@@ -10,11 +10,14 @@ import { Upload, FileText, GraduationCap, Briefcase, Quote } from "lucide-react"
 import { useLanguage } from "@/hooks/use-language"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
+import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeFile, setUpgradeFile] = useState<{name: string, size: number} | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { t } = useLanguage()
@@ -30,12 +33,12 @@ export default function HomePage() {
       alert(t("onlyPdfAllowed"))
       return
     }
-
+    // 超过10MB弹窗
     if (file.size > 10 * 1024 * 1024) {
-      alert(t("fileSizeLimit"))
+      setUpgradeFile({ name: file.name, size: file.size })
+      setShowUpgrade(true)
       return
     }
-
     setUploading(true)
 
     try {
@@ -91,6 +94,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <UpgradePlusModal
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        fileName={upgradeFile?.name || ''}
+        fileSizeMB={upgradeFile ? Math.round(upgradeFile.size / 1024 / 1024) : 0}
+      />
       {/* Header */}
       <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-slate-200 px-6 sm:px-10 py-4 bg-white shadow-sm">
         <div className="flex items-center gap-3 text-slate-800">

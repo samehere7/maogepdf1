@@ -30,7 +30,7 @@ const translations = {
       "Effortlessly extract insights and summarize key information from your PDFs with our advanced AI technology.",
     clickToUpload: "Click to upload",
     orDragAndDrop: "or drag and drop",
-    pdfMaxSize: "PDF (MAX. 10MB)",
+    pdfMaxSize: "PDF",
     uploading: "Uploading...",
 
     // Analysis Page
@@ -175,12 +175,12 @@ const translations = {
 
     // Home Page
     oneLineDescription: "一句话概括",
-    heroDescription: "你的 PDF AI —就像 MaogePDF，但专为PDF而生。可免费生成摘要并回答问题。",
+    heroDescription: "你的 PDF AI——就像 ChatGPT，但专为PDF而生。可免费生成摘要并回答问题",
     heroTitle: "拖放PDF文件进行AI驱动的分析和快速摘要。",
     heroSubtitle: "使用我们先进的AI技术轻松提取见解并总结PDF中的关键信息。",
     clickToUpload: "点击上传",
     orDragAndDrop: "或拖拽文件",
-    pdfMaxSize: "PDF (最大 10MB)",
+    pdfMaxSize: "PDF",
     uploading: "上传中...",
 
     // Analysis Page
@@ -325,7 +325,7 @@ const translations = {
     heroSubtitle: "先進的なAI技術を使用してPDFから洞察を簡単に抽出し、重要な情報を要約します。",
     clickToUpload: "クリックしてアップロード",
     orDragAndDrop: "またはドラッグアンドドロップ",
-    pdfMaxSize: "PDF（最大10MB）",
+    pdfMaxSize: "PDF",
     uploading: "アップロード中...",
 
     // Analysis Page
