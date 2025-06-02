@@ -222,21 +222,6 @@ export function Sidebar() {
       </div>
       {/* 底部菜单区 */}
       <div className="mt-auto pt-6 border-t border-[#23232a]">
-        {/* 语言/AI Scholar/AI检测器等保留 */}
-        <div className="flex items-center justify-between mb-2 px-1">
-          <div className="flex items-center gap-1 text-gray-400 text-sm cursor-pointer">
-            <span className="material-icons text-base">language</span>
-            <span>ZH</span>
-            <span className="material-icons text-xs">expand_more</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-400 text-sm">
-            <span className="material-icons text-base">settings</span>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 text-gray-400 text-sm px-1 mb-4">
-          <div className="flex items-center gap-2 cursor-pointer"><span className="material-icons text-base">school</span>AI Scholar</div>
-          <div className="flex items-center gap-2 cursor-pointer"><span className="material-icons text-base">science</span>AI检测器</div>
-        </div>
         {/* 登录信息区 */}
         <div className="bg-[#23232a] rounded-xl px-3 py-4 flex flex-col items-center gap-3 mb-2">
           {userInfo && userInfo.isLoggedIn ? (
