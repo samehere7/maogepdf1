@@ -32,6 +32,8 @@ const translations = {
     orDragAndDrop: "or drag and drop",
     pdfMaxSize: "PDF",
     uploading: "Uploading...",
+    heroTitleV2: "Chat with any PDF",
+    heroDescriptionV2: "Join millions of students, researchers and professionals to instantly answer questions and understand research with AI",
 
     // Analysis Page
     documentAnalysis: "Document Analysis",
@@ -182,6 +184,8 @@ const translations = {
     orDragAndDrop: "或拖拽文件",
     pdfMaxSize: "PDF",
     uploading: "上传中...",
+    heroTitleV2: "与任意 PDF 聊天",
+    heroDescriptionV2: "数百万学生、研究者和专业人士都在用，立即用 AI 回答问题、理解论文和资料",
 
     // Analysis Page
     documentAnalysis: "文档分析",
@@ -327,6 +331,8 @@ const translations = {
     orDragAndDrop: "またはドラッグアンドドロップ",
     pdfMaxSize: "PDF",
     uploading: "アップロード中...",
+    heroTitleV2: "Chat with any PDF",
+    heroDescriptionV2: "Join millions of students, researchers and professionals to instantly answer questions and understand research with AI",
 
     // Analysis Page
     documentAnalysis: "文書分析",

@@ -50,18 +50,24 @@ export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpen
               <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 高质量 模型</li>
             </ul>
             {/* 价格切换 */}
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-6 gap-0.5 w-full max-w-[340px] mx-auto">
               <button
-                className={`px-4 py-2 rounded-l-lg border border-[#8b5cf6] text-[#8b5cf6] font-semibold bg-white ${!yearly ? 'bg-[#f3e8ff]' : ''}`}
+                className={`flex-1 min-w-0 px-0 py-2 rounded-l-lg border border-[#8b5cf6] font-semibold text-base transition-colors duration-150 h-12 whitespace-nowrap ${!yearly ? 'bg-[#8b5cf6] text-white' : 'bg-white text-[#8b5cf6]'}`}
                 onClick={() => setYearly(false)}
               >
-                按月 $13.99/月
+                <div className="flex flex-col items-center justify-center leading-tight">
+                  <span>按月</span>
+                  <span>$13.99/月</span>
+                </div>
               </button>
               <button
-                className={`px-4 py-2 rounded-r-lg border border-l-0 border-[#8b5cf6] text-[#8b5cf6] font-semibold bg-white ${yearly ? 'bg-[#f3e8ff]' : ''}`}
+                className={`flex-1 min-w-0 px-0 py-2 rounded-r-lg border border-l-0 border-[#8b5cf6] font-semibold text-base transition-colors duration-150 h-12 whitespace-nowrap ${yearly ? 'bg-[#8b5cf6] text-white' : 'bg-white text-[#8b5cf6]'}`}
                 onClick={() => setYearly(true)}
               >
-                按年 <span className="text-green-600 font-bold ml-1">立省40%</span> $8.25/月
+                <div className="flex flex-col items-center justify-center leading-tight">
+                  <span>按年 <span className="text-green-200 font-bold ml-1">立省40%</span></span>
+                  <span>$8.25/月</span>
+                </div>
               </button>
             </div>
             {/* 升级按钮 */}

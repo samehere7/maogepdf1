@@ -5,11 +5,21 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { MaogeInterface } from "@/components/chat-interface"
-import { Download, InfoIcon as Insights, List, Flag } from "lucide-react"
+import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw } from "lucide-react"
 import { useLanguage } from "@/hooks/use-language"
 import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
+import { Sidebar } from "@/components/sidebar"
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+
+// 设置 PDF.js worker 路径
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 interface AnalysisResult {
   theme: string
@@ -29,6 +39,13 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(true)
   const [fileInfo, setFileInfo] = useState<any>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  
+  // PDF 预览相关状态
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1.0);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -46,6 +63,10 @@ export default function AnalysisPage() {
         }
 
         setFileInfo(file)
+
+        // 设置 PDF URL，优先使用上传时保存的 url 字段
+        setPdfUrl(file.url || '/sample.pdf')
+        setPdfError(null)
 
         // Check if analysis already exists
         const existingAnalysis = localStorage.getItem(`analysis-${params.id}`)
@@ -104,6 +125,33 @@ ${analysis.conclusions}
     URL.revokeObjectURL(url)
   }
 
+  // PDF 预览功能
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+    setPdfError(null);
+  }
+
+  function onDocumentLoadError(error: Error) {
+    console.error('PDF 加载失败:', error);
+    setPdfError('无法加载 PDF 文件，请确认文件是否有效。');
+  }
+
+  const goToPrevPage = () => {
+    setPageNumber(prev => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setPageNumber(prev => Math.min(prev + 1, numPages || 1));
+  };
+
+  const zoomIn = () => {
+    setScale(prev => Math.min(prev + 0.2, 2.0));
+  };
+
+  const zoomOut = () => {
+    setScale(prev => Math.max(prev - 0.2, 0.6));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -116,167 +164,135 @@ ${analysis.conclusions}
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-slate-200 px-10 py-4 shadow-sm">
-        <div className="flex items-center gap-3 text-slate-900">
-          <div className="size-8 text-[#0A52A1]">
-            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path
-                clipRule="evenodd"
-                d="M39.475 21.6262C40.358 21.4363 40.6863 21.5589 40.7581 21.5934C40.7876 21.655 40.8547 21.857 40.8082 22.3336C40.7408 23.0255 40.4502 24.0046 39.8572 25.2301C38.6799 27.6631 36.5085 30.6631 33.5858 33.5858C30.6631 36.5085 27.6632 38.6799 25.2301 39.8572C24.0046 40.4502 23.0255 40.7407 22.3336 40.8082C21.8571 40.8547 21.6551 40.7875 21.5934 40.7581C21.5589 40.6863 21.4363 40.358 21.6262 39.475C21.8562 38.4054 22.4689 36.9657 23.5038 35.2817C24.7575 33.2417 26.5497 30.9744 28.7621 28.762C30.9744 26.5497 33.2417 24.7574 35.2817 23.5037C36.9657 22.4689 38.4054 21.8562 39.475 21.6262ZM4.41189 29.2403L18.7597 43.5881C19.8813 44.7097 21.4027 44.9179 22.7217 44.7893C24.0585 44.659 25.5148 44.1631 26.9723 43.4579C29.9052 42.0387 33.2618 39.5667 36.4142 36.4142C39.5667 33.2618 42.0387 29.9052 43.4579 26.9723C44.1631 25.5148 44.659 24.0585 44.7893 22.7217C44.9179 21.4027 44.7097 19.8813 43.5881 18.7597L29.2403 4.41187C27.8527 3.02428 25.8765 3.02573 24.2861 3.36776C22.6081 3.72863 20.7334 4.58419 18.8396 5.74801C16.4978 7.18716 13.9881 9.18353 11.5858 11.5858C9.18354 13.988 7.18717 16.4978 5.74802 18.8396C4.58421 20.7334 3.72865 22.6081 3.36778 24.2861C3.02574 25.8765 3.02429 27.8527 4.41189 29.2403Z"
-                fill="currentColor"
-                fillRule="evenodd"
-              ></path>
-            </svg>
-          </div>
-          <h2 className="text-slate-900 text-xl font-bold leading-tight tracking-tight">Maoge PDF</h2>
-        </div>
-        <div className="flex flex-1 justify-end gap-6 items-center">
-          <nav className="flex items-center gap-6">
-            <a
-              className="text-slate-700 hover:text-slate-900 text-sm font-medium leading-normal transition-colors"
-              href="/account"
-            >
-              {t("myLibrary")}
-            </a>
-            <a
-              className="text-slate-700 hover:text-slate-900 text-sm font-medium leading-normal transition-colors"
-              href="/"
-            >
-              {t("explore")}
-            </a>
-          </nav>
-          <LanguageSelector />
-          <UpgradeModal>
-            <button className="flex items-center gap-1 bg-[#d2e2f3] text-slate-900 hover:bg-[#b0cce8] px-4 py-2 rounded-md text-sm font-medium transition-colors">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    <div className="flex min-h-screen ml-[300px]">
+      {/* 左侧侧边栏 */}
+      <div className="w-1/5 min-w-[260px] max-w-[340px] bg-[#18181b]">
+        <Sidebar />
+      </div>
+
+      {/* 中间 PDF 预览区 */}
+      <div className="flex-1 flex flex-col border-r border-slate-200 bg-white overflow-auto">
+        {/* PDF 工具栏 */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 bg-white">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={goToPrevPage} disabled={pageNumber <= 1}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span>{t("upgrade")}</span>
-            </button>
-          </UpgradeModal>
-          {isLoggedIn ? (
-            <a href="/account">
-              <div
-                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-300 shadow-sm"
-                style={{ 
-                  backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA6IhW592oJH7AwT9DjMtVEWXh8NHP1Yh6MKd3UbP61_uKdfoaFoHi5f-pJ0aYqXcpcxUIuG718DoNTXoEu1Zctidl-xP1MrjbvT6yE0KJp3IRTeSucfpMEvikR6PcLVNyB9eEHPr0ERqzgpi93OZCAN5qIvq-U43WN3rQK-y2wez_TYLP4ymvJPNxtHFeepfLwcEnk3K04dsiT1y2TtCx0Z1f-ZMPBlUAv_0KKo90xe-SMBm-JtqHVCW5Zaaq8YClXGnQvz347ttg")' 
-                }}
-              ></div>
-            </a>
+            </Button>
+            <span className="text-sm">
+              {pageNumber} / {numPages || '?'}
+            </span>
+            <Button variant="ghost" size="sm" onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={zoomOut}>
+              <ZoomOut size={16} />
+            </Button>
+            <span className="text-sm">{Math.round(scale * 100)}%</span>
+            <Button variant="ghost" size="sm" onClick={zoomIn}>
+              <ZoomIn size={16} />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <RotateCw size={16} />
+            </Button>
+          </div>
+        </div>
+
+        {/* PDF 内容 */}
+        <div className="flex-1 overflow-auto bg-slate-100 flex justify-center">
+          {pdfUrl ? (
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              className="flex flex-col items-center py-4"
+              loading={<div className="flex items-center justify-center h-full"><p className="text-slate-500">正在加载 PDF...</p></div>}
+              error={<div className="flex items-center justify-center h-full"><p className="text-red-500">{pdfError || '加载 PDF 时出错'}</p></div>}
+            >
+              {!pdfError && (
+                <Page 
+                  pageNumber={pageNumber} 
+                  scale={scale}
+                  className="shadow-lg mb-4"
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  error={<div className="bg-red-50 p-4 rounded border border-red-200 text-red-600">无法加载页面</div>}
+                />
+              )}
+            </Document>
           ) : (
-            <LoginModal>
-              <Button variant="outline" className="flex items-center gap-1">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span>{t("login")}</span>
-              </Button>
-            </LoginModal>
+            <div className="flex items-center justify-center h-full">
+              <p className="text-slate-500">PDF 文件不可用</p>
+            </div>
           )}
         </div>
-      </header>
+      </div>
 
-      <main className="px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-8 bg-slate-50">
-        <div className="layout-content-container flex flex-col max-w-[1200px] flex-1 gap-6">
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="px-4 py-2 bg-white rounded-lg shadow-sm border border-slate-200">
-            <ol className="flex items-center gap-1.5 text-sm">
-              <li>
-                <a className="text-slate-600 hover:text-slate-800 font-medium transition-colors" href="/account">
-                  {t("myLibrary")}
+      {/* 右侧 AI 分析和聊天区 */}
+      <div className="w-1/3 min-w-[320px] max-w-[450px] flex flex-col bg-white overflow-auto">
+        {/* 右侧顶部工具栏 */}
+        <div className="border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{fileInfo?.name || "文档"}</h2>
+            <div className="flex items-center gap-2">
+              <LanguageSelector />
+              {isLoggedIn ? (
+                <a href="/account">
+                  <div
+                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-slate-300 shadow-sm"
+                    style={{ 
+                      backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA6IhW592oJH7AwT9DjMtVEWXh8NHP1Yh6MKd3UbP61_uKdfoaFoHi5f-pJ0aYqXcpcxUIuG718DoNTXoEu1Zctidl-xP1MrjbvT6yE0KJp3IRTeSucfpMEvikR6PcLVNyB9eEHPr0ERqzgpi93OZCAN5qIvq-U43WN3rQK-y2wez_TYLP4ymvJPNxtHFeepfLwcEnk3K04dsiT1y2TtCx0Z1f-ZMPBlUAv_0KKo90xe-SMBm-JtqHVCW5Zaaq8YClXGnQvz347ttg")' 
+                    }}
+                  ></div>
                 </a>
-              </li>
-              <li>
-                <span className="text-slate-400">/</span>
-              </li>
-              <li>
-                <span className="text-slate-800 font-semibold">{t("documentAnalysis")}</span>
-              </li>
-            </ol>
-          </nav>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Analysis Results */}
-            <section className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
-              <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-                <div className="flex flex-col gap-1">
-                  <h1 className="text-slate-900 text-3xl font-bold leading-tight tracking-tight">
-                    {t("documentAnalysisResults")}
-                  </h1>
-                  <p className="text-slate-600 text-base font-normal leading-normal">{t("aiPoweredAnalysis")}</p>
-                </div>
-              </div>
-
-              {analysis && (
-                <div className="space-y-8">
-                  {/* Document Theme */}
-                  <div>
-                    <h2 className="text-slate-800 text-xl font-semibold leading-tight tracking-tight mb-3 flex items-center gap-2">
-                      <Insights className="text-[#0A52A1] text-2xl h-6 w-6" />
-                      {t("documentTheme")}
-                    </h2>
-                    <p className="text-slate-700 text-base font-normal leading-relaxed bg-slate-50 p-4 rounded-md border border-slate-200">
-                      {analysis.theme}
-                    </p>
-                  </div>
-
-                  {/* Main Points */}
-                  <div>
-                    <h2 className="text-slate-800 text-xl font-semibold leading-tight tracking-tight mb-4 flex items-center gap-2">
-                      <List className="text-[#0A52A1] text-2xl h-6 w-6" />
-                      {t("mainPoints")}
-                    </h2>
-                    <div className="space-y-4">
-                      {analysis.mainPoints.map((point, index) => (
-                        <div
-                          key={index}
-                          className="p-4 border border-slate-200 rounded-md hover:shadow-md transition-shadow bg-white"
-                        >
-                          <div className="flex flex-col gap-1">
-                            <p className="text-slate-900 text-base font-semibold leading-normal">{point.title}</p>
-                            <p className="text-slate-500 text-xs font-normal leading-normal">
-                              {t("reference")}: {point.reference}
-                            </p>
-                            <p className="text-slate-600 text-sm font-normal leading-relaxed mt-1">
-                              {point.description}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Conclusions */}
-                  <div>
-                    <h2 className="text-slate-800 text-xl font-semibold leading-tight tracking-tight mb-3 flex items-center gap-2">
-                      <Flag className="text-[#0A52A1] text-2xl h-6 w-6" />
-                      {t("conclusions")}
-                    </h2>
-                    <p className="text-slate-700 text-base font-normal leading-relaxed bg-slate-50 p-4 rounded-md border border-slate-200">
-                      {analysis.conclusions}
-                    </p>
-                  </div>
-
-                  <div className="mt-8 flex justify-start">
-                    <Button
-                      className="bg-[#0A52A1] hover:bg-[#084382] text-white shadow-sm hover:shadow-md"
-                      onClick={downloadSummary}
-                    >
-                      <Download className="h-5 w-5 mr-2" />
-                      {t("downloadSummary")}
-                    </Button>
-                  </div>
-                </div>
+              ) : (
+                <LoginModal>
+                  <Button variant="outline" size="sm" className="flex items-center gap-1">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>{t("login")}</span>
+                  </Button>
+                </LoginModal>
               )}
-            </section>
-
-            {/* Chat Interface */}
-            <MaogeInterface documentId={params.id as string} documentName={fileInfo?.name || ""} />
+            </div>
           </div>
         </div>
-      </main>
+
+        {/* AI 分析和聊天界面 */}
+        <div className="flex-1 overflow-auto p-4">
+          {/* AI 分析摘要 */}
+          {analysis && (
+            <div className="mb-6 bg-purple-50 rounded-lg p-4 border border-purple-100">
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <Insights className="text-[#8b5cf6] h-5 w-5" />
+                {t("documentTheme")}
+              </h3>
+              <p className="text-slate-700 text-sm">{analysis.theme}</p>
+              
+              <div className="flex justify-end mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-[#8b5cf6] text-[#8b5cf6] hover:bg-purple-50"
+                  onClick={downloadSummary}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  {t("downloadSummary")}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* 聊天界面 */}
+          <MaogeInterface documentId={params.id as string} documentName={fileInfo?.name || ""} />
+        </div>
+      </div>
     </div>
   )
 }
