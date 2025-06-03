@@ -163,9 +163,9 @@ ${analysis.conclusions}
   }
 
   return (
-    <div className="flex min-h-screen ml-[300px]">
+    <div className="flex min-h-screen">
       {/* 左侧侧边栏 */}
-      <div className="w-1/5 min-w-[260px] max-w-[340px] bg-[#18181b]">
+      <div className="w-[180px] min-w-[140px] max-w-[200px] bg-[#18181b]">
         <Sidebar />
       </div>
 
@@ -233,7 +233,7 @@ ${analysis.conclusions}
       </div>
 
       {/* 右侧 AI 分析和聊天区 */}
-      <div className="w-1/3 min-w-[320px] max-w-[450px] flex flex-col bg-white overflow-auto">
+      <div className="w-[40%] min-w-[380px] max-w-[600px] flex flex-col bg-white overflow-auto">
         {/* 右侧顶部工具栏 */}
         <div className="border-b border-slate-200 px-4 py-3">
           <div className="flex items-center justify-between">
