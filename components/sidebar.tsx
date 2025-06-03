@@ -223,23 +223,19 @@ export function Sidebar() {
       {/* 底部菜单区 */}
       <div className="mt-auto pt-6 border-t border-[#23232a]">
         {/* 登录信息区 */}
-        <div className="bg-[#23232a] rounded-xl px-3 py-4 flex flex-col items-center gap-3 mb-2">
-          {userInfo && userInfo.isLoggedIn ? (
-            <>
-              <div className="flex items-center gap-2 w-full">
-                <div className="bg-[#8b5cf6] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
-                  {userInfo.name?.[0]?.toUpperCase() || userInfo.email?.[0]?.toUpperCase() || 'A'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-white text-sm font-semibold truncate">{userInfo.email}</div>
-                </div>
+        {userInfo && userInfo.isLoggedIn && (
+          <div className="bg-[#23232a] rounded-xl px-3 py-4 flex flex-col items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 w-full">
+              <div className="bg-[#8b5cf6] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                {userInfo.name?.[0]?.toUpperCase() || userInfo.email?.[0]?.toUpperCase() || 'A'}
               </div>
-              <Button className="w-full bg-[#a21cf7] hover:bg-[#9333ea] text-white font-bold rounded-lg text-base py-2" onClick={() => alert('会员功能开发中~')}>升级到 Plus</Button>
-            </>
-          ) : (
-            <Button className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-lg text-base py-2" onClick={() => signIn('google')}>登录</Button>
-          )}
-        </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-white text-sm font-semibold truncate">{userInfo.email}</div>
+              </div>
+            </div>
+            <Button className="w-full bg-[#a21cf7] hover:bg-[#9333ea] text-white font-bold rounded-lg text-base py-2" onClick={() => alert('会员功能开发中~')}>升级到 Plus</Button>
+          </div>
+        )}
       </div>
     </aside>
   )

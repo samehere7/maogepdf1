@@ -93,7 +93,7 @@ export default function AnalysisPage() {
     loadAnalysis()
   }, [params.id, router])
 
-  const downloadSummary = () => {
+  const downloadSummary = () => （
     if (!analysis || !fileInfo) return
 
     const summary = `
