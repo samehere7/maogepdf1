@@ -27,6 +27,7 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [modelType, setModelType] = useState<'fast' | 'quality'>('fast')
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -78,11 +79,18 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
     setIsLoading(true)
 
     try {
-      const response = await chatWithDocument(input.trim(), documentName)
+      // 通过后端代理安全调用
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: input.trim(), modelType }),
+      })
+      const data = await response.json()
+      const aiContent = data.choices?.[0]?.message?.content || t("chatErrorMessage")
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: response,
+        content: aiContent,
         isUser: false,
         timestamp: new Date(),
       }
@@ -168,6 +176,25 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
         >
           <Send className="h-4 w-4" />
         </Button>
+      </div>
+      {/* Input 下方模型选择 */}
+      <div className="flex justify-center mt-2">
+        <div className="inline-flex rounded border border-gray-300 bg-gray-100">
+          <button
+            className={`px-4 py-1 rounded-l ${modelType === 'fast' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
+            onClick={() => setModelType('fast')}
+            disabled={isLoading}
+          >
+            快速
+          </button>
+          <button
+            className={`px-4 py-1 rounded-r ${modelType === 'quality' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
+            onClick={() => setModelType('quality')}
+            disabled={isLoading}
+          >
+            高质量
+          </button>
+        </div>
       </div>
     </section>
   )
