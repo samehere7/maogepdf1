@@ -267,7 +267,7 @@ ${analysis.conclusions}
         {/* AI 分析和聊天界面 */}
         <div className="flex-1 overflow-auto p-4">
           {/* AI 分析摘要 */}
-          {analysis && (
+          {/* {analysis && (
             <div className="mb-6 bg-purple-50 rounded-lg p-4 border border-purple-100">
               <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                 <Insights className="text-[#8b5cf6] h-5 w-5" />
@@ -287,7 +287,7 @@ ${analysis.conclusions}
                 </Button>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* 聊天界面 */}
           <MaogeInterface documentId={params.id as string} documentName={fileInfo?.name || ""} />

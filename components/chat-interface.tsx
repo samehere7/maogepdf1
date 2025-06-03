@@ -23,7 +23,7 @@ interface MaogeInterfaceProps {
 }
 
 export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -125,7 +125,7 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
   }
 
   return (
-    <section className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-[600px]">
+    <section className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-[700px] min-h-[700px]">
       <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-200">
         <MessageCircle className="h-6 w-6 text-[#0A52A1]" />
         <h2 className="text-slate-800 text-xl font-semibold leading-tight tracking-tight">{t("chatWithDocument")}</h2>
@@ -162,47 +162,48 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="flex gap-2 pt-4 border-t border-slate-200">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={t("askAboutDocument")}
-          disabled={isLoading}
-          className="flex-1"
-        />
-        <Button
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading}
-          className="bg-[#0A52A1] hover:bg-[#084382] text-white"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-      {/* Input 下方模型选择 */}
-      <div className="flex justify-center mt-2">
-        <div className="inline-flex rounded border border-gray-300 bg-gray-100">
-          <button
-            className={`px-4 py-1 rounded-l ${modelType === 'fast' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
-            onClick={() => setModelType('fast')}
+      {/* 底部输入区和模型切换，固定到底部 */}
+      <div className="mt-auto flex flex-col gap-2">
+        <div className="flex gap-2 pt-4 border-t border-slate-200">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={t("askAboutDocument")}
             disabled={isLoading}
+            className="flex-1"
+          />
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            className="bg-[#0A52A1] hover:bg-[#084382] text-white"
           >
-            快速
-          </button>
-          <button
-            className={`px-4 py-1 rounded-r ${modelType === 'quality' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
-            onClick={() => {
-              if (isPro) {
-                setModelType('quality')
-              } else {
-                setShowUpgrade(true)
-              }
-            }}
-            disabled={isLoading}
-          >
-            高质量
-          </button>
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex justify-center">
+          <div className="inline-flex rounded border border-gray-300 bg-gray-100">
+            <button
+              className={`px-4 py-1 rounded-l ${modelType === 'fast' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
+              onClick={() => setModelType('fast')}
+              disabled={isLoading}
+            >
+              {language === 'zh' ? '快速' : language === 'ja' ? '高速' : 'Fast'}
+            </button>
+            <button
+              className={`px-4 py-1 rounded-r ${modelType === 'quality' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
+              onClick={() => {
+                if (isPro) {
+                  setModelType('quality')
+                } else {
+                  setShowUpgrade(true)
+                }
+              }}
+              disabled={isLoading}
+            >
+              {language === 'zh' ? '高质量' : language === 'ja' ? '高品質' : 'High Quality'}
+            </button>
+          </div>
         </div>
       </div>
       {/* 付费弹窗 */}
