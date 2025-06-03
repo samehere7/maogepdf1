@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Send, MessageCircle } from "lucide-react"
 import { useLanguage } from "@/hooks/use-language"
 import { chatWithDocument } from "@/lib/openrouter"
+import { UpgradeModal } from "@/components/upgrade-modal"
 
 interface Message {
   id: string
@@ -28,6 +29,8 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [modelType, setModelType] = useState<'fast' | 'quality'>('fast')
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [isPro, setIsPro] = useState(false) // 这里可根据实际会员状态判断
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -189,13 +192,32 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
           </button>
           <button
             className={`px-4 py-1 rounded-r ${modelType === 'quality' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
-            onClick={() => setModelType('quality')}
+            onClick={() => {
+              if (isPro) {
+                setModelType('quality')
+              } else {
+                setShowUpgrade(true)
+              }
+            }}
             disabled={isLoading}
           >
             高质量
           </button>
         </div>
       </div>
+      {/* 付费弹窗 */}
+      {showUpgrade && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg shadow-lg p-0">
+            <UpgradeModal>
+              <div />
+            </UpgradeModal>
+            <div className="flex justify-end p-2">
+              <button className="text-gray-500 hover:text-gray-700" onClick={() => setShowUpgrade(false)}>关闭</button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
