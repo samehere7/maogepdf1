@@ -144,7 +144,7 @@ export function Sidebar({ className }: SidebarProps) {
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-600 text-white font-bold">
           P
         </div>
-        <h1 className="text-xl font-semibold">ChatPDF</h1>
+        <h1 className="text-xl font-semibold">maoge pdf</h1>
       </div>
 
       {/* 上传和新建按钮 */}

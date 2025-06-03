@@ -61,6 +61,7 @@ export function Sidebar({ files, onFilesChange }: SidebarProps) {
   return (
     <aside className="fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] flex flex-col px-4 pt-4 pb-2 z-30">
       <div className="mb-8">
+        <h1 className="text-xl font-semibold">maoge pdf</h1>
         <h2 className="text-white text-lg font-semibold mb-4">PDF Files</h2>
         {folders.map(folder => (
           <div key={folder.id} className="mb-4">
