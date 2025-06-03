@@ -252,25 +252,25 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* 创建文件夹模态框 */}
       <Dialog open={showFolderModal} onOpenChange={setShowFolderModal}>
-        <DialogContent className="sm:max-w-md bg-[#1e1e1e] text-white border-gray-800">
+        <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
           <h2 className="text-xl font-semibold mb-4">新建文件夹</h2>
           <Input
             placeholder="输入文件夹名称"
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
-            className="bg-[#2a2a2a] border-gray-700 mb-4"
+            className="bg-gray-100 border-gray-300 text-gray-900 mb-4 focus:ring-2 focus:ring-purple-200"
           />
           <div className="flex justify-end gap-2">
             <Button 
               variant="outline" 
               onClick={() => setShowFolderModal(false)}
-              className="border-gray-700 hover:bg-gray-800"
+              className="border-gray-300 hover:bg-gray-100 text-gray-700"
             >
               取消
             </Button>
             <Button 
               onClick={handleCreateFolder}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-500 hover:bg-purple-600 text-white shadow"
             >
               创建
             </Button>
