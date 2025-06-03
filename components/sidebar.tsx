@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 interface UserInfo {
   name: string
@@ -16,7 +17,11 @@ interface UserInfo {
   isLoggedIn: boolean
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  className?: string
+}
+
+export function Sidebar({ className }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { t } = useLanguage()
@@ -39,12 +44,17 @@ export function Sidebar() {
     setFolders(savedFolders)
   }, [])
 
-  const navigation = [
-    { name: "home", href: "/", icon: "home" },
-    { name: "myPdfs", href: "/account", icon: "description" },
-    { name: "explore", href: "/", icon: "explore" },
-    { name: "upgrade", href: "/pricing", icon: "rocket_launch" },
-    { name: "account", href: "/account", icon: "person" },
+  const routes = [
+    {
+      href: "/",
+      label: "Home",
+      active: pathname === "/",
+    },
+    {
+      href: "/account",
+      label: "Account",
+      active: pathname === "/account",
+    },
   ]
 
   const handleLogout = () => {
@@ -122,122 +132,25 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] flex flex-col px-4 pt-4 pb-2 z-30">
-      {/* 顶部logo+产品名 */}
-      <Link href="/" className="flex items-center gap-2 mb-8 px-2 cursor-pointer">
-        <img src="/logo.svg" alt="logo" className="h-8 w-8" />
-        <span className="text-white text-2xl font-bold tracking-tight">MaogePDF</span>
-      </Link>
-      {/* 操作按钮区 */}
-      <div className="flex flex-col gap-3 mb-6">
-        <Button
-          className="w-full h-12 text-base font-semibold bg-[#23232a] text-white border border-[#35353c] rounded-xl hover:bg-[#23232a]/80 flex items-center justify-center gap-2"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          上传 PDF
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf"
-          className="hidden"
-          onChange={handleFileInput}
-        />
-        <Button
-          className="w-full h-12 text-base font-semibold bg-[#23232a] text-white border border-[#35353c] rounded-xl hover:bg-[#23232a]/80 flex items-center justify-center gap-2"
-          onClick={() => setShowFolderModal(true)}
-        >
-          新建文件夹
-        </Button>
-      </div>
-      {/* 文件夹列表 */}
-      {folders.length > 0 && (
-        <div className="mb-8">
-          {folders.map(folder => (
-            <div key={folder.id} className="w-full px-3 py-2 mb-2 rounded-lg bg-[#23232a] text-white text-base font-medium truncate flex items-center group">
-              {editingFolderId === folder.id ? (
-                <input
-                  className="flex-1 bg-[#23232a] border border-[#8b5cf6] rounded px-2 py-1 text-white outline-none"
-                  value={editFolderName}
-                  onChange={e => setEditFolderName(e.target.value)}
-                  onBlur={() => handleRenameFolder(folder.id)}
-                  onKeyDown={e => { if (e.key === 'Enter') handleRenameFolder(folder.id) }}
-                  autoFocus
-                />
-              ) : (
-                <>
-                  <span className="flex-1 truncate">{folder.name}</span>
-                  <button
-                    className="ml-2 p-1 text-gray-400 hover:text-[#8b5cf6]"
-                    onClick={() => { setEditingFolderId(folder.id); setEditFolderName(folder.name) }}
-                    title="重命名"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-        <button
-                    className="ml-1 p-1 text-gray-400 hover:text-red-400"
-                    onClick={() => handleDeleteFolder(folder.id)}
-                    title="删除"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
+    <div className={cn("pb-12", className)}>
+      <div className="space-y-4 py-4">
+        <div className="px-3 py-2">
+          <div className="space-y-1">
+            {routes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className={cn(
+                  "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-primary hover:bg-primary/10 rounded-lg transition",
+                  route.active ? "text-primary bg-primary/10" : "text-zinc-400"
+                )}
+              >
+                {route.label}
+              </Link>
+            ))}
+          </div>
         </div>
-      )}
-      {/* 新建文件夹弹窗 */}
-      <Dialog open={showFolderModal} onOpenChange={setShowFolderModal}>
-        <DialogContent className="max-w-md">
-          <div className="text-lg font-bold mb-4">创建新文件夹</div>
-          <Input
-            className="mb-3 border-[#8b5cf6] focus:border-[#8b5cf6] focus:ring-[#8b5cf6]"
-            value={folderName}
-            onChange={e => setFolderName(e.target.value)}
-            autoFocus
-          />
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-slate-700 mb-4">
-            使用文件夹可以：<br />
-            • 管理文件<br />
-            • 同时与多个文件进行聊天
-          </div>
-          <div className="flex justify-end">
-            <Button className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-6" onClick={handleCreateFolder}>OK</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      {/* 聊天历史区/提示区 */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        {/* 插画（可用svg或占位div） */}
-        <div className="mb-4">
-          <img src="/chat-history-illustration.svg" alt="history" className="w-32 h-20 opacity-80" />
-        </div>
-        <div className="text-gray-300 text-sm mb-4 text-center">登录免费保存你的聊天记录</div>
-        <Button
-          className="w-24 h-10 text-base font-bold bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-lg shadow"
-          onClick={() => signIn("google")}
-        >
-          登录
-        </Button>
       </div>
-      {/* 底部菜单区 */}
-      <div className="mt-auto pt-6 border-t border-[#23232a]">
-        {/* 登录信息区 */}
-        {userInfo && userInfo.isLoggedIn && (
-          <div className="bg-[#23232a] rounded-xl px-3 py-4 flex flex-col items-center gap-3 mb-2">
-            <div className="flex items-center gap-2 w-full">
-              <div className="bg-[#8b5cf6] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
-                {userInfo.name?.[0]?.toUpperCase() || userInfo.email?.[0]?.toUpperCase() || 'A'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-white text-sm font-semibold truncate">{userInfo.email}</div>
-              </div>
-            </div>
-            <Button className="w-full bg-[#a21cf7] hover:bg-[#9333ea] text-white font-bold rounded-lg text-base py-2" onClick={() => alert('会员功能开发中~')}>升级到 Plus</Button>
-          </div>
-        )}
-      </div>
-    </aside>
+    </div>
   )
 }
