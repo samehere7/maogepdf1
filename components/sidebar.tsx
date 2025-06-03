@@ -174,7 +174,7 @@ export function Sidebar() {
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button
+        <button
                     className="ml-1 p-1 text-gray-400 hover:text-red-400"
                     onClick={() => handleDeleteFolder(folder.id)}
                     title="删除"

@@ -159,23 +159,23 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
 
       {/* 底部输入区和模型切换，固定到底部 */}
       <div className="mt-auto flex flex-col gap-2">
-        <div className="flex gap-2 pt-4 border-t border-slate-200">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={t("askAboutDocument")}
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="bg-[#0A52A1] hover:bg-[#084382] text-white"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="flex gap-2 pt-4 border-t border-slate-200">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder={t("askAboutDocument")}
+          disabled={isLoading}
+          className="flex-1"
+        />
+        <Button
+          onClick={handleSend}
+          disabled={!input.trim() || isLoading}
+          className="bg-[#0A52A1] hover:bg-[#084382] text-white"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
         <div className="flex justify-center">
           <div className="inline-flex rounded border border-gray-300 bg-gray-100">
             <button
