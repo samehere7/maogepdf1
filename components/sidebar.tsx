@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Pencil, Trash2 } from "lucide-react"
+import Link from "next/link"
 
 interface UserInfo {
   name: string
@@ -123,10 +124,10 @@ export function Sidebar() {
   return (
     <aside className="fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] flex flex-col px-4 pt-4 pb-2 z-30">
       {/* 顶部logo+产品名 */}
-      <a href="/" className="flex items-center gap-2 mb-8 px-2 cursor-pointer">
+      <Link href="/" className="flex items-center gap-2 mb-8 px-2 cursor-pointer">
         <img src="/logo.svg" alt="logo" className="h-8 w-8" />
         <span className="text-white text-2xl font-bold tracking-tight">MaogePDF</span>
-      </a>
+      </Link>
       {/* 操作按钮区 */}
       <div className="flex flex-col gap-3 mb-6">
         <Button
