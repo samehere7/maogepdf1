@@ -126,11 +126,6 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
 
   return (
     <section className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-[700px] min-h-[700px]">
-      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-200">
-        <MessageCircle className="h-6 w-6 text-[#0A52A1]" />
-        <h2 className="text-slate-800 text-xl font-semibold leading-tight tracking-tight">{t("chatWithDocument")}</h2>
-      </div>
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((message) => (
