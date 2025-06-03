@@ -185,7 +185,7 @@ ${analysis.conclusions}
             <Button variant="ghost" size="sm" onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            </svg>
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -260,8 +260,8 @@ ${analysis.conclusions}
                 </LoginModal>
               )}
             </div>
-          </div>
-        </div>
+                </div>
+              </div>
 
         {/* AI 分析和聊天界面 */}
         <div className="flex-1 overflow-auto p-4">
@@ -270,22 +270,22 @@ ${analysis.conclusions}
             <div className="mb-6 bg-purple-50 rounded-lg p-4 border border-purple-100">
               <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                 <Insights className="text-[#8b5cf6] h-5 w-5" />
-                {t("documentTheme")}
+                      {t("documentTheme")}
               </h3>
               <p className="text-slate-700 text-sm">{analysis.theme}</p>
               
               <div className="flex justify-end mt-3">
-                <Button
+                    <Button
                   size="sm"
                   variant="outline"
                   className="text-xs border-[#8b5cf6] text-[#8b5cf6] hover:bg-purple-50"
-                  onClick={downloadSummary}
-                >
+                      onClick={downloadSummary}
+                    >
                   <Download className="h-3 w-3 mr-1" />
-                  {t("downloadSummary")}
-                </Button>
-              </div>
-            </div>
+                      {t("downloadSummary")}
+                    </Button>
+                  </div>
+                </div>
           )} */}
 
           {/* 聊天界面 */}
