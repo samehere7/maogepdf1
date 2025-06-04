@@ -8,7 +8,7 @@ interface AnalysisResult {
   conclusions: string
 }
 
-const OPENROUTER_API_KEY = "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"
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY as string
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async function callOpenRouter(messages: any[]) {
