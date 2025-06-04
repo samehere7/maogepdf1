@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 
 type Language = "en" | "zh" | "ja"
 
@@ -465,25 +465,26 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("language") as Language) || "zh"
+    }
+    return "zh"
+  })
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language") as Language
-    if (savedLanguage && ["en", "zh", "ja"].includes(savedLanguage)) {
-      setLanguageState(savedLanguage)
-    }
-  }, [])
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    localStorage.setItem("language", lang)
-  }
+    localStorage.setItem("language", language)
+  }, [language])
 
   const t = (key: string): string => {
-    return translations[language]?.[key as keyof (typeof translations)["en"]] || key
+    return (translations[language] as any)?.[key] || key
   }
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  )
 }
 
 export function useLanguage() {

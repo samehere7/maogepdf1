@@ -1,30 +1,16 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { useLanguage } from "@/hooks/use-language"
+import { useRouter } from "next/navigation"
+import { Pencil, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Pencil, Trash2, Upload, FolderPlus } from "lucide-react"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
 
-interface UserInfo {
-  name: string
-  email: string
-  isLoggedIn: boolean
-}
-
-interface SidebarProps {
-  className?: string
-}
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className }: { className?: string }) {
   const router = useRouter()
-  const pathname = usePathname()
-  const { t } = useLanguage()
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showFolderModal, setShowFolderModal] = useState(false)
   const [folderName, setFolderName] = useState("我的文件夹")
@@ -34,75 +20,30 @@ export function Sidebar({ className }: SidebarProps) {
   const [pdfs, setPdfs] = useState<any[]>([])
 
   useEffect(() => {
-    // Load user info from localStorage
-    const savedUserInfo = JSON.parse(localStorage.getItem("userInfo") || "{}")
-    if (savedUserInfo.isLoggedIn) {
-      setUserInfo(savedUserInfo)
-    }
-    // 加载文件夹列表
-    const savedFolders = JSON.parse(localStorage.getItem("uploadedFolders") || "[]")
-    setFolders(savedFolders)
-    // 加载PDF文件列表
-    const savedPdfs = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
-    setPdfs(savedPdfs)
+    setFolders(JSON.parse(localStorage.getItem("uploadedFolders") || "[]"))
+    setPdfs(JSON.parse(localStorage.getItem("uploadedPdfs") || "[]"))
   }, [])
 
-  const handleLogout = () => {
-    // Clear user session data
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}")
-    localStorage.setItem("userInfo", JSON.stringify({
-      ...userInfo,
-      isLoggedIn: false
-    }))
-    router.push("/")
-  }
+  const handleUploadClick = () => fileInputRef.current?.click()
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFile = async (file: File) => {
-    if (!file.type.includes("pdf")) {
-      alert("只允许上传PDF文件")
-      return
-    }
-    // 构造 FormData
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      // 上传到后端
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!data.url) {
-        alert('上传失败');
-        return;
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      if (!file.type.includes("pdf")) {
+        alert("只允许上传PDF文件")
+        return
       }
-
       const fileInfo = {
         name: file.name,
         size: file.size,
         uploadDate: new Date().toISOString(),
         id: Date.now().toString(),
-        url: data.url, // 用后端返回的真实 URL
       }
       const existingFiles = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
       existingFiles.push(fileInfo)
       localStorage.setItem("uploadedPdfs", JSON.stringify(existingFiles))
       setPdfs(existingFiles)
       router.push(`/analysis/${fileInfo.id}`)
-    } catch (error) {
-      console.error('上传失败:', error)
-      alert('上传失败，请稍后重试')
-    }
-  }
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
     }
   }
 
@@ -138,7 +79,7 @@ export function Sidebar({ className }: SidebarProps) {
   }
 
   return (
-    <div className={cn("flex flex-col h-full bg-[#121212] text-white", className)}>
+    <div className={cn("flex flex-col h-full bg-[#18181b] text-white w-60 min-w-[180px]", className)}>
       {/* 顶部标题 */}
       <div className="flex items-center gap-2 p-4 border-b border-gray-800">
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-600 text-white font-bold">
@@ -155,14 +96,13 @@ export function Sidebar({ className }: SidebarProps) {
         >
           上传 PDF
         </button>
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          onChange={handleFileInput} 
-          accept=".pdf" 
-          className="hidden" 
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileInput}
+          accept=".pdf"
+          className="hidden"
         />
-        
         <button
           onClick={() => setShowFolderModal(true)}
           className="w-full py-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-md text-center transition"
@@ -183,21 +123,11 @@ export function Sidebar({ className }: SidebarProps) {
               <span className="text-gray-300">{pdf.name}</span>
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-              <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  router.push(`/analysis/${pdf.id}?edit=true`);
-                }}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <Pencil size={16} />
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDeletePdf(pdf.id);
+              <button
+                onClick={e => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleDeletePdf(pdf.id)
                 }}
                 className="p-1 hover:bg-gray-700 rounded"
               >
@@ -209,16 +139,16 @@ export function Sidebar({ className }: SidebarProps) {
 
         {/* 文件夹列表 */}
         {folders.map((folder) => (
-          <div 
+          <div
             key={folder.id}
             className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
           >
             {editingFolderId === folder.id ? (
-              <Input 
-                value={editFolderName} 
-                onChange={(e) => setEditFolderName(e.target.value)}
+              <Input
+                value={editFolderName}
+                onChange={e => setEditFolderName(e.target.value)}
                 onBlur={() => handleRenameFolder(folder.id)}
-                onKeyDown={(e) => e.key === 'Enter' && handleRenameFolder(folder.id)}
+                onKeyDown={e => e.key === 'Enter' && handleRenameFolder(folder.id)}
                 className="h-8 text-sm bg-gray-800 border-gray-700"
                 autoFocus
               />
@@ -228,16 +158,16 @@ export function Sidebar({ className }: SidebarProps) {
                   <span>{folder.name}</span>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button 
+                  <button
                     onClick={() => {
-                      setEditingFolderId(folder.id);
-                      setEditFolderName(folder.name);
+                      setEditingFolderId(folder.id)
+                      setEditFolderName(folder.name)
                     }}
                     className="p-1 hover:bg-gray-700 rounded"
                   >
                     <Pencil size={16} />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDeleteFolder(folder.id)}
                     className="p-1 hover:bg-gray-700 rounded"
                   >
@@ -257,18 +187,18 @@ export function Sidebar({ className }: SidebarProps) {
           <Input
             placeholder="输入文件夹名称"
             value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
+            onChange={e => setFolderName(e.target.value)}
             className="bg-gray-100 border-gray-300 text-gray-900 mb-4 focus:ring-2 focus:ring-purple-200"
           />
           <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowFolderModal(false)}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
             >
               取消
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateFolder}
               className="bg-purple-500 hover:bg-purple-600 text-white shadow"
             >

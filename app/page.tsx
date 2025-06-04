@@ -35,33 +35,25 @@ export default function HomePage() {
       alert(t("onlyPdfAllowed"))
       return
     }
-    // 超过10MB弹窗
     if (file.size > 10 * 1024 * 1024) {
-      setUpgradeFile({ name: file.name, size: file.size })
-      setShowUpgrade(true)
+      alert(t("fileSizeLimit"))
       return
     }
     setUploading(true)
-
     try {
-      // Simulate file processing
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Store file info in localStorage
+      // 模拟上传和本地存储
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       const fileInfo = {
         name: file.name,
         size: file.size,
         uploadDate: new Date().toISOString(),
         id: Date.now().toString(),
       }
-
       const existingFiles = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
       existingFiles.push(fileInfo)
       localStorage.setItem("uploadedPdfs", JSON.stringify(existingFiles))
-
-      // Redirect to analysis page
-      router.push(`/analysis/${fileInfo.id}`)
-    } catch (error) {
+      window.location.href = `/analysis/${fileInfo.id}`
+    } catch {
       alert(t("uploadError"))
     } finally {
       setUploading(false)
@@ -71,18 +63,14 @@ export default function HomePage() {
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true)
+    else if (e.type === "dragleave") setDragActive(false)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0])
     }
