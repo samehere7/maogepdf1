@@ -7,7 +7,7 @@ type Language = "en" | "zh" | "ja"
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string>) => string
 }
 
 const translations = {
@@ -163,6 +163,20 @@ const translations = {
     citationSources: "Citation Sources",
     citationDescription:
       "Built-in citation feature that links answers to specific pages in the PDF, making it easy to find sources.",
+    privacyPolicyTitle: "Privacy Policy",
+    privacyPolicyContent1: "We value your privacy. Maoge PDF does not store your uploaded PDF files or chat content on our servers. All file processing and AI analysis are performed locally in your browser or securely via our AI API.",
+    privacyPolicyContent2: "We only use your email for account management and do not share your personal information with third parties.",
+    privacyPolicyContent3: "You may contact us at {email} for any privacy-related questions.",
+    privacyPolicyContact: "Contact: {email}",
+    termsTitle: "Terms of Use",
+    termsContent1: "By using Maoge PDF, you agree to use the service for lawful purposes only. You are responsible for the content you upload and analyze.",
+    termsContent2: "Maoge PDF provides AI-powered PDF analysis and chat for informational purposes. We do not guarantee the accuracy or completeness of AI-generated content.",
+    termsContent3: "We reserve the right to update these terms at any time. Continued use of the service constitutes acceptance of the updated terms.",
+    termsContact: "Contact: {email}",
+    aboutTitle: "About Maoge PDF",
+    aboutContent1: "Maoge PDF is an AI-powered platform for PDF analysis and chat. Our mission is to help users quickly extract insights, summarize, and interact with PDF documents using advanced AI technology.",
+    aboutContent2: "Features include PDF upload and management, AI document analysis, chat with documents, folder organization, and multi-language support.",
+    aboutContact: "Contact: {email}",
   },
   zh: {
     // Header & Navigation
@@ -310,6 +324,20 @@ const translations = {
     professionalsImageAlt: "专业人士分析商业文档",
     citationSources: "引用来源",
     citationDescription: "内置引用功能，将回答与PDF对应的页面相链接，无需翻页查找。",
+    privacyPolicyTitle: "隐私政策",
+    privacyPolicyContent1: "我们重视您的隐私。Maoge PDF 不会在服务器上存储您的上传文件或聊天内容，所有文件处理和 AI 分析均在您的浏览器本地或通过安全的 AI 接口完成。",
+    privacyPolicyContent2: "我们仅将您的邮箱用于账户管理，不会将您的个人信息泄露给第三方。",
+    privacyPolicyContent3: "如有隐私相关问题，欢迎随时联系 {email}。",
+    privacyPolicyContact: "联系方式：{email}",
+    termsTitle: "使用条款",
+    termsContent1: "使用 Maoge PDF 即表示您同意仅将本服务用于合法用途。您需自行负责上传和分析的内容。",
+    termsContent2: "Maoge PDF 提供的 AI PDF 分析和聊天仅供参考，我们不保证 AI 生成内容的准确性或完整性。",
+    termsContent3: "我们有权随时更新本条款，您继续使用服务即视为接受最新条款。",
+    termsContact: "联系方式：{email}",
+    aboutTitle: "关于 Maoge PDF",
+    aboutContent1: "Maoge PDF 是一款基于 AI 的 PDF 分析与聊天平台。我们的使命是帮助用户通过先进的 AI 技术，快速提取、总结并交互式理解 PDF 文档。",
+    aboutContent2: "主要功能包括 PDF 上传与管理、AI 文档分析、文档聊天、文件夹管理和多语言支持。",
+    aboutContact: "联系方式：{email}",
   },
   ja: {
     // Header & Navigation
@@ -459,12 +487,26 @@ const translations = {
     professionalsImageAlt: "ビジネス文書を分析する専門家",
     citationSources: "引用ソース",
     citationDescription: "回答をPDFの特定のページにリンクする内蔵引用機能により、ソースを簡単に見つけられます。",
+    privacyPolicyTitle: "プライバシーポリシー",
+    privacyPolicyContent1: "私たちはお客様のプライバシーを大切にします。Maoge PDFはアップロードされたPDFやチャット内容をサーバーに保存しません。すべてのファイル処理とAI分析はお客様のブラウザ内または安全なAI API経由で行われます。",
+    privacyPolicyContent2: "メールアドレスはアカウント管理のみに使用し、第三者に個人情報を提供することはありません。",
+    privacyPolicyContent3: "プライバシーに関するご質問は {email} までご連絡ください。",
+    privacyPolicyContact: "連絡先：{email}",
+    termsTitle: "利用規約",
+    termsContent1: "Maoge PDFのご利用にあたり、法令に従った目的でのみサービスを利用することに同意したものとみなします。アップロードおよび分析する内容についてはご自身の責任となります。",
+    termsContent2: "Maoge PDFが提供するAIによるPDF分析・チャットは情報提供のみを目的としています。AI生成コンテンツの正確性や完全性は保証しません。",
+    termsContent3: "本規約は随時更新される場合があります。サービスの継続利用は最新規約への同意とみなします。",
+    termsContact: "連絡先：{email}",
+    aboutTitle: "Maoge PDFについて",
+    aboutContent1: "Maoge PDFはAIを活用したPDF分析・チャットプラットフォームです。高度なAI技術でPDF文書の要点抽出・要約・対話を迅速に実現することを目指しています。",
+    aboutContent2: "PDFのアップロード・管理、AIによる文書分析、ドキュメントチャット、フォルダ管理、多言語対応などの機能を備えています。",
+    aboutContact: "連絡先：{email}",
   },
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: ReactNode }): React.ReactNode {
+export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("language") as Language) || "zh"
@@ -476,8 +518,14 @@ export function LanguageProvider({ children }: { children: ReactNode }): React.R
     localStorage.setItem("language", language)
   }, [language])
 
-  const t = (key: string): string => {
-    return (translations[language] as any)?.[key] || key
+  const t = (key: string, params?: Record<string, string>): string => {
+    let str = (translations[language] as any)?.[key] || key
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        str = str.replace(new RegExp(`{${k}}`, 'g'), v)
+      })
+    }
+    return str
   }
 
   return (

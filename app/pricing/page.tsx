@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { Check, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/hooks/use-language"
+import { FooterModal } from "@/components/footer-modals"
 
 export default function PricingPage() {
   const { t } = useLanguage()
   const [openFaq, setOpenFaq] = useState(0)
+  const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
 
   const plans = [
     {
@@ -213,28 +215,35 @@ export default function PricingPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2">
-              <a
+              <button
                 className="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors"
-                href="#"
+                onClick={() => setModalType("terms")}
               >
                 {t("termsOfService")}
-              </a>
-              <a
+              </button>
+              <button
                 className="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors"
-                href="#"
+                onClick={() => setModalType("privacy")}
               >
                 {t("privacyPolicy")}
-              </a>
-              <a
+              </button>
+              <button
                 className="text-slate-600 hover:text-slate-900 text-sm font-medium leading-normal transition-colors"
-                href="#"
+                onClick={() => setModalType("contact")}
               >
                 {t("contactUs")}
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </footer>
+      
+      {/* Footer Modals */}
+      <FooterModal
+        isOpen={modalType !== null}
+        onClose={() => setModalType(null)}
+        type={modalType || "terms"}
+      />
     </div>
   )
 }

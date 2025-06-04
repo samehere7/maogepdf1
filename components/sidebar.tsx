@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, FolderIcon } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,10 +18,13 @@ export function Sidebar({ className }: { className?: string }) {
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null)
   const [editFolderName, setEditFolderName] = useState("")
   const [pdfs, setPdfs] = useState<any[]>([])
+  const [draggedPdfId, setDraggedPdfId] = useState<string | null>(null)
+  const [folderStructure, setFolderStructure] = useState<{[key: string]: string[]}>({})
 
   useEffect(() => {
     setFolders(JSON.parse(localStorage.getItem("uploadedFolders") || "[]"))
     setPdfs(JSON.parse(localStorage.getItem("uploadedPdfs") || "[]"))
+    setFolderStructure(JSON.parse(localStorage.getItem("folderStructure") || "{}"))
   }, [])
 
   const handleUploadClick = () => fileInputRef.current?.click()
@@ -53,6 +56,12 @@ export function Sidebar({ className }: { className?: string }) {
     const newFolders = [...folders, newFolder]
     setFolders(newFolders)
     localStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
+    
+    // Initialize empty folder in structure
+    const newStructure = { ...folderStructure, [newFolder.id]: [] }
+    setFolderStructure(newStructure)
+    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+    
     setShowFolderModal(false)
     setFolderName("我的文件夹")
   }
@@ -70,12 +79,71 @@ export function Sidebar({ className }: { className?: string }) {
     const newFolders = folders.filter(f => f.id !== id)
     setFolders(newFolders)
     localStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
+    
+    // Remove folder from structure and move PDFs back to root
+    const { [id]: removedPdfs, ...newStructure } = folderStructure
+    setFolderStructure(newStructure)
+    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
   }
 
   const handleDeletePdf = (id: string) => {
     const newPdfs = pdfs.filter(pdf => pdf.id !== id)
     setPdfs(newPdfs)
     localStorage.setItem("uploadedPdfs", JSON.stringify(newPdfs))
+    
+    // Remove PDF from folder structure
+    const newStructure = { ...folderStructure }
+    Object.keys(newStructure).forEach(folderId => {
+      newStructure[folderId] = newStructure[folderId].filter(pdfId => pdfId !== id)
+    })
+    setFolderStructure(newStructure)
+    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+  }
+
+  const handleDragStart = (pdfId: string) => {
+    setDraggedPdfId(pdfId)
+  }
+
+  const handleDragOver = (e: React.DragEvent, folderId: string) => {
+    e.preventDefault()
+    e.currentTarget.style.backgroundColor = "#3f3f46"
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.style.backgroundColor = ""
+  }
+
+  const handleDrop = (e: React.DragEvent, folderId: string) => {
+    e.preventDefault()
+    e.currentTarget.style.backgroundColor = ""
+    
+    if (!draggedPdfId) return
+
+    // Remove PDF from previous folder if it exists
+    const newStructure = { ...folderStructure }
+    Object.keys(newStructure).forEach(key => {
+      newStructure[key] = newStructure[key].filter(id => id !== draggedPdfId)
+    })
+
+    // Add PDF to new folder
+    newStructure[folderId] = [...(newStructure[folderId] || []), draggedPdfId]
+    setFolderStructure(newStructure)
+    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+    setDraggedPdfId(null)
+  }
+
+  // Get PDFs that are not in any folder
+  const getRootPdfs = () => {
+    const allFolderPdfs = new Set(
+      Object.values(folderStructure).flat()
+    )
+    return pdfs.filter(pdf => !allFolderPdfs.has(pdf.id))
+  }
+
+  // Get PDFs in a specific folder
+  const getFolderPdfs = (folderId: string) => {
+    const folderPdfIds = folderStructure[folderId] || []
+    return pdfs.filter(pdf => folderPdfIds.includes(pdf.id))
   }
 
   return (
@@ -96,12 +164,12 @@ export function Sidebar({ className }: { className?: string }) {
         >
           上传 PDF
         </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileInput}
-          accept=".pdf"
-          className="hidden"
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileInput} 
+          accept=".pdf" 
+          className="hidden" 
         />
         <button
           onClick={() => setShowFolderModal(true)}
@@ -113,69 +181,103 @@ export function Sidebar({ className }: { className?: string }) {
 
       {/* PDF 文件列表 */}
       <div className="flex-1 overflow-auto p-3">
-        {pdfs.map((pdf) => (
-          <Link
-            href={`/analysis/${pdf.id}`}
+        {/* Root PDFs */}
+        {getRootPdfs().map((pdf) => (
+          <div
             key={pdf.id}
-            className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
+            draggable
+            onDragStart={() => handleDragStart(pdf.id)}
+            className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
           >
-            <div className="flex items-center">
+            <Link
+              href={`/analysis/${pdf.id}`}
+              className="flex items-center flex-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               <span className="text-gray-300">{pdf.name}</span>
-            </div>
+            </Link>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-              <button
-                onClick={e => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleDeletePdf(pdf.id)
-                }}
+              <button 
+                onClick={() => handleDeletePdf(pdf.id)}
                 className="p-1 hover:bg-gray-700 rounded"
               >
                 <Trash2 size={16} />
               </button>
             </div>
-          </Link>
+          </div>
         ))}
 
         {/* 文件夹列表 */}
         {folders.map((folder) => (
-          <div
-            key={folder.id}
-            className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
-          >
-            {editingFolderId === folder.id ? (
-              <Input
-                value={editFolderName}
-                onChange={e => setEditFolderName(e.target.value)}
-                onBlur={() => handleRenameFolder(folder.id)}
-                onKeyDown={e => e.key === 'Enter' && handleRenameFolder(folder.id)}
-                className="h-8 text-sm bg-gray-800 border-gray-700"
-                autoFocus
-              />
-            ) : (
-              <>
-                <div className="flex items-center">
-                  <span>{folder.name}</span>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button
-                    onClick={() => {
-                      setEditingFolderId(folder.id)
-                      setEditFolderName(folder.name)
-                    }}
-                    className="p-1 hover:bg-gray-700 rounded"
+          <div key={folder.id}>
+            <div 
+              className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
+              onDragOver={(e) => handleDragOver(e, folder.id)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, folder.id)}
+            >
+              {editingFolderId === folder.id ? (
+                <Input 
+                  value={editFolderName} 
+                  onChange={e => setEditFolderName(e.target.value)}
+                  onBlur={() => handleRenameFolder(folder.id)}
+                  onKeyDown={e => e.key === 'Enter' && handleRenameFolder(folder.id)}
+                  className="h-8 text-sm bg-gray-800 border-gray-700"
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <FolderIcon size={16} className="text-gray-400" />
+                    <span>{folder.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                    <button 
+                      onClick={() => {
+                        setEditingFolderId(folder.id)
+                        setEditFolderName(folder.name)
+                      }}
+                      className="p-1 hover:bg-gray-700 rounded"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteFolder(folder.id)}
+                      className="p-1 hover:bg-gray-700 rounded"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            {/* Folder PDFs */}
+            <div className="ml-4">
+              {getFolderPdfs(folder.id).map((pdf) => (
+                <div
+                  key={pdf.id}
+                  draggable
+                  onDragStart={() => handleDragStart(pdf.id)}
+                  className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
+                >
+                  <Link
+                    href={`/analysis/${pdf.id}`}
+                    className="flex items-center flex-1"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteFolder(folder.id)}
-                    className="p-1 hover:bg-gray-700 rounded"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                    <span className="text-gray-300">{pdf.name}</span>
+                  </Link>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                    <button 
+                      onClick={() => handleDeletePdf(pdf.id)}
+                      className="p-1 hover:bg-gray-700 rounded"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -191,14 +293,14 @@ export function Sidebar({ className }: { className?: string }) {
             className="bg-gray-100 border-gray-300 text-gray-900 mb-4 focus:ring-2 focus:ring-purple-200"
           />
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
+            <Button 
+              variant="outline" 
               onClick={() => setShowFolderModal(false)}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
             >
               取消
             </Button>
-            <Button
+            <Button 
               onClick={handleCreateFolder}
               className="bg-purple-500 hover:bg-purple-600 text-white shadow"
             >

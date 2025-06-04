@@ -13,6 +13,7 @@ import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
 import { signIn } from "next-auth/react"
 import { Sidebar } from "@/components/sidebar"
+import { FooterModal } from "@/components/footer-modals"
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
@@ -23,6 +24,7 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { t, language } = useLanguage()
+  const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
 
   useEffect(() => {
     // Check if user is logged in
@@ -349,24 +351,24 @@ export default function HomePage() {
         <div className="flex max-w-6xl flex-1 flex-col">
           <div className="flex flex-col gap-6 px-5 py-8 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <a
+              <button
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                href="#"
+                onClick={() => setModalType("terms")}
               >
                 {t("termsOfService")}
-              </a>
-              <a
+              </button>
+              <button
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                href="#"
+                onClick={() => setModalType("privacy")}
               >
                 {t("privacyPolicy")}
-              </a>
-              <a
+              </button>
+              <button
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                href="#"
+                onClick={() => setModalType("contact")}
               >
                 {t("contactUs")}
-              </a>
+              </button>
             </div>
             <p className="text-slate-500 text-sm font-normal leading-normal">
               © 2024 Maoge PDF. {t("allRightsReserved")}
@@ -374,6 +376,13 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      
+      {/* Footer Modals */}
+      <FooterModal
+        isOpen={modalType !== null}
+        onClose={() => setModalType(null)}
+        type={modalType || "terms"}
+      />
       </div>
     </div>
   )
