@@ -1,7 +1,9 @@
+'use client'
+
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { LanguageProvider } from "@/components/language-provider"
+import { LanguageProvider } from "../components/language-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 

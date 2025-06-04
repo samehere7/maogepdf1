@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { Check, ChevronDown } from "lucide-react"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "../../components/language-provider"
 import { FooterModal } from "@/components/footer-modals"
 
 export default function PricingPage() {
