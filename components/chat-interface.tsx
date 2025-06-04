@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, MessageCircle } from "lucide-react"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "@/components/language-provider"
 import { chatWithDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 
@@ -82,14 +82,38 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
     setIsLoading(true)
 
     try {
-      // 通过后端代理安全调用
+      // 获取文档信息，包括embeddingsFile
+      const files = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]");
+      const fileInfo = files.find((f: any) => f.id === documentId);
+      
+      if (!fileInfo || !fileInfo.embeddingsFile) {
+        throw new Error('找不到文档嵌入信息');
+      }
+      
+      console.log("开始提问:", input.trim(), "文档:", fileInfo.embeddingsFile);
+      
+      // 调用PDF问答API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: input.trim(), modelType }),
+        body: JSON.stringify({ 
+          question: input.trim(),
+          embeddingsFile: fileInfo.embeddingsFile
+        }),
       })
-      const data = await response.json()
-      const aiContent = data.choices?.[0]?.message?.content || t("chatErrorMessage")
+      
+      console.log("问答响应状态:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("问答错误:", errorData);
+        throw new Error(errorData.error || '问答请求失败');
+      }
+      
+      const data = await response.json();
+      console.log("问答成功:", data);
+      
+      const aiContent = data.answer || t("chatErrorMessage");
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -102,9 +126,10 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
       setMessages(finalMessages)
       saveMessages(finalMessages)
     } catch (error) {
+      console.error("问答失败:", error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: t("chatErrorMessage"),
+        content: error instanceof Error ? error.message : t("chatErrorMessage"),
         isUser: false,
         timestamp: new Date(),
       }

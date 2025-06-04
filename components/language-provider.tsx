@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react'
 
-type Language = 'en' | 'zh'
+export type Language = 'en' | 'zh' | 'ja'
 
 interface LanguageContextType {
   language: Language
@@ -52,6 +52,27 @@ const translations = {
     pdfMaxSize: 'PDF最大10MB',
     heroTitleV2: '与您的PDF对话',
     heroDescriptionV2: '为学生、研究者和专业人士提供的最佳PDF对话方式',
+  },
+  ja: {
+    about: '概要',
+    aboutContent: '日本語の概要コンテンツ',
+    privacyPolicy: 'プライバシーポリシー',
+    privacyContent: '日本語のプライバシーポリシー',
+    termsOfUse: '利用規約',
+    termsContent: '日本語の利用規約',
+    account: 'アカウント',
+    accountContent: '日本語のアカウント内容',
+    pricing: '価格',
+    pricingContent: '日本語の価格内容',
+    uploadPdf: 'PDFをアップロード',
+    onlyPdfAllowed: 'PDFファイルのみアップロード可能です',
+    fileSizeLimit: 'ファイルサイズは10MB未満である必要があります',
+    uploadError: 'アップロードに失敗しました',
+    clickToUpload: 'クリックしてアップロード',
+    orDragAndDrop: 'またはドラッグ＆ドロップ',
+    pdfMaxSize: 'PDFは最大10MB',
+    heroTitleV2: 'PDFとチャット',
+    heroDescriptionV2: '学生、研究者、専門家のための最高のPDFチャット体験',
   }
 }
 

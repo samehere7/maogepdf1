@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Globe } from "lucide-react"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "@/components/language-provider"
 
 const languages = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -34,7 +34,7 @@ export function LanguageSelector() {
           <DropdownMenuItem
             key={lang.code}
             onClick={() => {
-              setLanguage(lang.code)
+              setLanguage(lang.code as import("./language-provider").Language)
               setOpen(false)
             }}
             className={`flex items-center gap-2 cursor-pointer ${language === lang.code ? "bg-slate-100" : ""}`}

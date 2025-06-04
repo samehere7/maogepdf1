@@ -1,28 +1,28 @@
-'use client'
-
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { LanguageProvider } from "../components/language-provider"
+import { Providers } from "@/components/providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "maoge pdf",
-  description: "maoge pdf",
+  title: "Maoge PDF",
+  description: "Chat with your PDF documents",
 }
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} h-full overflow-hidden`}>
+        <Providers>
+          <main className="h-full overflow-hidden">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   )

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "@/components/language-provider"
 import { signIn } from "next-auth/react"
 
 interface LoginModalProps {

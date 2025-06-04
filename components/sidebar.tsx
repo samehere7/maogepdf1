@@ -36,11 +36,13 @@ export function Sidebar({ className }: { className?: string }) {
         alert("只允许上传PDF文件")
         return
       }
+      const fileUrl = URL.createObjectURL(file)
       const fileInfo = {
         name: file.name,
         size: file.size,
         uploadDate: new Date().toISOString(),
         id: Date.now().toString(),
+        url: fileUrl,
       }
       const existingFiles = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
       existingFiles.push(fileInfo)

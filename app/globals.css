@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* 确保根元素占满整个视口 */
+#__next, main {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 添加滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 允许特定容器内滚动 */
+.overflow-y-auto {
+  overflow-y: auto !important;
+}
+
+.overflow-x-auto {
+  overflow-x: auto !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

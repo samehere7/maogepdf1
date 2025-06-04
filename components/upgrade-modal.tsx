@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Check } from "lucide-react"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "@/components/language-provider"
 
 interface UpgradeModalProps {
   children: React.ReactNode

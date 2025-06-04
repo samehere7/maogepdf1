@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { useLanguage } from "@/hooks/use-language"
+import { useLanguage } from "@/components/language-provider"
 
 interface FooterModalProps {
   isOpen: boolean

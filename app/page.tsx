@@ -14,6 +14,7 @@ import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
 import { signIn } from "next-auth/react"
 import { Sidebar } from "@/components/sidebar"
 import { FooterModal } from "@/components/footer-modals"
+import { ModelQuality } from "@/types/api"
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
@@ -21,6 +22,7 @@ export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [upgradeFile, setUpgradeFile] = useState<{name: string, size: number} | null>(null)
+  const [modelQuality, setModelQuality] = useState<ModelQuality>('high')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { t, language } = useLanguage()
@@ -32,7 +34,7 @@ export default function HomePage() {
     setIsLoggedIn(!!userInfo.isLoggedIn)
   }, [])
 
-  const handleFile = async (file: File) => {
+  const handleFile = async (file: File, quality: ModelQuality) => {
     if (!file.type.includes("pdf")) {
       alert(t("onlyPdfAllowed"))
       return
@@ -43,24 +45,57 @@ export default function HomePage() {
     }
     setUploading(true)
     try {
-      // 模拟上传和本地存储
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // 创建FormData对象
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('quality', quality);
+      
+      console.log("开始上传文件:", file.name, "质量模式:", quality);
+      
+      // 直接使用相对路径
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      console.log("上传响应状态:", uploadResponse.status);
+      
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        console.error("上传错误:", errorData);
+        throw new Error(errorData.error || '上传失败');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      console.log("上传成功:", uploadResult);
+      
+      // 保存文件信息到本地存储
       const fileInfo = {
         name: file.name,
         size: file.size,
         uploadDate: new Date().toISOString(),
         id: Date.now().toString(),
+        url: uploadResult.url || null,
+        embeddingsFile: uploadResult.embeddingsFile || null,
+        chunks: uploadResult.chunks || 0,
+        quality: quality
       }
       const existingFiles = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
       existingFiles.push(fileInfo)
       localStorage.setItem("uploadedPdfs", JSON.stringify(existingFiles))
       window.location.href = `/analysis/${fileInfo.id}`
-    } catch {
-      alert(t("uploadError"))
+    } catch (error) {
+      console.error("上传处理失败:", error);
+      alert(error instanceof Error ? error.message : t("uploadError"))
     } finally {
       setUploading(false)
     }
   }
+
+  const handleUploadWithQuality = (quality: ModelQuality) => {
+    setModelQuality(quality);
+    fileInputRef.current?.click();
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -74,13 +109,13 @@ export default function HomePage() {
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0])
+      handleFile(e.dataTransfer.files[0], modelQuality)
     }
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0])
+      handleFile(e.target.files[0], modelQuality)
     }
   }
 
@@ -204,6 +239,31 @@ export default function HomePage() {
                 onChange={handleFileInput}
                 disabled={uploading}
               />
+            </div>
+
+            {/* Model Quality Selection */}
+            <div className="flex justify-center gap-4 mt-6">
+              <Button
+                className="min-w-[120px] px-6 py-2 bg-[#38bdf8] hover:bg-[#0ea5e9] text-white font-medium flex items-center gap-2"
+                onClick={() => handleUploadWithQuality('fast')}
+                disabled={uploading}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                快速
+              </Button>
+              <Button
+                className="min-w-[120px] px-6 py-2 bg-[#a259ff] hover:bg-[#9333ea] text-white font-medium flex items-center gap-2"
+                onClick={() => handleUploadWithQuality('high')}
+                disabled={uploading}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                高质量
+              </Button>
             </div>
 
             <Button
