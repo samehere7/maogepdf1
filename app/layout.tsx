@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { LanguageProvider } from "@/hooks/use-language"
+import Script from "next/script"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LanguageProvider>
           {children}
         </LanguageProvider>
+        <Script defer data-domain="maogepdf.com" src="https://plausible.io/js/script.js" strategy="afterInteractive" />
       </body>
     </html>
   )
