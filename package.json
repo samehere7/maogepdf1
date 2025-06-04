@@ -7,13 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "npm install --legacy-peer-deps && npm install --save-dev typescript@latest @types/node@latest && next build"
+    "vercel-build": "next build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.1.12",
+    "@types/node": "^20.17.57",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -28,14 +31,11 @@
     "react-pdf": "^7.7.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.3.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
-    "@types/node": "^20.17.57",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
-    "typescript": "^5.8.3"
+    "eslint-config-next": "14.1.0"
   }
 }
