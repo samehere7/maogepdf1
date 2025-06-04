@@ -7,6 +7,52 @@ type Language = 'en' | 'zh'
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
+  t: (key: string) => string
+}
+
+const translations = {
+  en: {
+    about: 'About',
+    aboutContent: 'About content in English',
+    privacyPolicy: 'Privacy Policy',
+    privacyContent: 'Privacy policy content in English',
+    termsOfUse: 'Terms of Use',
+    termsContent: 'Terms of use content in English',
+    account: 'Account',
+    accountContent: 'Account content in English',
+    pricing: 'Pricing',
+    pricingContent: 'Pricing content in English',
+    uploadPdf: 'Upload PDF',
+    onlyPdfAllowed: 'Only PDF files are allowed',
+    fileSizeLimit: 'File size must be less than 10MB',
+    uploadError: 'Upload failed',
+    clickToUpload: 'Click to upload',
+    orDragAndDrop: 'or drag and drop',
+    pdfMaxSize: 'PDF up to 10MB',
+    heroTitleV2: 'Chat with your PDF',
+    heroDescriptionV2: 'The best way to chat with your PDF documents for students, researchers and professionals',
+  },
+  zh: {
+    about: '关于',
+    aboutContent: '关于内容中文版',
+    privacyPolicy: '隐私政策',
+    privacyContent: '隐私政策内容中文版',
+    termsOfUse: '使用条款',
+    termsContent: '使用条款内容中文版',
+    account: '账户',
+    accountContent: '账户内容中文版',
+    pricing: '价格',
+    pricingContent: '价格内容中文版',
+    uploadPdf: '上传PDF',
+    onlyPdfAllowed: '只允许上传PDF文件',
+    fileSizeLimit: '文件大小必须小于10MB',
+    uploadError: '上传失败',
+    clickToUpload: '点击上传',
+    orDragAndDrop: '或拖放文件',
+    pdfMaxSize: 'PDF最大10MB',
+    heroTitleV2: '与您的PDF对话',
+    heroDescriptionV2: '为学生、研究者和专业人士提供的最佳PDF对话方式',
+  }
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -14,8 +60,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>('en')
 
+  const t = (key: string): string => {
+    return translations[language][key as keyof typeof translations[typeof language]] || key
+  }
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   )
