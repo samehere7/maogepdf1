@@ -6,8 +6,9 @@ import { Providers } from "@/components/providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Maoge PDF",
-  description: "Chat with your PDF documents",
+  title: "Maoge PDF - Smart PDF Parsing & AI Chat | Online PDF Management Tool",
+  description: "Maoge PDF offers intelligent PDF parsing, AI chat, and file management features to help you efficiently process and manage your PDF documents. Multi-language support, clean interface, and secure service.",
+  keywords: ["PDF", "AI chat", "PDF parsing", "file management", "online tool", "productivity", "Maoge PDF"]
 }
 
 export default function RootLayout({
