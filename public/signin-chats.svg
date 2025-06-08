@@ -1,0 +1,8 @@
+<svg width="212" height="102" viewBox="0 0 212 102" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="212" height="102" rx="16" fill="#F3E8FF"/>
+  <circle cx="56" cy="51" r="28" fill="#a026ff" fill-opacity="0.15"/>
+  <circle cx="56" cy="51" r="18" fill="#a026ff" fill-opacity="0.35"/>
+  <rect x="100" y="36" width="80" height="12" rx="6" fill="#a026ff" fill-opacity="0.15"/>
+  <rect x="100" y="56" width="60" height="12" rx="6" fill="#a026ff" fill-opacity="0.25"/>
+  <text x="50%" y="90" text-anchor="middle" fill="#a026ff" font-size="18" font-weight="bold" dy=".3em">Sign In</text>
+</svg> 

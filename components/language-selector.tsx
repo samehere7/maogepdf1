@@ -21,7 +21,7 @@ export function LanguageSelector() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 min-w-[100px]">
+        <Button variant="outline" className="flex items-center gap-2 min-w-[100px] bg-white text-gray-900 border border-gray-300 shadow-sm hover:bg-gray-100">
           <Globe className="h-4 w-4" />
           <span className="text-sm">
             {currentLanguage.flag} {currentLanguage.name}

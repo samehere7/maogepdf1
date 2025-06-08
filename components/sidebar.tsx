@@ -8,6 +8,10 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import SidebarSignIn from "@/components/SidebarSignIn"
+import { LanguageSelector } from "@/components/language-selector"
+import { createClient } from "@/lib/supabase/client"
+import SidebarUserInfo from "@/components/SidebarUserInfo"
 
 export function Sidebar({ className }: { className?: string }) {
   const router = useRouter()
@@ -20,6 +24,19 @@ export function Sidebar({ className }: { className?: string }) {
   const [pdfs, setPdfs] = useState<any[]>([])
   const [draggedPdfId, setDraggedPdfId] = useState<string | null>(null)
   const [folderStructure, setFolderStructure] = useState<{[key: string]: string[]}>({})
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user)
+    })
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session?.user)
+    })
+    return () => listener.subscription.unsubscribe()
+  }, [supabase])
 
   useEffect(() => {
     setFolders(JSON.parse(localStorage.getItem("uploadedFolders") || "[]"))
@@ -102,33 +119,34 @@ export function Sidebar({ className }: { className?: string }) {
     localStorage.setItem("folderStructure", JSON.stringify(newStructure))
   }
 
-  const handleDragStart = (pdfId: string) => {
+  const handleDragStart = (e: React.DragEvent, pdfId: string) => {
     setDraggedPdfId(pdfId)
+    e.dataTransfer.setData('application/pdf-id', pdfId)
   }
 
   const handleDragOver = (e: React.DragEvent, folderId: string) => {
     e.preventDefault()
-    e.currentTarget.style.backgroundColor = "#3f3f46"
+    (e.currentTarget as HTMLElement).style.backgroundColor = "#3f3f46"
+    return undefined
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.style.backgroundColor = ""
+    (e.currentTarget as HTMLElement).style.backgroundColor = ""
   }
 
   const handleDrop = (e: React.DragEvent, folderId: string) => {
     e.preventDefault()
-    e.currentTarget.style.backgroundColor = ""
-    
-    if (!draggedPdfId) return
+    ;(e.currentTarget as HTMLElement).style.backgroundColor = ""
+    const pdfId = e.dataTransfer.getData('application/pdf-id') || draggedPdfId
+    if (!pdfId) return
 
     // Remove PDF from previous folder if it exists
     const newStructure = { ...folderStructure }
     Object.keys(newStructure).forEach(key => {
-      newStructure[key] = newStructure[key].filter(id => id !== draggedPdfId)
+      newStructure[key] = newStructure[key].filter(id => id !== pdfId)
     })
-
     // Add PDF to new folder
-    newStructure[folderId] = [...(newStructure[folderId] || []), draggedPdfId]
+    newStructure[folderId] = [...(newStructure[folderId] || []), pdfId]
     setFolderStructure(newStructure)
     localStorage.setItem("folderStructure", JSON.stringify(newStructure))
     setDraggedPdfId(null)
@@ -149,7 +167,7 @@ export function Sidebar({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn("flex flex-col h-full bg-[#18181b] text-white w-60 min-w-[180px]", className)}>
+    <div className={cn("flex flex-col h-screen bg-[#18181b] text-white w-60 min-w-[180px]", className)}>
       {/* 顶部标题 */}
       <div className="flex items-center gap-2 p-4 border-b border-gray-800">
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-600 text-white font-bold">
@@ -174,7 +192,13 @@ export function Sidebar({ className }: { className?: string }) {
           className="hidden" 
         />
         <button
-          onClick={() => setShowFolderModal(true)}
+          onClick={() => {
+            if (!isLoggedIn) {
+              setShowLoginModal(true)
+            } else {
+              setShowFolderModal(true)
+            }
+          }}
           className="w-full py-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-md text-center transition"
         >
           新建文件夹
@@ -182,107 +206,109 @@ export function Sidebar({ className }: { className?: string }) {
       </div>
 
       {/* PDF 文件列表 */}
-      <div className="flex-1 overflow-auto p-3">
-        {/* Root PDFs */}
-        {getRootPdfs().map((pdf) => (
-          <div
-            key={pdf.id}
-            draggable
-            onDragStart={() => handleDragStart(pdf.id)}
-            className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
-          >
-            <Link
-              href={`/analysis/${pdf.id}`}
-              className="flex items-center flex-1"
-              onClick={(e) => e.stopPropagation()}
+      {isLoggedIn && (
+        <div className="flex-1 min-h-0 overflow-auto p-3">
+          {/* Root PDFs */}
+          {getRootPdfs().map((pdf) => (
+            <div
+              key={pdf.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, pdf.id)}
+              className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
             >
-              <span className="text-gray-300">{pdf.name}</span>
-            </Link>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-              <button 
-                onClick={() => handleDeletePdf(pdf.id)}
-                className="p-1 hover:bg-gray-700 rounded"
+              <Link
+                href={`/analysis/${pdf.id}`}
+                className="flex items-center flex-1"
+                onClick={(e) => e.stopPropagation()}
               >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {/* 文件夹列表 */}
-        {folders.map((folder) => (
-          <div key={folder.id}>
-            <div 
-              className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
-              onDragOver={(e) => handleDragOver(e, folder.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, folder.id)}
-            >
-              {editingFolderId === folder.id ? (
-                <Input 
-                  value={editFolderName} 
-                  onChange={e => setEditFolderName(e.target.value)}
-                  onBlur={() => handleRenameFolder(folder.id)}
-                  onKeyDown={e => e.key === 'Enter' && handleRenameFolder(folder.id)}
-                  className="h-8 text-sm bg-gray-800 border-gray-700"
-                  autoFocus
-                />
-              ) : (
-                <>
-                  <div className="flex items-center gap-2">
-                    <FolderIcon size={16} className="text-gray-400" />
-                    <span>{folder.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button 
-                      onClick={() => {
-                        setEditingFolderId(folder.id)
-                        setEditFolderName(folder.name)
-                      }}
-                      className="p-1 hover:bg-gray-700 rounded"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteFolder(folder.id)}
-                      className="p-1 hover:bg-gray-700 rounded"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-            {/* Folder PDFs */}
-            <div className="ml-4">
-              {getFolderPdfs(folder.id).map((pdf) => (
-                <div
-                  key={pdf.id}
-                  draggable
-                  onDragStart={() => handleDragStart(pdf.id)}
-                  className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
+                <span className="text-gray-300">{pdf.name}</span>
+              </Link>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                <button 
+                  onClick={() => handleDeletePdf(pdf.id)}
+                  className="p-1 hover:bg-gray-700 rounded"
                 >
-                  <Link
-                    href={`/analysis/${pdf.id}`}
-                    className="flex items-center flex-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="text-gray-300">{pdf.name}</span>
-                  </Link>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button 
-                      onClick={() => handleDeletePdf(pdf.id)}
-                      className="p-1 hover:bg-gray-700 rounded"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+
+          {/* 文件夹列表 */}
+          {folders.map((folder) => (
+            <div key={folder.id}>
+              <div 
+                className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group"
+                onDragOver={(e) => handleDragOver(e, folder.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, folder.id)}
+              >
+                {editingFolderId === folder.id ? (
+                  <Input 
+                    value={editFolderName} 
+                    onChange={e => setEditFolderName(e.target.value)}
+                    onBlur={() => handleRenameFolder(folder.id)}
+                    onKeyDown={e => e.key === 'Enter' && handleRenameFolder(folder.id)}
+                    className="h-8 text-sm bg-gray-800 border-gray-700"
+                    autoFocus
+                  />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <FolderIcon size={16} className="text-gray-400" />
+                      <span>{folder.name}</span>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                      <button 
+                        onClick={() => {
+                          setEditingFolderId(folder.id)
+                          setEditFolderName(folder.name)
+                        }}
+                        className="p-1 hover:bg-gray-700 rounded"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteFolder(folder.id)}
+                        className="p-1 hover:bg-gray-700 rounded"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Folder PDFs */}
+              <div className="ml-4">
+                {getFolderPdfs(folder.id).map((pdf) => (
+                  <div
+                    key={pdf.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, pdf.id)}
+                    className="flex items-center justify-between p-2 mb-1 hover:bg-[#2a2a2a] rounded-md group cursor-move"
+                  >
+                    <Link
+                      href={`/analysis/${pdf.id}`}
+                      className="flex items-center flex-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="text-gray-300">{pdf.name}</span>
+                    </Link>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                      <button 
+                        onClick={() => handleDeletePdf(pdf.id)}
+                        className="p-1 hover:bg-gray-700 rounded"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 创建文件夹模态框 */}
       <Dialog open={showFolderModal} onOpenChange={setShowFolderModal}>
@@ -311,6 +337,23 @@ export function Sidebar({ className }: { className?: string }) {
           </div>
         </DialogContent>
       </Dialog>
+      {/* 登录弹窗 */}
+      <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+        <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
+          <h2 className="text-xl font-semibold mb-4">请先登录</h2>
+          <p className="mb-4 text-gray-700">登录后才能新建文件夹和管理PDF。</p>
+          <SidebarSignIn />
+        </DialogContent>
+      </Dialog>
+      {/* 侧边栏最底部：登录+语言选择器 */}
+      {isLoggedIn ? (
+        <SidebarUserInfo />
+      ) : (
+        <div className="flex flex-col items-center gap-4 pb-6">
+          <SidebarSignIn />
+          <LanguageSelector />
+        </div>
+      )}
     </div>
   )
 }
