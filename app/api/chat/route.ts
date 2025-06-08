@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { OpenAI } from 'openai';
-import { ModelQuality, createOpenAIClient } from '@/types/api';
+import { callOpenRouterChat, ModelQuality } from '../../utils/openrouter';
 import fs from 'fs';
 
 // 计算余弦相似度
@@ -67,7 +67,14 @@ function generateMockAnswer(question: string, chunks: string[], quality: ModelQu
 // 获取真实回答
 async function getAnswer(question: string, chunks: string[], quality: ModelQuality) {
   try {
-    const client = createOpenAIClient(quality);
+    const client = new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+      defaultHeaders: {
+        'HTTP-Referer': 'https://maoge.pdf',
+        'X-Title': 'Maoge PDF',
+      }
+    });
     console.log(`使用${quality}质量模式获取回答`);
     
     // 这里仍然使用模拟回答，实际使用时可以替换为真实API调用
@@ -100,82 +107,36 @@ async function getAnswer(question: string, chunks: string[], quality: ModelQuali
 }
 
 export async function POST(req: Request) {
+  console.log('收到 /api/chat 请求');
   try {
-    const { question, embeddingsFile, model, apiKey } = await req.json();
-    console.log("收到聊天请求:", { question, embeddingsFile, model });
-
-    if (!question || !model || !apiKey) {
-      return NextResponse.json(
-        { error: '缺少必要参数' },
-        { status: 400 }
-      );
+    const { question, embeddingsFile, quality = 'fast' } = await req.json();
+    if (!question) {
+      return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
     }
-
-    // 获取PDF内容
-    const pdfChunks = await getPdfContent(embeddingsFile);
-    
-    if (pdfChunks.length === 0) {
-      console.error("无法获取PDF内容，可能embeddings文件不存在或为空");
-      return NextResponse.json(
-        { answer: "抱歉，我无法访问此PDF的内容。请尝试重新上传文档。" },
-        { status: 200 }
-      );
+    // 获取PDF内容（如有）
+    let pdfContent = '';
+    if (embeddingsFile) {
+      const pdfChunks = await getPdfContent(embeddingsFile);
+      pdfContent = pdfChunks.join('\n\n');
     }
-    
-    const pdfContent = pdfChunks.join('\n\n');
-    console.log(`获取到${pdfChunks.length}个文本块，总字符数:${pdfContent.length}`);
-
-    // 创建OpenAI客户端实例
-    const client = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: apiKey,
-      defaultHeaders: {
-        'HTTP-Referer': 'https://maoge.pdf', // 你的网站 URL
-        'X-Title': 'Maoge PDF', // 你的网站名称
+    // 组装messages
+    const messages = [
+      {
+        role: 'system',
+        content: pdfContent
+          ? `你是一个专业的PDF文档助手。请基于以下PDF文档内容回答问题。\n如果问题超出了文档范围，请礼貌地告知用户。回答要准确、简洁、专业。\n\n文档内容:\n${pdfContent.length > 8000 ? pdfContent.slice(0, 8000) + '...' : pdfContent}`
+          : '你是一个专业的PDF文档助手。请准确、简洁、专业地回答用户问题。'
+      },
+      {
+        role: 'user',
+        content: question
       }
-    });
-
-    // 构建系统提示词
-    const systemPrompt = `你是一个专业的PDF文档助手。请基于以下PDF文档内容回答问题。
-如果问题超出了文档范围，请礼貌地告知用户。回答要准确、简洁、专业。
-
-文档内容:
-${pdfContent.length > 8000 ? pdfContent.slice(0, 8000) + "..." : pdfContent}`;
-
-    try {
-      console.log("调用OpenRouter API...");
-      const completion = await client.chat.completions.create({
-        model: model,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: question
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      });
-
-      const answer = completion.choices[0].message.content;
-      console.log("获得API回答，长度:", answer?.length);
-
-      return NextResponse.json({ answer });
-    } catch (error: any) {
-      console.error('OpenRouter API错误:', error);
-      return NextResponse.json(
-        { error: '与AI助手对话时出错' },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    console.error('服务器错误:', error);
-    return NextResponse.json(
-      { error: '服务器内部错误' },
-      { status: 500 }
-    );
+    ];
+    // 调用大模型
+    const answer = await callOpenRouterChat({ messages, quality });
+    return NextResponse.json({ answer });
+  } catch (error: any) {
+    console.error('chat接口错误:', error);
+    return NextResponse.json({ error: error.message || '服务器内部错误' }, { status: 500 });
   }
 } 

@@ -48,7 +48,11 @@ export default function PDFViewer({ file }: PDFViewerProps) {
           if (context) {
             canvas.height = viewport.height;
             canvas.width = viewport.width;
-            canvas.className = 'shadow-lg mx-auto mb-4';
+            // 关键：让canvas宽度自适应父容器，最大不超过原始宽度
+            canvas.style.width = '100%';
+            canvas.style.maxWidth = viewport.width + 'px';
+            canvas.style.height = 'auto';
+            canvas.className = 'shadow-lg';
             
             // 渲染PDF页面到canvas
             await page.render({
@@ -59,7 +63,9 @@ export default function PDFViewer({ file }: PDFViewerProps) {
             // 将canvas添加到容器
             if (containerRef.current) {
               const pageContainer = document.createElement('div');
-              pageContainer.className = 'flex justify-center mb-8';
+              pageContainer.className = 'w-full flex justify-center';
+              pageContainer.style.marginBottom = '16px';
+              pageContainer.style.padding = '0';
               pageContainer.appendChild(canvas);
               containerRef.current.appendChild(pageContainer);
             }
@@ -93,7 +99,7 @@ export default function PDFViewer({ file }: PDFViewerProps) {
   }
 
   return (
-    <div className="pdf-viewer-container h-full bg-gray-100 overflow-y-auto">
+    <div className="pdf-viewer-container h-full w-full bg-gray-100 overflow-y-auto flex flex-col" style={{minHeight:'0', minWidth:'0'}}>
       {isLoading && (
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
@@ -113,7 +119,8 @@ export default function PDFViewer({ file }: PDFViewerProps) {
 
       <div 
         ref={containerRef} 
-        className="pdf-pages-container p-4"
+        className="pdf-pages-container flex-1 min-h-0 w-full overflow-y-auto p-2"
+        style={{display:'flex', flexDirection:'column', alignItems:'flex-start', minHeight:'0', minWidth:'0'}}
       ></div>
     </div>
   );

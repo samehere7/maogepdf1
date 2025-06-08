@@ -15,6 +15,7 @@ import { Sidebar } from "@/components/sidebar"
 import { FooterModal } from "@/components/footer-modals"
 import { ModelQuality } from "@/types/api"
 import AuthButton from "@/components/AuthButton"
+import { useUser } from '@/components/UserProvider'
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
@@ -26,14 +27,17 @@ export default function HomePage() {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
+  const { profile } = useUser()
+  const isPlus = profile?.plus && profile?.is_active
 
   const handleFile = async (file: File, quality: ModelQuality) => {
     if (!file.type.includes("pdf")) {
       alert(t("onlyPdfAllowed"))
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      alert(t("fileSizeLimit"))
+    const maxSize = isPlus ? Infinity : 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert(isPlus ? "Plus会员文件大小无限制，可上传任意大小PDF" : t("fileSizeLimit"))
       return
     }
     setUploading(true)
