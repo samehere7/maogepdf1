@@ -48,12 +48,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['pdf-parse'],
     optimizePackageImports: ['lucide-react'],
   },
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-    responseLimit: false,
-  },
   // 生产环境优化
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
