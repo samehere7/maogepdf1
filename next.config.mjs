@@ -69,6 +69,12 @@ const nextConfig = {
       },
     ];
   },
+  serverRuntimeConfig: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+    responseLimit: false,
+  }
 }
 
 export default nextConfig

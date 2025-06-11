@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
+import { OpenAI } from 'openai';
+import { getPDF } from '@/lib/pdf-service';
+import { prisma } from '@/lib/prisma';
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { OpenAI } from 'openai';
-import { ModelQuality, createOpenAIClient } from '@/types/api';
+import { callOpenRouterChat, ModelQuality } from '../../utils/openrouter';
 import fs from 'fs';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+});
 
 // 计算余弦相似度
 function cosineSimilarity(a: number[], b: number[]) {
@@ -30,7 +38,10 @@ async function getPdfContent(embeddingsFileName: string) {
     // 检查文件是否存在
     if (!fs.existsSync(embeddingsFilePath)) {
       console.error("Embeddings文件不存在:", embeddingsFilePath);
-      return [];
+      // 新增：直接抛出404错误
+      const err: any = new Error("PDF尚未解析，请稍后再试或重新上传。");
+      err.status = 404;
+      throw err;
     }
     
     // 读取文件内容
@@ -67,7 +78,14 @@ function generateMockAnswer(question: string, chunks: string[], quality: ModelQu
 // 获取真实回答
 async function getAnswer(question: string, chunks: string[], quality: ModelQuality) {
   try {
-    const client = createOpenAIClient(quality);
+    const client = new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY_FAST,
+      defaultHeaders: {
+        'HTTP-Referer': 'https://maoge.pdf',
+        'X-Title': 'Maoge PDF',
+      }
+    });
     console.log(`使用${quality}质量模式获取回答`);
     
     // 这里仍然使用模拟回答，实际使用时可以替换为真实API调用
@@ -99,83 +117,127 @@ async function getAnswer(question: string, chunks: string[], quality: ModelQuali
   }
 }
 
-export async function POST(req: Request) {
+async function loadEmbeddings(pdfId: string): Promise<any[]> {
   try {
-    const { question, embeddingsFile, model, apiKey } = await req.json();
-    console.log("收到聊天请求:", { question, embeddingsFile, model });
-
-    if (!question || !model || !apiKey) {
-      return NextResponse.json(
-        { error: '缺少必要参数' },
-        { status: 400 }
-      );
-    }
-
-    // 获取PDF内容
-    const pdfChunks = await getPdfContent(embeddingsFile);
-    
-    if (pdfChunks.length === 0) {
-      console.error("无法获取PDF内容，可能embeddings文件不存在或为空");
-      return NextResponse.json(
-        { answer: "抱歉，我无法访问此PDF的内容。请尝试重新上传文档。" },
-        { status: 200 }
-      );
-    }
-    
-    const pdfContent = pdfChunks.join('\n\n');
-    console.log(`获取到${pdfChunks.length}个文本块，总字符数:${pdfContent.length}`);
-
-    // 创建OpenAI客户端实例
-    const client = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: apiKey,
-      defaultHeaders: {
-        'HTTP-Referer': 'https://maoge.pdf', // 你的网站 URL
-        'X-Title': 'Maoge PDF', // 你的网站名称
-      }
+    // 从数据库获取PDF的embeddings文件路径
+    const pdf = await prisma.pDF.findUnique({
+      where: { id: pdfId }
     });
 
-    // 构建系统提示词
-    const systemPrompt = `你是一个专业的PDF文档助手。请基于以下PDF文档内容回答问题。
-如果问题超出了文档范围，请礼貌地告知用户。回答要准确、简洁、专业。
-
-文档内容:
-${pdfContent.length > 8000 ? pdfContent.slice(0, 8000) + "..." : pdfContent}`;
-
-    try {
-      console.log("调用OpenRouter API...");
-      const completion = await client.chat.completions.create({
-        model: model,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: question
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      });
-
-      const answer = completion.choices[0].message.content;
-      console.log("获得API回答，长度:", answer?.length);
-
-      return NextResponse.json({ answer });
-    } catch (error: any) {
-      console.error('OpenRouter API错误:', error);
-      return NextResponse.json(
-        { error: '与AI助手对话时出错' },
-        { status: 500 }
-      );
+    if (!pdf?.embeddings) {
+      return [];
     }
+
+    // 读取embeddings文件
+    const response = await fetch(pdf.embeddings);
+    const embeddings = await response.json();
+    
+    return embeddings;
   } catch (error) {
-    console.error('服务器错误:', error);
-    return NextResponse.json(
-      { error: '服务器内部错误' },
-      { status: 500 }
-    );
+    console.error('加载embeddings错误:', error);
+    return [];
+  }
+}
+
+async function findSimilarChunks(query: string, embeddings: any[], topK: number = 3): Promise<string[]> {
+  try {
+    if (embeddings.length === 0) {
+      return ["没有找到相关文档内容。"];
+    }
+    
+    // 获取查询的embedding
+    const response = await openai.embeddings.create({
+      model: 'text-embedding-ada-002',
+      input: query,
+    });
+    
+    const queryEmbedding = response.data[0].embedding;
+
+    // 计算相似度并排序
+    const similarities = embeddings.map((item: any) => ({
+      chunk: item.chunk,
+      similarity: cosineSimilarity(queryEmbedding, item.embedding),
+    }));
+
+    similarities.sort((a, b) => b.similarity - a.similarity);
+    return similarities.slice(0, topK).map(item => item.chunk);
+  } catch (error) {
+    console.error('查找相似文本块错误:', error);
+    return embeddings.slice(0, topK).map((item: any) => item.chunk);
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    // 检查用户是否已登录
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: '未登录' }, { status: 401 });
+    }
+
+    const { messages, pdfId } = await req.json();
+    
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: '无效的消息格式' }, { status: 400 });
+    }
+
+    if (!pdfId) {
+      return NextResponse.json({ error: '未提供PDF ID' }, { status: 400 });
+    }
+
+    // 检查用户是否有权限访问该PDF
+    const pdf = await getPDF(pdfId, session.user.email);
+    if (!pdf) {
+      return NextResponse.json({ error: '无权访问该PDF' }, { status: 403 });
+    }
+    
+    // 加载embeddings
+    const embeddings = await loadEmbeddings(pdfId);
+    
+    if (embeddings.length === 0) {
+      return NextResponse.json({ 
+        content: "抱歉，我无法访问文档内容。请确保文档已正确上传并处理。", 
+        role: "assistant" 
+      });
+    }
+
+    // 获取最后一条用户消息
+    const lastUserMessage = messages[messages.length - 1].content;
+
+    // 查找相关文本块
+    const relevantChunks = await findSimilarChunks(lastUserMessage, embeddings);
+
+    // 构建系统提示
+    const systemPrompt = `你是一个专业的文档助手。请基于以下文档内容回答用户的问题。如果问题超出文档范围，请明确告知。
+
+相关文档内容：
+${relevantChunks.join('\n\n')}
+
+请用简洁、专业的语言回答，必要时可以使用markdown格式。`;
+
+    // 准备消息列表
+    const chatMessages = [
+      { role: 'system', content: systemPrompt },
+      ...messages
+    ];
+
+    // 调用ChatGPT API
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: chatMessages as any,
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    return NextResponse.json({
+      content: completion.choices[0].message.content,
+      role: 'assistant'
+    });
+  } catch (error) {
+    console.error('聊天API错误:', error);
+    return NextResponse.json({
+      content: "处理您的问题时出错了。请稍后再试。",
+      role: "assistant"
+    });
   }
 } 

@@ -11,15 +11,15 @@ import { useLanguage } from "../components/language-provider"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
-import { signIn } from "next-auth/react"
 import { Sidebar } from "@/components/sidebar"
 import { FooterModal } from "@/components/footer-modals"
 import { ModelQuality } from "@/types/api"
+import AuthButton from "@/components/AuthButton"
+import { useUser } from '@/components/UserProvider'
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [upgradeFile, setUpgradeFile] = useState<{name: string, size: number} | null>(null)
   const [modelQuality, setModelQuality] = useState<ModelQuality>('high')
@@ -27,20 +27,18 @@ export default function HomePage() {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
-
-  useEffect(() => {
-    // Check if user is logged in
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}")
-    setIsLoggedIn(!!userInfo.isLoggedIn)
-  }, [])
+  const { profile } = useUser()
+  // 默认非Plus会员
+  const isPlus = profile?.plus && profile?.is_active
 
   const handleFile = async (file: File, quality: ModelQuality) => {
     if (!file.type.includes("pdf")) {
       alert(t("onlyPdfAllowed"))
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      alert(t("fileSizeLimit"))
+    const maxSize = isPlus ? Infinity : 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert(isPlus ? "Plus会员文件大小无限制，可上传任意大小PDF" : t("fileSizeLimit"))
       return
     }
     setUploading(true)
@@ -61,13 +59,27 @@ export default function HomePage() {
       console.log("上传响应状态:", uploadResponse.status);
       
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
+        const errorText = await uploadResponse.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error("解析错误响应失败:", errorText);
+          throw new Error('上传失败，服务器返回无效响应');
+        }
         console.error("上传错误:", errorData);
         throw new Error(errorData.error || '上传失败');
       }
       
-      const uploadResult = await uploadResponse.json();
+      let uploadResult;
+      try {
+        const resultText = await uploadResponse.text();
+        uploadResult = JSON.parse(resultText);
       console.log("上传成功:", uploadResult);
+      } catch (e) {
+        console.error("解析成功响应失败:", e);
+        throw new Error('解析服务器响应失败');
+      }
       
       // 保存文件信息到本地存储
       const fileInfo = {
@@ -120,11 +132,13 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <div className="w-1/5 min-w-[260px] max-w-[340px] bg-[#18181b]">
+    <div className="min-h-screen">
+      {/* 固定侧边栏 */}
+      <div className="fixed top-0 left-0 h-screen w-64 z-30 bg-[#18181b]">
         <Sidebar />
       </div>
-      <div className="flex-1 bg-white shadow-lg p-8 sm:p-12 md:p-16 lg:p-20 xl:p-24" style={{boxShadow: 'rgba(0,0,0,0.06) -4px 0 16px'}}>
+      {/* 主内容区，留出侧边栏宽度 */}
+      <div className="ml-64 flex-1 bg-white shadow-lg p-8 sm:p-12 md:p-16 lg:p-20 xl:p-24" style={{boxShadow: 'rgba(0,0,0,0.06) -4px 0 16px'}}>
         <UpgradePlusModal
           open={showUpgrade}
           onOpenChange={setShowUpgrade}
@@ -148,12 +162,7 @@ export default function HomePage() {
         </div>
         <div className="flex flex-1 justify-end gap-6 sm:gap-8 items-center">
           <LanguageSelector />
-          <Button
-            className="min-w-[100px] bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {t("uploadPdf")}
-          </Button>
+          <AuthButton />
         </div>
       </header>
 
