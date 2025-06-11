@@ -12,6 +12,9 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { Sidebar } from "@/components/sidebar"
 import dynamic from 'next/dynamic'
+import * as pdfjsLib from 'pdfjs-dist'
+import { getPDF } from '@/lib/pdf-service'
+import { useSession } from 'next-auth/react'
 
 // 动态导入 PDFViewer 组件，确保只在客户端渲染
 const PDFViewer = dynamic(
@@ -55,6 +58,7 @@ export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
   const { t } = useLanguage()
+  const { data: session } = useSession()
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [fileInfo, setFileInfo] = useState<any>(null)
@@ -65,9 +69,7 @@ export default function AnalysisPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [pdfFiles, setPdfFiles] = useState<any[]>([])
   const [pdfError, setPdfError] = useState<string | null>(null)
-  const [modelQuality, setModelQuality] = useState<'fast' | 'highQuality'>(
-    fileInfo?.quality === 'fast' ? 'fast' : 'highQuality'
-  )
+  const [modelQuality, setModelQuality] = useState<'fast' | 'highQuality'>('highQuality')
   
   // PDF 预览相关状态
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -75,59 +77,81 @@ export default function AnalysisPage() {
   const [scale, setScale] = useState<number>(1.0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
+  // 新增：存储示例问题
+  const [exampleQuestions, setExampleQuestions] = useState<string[]>([]);
+
   useEffect(() => {
-    // Check if user is logged in
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}")
-    setIsLoggedIn(!!userInfo.isLoggedIn)
-    
-    // 加载所有PDF文件
-    const files = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
-    setPdfFiles(files)
-    
-    const loadAnalysis = async () => {
-      try {
-        const file = files.find((f: any) => f.id === params.id)
-
-        if (!file) {
-          router.push("/")
-          return
-        }
-
-        setFileInfo(file)
-        setPdfError(null)
-
-        // Check if analysis already exists
-        const existingAnalysis = localStorage.getItem(`analysis-${params.id}`)
-        if (existingAnalysis) {
-          setAnalysis(JSON.parse(existingAnalysis))
-          setLoading(false)
-          return
-        }
-
-        // Simulate AI analysis
-        const result = await analyzeDocument(file.name)
-        setAnalysis(result)
-
-        // Store analysis
-        localStorage.setItem(`analysis-${params.id}`, JSON.stringify(result))
-
-        // 添加欢迎消息
-        setMessages([
-          { 
-            role: "assistant", 
-            content: `欢迎！我已经分析了文档 "${file.name}"，请随时向我提问关于这个文档的任何内容。` 
-          }
-        ]);
-      } catch (error) {
-        console.error("Error loading analysis:", error)
-        router.push("/")
-      } finally {
-        setLoading(false)
+    const loadPDF = async () => {
+      if (!session?.user?.email) {
+        router.push('/login');
+        return;
       }
-    }
 
-    loadAnalysis()
-  }, [params.id, router])
+      try {
+        setLoading(true);
+        setPdfError(null);
+
+        // 从数据库获取PDF信息
+        const pdf = await getPDF(params.id as string, session.user.email);
+        
+        if (!pdf) {
+          router.push('/');
+          return;
+        }
+
+        setFileInfo(pdf);
+
+        // 加载分析结果
+        const existingAnalysis = localStorage.getItem(`analysis-${params.id}`);
+        let analysisData = null;
+        
+        if (existingAnalysis) {
+          try {
+            analysisData = JSON.parse(existingAnalysis);
+          } catch (e) {
+            console.error('解析已存在的分析数据失败:', e);
+            analysisData = null;
+          }
+        }
+        
+        if (analysisData) {
+          setAnalysis(analysisData);
+        } else {
+          try {
+            analysisData = await analyzeDocument(pdf.name);
+            if (analysisData) {
+              setAnalysis(analysisData);
+              localStorage.setItem(`analysis-${params.id}`, JSON.stringify(analysisData));
+            }
+          } catch (err) {
+            console.error('生成分析失败:', err);
+            analysisData = {
+              theme: '无法生成分析',
+              mainPoints: [],
+              conclusions: '暂时无法生成分析结果，但您仍可以提问文档相关问题。'
+            };
+            setAnalysis(analysisData);
+          }
+        }
+
+        // 设置欢迎消息
+        const greeting = `你好，PDF已加载成功！`;
+        const summary = `一句话总结：${analysisData?.theme || '本PDF内容丰富，欢迎提问。'}`;
+        setMessages([
+          { role: "assistant", content: greeting },
+          { role: "assistant", content: summary }
+        ]);
+
+      } catch (error) {
+        console.error("Error loading PDF:", error);
+        setPdfError('加载PDF失败，请重试');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPDF();
+  }, [params.id, router, session]);
 
   useEffect(() => {
     // 当fileInfo更新时，设置初始modelQuality
@@ -213,17 +237,22 @@ export default function AnalysisPage() {
     setAnswering(true);
 
     try {
-      // 调用聊天API，传入当前选择的模型配置
+      // 确保fileUrl是完整的URL路径
+      const fileUrl = fileInfo.url.startsWith('http') 
+        ? fileInfo.url 
+        : (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url);
+        
+      console.log('发送聊天请求，文件URL:', fileUrl);
+      
+      // 调用聊天API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          question: userQuestion,
-          embeddingsFile: fileInfo.embeddingsFile,
-          model: MODEL_CONFIGS[modelQuality].model,
-          apiKey: MODEL_CONFIGS[modelQuality].apiKey
+          messages: [{ role: "user", content: userQuestion }],
+          fileUrl: fileUrl
         }),
       });
 
@@ -234,7 +263,7 @@ export default function AnalysisPage() {
       const data = await response.json();
       
       // 添加AI回答到消息列表
-      setMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.content || "无法生成回答" }]);
     } catch (error) {
       console.error("聊天错误:", error);
       setMessages(prev => [...prev, { 
@@ -245,6 +274,31 @@ export default function AnalysisPage() {
       setAnswering(false);
     }
   };
+
+  // 新增：检测PDF文件是否可访问
+  useEffect(() => {
+    if (fileInfo?.url) {
+      // 确保URL是完整的
+      const fullUrl = fileInfo.url.startsWith('http') ? fileInfo.url : 
+                      (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url);
+      console.log('检查PDF文件可访问性:', fullUrl);
+      
+      fetch(fullUrl, { method: 'HEAD' })
+        .then(res => {
+          if (!res.ok) {
+            console.error('PDF文件不可访问:', res.status, res.statusText);
+            setPdfError('PDF文件不存在或已损坏');
+          } else {
+            console.log('PDF文件可访问');
+            setPdfError(null);
+          }
+        })
+        .catch((err) => {
+          console.error('PDF文件访问出错:', err);
+          setPdfError('PDF文件不存在或已损坏');
+        });
+    }
+  }, [fileInfo?.url]);
 
   if (loading) {
     return (
@@ -298,16 +352,21 @@ export default function AnalysisPage() {
           </div>
 
           {/* PDF查看区域 */}
-          <div className="flex-1 h-full border-r border-gray-200 overflow-hidden bg-gray-100" onClick={(e) => e.stopPropagation()}>
-            {fileInfo?.url && (
+          <div className="w-1/2 min-w-[350px] max-w-[900px] h-full border-r border-gray-200 overflow-hidden bg-gray-100" onClick={(e) => e.stopPropagation()}>
+            {pdfError ? (
+              <div className="flex items-center justify-center h-full text-red-500">{pdfError}</div>
+            ) : fileInfo?.url && (
               <div className="h-full">
-                <PDFViewer file={fileInfo.url} />
+                <PDFViewer 
+                  file={fileInfo.url.startsWith('http') ? fileInfo.url : 
+                        (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url)} 
+                />
               </div>
             )}
           </div>
 
           {/* 聊天区域 */}
-          <div className="w-96 h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="flex-1 min-w-[380px] max-w-[700px] h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* 文件信息头部 */}
             <div className="p-3 border-b border-gray-200 bg-white">
               <h2 className="text-base font-semibold truncate">{fileInfo?.name}</h2>
@@ -372,6 +431,20 @@ export default function AnalysisPage() {
                   </div>
                 </div>
               ))}
+              {/* 示例问题按钮 */}
+              {exampleQuestions.length > 0 && (
+                <div className="flex flex-col gap-2 mt-2">
+                  {exampleQuestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-sm text-purple-800 transition"
+                      onClick={() => setQuestion(q)}
+                    >
+                      你可以问我：{q}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
@@ -414,5 +487,5 @@ export default function AnalysisPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

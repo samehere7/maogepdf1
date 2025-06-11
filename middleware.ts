@@ -54,7 +54,20 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  console.log(`[Middleware] 路径: ${request.nextUrl.pathname}, 会话状态: ${session ? '已登录' : '未登录'}`)
+  
+  const protectedPaths = ['/analysis', '/account']
+  const path = request.nextUrl.pathname
+  
+  const isProtectedPath = protectedPaths.some(prefix => path.startsWith(prefix))
+  if (isProtectedPath && !session) {
+    console.log(`[Middleware] 重定向未授权访问: ${path} -> /auth/login`)
+    const redirectUrl = new URL('/auth/login', request.url)
+    redirectUrl.searchParams.set('redirectedFrom', path)
+    return NextResponse.redirect(redirectUrl)
+  }
 
   return response
 }
@@ -66,8 +79,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 } 

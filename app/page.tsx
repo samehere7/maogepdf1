@@ -28,6 +28,7 @@ export default function HomePage() {
   const { t, language } = useLanguage()
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
   const { profile } = useUser()
+  // 默认非Plus会员
   const isPlus = profile?.plus && profile?.is_active
 
   const handleFile = async (file: File, quality: ModelQuality) => {
@@ -58,13 +59,27 @@ export default function HomePage() {
       console.log("上传响应状态:", uploadResponse.status);
       
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
+        const errorText = await uploadResponse.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error("解析错误响应失败:", errorText);
+          throw new Error('上传失败，服务器返回无效响应');
+        }
         console.error("上传错误:", errorData);
         throw new Error(errorData.error || '上传失败');
       }
       
-      const uploadResult = await uploadResponse.json();
+      let uploadResult;
+      try {
+        const resultText = await uploadResponse.text();
+        uploadResult = JSON.parse(resultText);
       console.log("上传成功:", uploadResult);
+      } catch (e) {
+        console.error("解析成功响应失败:", e);
+        throw new Error('解析服务器响应失败');
+      }
       
       // 保存文件信息到本地存储
       const fileInfo = {

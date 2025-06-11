@@ -15,14 +15,18 @@ export async function callOpenRouterChat({
   messages,
   quality = 'fast',
   siteUrl = 'https://maoge.pdf',
-  siteTitle = 'Maoge PDF'
+  siteTitle = 'Maoge PDF',
+  apiKey: customApiKey
 }: {
   messages: any[],
   quality: ModelQuality,
   siteUrl?: string,
-  siteTitle?: string
+  siteTitle?: string,
+  apiKey?: string
 }) {
-  const { model, apiKey } = MODEL_CONFIGS[quality];
+  const { model, apiKey: envApiKey } = MODEL_CONFIGS[quality];
+  // 优先用传入的apiKey，没有则用环境变量
+  const apiKey = customApiKey || envApiKey;
   // debug: 打印apiKey，帮助排查环境变量问题
   console.log('[openrouter] 当前apiKey:', apiKey);
   if (!apiKey) throw new Error('缺少 openrouter key');

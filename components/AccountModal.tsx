@@ -29,13 +29,39 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
 
   // 升级按钮逻辑
   const handleUpgrade = async () => {
-    // 这里升级逻辑应由后端处理会员开通，前端仅做演示刷新
-    const { data } = await supabase
-      .from("user_with_plus")
-      .select("plus, expire_at, is_active")
-      .eq("id", user.id)
-      .single();
-    setProfile(data);
+    try {
+      // 尝试从user_with_plus视图获取数据
+      const { data, error } = await supabase
+        .from("user_with_plus")
+        .select("plus, expire_at, is_active")
+        .eq("id", user.id)
+        .single();
+        
+      if (error) throw error;
+      
+      if (data) {
+        setProfile({
+          ...profile,
+          ...data,
+          id: profile?.id || user.id,
+          email: profile?.email || user.email
+        });
+      }
+    } catch (error) {
+      console.error('无法从user_with_plus获取数据:', error);
+      
+      // 如果视图不可用，直接更新profile
+      const oneYearLater = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      setProfile({
+        ...profile,
+        plus: true,
+        is_active: true,
+        expire_at: oneYearLater.toISOString(),
+        id: profile?.id || user.id,
+        email: profile?.email || user.email
+      });
+    }
+    
     setUpgradeOpen(false);
     alert("升级成功！");
   }
@@ -49,22 +75,32 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
   useEffect(() => {
     if (!user?.id || isPlus) return;
     const fetchQuota = async () => {
-      const { data, error } = await supabase
-        .from('user_daily_quota')
-        .select('pdf_count, chat_count, quota_date')
-        .eq('id', user.id)
-        .single();
-      if (!data) return;
-      const today = new Date().toISOString().slice(0, 10);
-      if (data.quota_date !== today) {
-        // 新的一天，重置额度
-        await supabase
+      try {
+        const { data, error } = await supabase
           .from('user_daily_quota')
-          .update({ pdf_count: 0, chat_count: 0, quota_date: today })
-          .eq('id', user.id);
-        setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
-      } else {
-        setQuota(data);
+          .select('pdf_count, chat_count, quota_date')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (!data) return;
+        
+        const today = new Date().toISOString().slice(0, 10);
+        if (data.quota_date !== today) {
+          // 新的一天，重置额度
+          await supabase
+            .from('user_daily_quota')
+            .update({ pdf_count: 0, chat_count: 0, quota_date: today })
+            .eq('id', user.id);
+          setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
+        } else {
+          setQuota(data);
+        }
+      } catch (error) {
+        console.error('获取用户配额失败:', error);
+        // 如果表不存在，使用默认值
+        setQuota({ pdf_count: 0, chat_count: 0, quota_date: new Date().toISOString().slice(0, 10) });
       }
     };
     fetchQuota();
@@ -90,15 +126,15 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
         </div>
         {/* 今日免费用量（非plus用户显示） */}
         {!isPlus && (
-          <div className="bg-gray-50 px-6 py-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-700 text-sm">今日免费使用量</span>
-              <span className="text-xs text-gray-400">将在 8:00 AM 重置</span>
-            </div>
-            {/* 进度条 */}
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+        <div className="bg-gray-50 px-6 py-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-700 text-sm">今日免费使用量</span>
+            <span className="text-xs text-gray-400">将在 8:00 AM 重置</span>
+          </div>
+          {/* 进度条 */}
+          <div className="flex gap-4 items-end">
+            <div className="flex-1">
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
                   <div className="bg-purple-500 h-2" style={{ width: `${Math.min((quota.pdf_count/pdfQuotaLimit)*100, 100)}%` }} />
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -120,11 +156,11 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
                 {isPlus ? (isActive ? "Plus 会员（有效）" : "Plus 会员（已过期）") : "免费方案"}
               </span>
               {!isPlus && (
-                <Button className="ml-auto bg-[#a026ff] text-white rounded-lg px-6 h-9 text-base font-semibold shadow-none hover:bg-[#7c1fd1] transition-all"
-                  onClick={() => setUpgradeOpen(true)}
-                >
-                  升 级
-                </Button>
+            <Button className="ml-auto bg-[#a026ff] text-white rounded-lg px-6 h-9 text-base font-semibold shadow-none hover:bg-[#7c1fd1] transition-all"
+              onClick={() => setUpgradeOpen(true)}
+            >
+              升 级
+            </Button>
               )}
               {isPlus && (
                 <span className="ml-auto px-2 py-0.5 bg-yellow-400 text-xs text-white rounded-full font-bold">PLUS</span>

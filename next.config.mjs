@@ -21,12 +21,12 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['pdf-parse'],
   },
-  api: {
+  serverRuntimeConfig: {
     bodyParser: {
       sizeLimit: '10mb',
     },
     responseLimit: false,
-  },
+  }
 }
 
 export default nextConfig

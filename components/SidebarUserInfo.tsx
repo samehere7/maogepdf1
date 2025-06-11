@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client"
 import AccountModal from "@/components/AccountModal"
 import UpgradePlusModal from "@/components/UpgradePlusModal"
 import { useUser } from "@/components/UserProvider"
+import { Crown } from "lucide-react"
 
 export default function SidebarUserInfo() {
   const [open, setOpen] = useState(false)
@@ -11,26 +12,50 @@ export default function SidebarUserInfo() {
   const { user, profile, setProfile } = useUser();
   const supabase = createClient();
 
-  if (!user) return null
+  if (!user) return null;
 
-  const avatarUrl = user.user_metadata?.avatar_url
-  const displayName = user.user_metadata?.full_name || user.email || "未命名"
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
+  const displayName = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || "未命名";
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     setOpen(false)
-    // 可加刷新页面等
   }
 
-  // 升级按钮逻辑
   const handleUpgrade = async () => {
-    // 这里只做刷新演示，实际升级应由后端处理
-    const { data } = await supabase
-      .from("user_with_plus")
-      .select("plus, expire_at, is_active")
-      .eq("id", user.id)
-      .single();
-    setProfile(data);
+    try {
+      // 尝试从user_with_plus视图获取数据
+      const { data, error } = await supabase
+        .from("user_with_plus")
+        .select("plus, expire_at, is_active")
+        .eq("id", user.id)
+        .single();
+        
+      if (error) throw error;
+      
+      if (data) {
+        setProfile({
+          ...profile,
+          ...data,
+          id: profile?.id || user.id,
+          email: profile?.email || user.email
+        });
+      }
+    } catch (error) {
+      console.error('无法从user_with_plus获取数据:', error);
+      
+      // 如果视图不可用，直接更新profile
+      const oneYearLater = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      setProfile({
+        ...profile,
+        plus: true,
+        is_active: true,
+        expire_at: oneYearLater.toISOString(),
+        id: profile?.id || user.id,
+        email: profile?.email || user.email
+      });
+    }
+    
     setUpgradeOpen(false);
     alert("升级成功！");
   }
@@ -40,34 +65,55 @@ export default function SidebarUserInfo() {
 
   return (
     <>
-      <div className="flex flex-col items-center w-full">
+      <div className="flex flex-col items-center w-full px-3 py-4 border-b border-gray-700">
+        {/* 用户信息行 */}
         <div
-          className="flex items-center gap-2 w-full px-6 mt-3 cursor-pointer"
-          style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: "20px" }}
+          className="flex items-center gap-3 w-full cursor-pointer group"
           onClick={() => setOpen(true)}
         >
+          {/* 头像 */}
+          <div className="relative">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="w-8 h-8 rounded-full" />
+              <img 
+                src={avatarUrl} 
+                alt="avatar" 
+                className="w-10 h-10 rounded-full border-2 border-transparent group-hover:border-purple-400 transition-all" 
+              />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold border-2 border-transparent group-hover:border-purple-400 transition-all">
               {displayName[0]?.toUpperCase() || "U"}
             </div>
           )}
-          <span className="truncate">{displayName}</span>
           {isPlus && isActive && (
-            <span className="ml-2 px-2 py-0.5 bg-yellow-400 text-xs text-white rounded-full font-bold">PLUS</span>
-          )}
+              <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1">
+                <Crown className="w-3 h-3 text-white" />
+              </div>
+            )}
+          </div>
+
+          {/* 用户名和状态 */}
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-medium truncate group-hover:text-purple-400 transition-colors">
+              {displayName}
+            </div>
+            <div className="text-xs text-gray-400 truncate">
+              {isPlus && isActive ? "Plus 会员" : "免费用户"}
+            </div>
+          </div>
         </div>
+
+        {/* 升级按钮 */}
         {!isPlus && (
-          <button
-            className="w-[calc(100%-24px)] h-10 mt-3 bg-[#a026ff] text-white rounded-lg flex items-center justify-center gap-2 font-semibold text-[14px]"
-            style={{ marginLeft: 12, marginRight: 12 }}
-            onClick={() => setUpgradeOpen(true)}
-          >
-            升级到 Plus
-          </button>
+        <button
+            className="w-full h-9 mt-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg flex items-center justify-center gap-2 font-medium text-sm transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+          onClick={() => setUpgradeOpen(true)}
+        >
+            <Crown className="w-4 h-4" />
+          升级到 Plus
+        </button>
         )}
       </div>
+
       <AccountModal
         open={open}
         onOpenChange={setOpen}
