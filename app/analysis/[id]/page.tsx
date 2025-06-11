@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { MaogeInterface } from "@/components/chat-interface"
-import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles } from "lucide-react"
+import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
@@ -15,6 +15,9 @@ import dynamic from 'next/dynamic'
 import * as pdfjsLib from 'pdfjs-dist'
 import { getPDF } from '@/lib/pdf-service'
 import { useSession } from 'next-auth/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import FlashcardList from "@/components/flashcard-list"
+import FlashcardStudy from "@/components/flashcard-study"
 
 // 动态导入 PDFViewer 组件，确保只在客户端渲染
 const PDFViewer = dynamic(
@@ -79,6 +82,9 @@ export default function AnalysisPage() {
 
   // 新增：存储示例问题
   const [exampleQuestions, setExampleQuestions] = useState<string[]>([]);
+  
+  // 闪卡相关状态
+  const [activeTab, setActiveTab] = useState<'chat' | 'flashcards' | 'study'>('chat');
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -365,7 +371,7 @@ export default function AnalysisPage() {
             )}
           </div>
 
-          {/* 聊天区域 */}
+          {/* 右侧功能区 */}
           <div className="flex-1 min-w-[380px] max-w-[700px] h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* 文件信息头部 */}
             <div className="p-3 border-b border-gray-200 bg-white">
@@ -385,31 +391,50 @@ export default function AnalysisPage() {
               </div>
             </div>
             
-            {/* 模型质量选择按钮 */}
-            <div className="p-3 flex justify-center space-x-4 border-b border-gray-200 bg-gray-50">
-              <Button 
-                variant={modelQuality === 'fast' ? 'default' : 'outline'}
-                className={`w-24 ${modelQuality === 'fast' ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  switchModelQuality('fast');
-                }}
-              >
-                <Zap className="mr-2 h-4 w-4" />
-                快速
-              </Button>
-              <Button 
-                variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
-                className={`w-24 ${modelQuality === 'highQuality' ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  switchModelQuality('highQuality');
-                }}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                高质量
-              </Button>
-            </div>
+            {/* 选项卡 */}
+            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="flex-1 flex flex-col">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-50 border-b">
+                <TabsTrigger value="chat" className="flex items-center gap-2">
+                  <Send className="h-4 w-4" />
+                  聊天
+                </TabsTrigger>
+                <TabsTrigger value="flashcards" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  闪卡
+                </TabsTrigger>
+                <TabsTrigger value="study" className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  学习
+                </TabsTrigger>
+              </TabsList>
+
+              {/* 聊天选项卡 */}
+              <TabsContent value="chat" className="flex-1 flex flex-col m-0">
+                {/* 模型质量选择按钮 */}
+                <div className="p-3 flex justify-center space-x-4 border-b border-gray-200 bg-gray-50">
+                  <Button 
+                    variant={modelQuality === 'fast' ? 'default' : 'outline'}
+                    className={`w-24 ${modelQuality === 'fast' ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      switchModelQuality('fast');
+                    }}
+                  >
+                    <Zap className="mr-2 h-4 w-4" />
+                    快速
+                  </Button>
+                  <Button 
+                    variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
+                    className={`w-24 ${modelQuality === 'highQuality' ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      switchModelQuality('highQuality');
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    高质量
+                  </Button>
+                </div>
 
             {/* 消息区域 */}
             <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
@@ -483,6 +508,22 @@ export default function AnalysisPage() {
                 </Button>
               </div>
             </div>
+              </TabsContent>
+
+              {/* 闪卡选项卡 */}
+              <TabsContent value="flashcards" className="flex-1 m-0">
+                <FlashcardList pdfId={params.id as string} className="h-full overflow-y-auto" />
+              </TabsContent>
+
+              {/* 学习选项卡 */}
+              <TabsContent value="study" className="flex-1 m-0">
+                <FlashcardStudy 
+                  pdfId={params.id as string} 
+                  onComplete={() => setActiveTab('flashcards')}
+                  className="h-full overflow-y-auto" 
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

@@ -11,33 +11,81 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String?
-  plus      Boolean   @default(false)
-  is_active Boolean   @default(true)
-  expire_at DateTime?
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  pdfs      PDF[]
+  id         String      @id @default(cuid())
+  email      String      @unique
+  name       String?
+  image      String?
+  plus       Boolean     @default(false)
+  is_active  Boolean     @default(true)
+  expire_at  DateTime?
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime    @default(now()) @updatedAt @db.Timestamptz(6)
+  pdfs       PDF[]
+  flashcards Flashcard[]
 
   @@map("User")
   @@schema("public")
 }
 
 model PDF {
-  id         String   @id @default(cuid())
+  id         String      @id @default(cuid())
   name       String
   url        String
   size       Int
-  uploadDate DateTime @default(now()) @db.Timestamptz(6)
-  lastViewed DateTime @default(now()) @db.Timestamptz(6)
+  uploadDate DateTime    @default(now()) @db.Timestamptz(6)
+  lastViewed DateTime    @default(now()) @db.Timestamptz(6)
   embeddings String?
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  flashcards Flashcard[]
 
   @@map("PDF")
+  @@schema("public")
+}
+
+model Flashcard {
+  id          String           @id @default(cuid())
+  question    String
+  answer      String
+  difficulty  FlashcardLevel   @default(MEDIUM)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(6)
+  pdfId       String
+  pdf         PDF              @relation(fields: [pdfId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reviews     FlashcardReview[]
+
+  @@map("Flashcard")
+  @@schema("public")
+}
+
+model FlashcardReview {
+  id          String         @id @default(cuid())
+  rating      ReviewRating
+  reviewedAt  DateTime       @default(now()) @db.Timestamptz(6)
+  nextReview  DateTime       @db.Timestamptz(6)
+  flashcardId String
+  flashcard   Flashcard      @relation(fields: [flashcardId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("FlashcardReview")
+  @@schema("public")
+}
+
+enum FlashcardLevel {
+  EASY
+  MEDIUM
+  HARD
+
+  @@schema("public")
+}
+
+enum ReviewRating {
+  EASY
+  MEDIUM
+  HARD
+  AGAIN
+
   @@schema("public")
 }
 
