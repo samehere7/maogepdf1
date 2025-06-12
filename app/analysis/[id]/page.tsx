@@ -279,10 +279,13 @@ export default function AnalysisPage() {
       });
 
       if (!response.ok) {
-        throw new Error("聊天请求失败");
+        const errorText = await response.text();
+        console.error("聊天请求失败:", response.status, errorText);
+        throw new Error(`聊天请求失败: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log("聊天API响应:", data);
       const assistantReply = data.content || "无法生成回答";
       
       // 添加AI回答到消息列表
@@ -370,13 +373,13 @@ export default function AnalysisPage() {
     
     switch (action) {
       case 'explain':
-        prompt = `请解释以下选中的文本内容："${text}"`;
+        prompt = `解释：${text}`;
         break;
       case 'summarize':
-        prompt = `请总结以下选中的文本内容："${text}"`;
+        prompt = `总结：${text}`;
         break;
       case 'rewrite':
-        prompt = `请改写以下选中的文本，使其更易理解："${text}"`;
+        prompt = `改写：${text}`;
         break;
     }
     

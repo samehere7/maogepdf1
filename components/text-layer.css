@@ -119,20 +119,50 @@
   cursor: text;
 }
 
-/* 选中状态下的文本高亮 - 避免与原生选择重影 */
+/* 选中状态下的文本高亮 - 完全避免与原生选择重影 */
 .textLayer span.selected {
-  /* 移除背景色，避免与原生选择重影 */
-  /* background-color: rgba(59, 130, 246, 0.2) !important; */
+  /* 完全移除自定义高亮，只使用原生选择 */
+  background: none !important;
+  background-color: transparent !important;
   color: inherit !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* 确保原生选择高亮正常显示 */
-.textLayer ::selection {
-  background: rgba(0, 123, 255, 0.3) !important;
+/* 强制设置选择样式，彻底避免重影 */
+.textLayer ::selection,
+.textLayer span::selection,
+.textLayer span *::selection {
+  background: rgba(0, 123, 255, 0.12) !important;
   color: inherit !important;
+  text-shadow: none !important;
+  text-decoration: none !important;
 }
 
-.textLayer ::-moz-selection {
-  background: rgba(0, 123, 255, 0.3) !important;
+.textLayer ::-moz-selection,
+.textLayer span::-moz-selection,
+.textLayer span *::-moz-selection {
+  background: rgba(0, 123, 255, 0.12) !important;
   color: inherit !important;
+  text-shadow: none !important;
+  text-decoration: none !important;
+}
+
+/* 强制清除所有可能的选择相关样式 */
+.textLayer span {
+  background: transparent !important;
+  background-color: transparent !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  text-decoration: none !important;
+}
+
+/* 禁用悬停效果，避免与选择冲突 */
+.textLayer span:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  text-shadow: none !important;
 }

@@ -253,7 +253,7 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     try {
       const textContent = await page.getTextContent();
       
-      // 创建文本层容器 - 完全按照PDF.js官方标准
+      // 创建文本层容器 - 完全按照PDF.js官方标准，添加防重影样式
       const textLayerDiv = document.createElement('div');
       textLayerDiv.className = 'textLayer';
       textLayerDiv.style.position = 'absolute';
@@ -263,6 +263,32 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       textLayerDiv.style.lineHeight = '1';
       textLayerDiv.style.zIndex = '0';
       textLayerDiv.style.transformOrigin = '0 0';
+      
+      // 强制设置选择样式，防止重影 - 使用唯一ID确保样式生效
+      const uniqueId = `text-layer-${pageNum}-${Date.now()}`;
+      textLayerDiv.id = uniqueId;
+      
+      const selectionStyle = document.createElement('style');
+      selectionStyle.textContent = `
+        #${uniqueId} ::selection {
+          background: rgba(0, 123, 255, 0.12) !important;
+          color: inherit !important;
+          text-shadow: none !important;
+        }
+        #${uniqueId} ::-moz-selection {
+          background: rgba(0, 123, 255, 0.12) !important;
+          color: inherit !important;
+          text-shadow: none !important;
+        }
+        #${uniqueId} span {
+          background: transparent !important;
+          background-color: transparent !important;
+          outline: none !important;
+          text-shadow: none !important;
+          box-shadow: none !important;
+        }
+      `;
+      document.head.appendChild(selectionStyle);
       
       const textItems: TextItem[] = [];
       
@@ -312,6 +338,13 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
         span.style.pointerEvents = 'auto';
         span.style.transformOrigin = '0% 0%';
         span.style.touchAction = 'manipulation';
+        span.style.backgroundColor = 'transparent';
+        span.style.outline = 'none';
+        span.style.border = 'none';
+        span.style.boxShadow = 'none';
+        span.style.textShadow = 'none';
+        span.style.filter = 'none';
+        span.style.backdropFilter = 'none';
         
         // 处理旋转
         if (angle !== 0) {
@@ -422,33 +455,40 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
   const calculateOptimalPosition = useCallback((selectionRect: DOMRect, viewerRect: DOMRect) => {
     const PICKER_WIDTH = 320; // 颜色选择器的宽度
     const PICKER_HEIGHT = 200; // 颜色选择器的高度
-    const MARGIN = 10; // 边距
+    const MARGIN = 15; // 增加边距，让弹窗不会太贴边
+    const OFFSET_FROM_SELECTION = 10; // 距离选中内容的偏移量
     
-    // 水平位置：居中对齐选中区域，但确保不超出边界
-    let x = selectionRect.left - viewerRect.left + (selectionRect.width - PICKER_WIDTH) / 2;
+    console.log('计算位置参数:', { selectionRect, viewerRect, viewerRefExists: !!viewerRef.current });
     
-    // 检查左右边界
+    // 使用绝对定位相对于视口，不需要考虑滚动
+    // 水平位置：居中对齐选中区域
+    let x = selectionRect.left + (selectionRect.width - PICKER_WIDTH) / 2;
+    
+    // 检查左右边界，确保不超出视口
     if (x < MARGIN) {
       x = MARGIN;
-    } else if (x + PICKER_WIDTH > viewerRect.width - MARGIN) {
-      x = viewerRect.width - PICKER_WIDTH - MARGIN;
+    } else if (x + PICKER_WIDTH > window.innerWidth - MARGIN) {
+      x = window.innerWidth - PICKER_WIDTH - MARGIN;
     }
     
     // 垂直位置：优先显示在选中区域上方
-    let y = selectionRect.top - viewerRect.top + viewerRef.current!.scrollTop - PICKER_HEIGHT - MARGIN;
+    let y = selectionRect.top - PICKER_HEIGHT - OFFSET_FROM_SELECTION;
     
     // 如果上方空间不够，放在下方
     if (y < MARGIN) {
-      y = selectionRect.bottom - viewerRect.top + viewerRef.current!.scrollTop + MARGIN;
+      y = selectionRect.bottom + OFFSET_FROM_SELECTION;
     }
     
     // 确保不超出下边界
-    const maxY = viewerRect.height + viewerRef.current!.scrollTop - PICKER_HEIGHT - MARGIN;
-    if (y > maxY) {
-      y = maxY;
+    if (y + PICKER_HEIGHT > window.innerHeight - MARGIN) {
+      // 如果下方也不够，放在选中区域的中间偏上
+      y = selectionRect.top - PICKER_HEIGHT / 2;
+      if (y < MARGIN) y = MARGIN;
     }
     
-    return { x, y };
+    const position = { x, y };
+    console.log('计算得到的位置:', position, '视口尺寸:', { width: window.innerWidth, height: window.innerHeight });
+    return position;
   }, []);
 
   // 添加PDF.js官方的选择事件处理 - 简化版本
@@ -538,9 +578,9 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
             const selectedText = selection.toString().trim();
             console.log('拖拽选择的内容:', selectedText);
             
-            // 手动触发选择处理
-            const event = new Event('selectionchange');
-            document.dispatchEvent(event);
+            // 不要手动触发 selectionchange 事件，这可能导致冲突
+            // 让自然的选择处理机制工作
+            console.log('保持选择状态，等待自然处理');
           } else {
             console.log('拖拽结束后没有选择内容');
           }
@@ -566,10 +606,20 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     let selectionTimeout: NodeJS.Timeout | null = null;
     let lastSelectionText = '';
     let processingSelection = false;
+    let isMouseOperationActive = false;
     
     const processSelection = () => {
       if (processingSelection) return;
       processingSelection = true;
+      
+      // 如果鼠标操作还在进行中，延迟处理
+      if (isMouseOperationActive) {
+        setTimeout(() => {
+          processingSelection = false;
+          processSelection();
+        }, 100);
+        return;
+      }
       
       setTimeout(() => {
         const selection = window.getSelection();
@@ -644,9 +694,21 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
               rectLeft: rect.left
             });
             
+            // 使用优化的位置计算，显示在选中内容上方
             const position = calculateOptimalPosition(rect, viewerRect);
+            console.log('✓ 计算的位置:', position);
+            
             setColorPickerPosition(position);
             setShowColorPicker(true);
+            
+            // 强制重新渲染以确保状态更新
+            setTimeout(() => {
+              console.log('强制检查选择器状态:', { 
+                showColorPicker: true, 
+                hasPosition: !!testPosition,
+                actualState: { showColorPicker, colorPickerPosition }
+              });
+            }, 100);
           } else {
             console.log('选择区域无效，rect:', { width: rect.width, height: rect.height });
           }
@@ -681,9 +743,27 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       setTimeout(processSelection, 50);
     };
     
+    // 跟踪鼠标操作状态
+    const handleGlobalMouseDown = () => {
+      isMouseOperationActive = true;
+      console.log('全局鼠标按下，设置操作状态为活跃');
+    };
+    
+    const handleGlobalMouseUp = (e: MouseEvent) => {
+      console.log('全局mouseup事件触发');
+      // 延迟清除鼠标操作状态，给选择处理更多时间
+      setTimeout(() => {
+        isMouseOperationActive = false;
+        console.log('清除鼠标操作状态');
+        // 在鼠标操作结束后触发选择处理
+        setTimeout(processSelection, 50);
+      }, 200);
+    };
+    
     // 使用多种事件确保选择被正确检测
     document.addEventListener('selectionchange', handleSelectionChange);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousedown', handleGlobalMouseDown);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
     document.addEventListener('touchend', handleTouchEnd);
     
     // 初始检查
@@ -691,7 +771,8 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousedown', handleGlobalMouseDown);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
       document.removeEventListener('touchend', handleTouchEnd);
       if (selectionTimeout) {
         clearTimeout(selectionTimeout);
@@ -1148,7 +1229,10 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       </div>
       
       {/* 颜色选择器 */}
-      {showColorPicker && colorPickerPosition && (
+      {(() => {
+        console.log('渲染检查 - showColorPicker:', showColorPicker, 'colorPickerPosition:', colorPickerPosition);
+        return showColorPicker && colorPickerPosition;
+      })() && (
         <div 
           className="fixed z-[9999] bg-white rounded-xl shadow-2xl border border-gray-300 color-picker"
           style={{ 

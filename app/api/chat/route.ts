@@ -138,6 +138,8 @@ ${pdfContent}
     ];
 
     console.log(`[聊天API] 调用${modelConfig.model}模型`);
+    console.log(`[聊天API] API密钥前缀: ${modelConfig.apiKey.substring(0, 10)}...`);
+    console.log(`[聊天API] 消息数量: ${chatMessages.length}`);
 
     // 调用OpenRouter API
     const completion = await client.chat.completions.create({
@@ -150,6 +152,7 @@ ${pdfContent}
     const response = completion.choices[0].message.content || "抱歉，我无法生成回答。";
 
     console.log(`[聊天API] 成功生成回答，长度: ${response.length}`);
+    console.log(`[聊天API] 回答预览: ${response.substring(0, 100)}...`);
 
     return NextResponse.json({
       content: response,
