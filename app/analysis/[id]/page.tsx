@@ -84,7 +84,7 @@ export default function AnalysisPage() {
   const [exampleQuestions, setExampleQuestions] = useState<string[]>([]);
   
   // 闪卡相关状态
-  const [activeTab, setActiveTab] = useState<'chat' | 'flashcards' | 'study'>('chat');
+  const [activeTab, setActiveTab] = useState<'flashcards' | 'study'>('flashcards');
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -393,36 +393,30 @@ export default function AnalysisPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* 主内容区 */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-slate-200 px-6 sm:px-10 py-4 bg-white shadow-sm">
-          <div className="flex items-center gap-3 text-slate-800">
-            <div className="size-8 text-[#8b5cf6]">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  clipRule="evenodd"
-                  d="M39.475 21.6262C40.358 21.4363 40.6863 21.5589 40.7581 21.5934C40.7876 21.655 40.8547 21.857 40.8082 22.3336C40.7408 23.0255 40.4502 24.0046 39.8572 25.2301C38.6799 27.6631 36.5085 30.6631 33.5858 33.5858C30.6631 36.5085 27.6632 38.6799 25.2301 39.8572C24.0046 40.4502 23.0255 40.7407 22.3336 40.8082C21.8571 40.8547 21.6551 40.7875 21.5934 40.7581C21.5589 40.6863 21.4363 40.358 21.6262 39.475C21.8562 38.4054 22.4689 36.9657 23.5038 35.2817C24.7575 33.2417 26.5497 30.9744 28.7621 28.762C30.9744 26.5497 33.2417 24.7574 35.2817 23.5037C36.9657 22.4689 38.4054 21.8562 39.475 21.6262ZM4.41189 29.2403L18.7597 43.5881C19.8813 44.7097 21.4027 44.9179 22.7217 44.7893C24.0585 44.659 25.5148 44.1631 26.9723 43.4579C29.9052 42.0387 33.2618 39.5667 36.4142 36.4142C39.5667 33.2618 42.0387 29.9052 43.4579 26.9723C44.1631 25.5148 44.659 24.0585 44.7893 22.7217C44.9179 21.4027 44.7097 19.8813 43.5881 18.7597L29.2403 4.41187C27.8527 3.02428 25.8765 3.02573 24.2861 3.36776C22.6081 3.72863 20.7334 4.58419 18.8396 5.74801C16.4978 7.18716 13.9881 9.18353 11.5858 11.5858C9.18354 13.988 7.18717 16.4978 5.74802 18.8396C4.58421 20.7334 3.72865 22.6081 3.36778 24.2861C3.02574 25.8765 3.02429 27.8527 4.41189 29.2403Z"
-                  fill="currentColor"
-                  fillRule="evenodd"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="text-slate-800 text-xl font-bold leading-tight tracking-[-0.015em]">Maoge PDF</h2>
-          </div>
-          <div className="flex flex-1 justify-end gap-6 sm:gap-8 items-center">
-            <LanguageSelector />
-          </div>
-        </header>
+      <div className="flex flex-1 overflow-hidden">
+        {/* 左侧边栏 */}
+        <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-white">
+          <Sidebar />
+        </div>
 
-        <div className="flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
-          {/* 左侧边栏 */}
-          <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-white">
-            <Sidebar />
+        {/* 中间内容区：PDF + 闪卡 */}
+        <div className="flex-1 flex flex-col min-w-[400px] max-w-[700px] border-r border-gray-200">
+          {/* PDF文件信息 */}
+          <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
+            <h2 className="text-base font-semibold truncate">{fileInfo?.name}</h2>
+            <div className="flex items-center text-xs text-gray-500">
+              <span className="mr-2">
+                {fileInfo?.uploadDate && new Date(fileInfo.uploadDate).toLocaleString()}
+              </span>
+              <span className="mr-2">·</span>
+              <span className="mr-2">
+                {fileInfo && (fileInfo.size / (1024 * 1024)).toFixed(2)} MB
+              </span>
+            </div>
           </div>
 
           {/* PDF查看区域 */}
-          <div className="w-1/2 min-w-[350px] max-w-[900px] h-full border-r border-gray-200 overflow-hidden bg-gray-100" onClick={(e) => e.stopPropagation()}>
+          <div className="flex-1 overflow-hidden bg-gray-100" onClick={(e) => e.stopPropagation()}>
             {pdfError ? (
               <div className="flex items-center justify-center h-full text-red-500">{pdfError}</div>
             ) : fileInfo?.url && (
@@ -435,33 +429,10 @@ export default function AnalysisPage() {
             )}
           </div>
 
-          {/* 右侧功能区 */}
-          <div className="flex-1 min-w-[380px] max-w-[700px] h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
-            {/* 文件信息头部 */}
-            <div className="p-3 border-b border-gray-200 bg-white">
-              <h2 className="text-base font-semibold truncate">{fileInfo?.name}</h2>
-              <div className="flex items-center text-xs text-gray-500">
-                <span className="mr-2">
-                  {fileInfo?.uploadDate && new Date(fileInfo.uploadDate).toLocaleString()}
-                </span>
-                <span className="mr-2">·</span>
-                <span className="mr-2">
-                  {fileInfo && (fileInfo.size / (1024 * 1024)).toFixed(2)} MB
-                </span>
-                <span className="mr-2">·</span>
-                <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
-                  {modelQuality === 'fast' ? '快速模式' : '高质量模式'}
-                </span>
-              </div>
-            </div>
-            
-            {/* 选项卡 */}
-            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="flex-1 flex flex-col">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-50 border-b">
-                <TabsTrigger value="chat" className="flex items-center gap-2">
-                  <Send className="h-4 w-4" />
-                  聊天
-                </TabsTrigger>
+          {/* 闪卡功能区 */}
+          <div className="h-64 border-t border-gray-200 bg-white flex-shrink-0">
+            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-50 border-b flex-shrink-0">
                 <TabsTrigger value="flashcards" className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
                   闪卡
@@ -472,115 +443,11 @@ export default function AnalysisPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* 聊天选项卡 */}
-              <TabsContent value="chat" className="flex-1 flex flex-col m-0">
-                {/* 模型质量选择按钮 */}
-                <div className="p-3 flex justify-center space-x-4 border-b border-gray-200 bg-gray-50">
-                  <Button 
-                    variant={modelQuality === 'fast' ? 'default' : 'outline'}
-                    className={`w-24 ${modelQuality === 'fast' ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      switchModelQuality('fast');
-                    }}
-                  >
-                    <Zap className="mr-2 h-4 w-4" />
-                    快速
-                  </Button>
-                  <Button 
-                    variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
-                    className={`w-24 ${modelQuality === 'highQuality' ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      switchModelQuality('highQuality');
-                    }}
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    高质量
-                  </Button>
-                </div>
-
-            {/* 消息区域 */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-4 ${
-                    msg.role === "user" ? "flex justify-end" : "flex justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-3/4 p-3 rounded-lg ${
-                      msg.role === "user"
-                        ? "bg-[#8b5cf6] text-white"
-                        : "bg-white border border-gray-200"
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{msg.content}</div>
-                  </div>
-                </div>
-              ))}
-              {/* 示例问题按钮 */}
-              {exampleQuestions.length > 0 && (
-                <div className="flex flex-col gap-2 mt-2">
-                  {exampleQuestions.map((q, idx) => (
-                    <button
-                      key={idx}
-                      className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-sm text-purple-800 transition"
-                      onClick={() => setQuestion(q)}
-                    >
-                      你可以问我：{q}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* 输入区域 */}
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={question}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    setQuestion(e.target.value);
-                  }}
-                  onKeyPress={(e) => {
-                    e.stopPropagation();
-                    if (e.key === "Enter") handleSendQuestion();
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder="向文档提问..."
-                  className="flex-1 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
-                  disabled={answering}
-                />
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSendQuestion();
-                  }}
-                  disabled={!question.trim() || answering}
-                  className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-l-none"
-                >
-                  {answering ? (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
-                </Button>
-              </div>
-            </div>
-              </TabsContent>
-
-              {/* 闪卡选项卡 */}
-              <TabsContent value="flashcards" className="flex-1 m-0">
+              <TabsContent value="flashcards" className="flex-1 m-0 overflow-hidden">
                 <FlashcardList pdfId={params.id as string} className="h-full overflow-y-auto" />
               </TabsContent>
 
-              {/* 学习选项卡 */}
-              <TabsContent value="study" className="flex-1 m-0">
+              <TabsContent value="study" className="flex-1 m-0 overflow-hidden">
                 <FlashcardStudy 
                   pdfId={params.id as string} 
                   onComplete={() => setActiveTab('flashcards')}
@@ -588,6 +455,121 @@ export default function AnalysisPage() {
                 />
               </TabsContent>
             </Tabs>
+          </div>
+        </div>
+
+        {/* 右侧聊天区 */}
+        <div className="w-96 flex-shrink-0 h-full flex flex-col bg-white" onClick={(e) => e.stopPropagation()}>
+          {/* 聊天标题 */}
+          <div className="p-4 border-b border-gray-200 bg-white">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Send className="h-5 w-5 text-[#8b5cf6]" />
+              对话
+            </h3>
+            <div className="text-sm text-gray-500 mt-1">
+              当前模式: {modelQuality === 'fast' ? '快速模式' : '高质量模式'}
+            </div>
+          </div>
+
+          {/* 消息区域 */}
+          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`mb-4 ${
+                  msg.role === "user" ? "flex justify-end" : "flex justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[85%] p-3 rounded-lg ${
+                    msg.role === "user"
+                      ? "bg-[#8b5cf6] text-white"
+                      : "bg-white border border-gray-200 shadow-sm"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                </div>
+              </div>
+            ))}
+            {/* 示例问题按钮 */}
+            {exampleQuestions.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2">
+                {exampleQuestions.map((q, idx) => (
+                  <button
+                    key={idx}
+                    className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-sm text-purple-800 transition"
+                    onClick={() => setQuestion(q)}
+                  >
+                    你可以问我：{q}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* 模型选择按钮 */}
+          <div className="p-3 flex justify-center space-x-3 border-t border-gray-200 bg-gray-50">
+            <Button 
+              variant={modelQuality === 'fast' ? 'default' : 'outline'}
+              size="sm"
+              className={`flex-1 ${modelQuality === 'fast' ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                switchModelQuality('fast');
+              }}
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              快速
+            </Button>
+            <Button 
+              variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
+              size="sm"
+              className={`flex-1 ${modelQuality === 'highQuality' ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                switchModelQuality('highQuality');
+              }}
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              高质量
+            </Button>
+          </div>
+
+          {/* 输入区域 */}
+          <div className="p-4 border-t border-gray-200 bg-white">
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={question}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setQuestion(e.target.value);
+                }}
+                onKeyPress={(e) => {
+                  e.stopPropagation();
+                  if (e.key === "Enter") handleSendQuestion();
+                }}
+                onClick={(e) => e.stopPropagation()}
+                placeholder="向文档提问..."
+                className="flex-1 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                disabled={answering}
+              />
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSendQuestion();
+                }}
+                disabled={!question.trim() || answering}
+                className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-l-none px-4"
+              >
+                {answering ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

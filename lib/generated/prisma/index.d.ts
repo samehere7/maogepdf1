@@ -118,21 +118,6 @@ export type sso_providers = $Result.DefaultSelection<Prisma.$sso_providersPayloa
  */
 export type users = $Result.DefaultSelection<Prisma.$usersPayload>
 /**
- * Model ChatMessages
- * 
- */
-export type ChatMessages = $Result.DefaultSelection<Prisma.$ChatMessagesPayload>
-/**
- * Model PDF
- * 
- */
-export type PDF = $Result.DefaultSelection<Prisma.$PDFPayload>
-/**
- * Model User
- * 
- */
-export type User = $Result.DefaultSelection<Prisma.$UserPayload>
-/**
  * Model chat_messages
  * 
  */
@@ -523,36 +508,6 @@ export class PrismaClient<
     * ```
     */
   get users(): Prisma.usersDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.chatMessages`: Exposes CRUD operations for the **ChatMessages** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ChatMessages
-    * const chatMessages = await prisma.chatMessages.findMany()
-    * ```
-    */
-  get chatMessages(): Prisma.ChatMessagesDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.pDF`: Exposes CRUD operations for the **PDF** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more PDFS
-    * const pDFS = await prisma.pDF.findMany()
-    * ```
-    */
-  get pDF(): Prisma.PDFDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.user`: Exposes CRUD operations for the **User** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Users
-    * const users = await prisma.user.findMany()
-    * ```
-    */
-  get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.chat_messages`: Exposes CRUD operations for the **chat_messages** model.
@@ -1079,9 +1034,6 @@ export namespace Prisma {
     sso_domains: 'sso_domains',
     sso_providers: 'sso_providers',
     users: 'users',
-    ChatMessages: 'ChatMessages',
-    PDF: 'PDF',
-    User: 'User',
     chat_messages: 'chat_messages',
     document_chunks: 'document_chunks',
     pdfs: 'pdfs',
@@ -1107,7 +1059,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chatMessages" | "pDF" | "user" | "chat_messages" | "document_chunks" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles" | "vector_embeddings"
+      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chat_messages" | "document_chunks" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles" | "vector_embeddings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2295,228 +2247,6 @@ export namespace Prisma {
           }
         }
       }
-      ChatMessages: {
-        payload: Prisma.$ChatMessagesPayload<ExtArgs>
-        fields: Prisma.ChatMessagesFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ChatMessagesFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ChatMessagesFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          findFirst: {
-            args: Prisma.ChatMessagesFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ChatMessagesFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          findMany: {
-            args: Prisma.ChatMessagesFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>[]
-          }
-          create: {
-            args: Prisma.ChatMessagesCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          createMany: {
-            args: Prisma.ChatMessagesCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ChatMessagesCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>[]
-          }
-          delete: {
-            args: Prisma.ChatMessagesDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          update: {
-            args: Prisma.ChatMessagesUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          deleteMany: {
-            args: Prisma.ChatMessagesDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ChatMessagesUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ChatMessagesUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>[]
-          }
-          upsert: {
-            args: Prisma.ChatMessagesUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ChatMessagesPayload>
-          }
-          aggregate: {
-            args: Prisma.ChatMessagesAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateChatMessages>
-          }
-          groupBy: {
-            args: Prisma.ChatMessagesGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ChatMessagesGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ChatMessagesCountArgs<ExtArgs>
-            result: $Utils.Optional<ChatMessagesCountAggregateOutputType> | number
-          }
-        }
-      }
-      PDF: {
-        payload: Prisma.$PDFPayload<ExtArgs>
-        fields: Prisma.PDFFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.PDFFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.PDFFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          findFirst: {
-            args: Prisma.PDFFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.PDFFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          findMany: {
-            args: Prisma.PDFFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>[]
-          }
-          create: {
-            args: Prisma.PDFCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          createMany: {
-            args: Prisma.PDFCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.PDFCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>[]
-          }
-          delete: {
-            args: Prisma.PDFDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          update: {
-            args: Prisma.PDFUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          deleteMany: {
-            args: Prisma.PDFDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.PDFUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.PDFUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>[]
-          }
-          upsert: {
-            args: Prisma.PDFUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PDFPayload>
-          }
-          aggregate: {
-            args: Prisma.PDFAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregatePDF>
-          }
-          groupBy: {
-            args: Prisma.PDFGroupByArgs<ExtArgs>
-            result: $Utils.Optional<PDFGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.PDFCountArgs<ExtArgs>
-            result: $Utils.Optional<PDFCountAggregateOutputType> | number
-          }
-        }
-      }
-      User: {
-        payload: Prisma.$UserPayload<ExtArgs>
-        fields: Prisma.UserFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.UserFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.UserFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          findFirst: {
-            args: Prisma.UserFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.UserFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          findMany: {
-            args: Prisma.UserFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
-          }
-          create: {
-            args: Prisma.UserCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          createMany: {
-            args: Prisma.UserCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.UserCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
-          }
-          delete: {
-            args: Prisma.UserDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          update: {
-            args: Prisma.UserUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          deleteMany: {
-            args: Prisma.UserDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.UserUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
-          }
-          upsert: {
-            args: Prisma.UserUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>
-          }
-          aggregate: {
-            args: Prisma.UserAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateUser>
-          }
-          groupBy: {
-            args: Prisma.UserGroupByArgs<ExtArgs>
-            result: $Utils.Optional<UserGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.UserCountArgs<ExtArgs>
-            result: $Utils.Optional<UserCountAggregateOutputType> | number
-          }
-        }
-      }
       chat_messages: {
         payload: Prisma.$chat_messagesPayload<ExtArgs>
         fields: Prisma.chat_messagesFieldRefs
@@ -3135,9 +2865,6 @@ export namespace Prisma {
     sso_domains?: sso_domainsOmit
     sso_providers?: sso_providersOmit
     users?: usersOmit
-    chatMessages?: ChatMessagesOmit
-    pDF?: PDFOmit
-    user?: UserOmit
     chat_messages?: chat_messagesOmit
     document_chunks?: document_chunksOmit
     pdfs?: pdfsOmit
@@ -3462,86 +3189,17 @@ export namespace Prisma {
 
 
   /**
-   * Count Type PDFCountOutputType
-   */
-
-  export type PDFCountOutputType = {
-    document_chunks: number
-  }
-
-  export type PDFCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    document_chunks?: boolean | PDFCountOutputTypeCountDocument_chunksArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * PDFCountOutputType without action
-   */
-  export type PDFCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDFCountOutputType
-     */
-    select?: PDFCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * PDFCountOutputType without action
-   */
-  export type PDFCountOutputTypeCountDocument_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: document_chunksWhereInput
-  }
-
-
-  /**
-   * Count Type UserCountOutputType
-   */
-
-  export type UserCountOutputType = {
-    ChatMessages: number
-    PDF: number
-  }
-
-  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    ChatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
-    PDF?: boolean | UserCountOutputTypeCountPDFArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserCountOutputType
-     */
-    select?: UserCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountChatMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ChatMessagesWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountPDFArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: PDFWhereInput
-  }
-
-
-  /**
    * Count Type PdfsCountOutputType
    */
 
   export type PdfsCountOutputType = {
     chat_messages: number
+    document_chunks: number
   }
 
   export type PdfsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | PdfsCountOutputTypeCountChat_messagesArgs
+    document_chunks?: boolean | PdfsCountOutputTypeCountDocument_chunksArgs
   }
 
   // Custom InputTypes
@@ -3560,6 +3218,13 @@ export namespace Prisma {
    */
   export type PdfsCountOutputTypeCountChat_messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: chat_messagesWhereInput
+  }
+
+  /**
+   * PdfsCountOutputType without action
+   */
+  export type PdfsCountOutputTypeCountDocument_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: document_chunksWhereInput
   }
 
 
@@ -21614,3388 +21279,6 @@ export namespace Prisma {
 
 
   /**
-   * Model ChatMessages
-   */
-
-  export type AggregateChatMessages = {
-    _count: ChatMessagesCountAggregateOutputType | null
-    _min: ChatMessagesMinAggregateOutputType | null
-    _max: ChatMessagesMaxAggregateOutputType | null
-  }
-
-  export type ChatMessagesMinAggregateOutputType = {
-    id: string | null
-    userId: string | null
-    document_id: string | null
-    content: string | null
-    isUser: boolean | null
-    timestamp: Date | null
-  }
-
-  export type ChatMessagesMaxAggregateOutputType = {
-    id: string | null
-    userId: string | null
-    document_id: string | null
-    content: string | null
-    isUser: boolean | null
-    timestamp: Date | null
-  }
-
-  export type ChatMessagesCountAggregateOutputType = {
-    id: number
-    userId: number
-    document_id: number
-    content: number
-    isUser: number
-    timestamp: number
-    _all: number
-  }
-
-
-  export type ChatMessagesMinAggregateInputType = {
-    id?: true
-    userId?: true
-    document_id?: true
-    content?: true
-    isUser?: true
-    timestamp?: true
-  }
-
-  export type ChatMessagesMaxAggregateInputType = {
-    id?: true
-    userId?: true
-    document_id?: true
-    content?: true
-    isUser?: true
-    timestamp?: true
-  }
-
-  export type ChatMessagesCountAggregateInputType = {
-    id?: true
-    userId?: true
-    document_id?: true
-    content?: true
-    isUser?: true
-    timestamp?: true
-    _all?: true
-  }
-
-  export type ChatMessagesAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ChatMessages to aggregate.
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ChatMessages to fetch.
-     */
-    orderBy?: ChatMessagesOrderByWithRelationInput | ChatMessagesOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: ChatMessagesWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ChatMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ChatMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned ChatMessages
-    **/
-    _count?: true | ChatMessagesCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: ChatMessagesMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: ChatMessagesMaxAggregateInputType
-  }
-
-  export type GetChatMessagesAggregateType<T extends ChatMessagesAggregateArgs> = {
-        [P in keyof T & keyof AggregateChatMessages]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateChatMessages[P]>
-      : GetScalarType<T[P], AggregateChatMessages[P]>
-  }
-
-
-
-
-  export type ChatMessagesGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ChatMessagesWhereInput
-    orderBy?: ChatMessagesOrderByWithAggregationInput | ChatMessagesOrderByWithAggregationInput[]
-    by: ChatMessagesScalarFieldEnum[] | ChatMessagesScalarFieldEnum
-    having?: ChatMessagesScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ChatMessagesCountAggregateInputType | true
-    _min?: ChatMessagesMinAggregateInputType
-    _max?: ChatMessagesMaxAggregateInputType
-  }
-
-  export type ChatMessagesGroupByOutputType = {
-    id: string
-    userId: string
-    document_id: string
-    content: string
-    isUser: boolean
-    timestamp: Date
-    _count: ChatMessagesCountAggregateOutputType | null
-    _min: ChatMessagesMinAggregateOutputType | null
-    _max: ChatMessagesMaxAggregateOutputType | null
-  }
-
-  type GetChatMessagesGroupByPayload<T extends ChatMessagesGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ChatMessagesGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ChatMessagesGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ChatMessagesGroupByOutputType[P]>
-            : GetScalarType<T[P], ChatMessagesGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ChatMessagesSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    document_id?: boolean
-    content?: boolean
-    isUser?: boolean
-    timestamp?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["chatMessages"]>
-
-  export type ChatMessagesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    document_id?: boolean
-    content?: boolean
-    isUser?: boolean
-    timestamp?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["chatMessages"]>
-
-  export type ChatMessagesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    document_id?: boolean
-    content?: boolean
-    isUser?: boolean
-    timestamp?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["chatMessages"]>
-
-  export type ChatMessagesSelectScalar = {
-    id?: boolean
-    userId?: boolean
-    document_id?: boolean
-    content?: boolean
-    isUser?: boolean
-    timestamp?: boolean
-  }
-
-  export type ChatMessagesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "document_id" | "content" | "isUser" | "timestamp", ExtArgs["result"]["chatMessages"]>
-  export type ChatMessagesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type ChatMessagesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type ChatMessagesIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }
-
-  export type $ChatMessagesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ChatMessages"
-    objects: {
-      User: Prisma.$UserPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      userId: string
-      document_id: string
-      content: string
-      isUser: boolean
-      timestamp: Date
-    }, ExtArgs["result"]["chatMessages"]>
-    composites: {}
-  }
-
-  type ChatMessagesGetPayload<S extends boolean | null | undefined | ChatMessagesDefaultArgs> = $Result.GetResult<Prisma.$ChatMessagesPayload, S>
-
-  type ChatMessagesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ChatMessagesFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ChatMessagesCountAggregateInputType | true
-    }
-
-  export interface ChatMessagesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ChatMessages'], meta: { name: 'ChatMessages' } }
-    /**
-     * Find zero or one ChatMessages that matches the filter.
-     * @param {ChatMessagesFindUniqueArgs} args - Arguments to find a ChatMessages
-     * @example
-     * // Get one ChatMessages
-     * const chatMessages = await prisma.chatMessages.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ChatMessagesFindUniqueArgs>(args: SelectSubset<T, ChatMessagesFindUniqueArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ChatMessages that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ChatMessagesFindUniqueOrThrowArgs} args - Arguments to find a ChatMessages
-     * @example
-     * // Get one ChatMessages
-     * const chatMessages = await prisma.chatMessages.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ChatMessagesFindUniqueOrThrowArgs>(args: SelectSubset<T, ChatMessagesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ChatMessages that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesFindFirstArgs} args - Arguments to find a ChatMessages
-     * @example
-     * // Get one ChatMessages
-     * const chatMessages = await prisma.chatMessages.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ChatMessagesFindFirstArgs>(args?: SelectSubset<T, ChatMessagesFindFirstArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ChatMessages that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesFindFirstOrThrowArgs} args - Arguments to find a ChatMessages
-     * @example
-     * // Get one ChatMessages
-     * const chatMessages = await prisma.chatMessages.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ChatMessagesFindFirstOrThrowArgs>(args?: SelectSubset<T, ChatMessagesFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ChatMessages that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ChatMessages
-     * const chatMessages = await prisma.chatMessages.findMany()
-     * 
-     * // Get first 10 ChatMessages
-     * const chatMessages = await prisma.chatMessages.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const chatMessagesWithIdOnly = await prisma.chatMessages.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends ChatMessagesFindManyArgs>(args?: SelectSubset<T, ChatMessagesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ChatMessages.
-     * @param {ChatMessagesCreateArgs} args - Arguments to create a ChatMessages.
-     * @example
-     * // Create one ChatMessages
-     * const ChatMessages = await prisma.chatMessages.create({
-     *   data: {
-     *     // ... data to create a ChatMessages
-     *   }
-     * })
-     * 
-     */
-    create<T extends ChatMessagesCreateArgs>(args: SelectSubset<T, ChatMessagesCreateArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ChatMessages.
-     * @param {ChatMessagesCreateManyArgs} args - Arguments to create many ChatMessages.
-     * @example
-     * // Create many ChatMessages
-     * const chatMessages = await prisma.chatMessages.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends ChatMessagesCreateManyArgs>(args?: SelectSubset<T, ChatMessagesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ChatMessages and returns the data saved in the database.
-     * @param {ChatMessagesCreateManyAndReturnArgs} args - Arguments to create many ChatMessages.
-     * @example
-     * // Create many ChatMessages
-     * const chatMessages = await prisma.chatMessages.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many ChatMessages and only return the `id`
-     * const chatMessagesWithIdOnly = await prisma.chatMessages.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ChatMessagesCreateManyAndReturnArgs>(args?: SelectSubset<T, ChatMessagesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ChatMessages.
-     * @param {ChatMessagesDeleteArgs} args - Arguments to delete one ChatMessages.
-     * @example
-     * // Delete one ChatMessages
-     * const ChatMessages = await prisma.chatMessages.delete({
-     *   where: {
-     *     // ... filter to delete one ChatMessages
-     *   }
-     * })
-     * 
-     */
-    delete<T extends ChatMessagesDeleteArgs>(args: SelectSubset<T, ChatMessagesDeleteArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ChatMessages.
-     * @param {ChatMessagesUpdateArgs} args - Arguments to update one ChatMessages.
-     * @example
-     * // Update one ChatMessages
-     * const chatMessages = await prisma.chatMessages.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends ChatMessagesUpdateArgs>(args: SelectSubset<T, ChatMessagesUpdateArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ChatMessages.
-     * @param {ChatMessagesDeleteManyArgs} args - Arguments to filter ChatMessages to delete.
-     * @example
-     * // Delete a few ChatMessages
-     * const { count } = await prisma.chatMessages.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends ChatMessagesDeleteManyArgs>(args?: SelectSubset<T, ChatMessagesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ChatMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ChatMessages
-     * const chatMessages = await prisma.chatMessages.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends ChatMessagesUpdateManyArgs>(args: SelectSubset<T, ChatMessagesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ChatMessages and returns the data updated in the database.
-     * @param {ChatMessagesUpdateManyAndReturnArgs} args - Arguments to update many ChatMessages.
-     * @example
-     * // Update many ChatMessages
-     * const chatMessages = await prisma.chatMessages.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ChatMessages and only return the `id`
-     * const chatMessagesWithIdOnly = await prisma.chatMessages.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ChatMessagesUpdateManyAndReturnArgs>(args: SelectSubset<T, ChatMessagesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ChatMessages.
-     * @param {ChatMessagesUpsertArgs} args - Arguments to update or create a ChatMessages.
-     * @example
-     * // Update or create a ChatMessages
-     * const chatMessages = await prisma.chatMessages.upsert({
-     *   create: {
-     *     // ... data to create a ChatMessages
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ChatMessages we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ChatMessagesUpsertArgs>(args: SelectSubset<T, ChatMessagesUpsertArgs<ExtArgs>>): Prisma__ChatMessagesClient<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ChatMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesCountArgs} args - Arguments to filter ChatMessages to count.
-     * @example
-     * // Count the number of ChatMessages
-     * const count = await prisma.chatMessages.count({
-     *   where: {
-     *     // ... the filter for the ChatMessages we want to count
-     *   }
-     * })
-    **/
-    count<T extends ChatMessagesCountArgs>(
-      args?: Subset<T, ChatMessagesCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ChatMessagesCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ChatMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ChatMessagesAggregateArgs>(args: Subset<T, ChatMessagesAggregateArgs>): Prisma.PrismaPromise<GetChatMessagesAggregateType<T>>
-
-    /**
-     * Group by ChatMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ChatMessagesGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends ChatMessagesGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ChatMessagesGroupByArgs['orderBy'] }
-        : { orderBy?: ChatMessagesGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ChatMessagesGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChatMessagesGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ChatMessages model
-   */
-  readonly fields: ChatMessagesFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ChatMessages.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ChatMessagesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    User<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ChatMessages model
-   */
-  interface ChatMessagesFieldRefs {
-    readonly id: FieldRef<"ChatMessages", 'String'>
-    readonly userId: FieldRef<"ChatMessages", 'String'>
-    readonly document_id: FieldRef<"ChatMessages", 'String'>
-    readonly content: FieldRef<"ChatMessages", 'String'>
-    readonly isUser: FieldRef<"ChatMessages", 'Boolean'>
-    readonly timestamp: FieldRef<"ChatMessages", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * ChatMessages findUnique
-   */
-  export type ChatMessagesFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter, which ChatMessages to fetch.
-     */
-    where: ChatMessagesWhereUniqueInput
-  }
-
-  /**
-   * ChatMessages findUniqueOrThrow
-   */
-  export type ChatMessagesFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter, which ChatMessages to fetch.
-     */
-    where: ChatMessagesWhereUniqueInput
-  }
-
-  /**
-   * ChatMessages findFirst
-   */
-  export type ChatMessagesFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter, which ChatMessages to fetch.
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ChatMessages to fetch.
-     */
-    orderBy?: ChatMessagesOrderByWithRelationInput | ChatMessagesOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ChatMessages.
-     */
-    cursor?: ChatMessagesWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ChatMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ChatMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ChatMessages.
-     */
-    distinct?: ChatMessagesScalarFieldEnum | ChatMessagesScalarFieldEnum[]
-  }
-
-  /**
-   * ChatMessages findFirstOrThrow
-   */
-  export type ChatMessagesFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter, which ChatMessages to fetch.
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ChatMessages to fetch.
-     */
-    orderBy?: ChatMessagesOrderByWithRelationInput | ChatMessagesOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for ChatMessages.
-     */
-    cursor?: ChatMessagesWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ChatMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ChatMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of ChatMessages.
-     */
-    distinct?: ChatMessagesScalarFieldEnum | ChatMessagesScalarFieldEnum[]
-  }
-
-  /**
-   * ChatMessages findMany
-   */
-  export type ChatMessagesFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter, which ChatMessages to fetch.
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of ChatMessages to fetch.
-     */
-    orderBy?: ChatMessagesOrderByWithRelationInput | ChatMessagesOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing ChatMessages.
-     */
-    cursor?: ChatMessagesWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` ChatMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` ChatMessages.
-     */
-    skip?: number
-    distinct?: ChatMessagesScalarFieldEnum | ChatMessagesScalarFieldEnum[]
-  }
-
-  /**
-   * ChatMessages create
-   */
-  export type ChatMessagesCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ChatMessages.
-     */
-    data: XOR<ChatMessagesCreateInput, ChatMessagesUncheckedCreateInput>
-  }
-
-  /**
-   * ChatMessages createMany
-   */
-  export type ChatMessagesCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ChatMessages.
-     */
-    data: ChatMessagesCreateManyInput | ChatMessagesCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ChatMessages createManyAndReturn
-   */
-  export type ChatMessagesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * The data used to create many ChatMessages.
-     */
-    data: ChatMessagesCreateManyInput | ChatMessagesCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ChatMessages update
-   */
-  export type ChatMessagesUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ChatMessages.
-     */
-    data: XOR<ChatMessagesUpdateInput, ChatMessagesUncheckedUpdateInput>
-    /**
-     * Choose, which ChatMessages to update.
-     */
-    where: ChatMessagesWhereUniqueInput
-  }
-
-  /**
-   * ChatMessages updateMany
-   */
-  export type ChatMessagesUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ChatMessages.
-     */
-    data: XOR<ChatMessagesUpdateManyMutationInput, ChatMessagesUncheckedUpdateManyInput>
-    /**
-     * Filter which ChatMessages to update
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * Limit how many ChatMessages to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ChatMessages updateManyAndReturn
-   */
-  export type ChatMessagesUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * The data used to update ChatMessages.
-     */
-    data: XOR<ChatMessagesUpdateManyMutationInput, ChatMessagesUncheckedUpdateManyInput>
-    /**
-     * Filter which ChatMessages to update
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * Limit how many ChatMessages to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ChatMessages upsert
-   */
-  export type ChatMessagesUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ChatMessages to update in case it exists.
-     */
-    where: ChatMessagesWhereUniqueInput
-    /**
-     * In case the ChatMessages found by the `where` argument doesn't exist, create a new ChatMessages with this data.
-     */
-    create: XOR<ChatMessagesCreateInput, ChatMessagesUncheckedCreateInput>
-    /**
-     * In case the ChatMessages was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ChatMessagesUpdateInput, ChatMessagesUncheckedUpdateInput>
-  }
-
-  /**
-   * ChatMessages delete
-   */
-  export type ChatMessagesDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    /**
-     * Filter which ChatMessages to delete.
-     */
-    where: ChatMessagesWhereUniqueInput
-  }
-
-  /**
-   * ChatMessages deleteMany
-   */
-  export type ChatMessagesDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ChatMessages to delete
-     */
-    where?: ChatMessagesWhereInput
-    /**
-     * Limit how many ChatMessages to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ChatMessages without action
-   */
-  export type ChatMessagesDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model PDF
-   */
-
-  export type AggregatePDF = {
-    _count: PDFCountAggregateOutputType | null
-    _avg: PDFAvgAggregateOutputType | null
-    _sum: PDFSumAggregateOutputType | null
-    _min: PDFMinAggregateOutputType | null
-    _max: PDFMaxAggregateOutputType | null
-  }
-
-  export type PDFAvgAggregateOutputType = {
-    size: number | null
-  }
-
-  export type PDFSumAggregateOutputType = {
-    size: number | null
-  }
-
-  export type PDFMinAggregateOutputType = {
-    id: string | null
-    name: string | null
-    url: string | null
-    size: number | null
-    uploadDate: Date | null
-    lastViewed: Date | null
-    userId: string | null
-    contentType: string | null
-  }
-
-  export type PDFMaxAggregateOutputType = {
-    id: string | null
-    name: string | null
-    url: string | null
-    size: number | null
-    uploadDate: Date | null
-    lastViewed: Date | null
-    userId: string | null
-    contentType: string | null
-  }
-
-  export type PDFCountAggregateOutputType = {
-    id: number
-    name: number
-    url: number
-    size: number
-    uploadDate: number
-    lastViewed: number
-    userId: number
-    contentType: number
-    _all: number
-  }
-
-
-  export type PDFAvgAggregateInputType = {
-    size?: true
-  }
-
-  export type PDFSumAggregateInputType = {
-    size?: true
-  }
-
-  export type PDFMinAggregateInputType = {
-    id?: true
-    name?: true
-    url?: true
-    size?: true
-    uploadDate?: true
-    lastViewed?: true
-    userId?: true
-    contentType?: true
-  }
-
-  export type PDFMaxAggregateInputType = {
-    id?: true
-    name?: true
-    url?: true
-    size?: true
-    uploadDate?: true
-    lastViewed?: true
-    userId?: true
-    contentType?: true
-  }
-
-  export type PDFCountAggregateInputType = {
-    id?: true
-    name?: true
-    url?: true
-    size?: true
-    uploadDate?: true
-    lastViewed?: true
-    userId?: true
-    contentType?: true
-    _all?: true
-  }
-
-  export type PDFAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which PDF to aggregate.
-     */
-    where?: PDFWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of PDFS to fetch.
-     */
-    orderBy?: PDFOrderByWithRelationInput | PDFOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: PDFWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` PDFS from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` PDFS.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned PDFS
-    **/
-    _count?: true | PDFCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: PDFAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: PDFSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: PDFMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: PDFMaxAggregateInputType
-  }
-
-  export type GetPDFAggregateType<T extends PDFAggregateArgs> = {
-        [P in keyof T & keyof AggregatePDF]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregatePDF[P]>
-      : GetScalarType<T[P], AggregatePDF[P]>
-  }
-
-
-
-
-  export type PDFGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: PDFWhereInput
-    orderBy?: PDFOrderByWithAggregationInput | PDFOrderByWithAggregationInput[]
-    by: PDFScalarFieldEnum[] | PDFScalarFieldEnum
-    having?: PDFScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: PDFCountAggregateInputType | true
-    _avg?: PDFAvgAggregateInputType
-    _sum?: PDFSumAggregateInputType
-    _min?: PDFMinAggregateInputType
-    _max?: PDFMaxAggregateInputType
-  }
-
-  export type PDFGroupByOutputType = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate: Date
-    lastViewed: Date
-    userId: string
-    contentType: string
-    _count: PDFCountAggregateOutputType | null
-    _avg: PDFAvgAggregateOutputType | null
-    _sum: PDFSumAggregateOutputType | null
-    _min: PDFMinAggregateOutputType | null
-    _max: PDFMaxAggregateOutputType | null
-  }
-
-  type GetPDFGroupByPayload<T extends PDFGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<PDFGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof PDFGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], PDFGroupByOutputType[P]>
-            : GetScalarType<T[P], PDFGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type PDFSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    url?: boolean
-    size?: boolean
-    uploadDate?: boolean
-    lastViewed?: boolean
-    userId?: boolean
-    contentType?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-    document_chunks?: boolean | PDF$document_chunksArgs<ExtArgs>
-    _count?: boolean | PDFCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["pDF"]>
-
-  export type PDFSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    url?: boolean
-    size?: boolean
-    uploadDate?: boolean
-    lastViewed?: boolean
-    userId?: boolean
-    contentType?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["pDF"]>
-
-  export type PDFSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    url?: boolean
-    size?: boolean
-    uploadDate?: boolean
-    lastViewed?: boolean
-    userId?: boolean
-    contentType?: boolean
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["pDF"]>
-
-  export type PDFSelectScalar = {
-    id?: boolean
-    name?: boolean
-    url?: boolean
-    size?: boolean
-    uploadDate?: boolean
-    lastViewed?: boolean
-    userId?: boolean
-    contentType?: boolean
-  }
-
-  export type PDFOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "size" | "uploadDate" | "lastViewed" | "userId" | "contentType", ExtArgs["result"]["pDF"]>
-  export type PDFInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-    document_chunks?: boolean | PDF$document_chunksArgs<ExtArgs>
-    _count?: boolean | PDFCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type PDFIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type PDFIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    User?: boolean | UserDefaultArgs<ExtArgs>
-  }
-
-  export type $PDFPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "PDF"
-    objects: {
-      User: Prisma.$UserPayload<ExtArgs>
-      document_chunks: Prisma.$document_chunksPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      name: string
-      url: string
-      size: number
-      uploadDate: Date
-      lastViewed: Date
-      userId: string
-      contentType: string
-    }, ExtArgs["result"]["pDF"]>
-    composites: {}
-  }
-
-  type PDFGetPayload<S extends boolean | null | undefined | PDFDefaultArgs> = $Result.GetResult<Prisma.$PDFPayload, S>
-
-  type PDFCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<PDFFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: PDFCountAggregateInputType | true
-    }
-
-  export interface PDFDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PDF'], meta: { name: 'PDF' } }
-    /**
-     * Find zero or one PDF that matches the filter.
-     * @param {PDFFindUniqueArgs} args - Arguments to find a PDF
-     * @example
-     * // Get one PDF
-     * const pDF = await prisma.pDF.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends PDFFindUniqueArgs>(args: SelectSubset<T, PDFFindUniqueArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one PDF that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {PDFFindUniqueOrThrowArgs} args - Arguments to find a PDF
-     * @example
-     * // Get one PDF
-     * const pDF = await prisma.pDF.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends PDFFindUniqueOrThrowArgs>(args: SelectSubset<T, PDFFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first PDF that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFFindFirstArgs} args - Arguments to find a PDF
-     * @example
-     * // Get one PDF
-     * const pDF = await prisma.pDF.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends PDFFindFirstArgs>(args?: SelectSubset<T, PDFFindFirstArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first PDF that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFFindFirstOrThrowArgs} args - Arguments to find a PDF
-     * @example
-     * // Get one PDF
-     * const pDF = await prisma.pDF.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends PDFFindFirstOrThrowArgs>(args?: SelectSubset<T, PDFFindFirstOrThrowArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more PDFS that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all PDFS
-     * const pDFS = await prisma.pDF.findMany()
-     * 
-     * // Get first 10 PDFS
-     * const pDFS = await prisma.pDF.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const pDFWithIdOnly = await prisma.pDF.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends PDFFindManyArgs>(args?: SelectSubset<T, PDFFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a PDF.
-     * @param {PDFCreateArgs} args - Arguments to create a PDF.
-     * @example
-     * // Create one PDF
-     * const PDF = await prisma.pDF.create({
-     *   data: {
-     *     // ... data to create a PDF
-     *   }
-     * })
-     * 
-     */
-    create<T extends PDFCreateArgs>(args: SelectSubset<T, PDFCreateArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many PDFS.
-     * @param {PDFCreateManyArgs} args - Arguments to create many PDFS.
-     * @example
-     * // Create many PDFS
-     * const pDF = await prisma.pDF.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends PDFCreateManyArgs>(args?: SelectSubset<T, PDFCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many PDFS and returns the data saved in the database.
-     * @param {PDFCreateManyAndReturnArgs} args - Arguments to create many PDFS.
-     * @example
-     * // Create many PDFS
-     * const pDF = await prisma.pDF.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many PDFS and only return the `id`
-     * const pDFWithIdOnly = await prisma.pDF.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends PDFCreateManyAndReturnArgs>(args?: SelectSubset<T, PDFCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a PDF.
-     * @param {PDFDeleteArgs} args - Arguments to delete one PDF.
-     * @example
-     * // Delete one PDF
-     * const PDF = await prisma.pDF.delete({
-     *   where: {
-     *     // ... filter to delete one PDF
-     *   }
-     * })
-     * 
-     */
-    delete<T extends PDFDeleteArgs>(args: SelectSubset<T, PDFDeleteArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one PDF.
-     * @param {PDFUpdateArgs} args - Arguments to update one PDF.
-     * @example
-     * // Update one PDF
-     * const pDF = await prisma.pDF.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends PDFUpdateArgs>(args: SelectSubset<T, PDFUpdateArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more PDFS.
-     * @param {PDFDeleteManyArgs} args - Arguments to filter PDFS to delete.
-     * @example
-     * // Delete a few PDFS
-     * const { count } = await prisma.pDF.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends PDFDeleteManyArgs>(args?: SelectSubset<T, PDFDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more PDFS.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many PDFS
-     * const pDF = await prisma.pDF.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends PDFUpdateManyArgs>(args: SelectSubset<T, PDFUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more PDFS and returns the data updated in the database.
-     * @param {PDFUpdateManyAndReturnArgs} args - Arguments to update many PDFS.
-     * @example
-     * // Update many PDFS
-     * const pDF = await prisma.pDF.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more PDFS and only return the `id`
-     * const pDFWithIdOnly = await prisma.pDF.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends PDFUpdateManyAndReturnArgs>(args: SelectSubset<T, PDFUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one PDF.
-     * @param {PDFUpsertArgs} args - Arguments to update or create a PDF.
-     * @example
-     * // Update or create a PDF
-     * const pDF = await prisma.pDF.upsert({
-     *   create: {
-     *     // ... data to create a PDF
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the PDF we want to update
-     *   }
-     * })
-     */
-    upsert<T extends PDFUpsertArgs>(args: SelectSubset<T, PDFUpsertArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of PDFS.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFCountArgs} args - Arguments to filter PDFS to count.
-     * @example
-     * // Count the number of PDFS
-     * const count = await prisma.pDF.count({
-     *   where: {
-     *     // ... the filter for the PDFS we want to count
-     *   }
-     * })
-    **/
-    count<T extends PDFCountArgs>(
-      args?: Subset<T, PDFCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], PDFCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a PDF.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends PDFAggregateArgs>(args: Subset<T, PDFAggregateArgs>): Prisma.PrismaPromise<GetPDFAggregateType<T>>
-
-    /**
-     * Group by PDF.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {PDFGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends PDFGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: PDFGroupByArgs['orderBy'] }
-        : { orderBy?: PDFGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, PDFGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPDFGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the PDF model
-   */
-  readonly fields: PDFFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for PDF.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__PDFClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    User<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    document_chunks<T extends PDF$document_chunksArgs<ExtArgs> = {}>(args?: Subset<T, PDF$document_chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the PDF model
-   */
-  interface PDFFieldRefs {
-    readonly id: FieldRef<"PDF", 'String'>
-    readonly name: FieldRef<"PDF", 'String'>
-    readonly url: FieldRef<"PDF", 'String'>
-    readonly size: FieldRef<"PDF", 'Int'>
-    readonly uploadDate: FieldRef<"PDF", 'DateTime'>
-    readonly lastViewed: FieldRef<"PDF", 'DateTime'>
-    readonly userId: FieldRef<"PDF", 'String'>
-    readonly contentType: FieldRef<"PDF", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * PDF findUnique
-   */
-  export type PDFFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter, which PDF to fetch.
-     */
-    where: PDFWhereUniqueInput
-  }
-
-  /**
-   * PDF findUniqueOrThrow
-   */
-  export type PDFFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter, which PDF to fetch.
-     */
-    where: PDFWhereUniqueInput
-  }
-
-  /**
-   * PDF findFirst
-   */
-  export type PDFFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter, which PDF to fetch.
-     */
-    where?: PDFWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of PDFS to fetch.
-     */
-    orderBy?: PDFOrderByWithRelationInput | PDFOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for PDFS.
-     */
-    cursor?: PDFWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` PDFS from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` PDFS.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of PDFS.
-     */
-    distinct?: PDFScalarFieldEnum | PDFScalarFieldEnum[]
-  }
-
-  /**
-   * PDF findFirstOrThrow
-   */
-  export type PDFFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter, which PDF to fetch.
-     */
-    where?: PDFWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of PDFS to fetch.
-     */
-    orderBy?: PDFOrderByWithRelationInput | PDFOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for PDFS.
-     */
-    cursor?: PDFWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` PDFS from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` PDFS.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of PDFS.
-     */
-    distinct?: PDFScalarFieldEnum | PDFScalarFieldEnum[]
-  }
-
-  /**
-   * PDF findMany
-   */
-  export type PDFFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter, which PDFS to fetch.
-     */
-    where?: PDFWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of PDFS to fetch.
-     */
-    orderBy?: PDFOrderByWithRelationInput | PDFOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing PDFS.
-     */
-    cursor?: PDFWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` PDFS from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` PDFS.
-     */
-    skip?: number
-    distinct?: PDFScalarFieldEnum | PDFScalarFieldEnum[]
-  }
-
-  /**
-   * PDF create
-   */
-  export type PDFCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * The data needed to create a PDF.
-     */
-    data: XOR<PDFCreateInput, PDFUncheckedCreateInput>
-  }
-
-  /**
-   * PDF createMany
-   */
-  export type PDFCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many PDFS.
-     */
-    data: PDFCreateManyInput | PDFCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * PDF createManyAndReturn
-   */
-  export type PDFCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * The data used to create many PDFS.
-     */
-    data: PDFCreateManyInput | PDFCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * PDF update
-   */
-  export type PDFUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * The data needed to update a PDF.
-     */
-    data: XOR<PDFUpdateInput, PDFUncheckedUpdateInput>
-    /**
-     * Choose, which PDF to update.
-     */
-    where: PDFWhereUniqueInput
-  }
-
-  /**
-   * PDF updateMany
-   */
-  export type PDFUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update PDFS.
-     */
-    data: XOR<PDFUpdateManyMutationInput, PDFUncheckedUpdateManyInput>
-    /**
-     * Filter which PDFS to update
-     */
-    where?: PDFWhereInput
-    /**
-     * Limit how many PDFS to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * PDF updateManyAndReturn
-   */
-  export type PDFUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * The data used to update PDFS.
-     */
-    data: XOR<PDFUpdateManyMutationInput, PDFUncheckedUpdateManyInput>
-    /**
-     * Filter which PDFS to update
-     */
-    where?: PDFWhereInput
-    /**
-     * Limit how many PDFS to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * PDF upsert
-   */
-  export type PDFUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * The filter to search for the PDF to update in case it exists.
-     */
-    where: PDFWhereUniqueInput
-    /**
-     * In case the PDF found by the `where` argument doesn't exist, create a new PDF with this data.
-     */
-    create: XOR<PDFCreateInput, PDFUncheckedCreateInput>
-    /**
-     * In case the PDF was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<PDFUpdateInput, PDFUncheckedUpdateInput>
-  }
-
-  /**
-   * PDF delete
-   */
-  export type PDFDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    /**
-     * Filter which PDF to delete.
-     */
-    where: PDFWhereUniqueInput
-  }
-
-  /**
-   * PDF deleteMany
-   */
-  export type PDFDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which PDFS to delete
-     */
-    where?: PDFWhereInput
-    /**
-     * Limit how many PDFS to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * PDF.document_chunks
-   */
-  export type PDF$document_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    where?: document_chunksWhereInput
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    cursor?: document_chunksWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
-  }
-
-  /**
-   * PDF without action
-   */
-  export type PDFDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model User
-   */
-
-  export type AggregateUser = {
-    _count: UserCountAggregateOutputType | null
-    _min: UserMinAggregateOutputType | null
-    _max: UserMaxAggregateOutputType | null
-  }
-
-  export type UserMinAggregateOutputType = {
-    id: string | null
-    email: string | null
-    name: string | null
-    image: string | null
-    plus: boolean | null
-    is_active: boolean | null
-    expire_at: Date | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type UserMaxAggregateOutputType = {
-    id: string | null
-    email: string | null
-    name: string | null
-    image: string | null
-    plus: boolean | null
-    is_active: boolean | null
-    expire_at: Date | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type UserCountAggregateOutputType = {
-    id: number
-    email: number
-    name: number
-    image: number
-    plus: number
-    is_active: number
-    expire_at: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type UserMinAggregateInputType = {
-    id?: true
-    email?: true
-    name?: true
-    image?: true
-    plus?: true
-    is_active?: true
-    expire_at?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type UserMaxAggregateInputType = {
-    id?: true
-    email?: true
-    name?: true
-    image?: true
-    plus?: true
-    is_active?: true
-    expire_at?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type UserCountAggregateInputType = {
-    id?: true
-    email?: true
-    name?: true
-    image?: true
-    plus?: true
-    is_active?: true
-    expire_at?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type UserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which User to aggregate.
-     */
-    where?: UserWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Users to fetch.
-     */
-    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: UserWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Users from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Users.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Users
-    **/
-    _count?: true | UserCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: UserMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: UserMaxAggregateInputType
-  }
-
-  export type GetUserAggregateType<T extends UserAggregateArgs> = {
-        [P in keyof T & keyof AggregateUser]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateUser[P]>
-      : GetScalarType<T[P], AggregateUser[P]>
-  }
-
-
-
-
-  export type UserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: UserWhereInput
-    orderBy?: UserOrderByWithAggregationInput | UserOrderByWithAggregationInput[]
-    by: UserScalarFieldEnum[] | UserScalarFieldEnum
-    having?: UserScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: UserCountAggregateInputType | true
-    _min?: UserMinAggregateInputType
-    _max?: UserMaxAggregateInputType
-  }
-
-  export type UserGroupByOutputType = {
-    id: string
-    email: string
-    name: string | null
-    image: string | null
-    plus: boolean
-    is_active: boolean
-    expire_at: Date | null
-    createdAt: Date
-    updatedAt: Date
-    _count: UserCountAggregateOutputType | null
-    _min: UserMinAggregateOutputType | null
-    _max: UserMaxAggregateOutputType | null
-  }
-
-  type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<UserGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof UserGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], UserGroupByOutputType[P]>
-            : GetScalarType<T[P], UserGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    email?: boolean
-    name?: boolean
-    image?: boolean
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    ChatMessages?: boolean | User$ChatMessagesArgs<ExtArgs>
-    PDF?: boolean | User$PDFArgs<ExtArgs>
-    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["user"]>
-
-  export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    email?: boolean
-    name?: boolean
-    image?: boolean
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["user"]>
-
-  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    email?: boolean
-    name?: boolean
-    image?: boolean
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["user"]>
-
-  export type UserSelectScalar = {
-    id?: boolean
-    email?: boolean
-    name?: boolean
-    image?: boolean
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "image" | "plus" | "is_active" | "expire_at" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
-  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    ChatMessages?: boolean | User$ChatMessagesArgs<ExtArgs>
-    PDF?: boolean | User$PDFArgs<ExtArgs>
-    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-
-  export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "User"
-    objects: {
-      ChatMessages: Prisma.$ChatMessagesPayload<ExtArgs>[]
-      PDF: Prisma.$PDFPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      email: string
-      name: string | null
-      image: string | null
-      plus: boolean
-      is_active: boolean
-      expire_at: Date | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["user"]>
-    composites: {}
-  }
-
-  type UserGetPayload<S extends boolean | null | undefined | UserDefaultArgs> = $Result.GetResult<Prisma.$UserPayload, S>
-
-  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: UserCountAggregateInputType | true
-    }
-
-  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
-    /**
-     * Find zero or one User that matches the filter.
-     * @param {UserFindUniqueArgs} args - Arguments to find a User
-     * @example
-     * // Get one User
-     * const user = await prisma.user.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one User that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {UserFindUniqueOrThrowArgs} args - Arguments to find a User
-     * @example
-     * // Get one User
-     * const user = await prisma.user.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first User that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserFindFirstArgs} args - Arguments to find a User
-     * @example
-     * // Get one User
-     * const user = await prisma.user.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first User that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserFindFirstOrThrowArgs} args - Arguments to find a User
-     * @example
-     * // Get one User
-     * const user = await prisma.user.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Users that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Users
-     * const users = await prisma.user.findMany()
-     * 
-     * // Get first 10 Users
-     * const users = await prisma.user.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a User.
-     * @param {UserCreateArgs} args - Arguments to create a User.
-     * @example
-     * // Create one User
-     * const User = await prisma.user.create({
-     *   data: {
-     *     // ... data to create a User
-     *   }
-     * })
-     * 
-     */
-    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Users.
-     * @param {UserCreateManyArgs} args - Arguments to create many Users.
-     * @example
-     * // Create many Users
-     * const user = await prisma.user.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends UserCreateManyArgs>(args?: SelectSubset<T, UserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Users and returns the data saved in the database.
-     * @param {UserCreateManyAndReturnArgs} args - Arguments to create many Users.
-     * @example
-     * // Create many Users
-     * const user = await prisma.user.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a User.
-     * @param {UserDeleteArgs} args - Arguments to delete one User.
-     * @example
-     * // Delete one User
-     * const User = await prisma.user.delete({
-     *   where: {
-     *     // ... filter to delete one User
-     *   }
-     * })
-     * 
-     */
-    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one User.
-     * @param {UserUpdateArgs} args - Arguments to update one User.
-     * @example
-     * // Update one User
-     * const user = await prisma.user.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Users.
-     * @param {UserDeleteManyArgs} args - Arguments to filter Users to delete.
-     * @example
-     * // Delete a few Users
-     * const { count } = await prisma.user.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends UserDeleteManyArgs>(args?: SelectSubset<T, UserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Users.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Users
-     * const user = await prisma.user.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Users and returns the data updated in the database.
-     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
-     * @example
-     * // Update many Users
-     * const user = await prisma.user.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one User.
-     * @param {UserUpsertArgs} args - Arguments to update or create a User.
-     * @example
-     * // Update or create a User
-     * const user = await prisma.user.upsert({
-     *   create: {
-     *     // ... data to create a User
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the User we want to update
-     *   }
-     * })
-     */
-    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Users.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserCountArgs} args - Arguments to filter Users to count.
-     * @example
-     * // Count the number of Users
-     * const count = await prisma.user.count({
-     *   where: {
-     *     // ... the filter for the Users we want to count
-     *   }
-     * })
-    **/
-    count<T extends UserCountArgs>(
-      args?: Subset<T, UserCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], UserCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a User.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends UserAggregateArgs>(args: Subset<T, UserAggregateArgs>): Prisma.PrismaPromise<GetUserAggregateType<T>>
-
-    /**
-     * Group by User.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends UserGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: UserGroupByArgs['orderBy'] }
-        : { orderBy?: UserGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, UserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the User model
-   */
-  readonly fields: UserFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for User.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    ChatMessages<T extends User$ChatMessagesArgs<ExtArgs> = {}>(args?: Subset<T, User$ChatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatMessagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    PDF<T extends User$PDFArgs<ExtArgs> = {}>(args?: Subset<T, User$PDFArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the User model
-   */
-  interface UserFieldRefs {
-    readonly id: FieldRef<"User", 'String'>
-    readonly email: FieldRef<"User", 'String'>
-    readonly name: FieldRef<"User", 'String'>
-    readonly image: FieldRef<"User", 'String'>
-    readonly plus: FieldRef<"User", 'Boolean'>
-    readonly is_active: FieldRef<"User", 'Boolean'>
-    readonly expire_at: FieldRef<"User", 'DateTime'>
-    readonly createdAt: FieldRef<"User", 'DateTime'>
-    readonly updatedAt: FieldRef<"User", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * User findUnique
-   */
-  export type UserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter, which User to fetch.
-     */
-    where: UserWhereUniqueInput
-  }
-
-  /**
-   * User findUniqueOrThrow
-   */
-  export type UserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter, which User to fetch.
-     */
-    where: UserWhereUniqueInput
-  }
-
-  /**
-   * User findFirst
-   */
-  export type UserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter, which User to fetch.
-     */
-    where?: UserWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Users to fetch.
-     */
-    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Users.
-     */
-    cursor?: UserWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Users from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Users.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Users.
-     */
-    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
-  }
-
-  /**
-   * User findFirstOrThrow
-   */
-  export type UserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter, which User to fetch.
-     */
-    where?: UserWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Users to fetch.
-     */
-    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Users.
-     */
-    cursor?: UserWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Users from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Users.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Users.
-     */
-    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
-  }
-
-  /**
-   * User findMany
-   */
-  export type UserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter, which Users to fetch.
-     */
-    where?: UserWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Users to fetch.
-     */
-    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Users.
-     */
-    cursor?: UserWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Users from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Users.
-     */
-    skip?: number
-    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
-  }
-
-  /**
-   * User create
-   */
-  export type UserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * The data needed to create a User.
-     */
-    data: XOR<UserCreateInput, UserUncheckedCreateInput>
-  }
-
-  /**
-   * User createMany
-   */
-  export type UserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Users.
-     */
-    data: UserCreateManyInput | UserCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * User createManyAndReturn
-   */
-  export type UserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to create many Users.
-     */
-    data: UserCreateManyInput | UserCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * User update
-   */
-  export type UserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * The data needed to update a User.
-     */
-    data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
-    /**
-     * Choose, which User to update.
-     */
-    where: UserWhereUniqueInput
-  }
-
-  /**
-   * User updateMany
-   */
-  export type UserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Users.
-     */
-    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
-    /**
-     * Filter which Users to update
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * User updateManyAndReturn
-   */
-  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to update Users.
-     */
-    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
-    /**
-     * Filter which Users to update
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * User upsert
-   */
-  export type UserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * The filter to search for the User to update in case it exists.
-     */
-    where: UserWhereUniqueInput
-    /**
-     * In case the User found by the `where` argument doesn't exist, create a new User with this data.
-     */
-    create: XOR<UserCreateInput, UserUncheckedCreateInput>
-    /**
-     * In case the User was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<UserUpdateInput, UserUncheckedUpdateInput>
-  }
-
-  /**
-   * User delete
-   */
-  export type UserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    /**
-     * Filter which User to delete.
-     */
-    where: UserWhereUniqueInput
-  }
-
-  /**
-   * User deleteMany
-   */
-  export type UserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Users to delete
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * User.ChatMessages
-   */
-  export type User$ChatMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ChatMessages
-     */
-    select?: ChatMessagesSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ChatMessages
-     */
-    omit?: ChatMessagesOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ChatMessagesInclude<ExtArgs> | null
-    where?: ChatMessagesWhereInput
-    orderBy?: ChatMessagesOrderByWithRelationInput | ChatMessagesOrderByWithRelationInput[]
-    cursor?: ChatMessagesWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ChatMessagesScalarFieldEnum | ChatMessagesScalarFieldEnum[]
-  }
-
-  /**
-   * User.PDF
-   */
-  export type User$PDFArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the PDF
-     */
-    select?: PDFSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the PDF
-     */
-    omit?: PDFOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: PDFInclude<ExtArgs> | null
-    where?: PDFWhereInput
-    orderBy?: PDFOrderByWithRelationInput | PDFOrderByWithRelationInput[]
-    cursor?: PDFWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: PDFScalarFieldEnum | PDFScalarFieldEnum[]
-  }
-
-  /**
-   * User without action
-   */
-  export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model chat_messages
    */
 
@@ -26343,7 +22626,7 @@ export namespace Prisma {
     chunkNumber?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
     vector_embeddings?: boolean | document_chunks$vector_embeddingsArgs<ExtArgs>
   }, ExtArgs["result"]["document_chunks"]>
 
@@ -26355,7 +22638,7 @@ export namespace Prisma {
     chunkNumber?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document_chunks"]>
 
   export type document_chunksSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -26366,7 +22649,7 @@ export namespace Prisma {
     chunkNumber?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document_chunks"]>
 
   export type document_chunksSelectScalar = {
@@ -26381,20 +22664,20 @@ export namespace Prisma {
 
   export type document_chunksOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "documentId" | "content" | "pageNumber" | "chunkNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["document_chunks"]>
   export type document_chunksInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
     vector_embeddings?: boolean | document_chunks$vector_embeddingsArgs<ExtArgs>
   }
   export type document_chunksIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
   }
   export type document_chunksIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    PDF?: boolean | PDFDefaultArgs<ExtArgs>
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
   }
 
   export type $document_chunksPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "document_chunks"
     objects: {
-      PDF: Prisma.$PDFPayload<ExtArgs>
+      pdfs: Prisma.$pdfsPayload<ExtArgs>
       vector_embeddings: Prisma.$vector_embeddingsPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -26799,7 +23082,7 @@ export namespace Prisma {
    */
   export interface Prisma__document_chunksClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    PDF<T extends PDFDefaultArgs<ExtArgs> = {}>(args?: Subset<T, PDFDefaultArgs<ExtArgs>>): Prisma__PDFClient<$Result.GetResult<Prisma.$PDFPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    pdfs<T extends pdfsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, pdfsDefaultArgs<ExtArgs>>): Prisma__pdfsClient<$Result.GetResult<Prisma.$pdfsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     vector_embeddings<T extends document_chunks$vector_embeddingsArgs<ExtArgs> = {}>(args?: Subset<T, document_chunks$vector_embeddingsArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -27509,6 +23792,7 @@ export namespace Prisma {
     created_at?: boolean
     updated_at?: boolean
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
+    document_chunks?: boolean | pdfs$document_chunksArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["pdfs"]>
@@ -27557,6 +23841,7 @@ export namespace Prisma {
   export type pdfsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "size" | "upload_date" | "last_viewed" | "user_id" | "content_type" | "created_at" | "updated_at", ExtArgs["result"]["pdfs"]>
   export type pdfsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
+    document_chunks?: boolean | pdfs$document_chunksArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -27571,6 +23856,7 @@ export namespace Prisma {
     name: "pdfs"
     objects: {
       chat_messages: Prisma.$chat_messagesPayload<ExtArgs>[]
+      document_chunks: Prisma.$document_chunksPayload<ExtArgs>[]
       users: Prisma.$usersPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -27979,6 +24265,7 @@ export namespace Prisma {
   export interface Prisma__pdfsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     chat_messages<T extends pdfs$chat_messagesArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$chat_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$chat_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    document_chunks<T extends pdfs$document_chunksArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$document_chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends pdfs$usersArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$usersArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -28436,6 +24723,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Chat_messagesScalarFieldEnum | Chat_messagesScalarFieldEnum[]
+  }
+
+  /**
+   * pdfs.document_chunks
+   */
+  export type pdfs$document_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the document_chunks
+     */
+    select?: document_chunksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the document_chunks
+     */
+    omit?: document_chunksOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: document_chunksInclude<ExtArgs> | null
+    where?: document_chunksWhereInput
+    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
+    cursor?: document_chunksWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
   }
 
   /**
@@ -33159,47 +29470,6 @@ export namespace Prisma {
   export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
 
 
-  export const ChatMessagesScalarFieldEnum: {
-    id: 'id',
-    userId: 'userId',
-    document_id: 'document_id',
-    content: 'content',
-    isUser: 'isUser',
-    timestamp: 'timestamp'
-  };
-
-  export type ChatMessagesScalarFieldEnum = (typeof ChatMessagesScalarFieldEnum)[keyof typeof ChatMessagesScalarFieldEnum]
-
-
-  export const PDFScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    url: 'url',
-    size: 'size',
-    uploadDate: 'uploadDate',
-    lastViewed: 'lastViewed',
-    userId: 'userId',
-    contentType: 'contentType'
-  };
-
-  export type PDFScalarFieldEnum = (typeof PDFScalarFieldEnum)[keyof typeof PDFScalarFieldEnum]
-
-
-  export const UserScalarFieldEnum: {
-    id: 'id',
-    email: 'email',
-    name: 'name',
-    image: 'image',
-    plus: 'plus',
-    is_active: 'is_active',
-    expire_at: 'expire_at',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
   export const Chat_messagesScalarFieldEnum: {
     id: 'id',
     user_id: 'user_id',
@@ -34765,219 +31035,6 @@ export namespace Prisma {
     is_anonymous?: BoolWithAggregatesFilter<"users"> | boolean
   }
 
-  export type ChatMessagesWhereInput = {
-    AND?: ChatMessagesWhereInput | ChatMessagesWhereInput[]
-    OR?: ChatMessagesWhereInput[]
-    NOT?: ChatMessagesWhereInput | ChatMessagesWhereInput[]
-    id?: StringFilter<"ChatMessages"> | string
-    userId?: StringFilter<"ChatMessages"> | string
-    document_id?: StringFilter<"ChatMessages"> | string
-    content?: StringFilter<"ChatMessages"> | string
-    isUser?: BoolFilter<"ChatMessages"> | boolean
-    timestamp?: DateTimeFilter<"ChatMessages"> | Date | string
-    User?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }
-
-  export type ChatMessagesOrderByWithRelationInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    document_id?: SortOrder
-    content?: SortOrder
-    isUser?: SortOrder
-    timestamp?: SortOrder
-    User?: UserOrderByWithRelationInput
-  }
-
-  export type ChatMessagesWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: ChatMessagesWhereInput | ChatMessagesWhereInput[]
-    OR?: ChatMessagesWhereInput[]
-    NOT?: ChatMessagesWhereInput | ChatMessagesWhereInput[]
-    userId?: StringFilter<"ChatMessages"> | string
-    document_id?: StringFilter<"ChatMessages"> | string
-    content?: StringFilter<"ChatMessages"> | string
-    isUser?: BoolFilter<"ChatMessages"> | boolean
-    timestamp?: DateTimeFilter<"ChatMessages"> | Date | string
-    User?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id">
-
-  export type ChatMessagesOrderByWithAggregationInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    document_id?: SortOrder
-    content?: SortOrder
-    isUser?: SortOrder
-    timestamp?: SortOrder
-    _count?: ChatMessagesCountOrderByAggregateInput
-    _max?: ChatMessagesMaxOrderByAggregateInput
-    _min?: ChatMessagesMinOrderByAggregateInput
-  }
-
-  export type ChatMessagesScalarWhereWithAggregatesInput = {
-    AND?: ChatMessagesScalarWhereWithAggregatesInput | ChatMessagesScalarWhereWithAggregatesInput[]
-    OR?: ChatMessagesScalarWhereWithAggregatesInput[]
-    NOT?: ChatMessagesScalarWhereWithAggregatesInput | ChatMessagesScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ChatMessages"> | string
-    userId?: StringWithAggregatesFilter<"ChatMessages"> | string
-    document_id?: StringWithAggregatesFilter<"ChatMessages"> | string
-    content?: StringWithAggregatesFilter<"ChatMessages"> | string
-    isUser?: BoolWithAggregatesFilter<"ChatMessages"> | boolean
-    timestamp?: DateTimeWithAggregatesFilter<"ChatMessages"> | Date | string
-  }
-
-  export type PDFWhereInput = {
-    AND?: PDFWhereInput | PDFWhereInput[]
-    OR?: PDFWhereInput[]
-    NOT?: PDFWhereInput | PDFWhereInput[]
-    id?: StringFilter<"PDF"> | string
-    name?: StringFilter<"PDF"> | string
-    url?: StringFilter<"PDF"> | string
-    size?: IntFilter<"PDF"> | number
-    uploadDate?: DateTimeFilter<"PDF"> | Date | string
-    lastViewed?: DateTimeFilter<"PDF"> | Date | string
-    userId?: StringFilter<"PDF"> | string
-    contentType?: StringFilter<"PDF"> | string
-    User?: XOR<UserScalarRelationFilter, UserWhereInput>
-    document_chunks?: Document_chunksListRelationFilter
-  }
-
-  export type PDFOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    url?: SortOrder
-    size?: SortOrder
-    uploadDate?: SortOrder
-    lastViewed?: SortOrder
-    userId?: SortOrder
-    contentType?: SortOrder
-    User?: UserOrderByWithRelationInput
-    document_chunks?: document_chunksOrderByRelationAggregateInput
-  }
-
-  export type PDFWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: PDFWhereInput | PDFWhereInput[]
-    OR?: PDFWhereInput[]
-    NOT?: PDFWhereInput | PDFWhereInput[]
-    name?: StringFilter<"PDF"> | string
-    url?: StringFilter<"PDF"> | string
-    size?: IntFilter<"PDF"> | number
-    uploadDate?: DateTimeFilter<"PDF"> | Date | string
-    lastViewed?: DateTimeFilter<"PDF"> | Date | string
-    userId?: StringFilter<"PDF"> | string
-    contentType?: StringFilter<"PDF"> | string
-    User?: XOR<UserScalarRelationFilter, UserWhereInput>
-    document_chunks?: Document_chunksListRelationFilter
-  }, "id">
-
-  export type PDFOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    url?: SortOrder
-    size?: SortOrder
-    uploadDate?: SortOrder
-    lastViewed?: SortOrder
-    userId?: SortOrder
-    contentType?: SortOrder
-    _count?: PDFCountOrderByAggregateInput
-    _avg?: PDFAvgOrderByAggregateInput
-    _max?: PDFMaxOrderByAggregateInput
-    _min?: PDFMinOrderByAggregateInput
-    _sum?: PDFSumOrderByAggregateInput
-  }
-
-  export type PDFScalarWhereWithAggregatesInput = {
-    AND?: PDFScalarWhereWithAggregatesInput | PDFScalarWhereWithAggregatesInput[]
-    OR?: PDFScalarWhereWithAggregatesInput[]
-    NOT?: PDFScalarWhereWithAggregatesInput | PDFScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"PDF"> | string
-    name?: StringWithAggregatesFilter<"PDF"> | string
-    url?: StringWithAggregatesFilter<"PDF"> | string
-    size?: IntWithAggregatesFilter<"PDF"> | number
-    uploadDate?: DateTimeWithAggregatesFilter<"PDF"> | Date | string
-    lastViewed?: DateTimeWithAggregatesFilter<"PDF"> | Date | string
-    userId?: StringWithAggregatesFilter<"PDF"> | string
-    contentType?: StringWithAggregatesFilter<"PDF"> | string
-  }
-
-  export type UserWhereInput = {
-    AND?: UserWhereInput | UserWhereInput[]
-    OR?: UserWhereInput[]
-    NOT?: UserWhereInput | UserWhereInput[]
-    id?: StringFilter<"User"> | string
-    email?: StringFilter<"User"> | string
-    name?: StringNullableFilter<"User"> | string | null
-    image?: StringNullableFilter<"User"> | string | null
-    plus?: BoolFilter<"User"> | boolean
-    is_active?: BoolFilter<"User"> | boolean
-    expire_at?: DateTimeNullableFilter<"User"> | Date | string | null
-    createdAt?: DateTimeFilter<"User"> | Date | string
-    updatedAt?: DateTimeFilter<"User"> | Date | string
-    ChatMessages?: ChatMessagesListRelationFilter
-    PDF?: PDFListRelationFilter
-  }
-
-  export type UserOrderByWithRelationInput = {
-    id?: SortOrder
-    email?: SortOrder
-    name?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
-    plus?: SortOrder
-    is_active?: SortOrder
-    expire_at?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    ChatMessages?: ChatMessagesOrderByRelationAggregateInput
-    PDF?: PDFOrderByRelationAggregateInput
-  }
-
-  export type UserWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    email?: string
-    AND?: UserWhereInput | UserWhereInput[]
-    OR?: UserWhereInput[]
-    NOT?: UserWhereInput | UserWhereInput[]
-    name?: StringNullableFilter<"User"> | string | null
-    image?: StringNullableFilter<"User"> | string | null
-    plus?: BoolFilter<"User"> | boolean
-    is_active?: BoolFilter<"User"> | boolean
-    expire_at?: DateTimeNullableFilter<"User"> | Date | string | null
-    createdAt?: DateTimeFilter<"User"> | Date | string
-    updatedAt?: DateTimeFilter<"User"> | Date | string
-    ChatMessages?: ChatMessagesListRelationFilter
-    PDF?: PDFListRelationFilter
-  }, "id" | "email">
-
-  export type UserOrderByWithAggregationInput = {
-    id?: SortOrder
-    email?: SortOrder
-    name?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
-    plus?: SortOrder
-    is_active?: SortOrder
-    expire_at?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: UserCountOrderByAggregateInput
-    _max?: UserMaxOrderByAggregateInput
-    _min?: UserMinOrderByAggregateInput
-  }
-
-  export type UserScalarWhereWithAggregatesInput = {
-    AND?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
-    OR?: UserScalarWhereWithAggregatesInput[]
-    NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"User"> | string
-    email?: StringWithAggregatesFilter<"User"> | string
-    name?: StringNullableWithAggregatesFilter<"User"> | string | null
-    image?: StringNullableWithAggregatesFilter<"User"> | string | null
-    plus?: BoolWithAggregatesFilter<"User"> | boolean
-    is_active?: BoolWithAggregatesFilter<"User"> | boolean
-    expire_at?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-  }
-
   export type chat_messagesWhereInput = {
     AND?: chat_messagesWhereInput | chat_messagesWhereInput[]
     OR?: chat_messagesWhereInput[]
@@ -35057,7 +31114,7 @@ export namespace Prisma {
     chunkNumber?: IntFilter<"document_chunks"> | number
     createdAt?: DateTimeFilter<"document_chunks"> | Date | string
     updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
-    PDF?: XOR<PDFScalarRelationFilter, PDFWhereInput>
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
     vector_embeddings?: XOR<Vector_embeddingsNullableScalarRelationFilter, vector_embeddingsWhereInput> | null
   }
 
@@ -35069,7 +31126,7 @@ export namespace Prisma {
     chunkNumber?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    PDF?: PDFOrderByWithRelationInput
+    pdfs?: pdfsOrderByWithRelationInput
     vector_embeddings?: vector_embeddingsOrderByWithRelationInput
   }
 
@@ -35084,7 +31141,7 @@ export namespace Prisma {
     chunkNumber?: IntFilter<"document_chunks"> | number
     createdAt?: DateTimeFilter<"document_chunks"> | Date | string
     updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
-    PDF?: XOR<PDFScalarRelationFilter, PDFWhereInput>
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
     vector_embeddings?: XOR<Vector_embeddingsNullableScalarRelationFilter, vector_embeddingsWhereInput> | null
   }, "id">
 
@@ -35131,6 +31188,7 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
+    document_chunks?: Document_chunksListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }
 
@@ -35146,6 +31204,7 @@ export namespace Prisma {
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     chat_messages?: chat_messagesOrderByRelationAggregateInput
+    document_chunks?: document_chunksOrderByRelationAggregateInput
     users?: usersOrderByWithRelationInput
   }
 
@@ -35164,6 +31223,7 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
+    document_chunks?: Document_chunksListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }, "id">
 
@@ -36859,240 +32919,6 @@ export namespace Prisma {
     is_anonymous?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type ChatMessagesCreateInput = {
-    id: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-    User: UserCreateNestedOneWithoutChatMessagesInput
-  }
-
-  export type ChatMessagesUncheckedCreateInput = {
-    id: string
-    userId: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-  }
-
-  export type ChatMessagesUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    User?: UserUpdateOneRequiredWithoutChatMessagesNestedInput
-  }
-
-  export type ChatMessagesUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ChatMessagesCreateManyInput = {
-    id: string
-    userId: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-  }
-
-  export type ChatMessagesUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ChatMessagesUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PDFCreateInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    contentType?: string
-    User: UserCreateNestedOneWithoutPDFInput
-    document_chunks?: document_chunksCreateNestedManyWithoutPDFInput
-  }
-
-  export type PDFUncheckedCreateInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    userId: string
-    contentType?: string
-    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPDFInput
-  }
-
-  export type PDFUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-    User?: UserUpdateOneRequiredWithoutPDFNestedInput
-    document_chunks?: document_chunksUpdateManyWithoutPDFNestedInput
-  }
-
-  export type PDFUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
-    contentType?: StringFieldUpdateOperationsInput | string
-    document_chunks?: document_chunksUncheckedUpdateManyWithoutPDFNestedInput
-  }
-
-  export type PDFCreateManyInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    userId: string
-    contentType?: string
-  }
-
-  export type PDFUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type PDFUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
-    contentType?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type UserCreateInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    ChatMessages?: ChatMessagesCreateNestedManyWithoutUserInput
-    PDF?: PDFCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    ChatMessages?: ChatMessagesUncheckedCreateNestedManyWithoutUserInput
-    PDF?: PDFUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ChatMessages?: ChatMessagesUpdateManyWithoutUserNestedInput
-    PDF?: PDFUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ChatMessages?: ChatMessagesUncheckedUpdateManyWithoutUserNestedInput
-    PDF?: PDFUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserCreateManyInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type chat_messagesCreateInput = {
     id?: string
     content: string
@@ -37168,7 +32994,7 @@ export namespace Prisma {
     chunkNumber: number
     createdAt?: Date | string
     updatedAt: Date | string
-    PDF: PDFCreateNestedOneWithoutDocument_chunksInput
+    pdfs: pdfsCreateNestedOneWithoutDocument_chunksInput
     vector_embeddings?: vector_embeddingsCreateNestedOneWithoutDocument_chunksInput
   }
 
@@ -37190,7 +33016,7 @@ export namespace Prisma {
     chunkNumber?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    PDF?: PDFUpdateOneRequiredWithoutDocument_chunksNestedInput
+    pdfs?: pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput
     vector_embeddings?: vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput
   }
 
@@ -37245,6 +33071,7 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -37260,6 +33087,7 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUpdateInput = {
@@ -37273,6 +33101,7 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -37288,6 +33117,7 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsCreateManyInput = {
@@ -38798,172 +34628,6 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
-  export type ChatMessagesCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    document_id?: SortOrder
-    content?: SortOrder
-    isUser?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type ChatMessagesMaxOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    document_id?: SortOrder
-    content?: SortOrder
-    isUser?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type ChatMessagesMinOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    document_id?: SortOrder
-    content?: SortOrder
-    isUser?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
-  export type Document_chunksListRelationFilter = {
-    every?: document_chunksWhereInput
-    some?: document_chunksWhereInput
-    none?: document_chunksWhereInput
-  }
-
-  export type document_chunksOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type PDFCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    url?: SortOrder
-    size?: SortOrder
-    uploadDate?: SortOrder
-    lastViewed?: SortOrder
-    userId?: SortOrder
-    contentType?: SortOrder
-  }
-
-  export type PDFAvgOrderByAggregateInput = {
-    size?: SortOrder
-  }
-
-  export type PDFMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    url?: SortOrder
-    size?: SortOrder
-    uploadDate?: SortOrder
-    lastViewed?: SortOrder
-    userId?: SortOrder
-    contentType?: SortOrder
-  }
-
-  export type PDFMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    url?: SortOrder
-    size?: SortOrder
-    uploadDate?: SortOrder
-    lastViewed?: SortOrder
-    userId?: SortOrder
-    contentType?: SortOrder
-  }
-
-  export type PDFSumOrderByAggregateInput = {
-    size?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type ChatMessagesListRelationFilter = {
-    every?: ChatMessagesWhereInput
-    some?: ChatMessagesWhereInput
-    none?: ChatMessagesWhereInput
-  }
-
-  export type PDFListRelationFilter = {
-    every?: PDFWhereInput
-    some?: PDFWhereInput
-    none?: PDFWhereInput
-  }
-
-  export type ChatMessagesOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type PDFOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type UserCountOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    name?: SortOrder
-    image?: SortOrder
-    plus?: SortOrder
-    is_active?: SortOrder
-    expire_at?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type UserMaxOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    name?: SortOrder
-    image?: SortOrder
-    plus?: SortOrder
-    is_active?: SortOrder
-    expire_at?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type UserMinOrderByAggregateInput = {
-    id?: SortOrder
-    email?: SortOrder
-    name?: SortOrder
-    image?: SortOrder
-    plus?: SortOrder
-    is_active?: SortOrder
-    expire_at?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
   export type PdfsNullableScalarRelationFilter = {
     is?: pdfsWhereInput | null
     isNot?: pdfsWhereInput | null
@@ -39004,9 +34668,20 @@ export namespace Prisma {
     created_at?: SortOrder
   }
 
-  export type PDFScalarRelationFilter = {
-    is?: PDFWhereInput
-    isNot?: PDFWhereInput
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type PdfsScalarRelationFilter = {
+    is?: pdfsWhereInput
+    isNot?: pdfsWhereInput
   }
 
   export type Vector_embeddingsNullableScalarRelationFilter = {
@@ -39052,6 +34727,32 @@ export namespace Prisma {
   export type document_chunksSumOrderByAggregateInput = {
     pageNumber?: SortOrder
     chunkNumber?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type Document_chunksListRelationFilter = {
+    every?: document_chunksWhereInput
+    some?: document_chunksWhereInput
+    none?: document_chunksWhereInput
+  }
+
+  export type document_chunksOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type pdfsCountOrderByAggregateInput = {
@@ -40126,168 +35827,6 @@ export namespace Prisma {
     update?: XOR<XOR<user_profilesUpdateToOneWithWhereWithoutUsersInput, user_profilesUpdateWithoutUsersInput>, user_profilesUncheckedUpdateWithoutUsersInput>
   }
 
-  export type UserCreateNestedOneWithoutChatMessagesInput = {
-    create?: XOR<UserCreateWithoutChatMessagesInput, UserUncheckedCreateWithoutChatMessagesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutChatMessagesInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type UserUpdateOneRequiredWithoutChatMessagesNestedInput = {
-    create?: XOR<UserCreateWithoutChatMessagesInput, UserUncheckedCreateWithoutChatMessagesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutChatMessagesInput
-    upsert?: UserUpsertWithoutChatMessagesInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutChatMessagesInput, UserUpdateWithoutChatMessagesInput>, UserUncheckedUpdateWithoutChatMessagesInput>
-  }
-
-  export type UserCreateNestedOneWithoutPDFInput = {
-    create?: XOR<UserCreateWithoutPDFInput, UserUncheckedCreateWithoutPDFInput>
-    connectOrCreate?: UserCreateOrConnectWithoutPDFInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type document_chunksCreateNestedManyWithoutPDFInput = {
-    create?: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput> | document_chunksCreateWithoutPDFInput[] | document_chunksUncheckedCreateWithoutPDFInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPDFInput | document_chunksCreateOrConnectWithoutPDFInput[]
-    createMany?: document_chunksCreateManyPDFInputEnvelope
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-  }
-
-  export type document_chunksUncheckedCreateNestedManyWithoutPDFInput = {
-    create?: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput> | document_chunksCreateWithoutPDFInput[] | document_chunksUncheckedCreateWithoutPDFInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPDFInput | document_chunksCreateOrConnectWithoutPDFInput[]
-    createMany?: document_chunksCreateManyPDFInputEnvelope
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type UserUpdateOneRequiredWithoutPDFNestedInput = {
-    create?: XOR<UserCreateWithoutPDFInput, UserUncheckedCreateWithoutPDFInput>
-    connectOrCreate?: UserCreateOrConnectWithoutPDFInput
-    upsert?: UserUpsertWithoutPDFInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPDFInput, UserUpdateWithoutPDFInput>, UserUncheckedUpdateWithoutPDFInput>
-  }
-
-  export type document_chunksUpdateManyWithoutPDFNestedInput = {
-    create?: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput> | document_chunksCreateWithoutPDFInput[] | document_chunksUncheckedCreateWithoutPDFInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPDFInput | document_chunksCreateOrConnectWithoutPDFInput[]
-    upsert?: document_chunksUpsertWithWhereUniqueWithoutPDFInput | document_chunksUpsertWithWhereUniqueWithoutPDFInput[]
-    createMany?: document_chunksCreateManyPDFInputEnvelope
-    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    update?: document_chunksUpdateWithWhereUniqueWithoutPDFInput | document_chunksUpdateWithWhereUniqueWithoutPDFInput[]
-    updateMany?: document_chunksUpdateManyWithWhereWithoutPDFInput | document_chunksUpdateManyWithWhereWithoutPDFInput[]
-    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-  }
-
-  export type document_chunksUncheckedUpdateManyWithoutPDFNestedInput = {
-    create?: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput> | document_chunksCreateWithoutPDFInput[] | document_chunksUncheckedCreateWithoutPDFInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPDFInput | document_chunksCreateOrConnectWithoutPDFInput[]
-    upsert?: document_chunksUpsertWithWhereUniqueWithoutPDFInput | document_chunksUpsertWithWhereUniqueWithoutPDFInput[]
-    createMany?: document_chunksCreateManyPDFInputEnvelope
-    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    update?: document_chunksUpdateWithWhereUniqueWithoutPDFInput | document_chunksUpdateWithWhereUniqueWithoutPDFInput[]
-    updateMany?: document_chunksUpdateManyWithWhereWithoutPDFInput | document_chunksUpdateManyWithWhereWithoutPDFInput[]
-    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-  }
-
-  export type ChatMessagesCreateNestedManyWithoutUserInput = {
-    create?: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput> | ChatMessagesCreateWithoutUserInput[] | ChatMessagesUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: ChatMessagesCreateOrConnectWithoutUserInput | ChatMessagesCreateOrConnectWithoutUserInput[]
-    createMany?: ChatMessagesCreateManyUserInputEnvelope
-    connect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-  }
-
-  export type PDFCreateNestedManyWithoutUserInput = {
-    create?: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput> | PDFCreateWithoutUserInput[] | PDFUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: PDFCreateOrConnectWithoutUserInput | PDFCreateOrConnectWithoutUserInput[]
-    createMany?: PDFCreateManyUserInputEnvelope
-    connect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-  }
-
-  export type ChatMessagesUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput> | ChatMessagesCreateWithoutUserInput[] | ChatMessagesUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: ChatMessagesCreateOrConnectWithoutUserInput | ChatMessagesCreateOrConnectWithoutUserInput[]
-    createMany?: ChatMessagesCreateManyUserInputEnvelope
-    connect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-  }
-
-  export type PDFUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput> | PDFCreateWithoutUserInput[] | PDFUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: PDFCreateOrConnectWithoutUserInput | PDFCreateOrConnectWithoutUserInput[]
-    createMany?: PDFCreateManyUserInputEnvelope
-    connect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-  }
-
-  export type ChatMessagesUpdateManyWithoutUserNestedInput = {
-    create?: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput> | ChatMessagesCreateWithoutUserInput[] | ChatMessagesUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: ChatMessagesCreateOrConnectWithoutUserInput | ChatMessagesCreateOrConnectWithoutUserInput[]
-    upsert?: ChatMessagesUpsertWithWhereUniqueWithoutUserInput | ChatMessagesUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: ChatMessagesCreateManyUserInputEnvelope
-    set?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    disconnect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    delete?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    connect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    update?: ChatMessagesUpdateWithWhereUniqueWithoutUserInput | ChatMessagesUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: ChatMessagesUpdateManyWithWhereWithoutUserInput | ChatMessagesUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: ChatMessagesScalarWhereInput | ChatMessagesScalarWhereInput[]
-  }
-
-  export type PDFUpdateManyWithoutUserNestedInput = {
-    create?: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput> | PDFCreateWithoutUserInput[] | PDFUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: PDFCreateOrConnectWithoutUserInput | PDFCreateOrConnectWithoutUserInput[]
-    upsert?: PDFUpsertWithWhereUniqueWithoutUserInput | PDFUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: PDFCreateManyUserInputEnvelope
-    set?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    disconnect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    delete?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    connect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    update?: PDFUpdateWithWhereUniqueWithoutUserInput | PDFUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: PDFUpdateManyWithWhereWithoutUserInput | PDFUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: PDFScalarWhereInput | PDFScalarWhereInput[]
-  }
-
-  export type ChatMessagesUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput> | ChatMessagesCreateWithoutUserInput[] | ChatMessagesUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: ChatMessagesCreateOrConnectWithoutUserInput | ChatMessagesCreateOrConnectWithoutUserInput[]
-    upsert?: ChatMessagesUpsertWithWhereUniqueWithoutUserInput | ChatMessagesUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: ChatMessagesCreateManyUserInputEnvelope
-    set?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    disconnect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    delete?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    connect?: ChatMessagesWhereUniqueInput | ChatMessagesWhereUniqueInput[]
-    update?: ChatMessagesUpdateWithWhereUniqueWithoutUserInput | ChatMessagesUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: ChatMessagesUpdateManyWithWhereWithoutUserInput | ChatMessagesUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: ChatMessagesScalarWhereInput | ChatMessagesScalarWhereInput[]
-  }
-
-  export type PDFUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput> | PDFCreateWithoutUserInput[] | PDFUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: PDFCreateOrConnectWithoutUserInput | PDFCreateOrConnectWithoutUserInput[]
-    upsert?: PDFUpsertWithWhereUniqueWithoutUserInput | PDFUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: PDFCreateManyUserInputEnvelope
-    set?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    disconnect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    delete?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    connect?: PDFWhereUniqueInput | PDFWhereUniqueInput[]
-    update?: PDFUpdateWithWhereUniqueWithoutUserInput | PDFUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: PDFUpdateManyWithWhereWithoutUserInput | PDFUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: PDFScalarWhereInput | PDFScalarWhereInput[]
-  }
-
   export type pdfsCreateNestedOneWithoutChat_messagesInput = {
     create?: XOR<pdfsCreateWithoutChat_messagesInput, pdfsUncheckedCreateWithoutChat_messagesInput>
     connectOrCreate?: pdfsCreateOrConnectWithoutChat_messagesInput
@@ -40320,10 +35859,10 @@ export namespace Prisma {
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutChat_messagesInput, usersUpdateWithoutChat_messagesInput>, usersUncheckedUpdateWithoutChat_messagesInput>
   }
 
-  export type PDFCreateNestedOneWithoutDocument_chunksInput = {
-    create?: XOR<PDFCreateWithoutDocument_chunksInput, PDFUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: PDFCreateOrConnectWithoutDocument_chunksInput
-    connect?: PDFWhereUniqueInput
+  export type pdfsCreateNestedOneWithoutDocument_chunksInput = {
+    create?: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutDocument_chunksInput
+    connect?: pdfsWhereUniqueInput
   }
 
   export type vector_embeddingsCreateNestedOneWithoutDocument_chunksInput = {
@@ -40338,12 +35877,20 @@ export namespace Prisma {
     connect?: vector_embeddingsWhereUniqueInput
   }
 
-  export type PDFUpdateOneRequiredWithoutDocument_chunksNestedInput = {
-    create?: XOR<PDFCreateWithoutDocument_chunksInput, PDFUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: PDFCreateOrConnectWithoutDocument_chunksInput
-    upsert?: PDFUpsertWithoutDocument_chunksInput
-    connect?: PDFWhereUniqueInput
-    update?: XOR<XOR<PDFUpdateToOneWithWhereWithoutDocument_chunksInput, PDFUpdateWithoutDocument_chunksInput>, PDFUncheckedUpdateWithoutDocument_chunksInput>
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput = {
+    create?: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutDocument_chunksInput
+    upsert?: pdfsUpsertWithoutDocument_chunksInput
+    connect?: pdfsWhereUniqueInput
+    update?: XOR<XOR<pdfsUpdateToOneWithWhereWithoutDocument_chunksInput, pdfsUpdateWithoutDocument_chunksInput>, pdfsUncheckedUpdateWithoutDocument_chunksInput>
   }
 
   export type vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput = {
@@ -40373,6 +35920,13 @@ export namespace Prisma {
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
   }
 
+  export type document_chunksCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
+    createMany?: document_chunksCreateManyPdfsInputEnvelope
+    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+  }
+
   export type usersCreateNestedOneWithoutPdfsInput = {
     create?: XOR<usersCreateWithoutPdfsInput, usersUncheckedCreateWithoutPdfsInput>
     connectOrCreate?: usersCreateOrConnectWithoutPdfsInput
@@ -40384,6 +35938,13 @@ export namespace Prisma {
     connectOrCreate?: chat_messagesCreateOrConnectWithoutPdfsInput | chat_messagesCreateOrConnectWithoutPdfsInput[]
     createMany?: chat_messagesCreateManyPdfsInputEnvelope
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
+  }
+
+  export type document_chunksUncheckedCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
+    createMany?: document_chunksCreateManyPdfsInputEnvelope
+    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
   }
 
   export type chat_messagesUpdateManyWithoutPdfsNestedInput = {
@@ -40398,6 +35959,20 @@ export namespace Prisma {
     update?: chat_messagesUpdateWithWhereUniqueWithoutPdfsInput | chat_messagesUpdateWithWhereUniqueWithoutPdfsInput[]
     updateMany?: chat_messagesUpdateManyWithWhereWithoutPdfsInput | chat_messagesUpdateManyWithWhereWithoutPdfsInput[]
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
+  }
+
+  export type document_chunksUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
+    upsert?: document_chunksUpsertWithWhereUniqueWithoutPdfsInput | document_chunksUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: document_chunksCreateManyPdfsInputEnvelope
+    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    update?: document_chunksUpdateWithWhereUniqueWithoutPdfsInput | document_chunksUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: document_chunksUpdateManyWithWhereWithoutPdfsInput | document_chunksUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
   }
 
   export type usersUpdateOneWithoutPdfsNestedInput = {
@@ -40422,6 +35997,20 @@ export namespace Prisma {
     update?: chat_messagesUpdateWithWhereUniqueWithoutPdfsInput | chat_messagesUpdateWithWhereUniqueWithoutPdfsInput[]
     updateMany?: chat_messagesUpdateManyWithWhereWithoutPdfsInput | chat_messagesUpdateManyWithWhereWithoutPdfsInput[]
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
+  }
+
+  export type document_chunksUncheckedUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
+    upsert?: document_chunksUpsertWithWhereUniqueWithoutPdfsInput | document_chunksUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: document_chunksCreateManyPdfsInputEnvelope
+    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+    update?: document_chunksUpdateWithWhereUniqueWithoutPdfsInput | document_chunksUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: document_chunksUpdateManyWithWhereWithoutPdfsInput | document_chunksUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
   }
 
   export type usersCreateNestedOneWithoutPlusInput = {
@@ -42753,6 +38342,7 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUncheckedCreateWithoutUsersInput = {
@@ -42766,6 +38356,7 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutUsersInput = {
@@ -43118,317 +38709,6 @@ export namespace Prisma {
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type UserCreateWithoutChatMessagesInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    PDF?: PDFCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutChatMessagesInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    PDF?: PDFUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutChatMessagesInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutChatMessagesInput, UserUncheckedCreateWithoutChatMessagesInput>
-  }
-
-  export type UserUpsertWithoutChatMessagesInput = {
-    update: XOR<UserUpdateWithoutChatMessagesInput, UserUncheckedUpdateWithoutChatMessagesInput>
-    create: XOR<UserCreateWithoutChatMessagesInput, UserUncheckedCreateWithoutChatMessagesInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutChatMessagesInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutChatMessagesInput, UserUncheckedUpdateWithoutChatMessagesInput>
-  }
-
-  export type UserUpdateWithoutChatMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    PDF?: PDFUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutChatMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    PDF?: PDFUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserCreateWithoutPDFInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    ChatMessages?: ChatMessagesCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutPDFInput = {
-    id: string
-    email: string
-    name?: string | null
-    image?: string | null
-    plus?: boolean
-    is_active?: boolean
-    expire_at?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    ChatMessages?: ChatMessagesUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutPDFInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutPDFInput, UserUncheckedCreateWithoutPDFInput>
-  }
-
-  export type document_chunksCreateWithoutPDFInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    vector_embeddings?: vector_embeddingsCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksUncheckedCreateWithoutPDFInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    vector_embeddings?: vector_embeddingsUncheckedCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksCreateOrConnectWithoutPDFInput = {
-    where: document_chunksWhereUniqueInput
-    create: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput>
-  }
-
-  export type document_chunksCreateManyPDFInputEnvelope = {
-    data: document_chunksCreateManyPDFInput | document_chunksCreateManyPDFInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type UserUpsertWithoutPDFInput = {
-    update: XOR<UserUpdateWithoutPDFInput, UserUncheckedUpdateWithoutPDFInput>
-    create: XOR<UserCreateWithoutPDFInput, UserUncheckedCreateWithoutPDFInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutPDFInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutPDFInput, UserUncheckedUpdateWithoutPDFInput>
-  }
-
-  export type UserUpdateWithoutPDFInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ChatMessages?: ChatMessagesUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutPDFInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    plus?: BoolFieldUpdateOperationsInput | boolean
-    is_active?: BoolFieldUpdateOperationsInput | boolean
-    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ChatMessages?: ChatMessagesUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type document_chunksUpsertWithWhereUniqueWithoutPDFInput = {
-    where: document_chunksWhereUniqueInput
-    update: XOR<document_chunksUpdateWithoutPDFInput, document_chunksUncheckedUpdateWithoutPDFInput>
-    create: XOR<document_chunksCreateWithoutPDFInput, document_chunksUncheckedCreateWithoutPDFInput>
-  }
-
-  export type document_chunksUpdateWithWhereUniqueWithoutPDFInput = {
-    where: document_chunksWhereUniqueInput
-    data: XOR<document_chunksUpdateWithoutPDFInput, document_chunksUncheckedUpdateWithoutPDFInput>
-  }
-
-  export type document_chunksUpdateManyWithWhereWithoutPDFInput = {
-    where: document_chunksScalarWhereInput
-    data: XOR<document_chunksUpdateManyMutationInput, document_chunksUncheckedUpdateManyWithoutPDFInput>
-  }
-
-  export type document_chunksScalarWhereInput = {
-    AND?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-    OR?: document_chunksScalarWhereInput[]
-    NOT?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-    id?: StringFilter<"document_chunks"> | string
-    documentId?: StringFilter<"document_chunks"> | string
-    content?: StringFilter<"document_chunks"> | string
-    pageNumber?: IntFilter<"document_chunks"> | number
-    chunkNumber?: IntFilter<"document_chunks"> | number
-    createdAt?: DateTimeFilter<"document_chunks"> | Date | string
-    updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
-  }
-
-  export type ChatMessagesCreateWithoutUserInput = {
-    id: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-  }
-
-  export type ChatMessagesUncheckedCreateWithoutUserInput = {
-    id: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-  }
-
-  export type ChatMessagesCreateOrConnectWithoutUserInput = {
-    where: ChatMessagesWhereUniqueInput
-    create: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput>
-  }
-
-  export type ChatMessagesCreateManyUserInputEnvelope = {
-    data: ChatMessagesCreateManyUserInput | ChatMessagesCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type PDFCreateWithoutUserInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    contentType?: string
-    document_chunks?: document_chunksCreateNestedManyWithoutPDFInput
-  }
-
-  export type PDFUncheckedCreateWithoutUserInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    contentType?: string
-    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPDFInput
-  }
-
-  export type PDFCreateOrConnectWithoutUserInput = {
-    where: PDFWhereUniqueInput
-    create: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput>
-  }
-
-  export type PDFCreateManyUserInputEnvelope = {
-    data: PDFCreateManyUserInput | PDFCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ChatMessagesUpsertWithWhereUniqueWithoutUserInput = {
-    where: ChatMessagesWhereUniqueInput
-    update: XOR<ChatMessagesUpdateWithoutUserInput, ChatMessagesUncheckedUpdateWithoutUserInput>
-    create: XOR<ChatMessagesCreateWithoutUserInput, ChatMessagesUncheckedCreateWithoutUserInput>
-  }
-
-  export type ChatMessagesUpdateWithWhereUniqueWithoutUserInput = {
-    where: ChatMessagesWhereUniqueInput
-    data: XOR<ChatMessagesUpdateWithoutUserInput, ChatMessagesUncheckedUpdateWithoutUserInput>
-  }
-
-  export type ChatMessagesUpdateManyWithWhereWithoutUserInput = {
-    where: ChatMessagesScalarWhereInput
-    data: XOR<ChatMessagesUpdateManyMutationInput, ChatMessagesUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type ChatMessagesScalarWhereInput = {
-    AND?: ChatMessagesScalarWhereInput | ChatMessagesScalarWhereInput[]
-    OR?: ChatMessagesScalarWhereInput[]
-    NOT?: ChatMessagesScalarWhereInput | ChatMessagesScalarWhereInput[]
-    id?: StringFilter<"ChatMessages"> | string
-    userId?: StringFilter<"ChatMessages"> | string
-    document_id?: StringFilter<"ChatMessages"> | string
-    content?: StringFilter<"ChatMessages"> | string
-    isUser?: BoolFilter<"ChatMessages"> | boolean
-    timestamp?: DateTimeFilter<"ChatMessages"> | Date | string
-  }
-
-  export type PDFUpsertWithWhereUniqueWithoutUserInput = {
-    where: PDFWhereUniqueInput
-    update: XOR<PDFUpdateWithoutUserInput, PDFUncheckedUpdateWithoutUserInput>
-    create: XOR<PDFCreateWithoutUserInput, PDFUncheckedCreateWithoutUserInput>
-  }
-
-  export type PDFUpdateWithWhereUniqueWithoutUserInput = {
-    where: PDFWhereUniqueInput
-    data: XOR<PDFUpdateWithoutUserInput, PDFUncheckedUpdateWithoutUserInput>
-  }
-
-  export type PDFUpdateManyWithWhereWithoutUserInput = {
-    where: PDFScalarWhereInput
-    data: XOR<PDFUpdateManyMutationInput, PDFUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type PDFScalarWhereInput = {
-    AND?: PDFScalarWhereInput | PDFScalarWhereInput[]
-    OR?: PDFScalarWhereInput[]
-    NOT?: PDFScalarWhereInput | PDFScalarWhereInput[]
-    id?: StringFilter<"PDF"> | string
-    name?: StringFilter<"PDF"> | string
-    url?: StringFilter<"PDF"> | string
-    size?: IntFilter<"PDF"> | number
-    uploadDate?: DateTimeFilter<"PDF"> | Date | string
-    lastViewed?: DateTimeFilter<"PDF"> | Date | string
-    userId?: StringFilter<"PDF"> | string
-    contentType?: StringFilter<"PDF"> | string
-  }
-
   export type pdfsCreateWithoutChat_messagesInput = {
     id?: string
     name: string
@@ -43439,6 +38719,7 @@ export namespace Prisma {
     content_type?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -43453,6 +38734,7 @@ export namespace Prisma {
     content_type?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutChat_messagesInput = {
@@ -43578,6 +38860,7 @@ export namespace Prisma {
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -43592,6 +38875,7 @@ export namespace Prisma {
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type usersUpsertWithoutChat_messagesInput = {
@@ -43697,31 +38981,37 @@ export namespace Prisma {
     user_profiles?: user_profilesUncheckedUpdateOneWithoutUsersNestedInput
   }
 
-  export type PDFCreateWithoutDocument_chunksInput = {
-    id: string
+  export type pdfsCreateWithoutDocument_chunksInput = {
+    id?: string
     name: string
     url: string
     size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    contentType?: string
-    User: UserCreateNestedOneWithoutPDFInput
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    content_type?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    users?: usersCreateNestedOneWithoutPdfsInput
   }
 
-  export type PDFUncheckedCreateWithoutDocument_chunksInput = {
-    id: string
+  export type pdfsUncheckedCreateWithoutDocument_chunksInput = {
+    id?: string
     name: string
     url: string
     size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    userId: string
-    contentType?: string
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    user_id?: string | null
+    content_type?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
   }
 
-  export type PDFCreateOrConnectWithoutDocument_chunksInput = {
-    where: PDFWhereUniqueInput
-    create: XOR<PDFCreateWithoutDocument_chunksInput, PDFUncheckedCreateWithoutDocument_chunksInput>
+  export type pdfsCreateOrConnectWithoutDocument_chunksInput = {
+    where: pdfsWhereUniqueInput
+    create: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
   }
 
   export type vector_embeddingsCreateWithoutDocument_chunksInput = {
@@ -43747,37 +39037,43 @@ export namespace Prisma {
     create: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
   }
 
-  export type PDFUpsertWithoutDocument_chunksInput = {
-    update: XOR<PDFUpdateWithoutDocument_chunksInput, PDFUncheckedUpdateWithoutDocument_chunksInput>
-    create: XOR<PDFCreateWithoutDocument_chunksInput, PDFUncheckedCreateWithoutDocument_chunksInput>
-    where?: PDFWhereInput
+  export type pdfsUpsertWithoutDocument_chunksInput = {
+    update: XOR<pdfsUpdateWithoutDocument_chunksInput, pdfsUncheckedUpdateWithoutDocument_chunksInput>
+    create: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
+    where?: pdfsWhereInput
   }
 
-  export type PDFUpdateToOneWithWhereWithoutDocument_chunksInput = {
-    where?: PDFWhereInput
-    data: XOR<PDFUpdateWithoutDocument_chunksInput, PDFUncheckedUpdateWithoutDocument_chunksInput>
+  export type pdfsUpdateToOneWithWhereWithoutDocument_chunksInput = {
+    where?: pdfsWhereInput
+    data: XOR<pdfsUpdateWithoutDocument_chunksInput, pdfsUncheckedUpdateWithoutDocument_chunksInput>
   }
 
-  export type PDFUpdateWithoutDocument_chunksInput = {
+  export type pdfsUpdateWithoutDocument_chunksInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
     size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-    User?: UserUpdateOneRequiredWithoutPDFNestedInput
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
-  export type PDFUncheckedUpdateWithoutDocument_chunksInput = {
+  export type pdfsUncheckedUpdateWithoutDocument_chunksInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
     size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
-    contentType?: StringFieldUpdateOperationsInput | string
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type vector_embeddingsUpsertWithoutDocument_chunksInput = {
@@ -43834,6 +39130,36 @@ export namespace Prisma {
 
   export type chat_messagesCreateManyPdfsInputEnvelope = {
     data: chat_messagesCreateManyPdfsInput | chat_messagesCreateManyPdfsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type document_chunksCreateWithoutPdfsInput = {
+    id: string
+    content: string
+    pageNumber: number
+    chunkNumber: number
+    createdAt?: Date | string
+    updatedAt: Date | string
+    vector_embeddings?: vector_embeddingsCreateNestedOneWithoutDocument_chunksInput
+  }
+
+  export type document_chunksUncheckedCreateWithoutPdfsInput = {
+    id: string
+    content: string
+    pageNumber: number
+    chunkNumber: number
+    createdAt?: Date | string
+    updatedAt: Date | string
+    vector_embeddings?: vector_embeddingsUncheckedCreateNestedOneWithoutDocument_chunksInput
+  }
+
+  export type document_chunksCreateOrConnectWithoutPdfsInput = {
+    where: document_chunksWhereUniqueInput
+    create: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type document_chunksCreateManyPdfsInputEnvelope = {
+    data: document_chunksCreateManyPdfsInput | document_chunksCreateManyPdfsInput[]
     skipDuplicates?: boolean
   }
 
@@ -43948,6 +39274,35 @@ export namespace Prisma {
   export type chat_messagesUpdateManyWithWhereWithoutPdfsInput = {
     where: chat_messagesScalarWhereInput
     data: XOR<chat_messagesUpdateManyMutationInput, chat_messagesUncheckedUpdateManyWithoutPdfsInput>
+  }
+
+  export type document_chunksUpsertWithWhereUniqueWithoutPdfsInput = {
+    where: document_chunksWhereUniqueInput
+    update: XOR<document_chunksUpdateWithoutPdfsInput, document_chunksUncheckedUpdateWithoutPdfsInput>
+    create: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type document_chunksUpdateWithWhereUniqueWithoutPdfsInput = {
+    where: document_chunksWhereUniqueInput
+    data: XOR<document_chunksUpdateWithoutPdfsInput, document_chunksUncheckedUpdateWithoutPdfsInput>
+  }
+
+  export type document_chunksUpdateManyWithWhereWithoutPdfsInput = {
+    where: document_chunksScalarWhereInput
+    data: XOR<document_chunksUpdateManyMutationInput, document_chunksUncheckedUpdateManyWithoutPdfsInput>
+  }
+
+  export type document_chunksScalarWhereInput = {
+    AND?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
+    OR?: document_chunksScalarWhereInput[]
+    NOT?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
+    id?: StringFilter<"document_chunks"> | string
+    documentId?: StringFilter<"document_chunks"> | string
+    content?: StringFilter<"document_chunks"> | string
+    pageNumber?: IntFilter<"document_chunks"> | number
+    chunkNumber?: IntFilter<"document_chunks"> | number
+    createdAt?: DateTimeFilter<"document_chunks"> | Date | string
+    updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
   }
 
   export type usersUpsertWithoutPdfsInput = {
@@ -44660,7 +40015,7 @@ export namespace Prisma {
     chunkNumber: number
     createdAt?: Date | string
     updatedAt: Date | string
-    PDF: PDFCreateNestedOneWithoutDocument_chunksInput
+    pdfs: pdfsCreateNestedOneWithoutDocument_chunksInput
   }
 
   export type document_chunksUncheckedCreateWithoutVector_embeddingsInput = {
@@ -44696,7 +40051,7 @@ export namespace Prisma {
     chunkNumber?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    PDF?: PDFUpdateOneRequiredWithoutDocument_chunksNestedInput
+    pdfs?: pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput
   }
 
   export type document_chunksUncheckedUpdateWithoutVector_embeddingsInput = {
@@ -45222,6 +40577,7 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateWithoutUsersInput = {
@@ -45235,6 +40591,7 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateManyWithoutUsersInput = {
@@ -45249,118 +40606,6 @@ export namespace Prisma {
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type document_chunksCreateManyPDFInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type document_chunksUpdateWithoutPDFInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    vector_embeddings?: vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateWithoutPDFInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    vector_embeddings?: vector_embeddingsUncheckedUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateManyWithoutPDFInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ChatMessagesCreateManyUserInput = {
-    id: string
-    document_id: string
-    content: string
-    isUser?: boolean
-    timestamp?: Date | string
-  }
-
-  export type PDFCreateManyUserInput = {
-    id: string
-    name: string
-    url: string
-    size: number
-    uploadDate?: Date | string
-    lastViewed?: Date | string
-    contentType?: string
-  }
-
-  export type ChatMessagesUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ChatMessagesUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ChatMessagesUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    document_id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    isUser?: BoolFieldUpdateOperationsInput | boolean
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type PDFUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-    document_chunks?: document_chunksUpdateManyWithoutPDFNestedInput
-  }
-
-  export type PDFUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-    document_chunks?: document_chunksUncheckedUpdateManyWithoutPDFNestedInput
-  }
-
-  export type PDFUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    uploadDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    lastViewed?: DateTimeFieldUpdateOperationsInput | Date | string
-    contentType?: StringFieldUpdateOperationsInput | string
-  }
-
   export type chat_messagesCreateManyPdfsInput = {
     id?: string
     user_id?: string | null
@@ -45368,6 +40613,15 @@ export namespace Prisma {
     is_user?: boolean | null
     timestamp?: Date | string | null
     created_at?: Date | string | null
+  }
+
+  export type document_chunksCreateManyPdfsInput = {
+    id: string
+    content: string
+    pageNumber: number
+    chunkNumber: number
+    createdAt?: Date | string
+    updatedAt: Date | string
   }
 
   export type chat_messagesUpdateWithoutPdfsInput = {
@@ -45395,6 +40649,35 @@ export namespace Prisma {
     is_user?: NullableBoolFieldUpdateOperationsInput | boolean | null
     timestamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type document_chunksUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    pageNumber?: IntFieldUpdateOperationsInput | number
+    chunkNumber?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vector_embeddings?: vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput
+  }
+
+  export type document_chunksUncheckedUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    pageNumber?: IntFieldUpdateOperationsInput | number
+    chunkNumber?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vector_embeddings?: vector_embeddingsUncheckedUpdateOneWithoutDocument_chunksNestedInput
+  }
+
+  export type document_chunksUncheckedUpdateManyWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    pageNumber?: IntFieldUpdateOperationsInput | number
+    chunkNumber?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 
