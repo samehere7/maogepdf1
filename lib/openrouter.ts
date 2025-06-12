@@ -8,7 +8,8 @@ interface AnalysisResult {
   conclusions: string
 }
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY_FAST as string
+// 使用新的API密钥
+const OPENROUTER_API_KEY = "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"
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async function callOpenRouter(messages: any[]) {
@@ -18,7 +19,7 @@ async function callOpenRouter(messages: any[]) {
       headers: {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://maoge-pdf.vercel.app",
+        "HTTP-Referer": "https://maoge.pdf",
         "X-Title": "Maoge PDF",
       },
       body: JSON.stringify({

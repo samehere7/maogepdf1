@@ -6,6 +6,8 @@ import { PDFDocumentProxy } from 'pdfjs-dist';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from "lucide-react";
+import TextSelectionToolbar from './text-selection-toolbar';
+import AIResultDialog from './ai-result-dialog';
 
 // 设置 PDF.js worker
 if (typeof window !== 'undefined') {
@@ -25,6 +27,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [scale, setScale] = useState(1.0);
+  const [fitToWidth, setFitToWidth] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pageInput, setPageInput] = useState('1');
@@ -33,6 +36,21 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
   const [pageHeights, setPageHeights] = useState<{[key: number]: number}>({});
   const [initialLoad, setInitialLoad] = useState(true);
   const renderInProgress = useRef(false);
+
+  // 文本选择相关状态
+  const [toolbarPosition, setToolbarPosition] = useState<{ x: number; y: number } | null>(null);
+  const [selectedText, setSelectedText] = useState<string>('');
+  const [dialogState, setDialogState] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: string | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    content: null,
+    isLoading: false
+  });
 
   // 加载PDF文件
   useEffect(() => {
@@ -128,13 +146,40 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         const containerWidth = container.clientWidth - 40; // 减去内边距
         const estimatedHeight = containerWidth * aspectRatio;
         
+        // 计算适合的缩放比例
+        if (fitToWidth) {
+          const optimalScale = containerWidth / viewport.width;
+          setScale(Math.min(optimalScale, 2.0)); // 最大缩放2倍
+        }
+        
         // 创建所有页面的占位符
         for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-          // 创建页面容器
           const pageContainer = document.createElement('div');
           pageContainer.className = 'pdf-page mb-6 flex justify-center';
           pageContainer.setAttribute('data-page-num', pageNum.toString());
           pageContainer.style.minHeight = `${estimatedHeight}px`;
+          
+          // 添加自定义样式
+          const style = document.createElement('style');
+          style.textContent = `
+            ::selection {
+              background: rgba(0, 123, 255, 0.3) !important;
+              color: inherit !important;
+            }
+            ::-moz-selection {
+              background: rgba(0, 123, 255, 0.3) !important;
+              color: inherit !important;
+            }
+            .pdf-page canvas {
+              user-select: text !important;
+              -webkit-user-select: text !important;
+            }
+            .pdf-page canvas::selection {
+              background: rgba(0, 123, 255, 0.3) !important;
+              color: inherit !important;
+            }
+          `;
+          document.head.appendChild(style);
           
           // 存储估计的页面高度
           newPageHeights[pageNum] = estimatedHeight;
@@ -281,7 +326,17 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           try {
             // 渲染PDF页面
             const page = await pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale });
+            
+            // 计算适合的缩放比例
+            let actualScale = scale;
+            if (fitToWidth && pageContainer.parentElement) {
+              const containerWidth = pageContainer.parentElement.clientWidth - 40;
+              const baseViewport = page.getViewport({ scale: 1.0 });
+              actualScale = containerWidth / baseViewport.width;
+              actualScale = Math.min(actualScale, 2.0); // 最大缩放2倍
+            }
+            
+            const viewport = page.getViewport({ scale: actualScale });
             
             // 创建canvas
             const canvas = document.createElement('canvas');
@@ -294,7 +349,9 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
             // 设置canvas尺寸
             canvas.width = viewport.width;
             canvas.height = viewport.height;
-            canvas.className = 'mx-auto shadow-md';
+            canvas.className = 'mx-auto shadow-lg border border-gray-200';
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
             
             // 更新页面容器高度
             pageContainer.style.height = `${viewport.height}px`;
@@ -365,11 +422,27 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
   };
 
   const handleZoomIn = () => {
+    setFitToWidth(false);
     setScale(prevScale => Math.min(prevScale + 0.2, 3.0));
   };
 
   const handleZoomOut = () => {
+    setFitToWidth(false);
     setScale(prevScale => Math.max(0.5, prevScale - 0.2));
+  };
+  
+  const handleFitToWidth = () => {
+    setFitToWidth(true);
+    if (containerRef.current && pdfDoc) {
+      // 重新计算缩放比例
+      const container = containerRef.current;
+      const containerWidth = container.clientWidth - 40;
+      pdfDoc.getPage(1).then(page => {
+        const viewport = page.getViewport({ scale: 1.0 });
+        const optimalScale = containerWidth / viewport.width;
+        setScale(Math.min(optimalScale, 2.0));
+      });
+    }
   };
 
   const handlePrevPage = () => {
@@ -399,6 +472,139 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         // 添加到可见页面集合
         setVisiblePages(prev => new Set([...prev, nextPage]));
       }
+    }
+  };
+
+  // 添加清除选择的函数
+  const clearSelection = () => {
+    if (window.getSelection) {
+      window.getSelection()?.removeAllRanges();
+    }
+    setToolbarPosition(null);
+    setSelectedText('');
+  };
+
+  // 修改点击事件处理
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // 如果点击的不是工具栏或其子元素，清除选择
+      if (!target.closest('.selection-toolbar')) {
+        clearSelection();
+      }
+    };
+    
+    document.addEventListener('click', handleClick);
+    
+    // 添加快捷键支持
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 按ESC键清除选择
+      if (e.key === 'Escape') {
+        clearSelection();
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // 监听文本选择
+  useEffect(() => {
+    const handleSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        setToolbarPosition(null);
+        setSelectedText('');
+        return;
+      }
+
+      const text = selection.toString().trim();
+      if (!text) {
+        setToolbarPosition(null);
+        setSelectedText('');
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      
+      // 计算工具栏位置
+      const x = rect.left + (rect.width / 2);
+      const y = rect.bottom;
+
+      setToolbarPosition({ x, y });
+      setSelectedText(text);
+    };
+
+    // 监听选择变化
+    document.addEventListener('selectionchange', handleSelection);
+    
+    // 点击空白处隐藏工具栏
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.selection-toolbar')) {
+        setToolbarPosition(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('selectionchange', handleSelection);
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  // AI处理函数
+  const handleAIOperation = async (operation: 'explain' | 'rewrite' | 'summarize') => {
+    if (!selectedText) return;
+
+    const operationTitles = {
+      explain: '解释文本',
+      rewrite: '改写文本',
+      summarize: '文本总结'
+    };
+
+    setDialogState({
+      isOpen: true,
+      title: operationTitles[operation],
+      content: null,
+      isLoading: true
+    });
+
+    try {
+      // TODO: 替换为实际的API调用
+      const response = await fetch('/api/ai/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: selectedText,
+          operation
+        }),
+      });
+
+      if (!response.ok) throw new Error('处理请求失败');
+      
+      const data = await response.json();
+      
+      setDialogState(prev => ({
+        ...prev,
+        content: data.result,
+        isLoading: false
+      }));
+    } catch (err) {
+      console.error('AI处理错误:', err);
+      setDialogState(prev => ({
+        ...prev,
+        content: '处理过程中出现错误，请重试。',
+        isLoading: false
+      }));
     }
   };
 
@@ -480,7 +686,11 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
       <div 
         ref={containerRef}
         className="border border-gray-300 rounded-lg overflow-auto flex-1 w-full bg-white"
-        style={{ height: 'calc(100% - 120px)' }}
+        style={{ 
+          height: 'calc(100% - 120px)',
+          userSelect: 'text',
+          WebkitUserSelect: 'text'
+        }}
       >
         {/* 页面将由useEffect动态添加 */}
       </div>
@@ -503,6 +713,24 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           </Button>
         </form>
       </div>
+
+      {/* 文本选择工具栏 */}
+      <TextSelectionToolbar
+        position={toolbarPosition}
+        onExplain={() => handleAIOperation('explain')}
+        onRewrite={() => handleAIOperation('rewrite')}
+        onSummarize={() => handleAIOperation('summarize')}
+        isLoading={dialogState.isLoading}
+      />
+
+      {/* AI处理结果对话框 */}
+      <AIResultDialog
+        isOpen={dialogState.isOpen}
+        onClose={() => setDialogState(prev => ({ ...prev, isOpen: false }))}
+        title={dialogState.title}
+        content={dialogState.content}
+        isLoading={dialogState.isLoading}
+      />
     </div>
   );
 } 

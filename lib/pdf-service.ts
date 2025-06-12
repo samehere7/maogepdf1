@@ -257,6 +257,36 @@ export async function deletePDF(pdfId: string, userId: string) {
   }
 }
 
+// 更新PDF信息
+export async function updatePDF(pdfId: string, userId: string, updates: { name?: string }) {
+  try {
+    // 1. 检查PDF是否存在且用户有权限
+    const pdf = await prisma.pdfs.findFirst({
+      where: {
+        id: pdfId,
+        user_id: userId
+      }
+    });
+
+    if (!pdf) {
+      throw new Error('PDF不存在或无权限编辑');
+    }
+
+    // 2. 更新PDF信息
+    const updatedPdf = await prisma.pdfs.update({
+      where: {
+        id: pdfId
+      },
+      data: updates
+    });
+
+    return updatedPdf;
+  } catch (error) {
+    console.error('更新PDF出错:', error);
+    throw error;
+  }
+}
+
 // 更新PDF的embeddings路径 - 现在PDF表支持embeddings
 export async function updatePDFEmbeddings(pdfId: string, embeddingsPath: string, userId: string) {
   try {

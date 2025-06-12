@@ -6,7 +6,7 @@ import { Pencil, Trash2, FolderIcon } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import SidebarSignIn from "@/components/SidebarSignIn"
 import { LanguageSelector } from "@/components/language-selector"
@@ -27,6 +27,8 @@ export function Sidebar({ className }: { className?: string }) {
   const [folderStructure, setFolderStructure] = useState<{[key: string]: string[]}>({})
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletingPdf, setDeletingPdf] = useState<{id: string, name: string} | null>(null)
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
@@ -52,6 +54,20 @@ export function Sidebar({ className }: { className?: string }) {
     // 加载本地文件夹数据（这些可以继续使用localStorage，因为它们是组织结构）
     setFolders(JSON.parse(localStorage.getItem("uploadedFolders") || "[]"))
     setFolderStructure(JSON.parse(localStorage.getItem("folderStructure") || "{}"))
+    
+    // 监听PDF重命名事件
+    const handlePdfRename = (event: CustomEvent) => {
+      const { id, newName } = event.detail;
+      setPdfs(prev => prev.map(pdf => 
+        pdf.id === id ? { ...pdf, name: newName } : pdf
+      ));
+    };
+    
+    window.addEventListener('pdf-renamed', handlePdfRename as EventListener);
+    
+    return () => {
+      window.removeEventListener('pdf-renamed', handlePdfRename as EventListener);
+    };
   }, [isLoggedIn])
 
   // 从API加载PDF列表
@@ -149,11 +165,20 @@ export function Sidebar({ className }: { className?: string }) {
     localStorage.setItem("folderStructure", JSON.stringify(newStructure))
   }
 
-  const handleDeletePdf = async (id: string) => {
-    if (!confirm('确定要删除这个PDF文件吗？')) return
+  const handleDeletePdf = (id: string) => {
+    // 找到PDF名称用于更友好的确认提示
+    const pdfToDelete = pdfs.find(pdf => pdf.id === id);
+    const pdfName = pdfToDelete?.name || 'PDF文件';
+    
+    setDeletingPdf({ id, name: pdfName });
+    setShowDeleteModal(true);
+  }
+
+  const confirmDeletePdf = async () => {
+    if (!deletingPdf) return;
 
     try {
-      const response = await fetch(`/api/pdfs/${id}`, {
+      const response = await fetch(`/api/pdfs/${deletingPdf.id}`, {
         method: 'DELETE'
       })
 
@@ -166,7 +191,7 @@ export function Sidebar({ className }: { className?: string }) {
         // Remove PDF from folder structure
         const newStructure = { ...folderStructure }
         Object.keys(newStructure).forEach(folderId => {
-          newStructure[folderId] = newStructure[folderId].filter(pdfId => pdfId !== id)
+          newStructure[folderId] = newStructure[folderId].filter(pdfId => pdfId !== deletingPdf.id)
         })
         setFolderStructure(newStructure)
         localStorage.setItem("folderStructure", JSON.stringify(newStructure))
@@ -177,6 +202,9 @@ export function Sidebar({ className }: { className?: string }) {
     } catch (error) {
       console.error('[Sidebar] 删除PDF失败:', error)
       alert('删除失败，请重试')
+    } finally {
+      setShowDeleteModal(false)
+      setDeletingPdf(null)
     }
   }
 
@@ -375,7 +403,10 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col h-screen bg-[#18181b] text-white w-60 min-w-[180px]", className)}>
       {/* 顶部标题 */}
-      <div className="flex items-center gap-2 p-4 border-b border-gray-800">
+      <div 
+        className="flex items-center gap-2 p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800/50 transition-colors"
+        onClick={() => router.push('/')}
+      >
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-600 text-white font-bold">
           P
         </div>
@@ -678,6 +709,38 @@ export function Sidebar({ className }: { className?: string }) {
           <h2 className="text-xl font-semibold mb-4">请先登录</h2>
           <p className="mb-4 text-gray-700">登录后才能新建文件夹和管理PDF。</p>
           <SidebarSignIn />
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认弹窗 */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-red-600">删除PDF文件</DialogTitle>
+            <DialogDescription className="text-gray-700 mt-2">
+              确定要删除「{deletingPdf?.name}」吗？
+            </DialogDescription>
+          </DialogHeader>
+          <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-700">
+              ⚠️ 删除后将无法恢复该PDF文件及其相关的聊天记录。
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteModal(false)}
+              className="border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
+              取消
+            </Button>
+            <Button 
+              onClick={confirmDeletePdf}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              删除
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

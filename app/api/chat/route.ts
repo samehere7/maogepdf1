@@ -1,212 +1,135 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
 import { OpenAI } from 'openai';
 import { getPDF } from '@/lib/pdf-service';
-import { prisma } from '@/lib/prisma';
-import { readFile } from 'fs/promises';
-import path from 'path';
-import { callOpenRouterChat, ModelQuality } from '../../utils/openrouter';
-import fs from 'fs';
+import { createClient } from '@/lib/supabase/server';
+import { extractTextFromPDF, summarizeTextForContext } from '@/lib/pdf-text-extractor';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
-
-// 计算余弦相似度
-function cosineSimilarity(a: number[], b: number[]) {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
+// 定义模型配置
+const MODEL_CONFIGS = {
+  fast: {
+    model: "openai/gpt-4o-mini",
+    apiKey: "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"
+  },
+  highQuality: {
+    model: "openai/gpt-4o-2024-11-20",
+    apiKey: "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"
   }
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-}
+};
 
-// 从文件中获取PDF内容
-async function getPdfContent(embeddingsFileName: string) {
+// 移除所有不需要的函数，直接使用OpenRouter API
+
+export async function POST(req: Request) {
+  console.log('[聊天API] 开始处理请求');
+  
   try {
-    // 构建完整的文件路径
-    const embeddingsDir = path.join(process.cwd(), 'public', 'embeddings');
-    const embeddingsFilePath = path.join(embeddingsDir, embeddingsFileName);
+    // 检查用户是否已登录
+    console.log('[聊天API] 检查用户登录状态');
+    const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    console.log("尝试读取embeddings文件:", embeddingsFilePath);
-    
-    // 检查文件是否存在
-    if (!fs.existsSync(embeddingsFilePath)) {
-      console.error("Embeddings文件不存在:", embeddingsFilePath);
-      // 新增：直接抛出404错误
-      const err: any = new Error("PDF尚未解析，请稍后再试或重新上传。");
-      err.status = 404;
-      throw err;
+    if (authError || !user?.id) {
+      console.log('[聊天API] 用户未登录');
+      return NextResponse.json({ error: '未登录' }, { status: 401 });
+    }
+    console.log(`[聊天API] 用户已登录: ${user.email}`);
+
+    // 解析请求体
+    console.log('[聊天API] 解析请求体');
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (jsonError) {
+      console.error('[聊天API] JSON解析错误:', jsonError);
+      return NextResponse.json({ error: 'JSON格式错误' }, { status: 400 });
     }
     
-    // 读取文件内容
-    const content = await fs.promises.readFile(embeddingsFilePath, 'utf-8');
-    const data = JSON.parse(content);
+    const { messages, pdfId, quality = 'highQuality' } = requestBody;
+    console.log(`[聊天API] 解析参数 - pdfId: ${pdfId}, quality: ${quality}, messages数量: ${messages?.length}`);
     
-    console.log(`成功读取embeddings文件，包含${data.length}个文本块`);
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.log('[聊天API] 消息格式无效');
+      return NextResponse.json({ error: '无效的消息格式' }, { status: 400 });
+    }
+
+    if (!pdfId) {
+      console.log('[聊天API] 未提供PDF ID');
+      return NextResponse.json({ error: '未提供PDF ID' }, { status: 400 });
+    }
+
+    // 检查用户是否有权限访问该PDF
+    console.log(`[聊天API] 检查PDF访问权限: ${pdfId}`);
+    let pdf;
+    try {
+      pdf = await getPDF(pdfId, user.id);
+    } catch (pdfError) {
+      console.error('[聊天API] 获取PDF错误:', pdfError);
+      return NextResponse.json({ error: '获取PDF信息失败' }, { status: 500 });
+    }
     
-    // 返回文本块
-    return data.map((item: any) => item.chunk);
-  } catch (error) {
-    console.error('读取PDF内容错误:', error);
-    return [];
-  }
-}
+    if (!pdf) {
+      console.log('[聊天API] 无权访问该PDF');
+      return NextResponse.json({ error: '无权访问该PDF' }, { status: 403 });
+    }
+    console.log(`[聊天API] PDF访问权限检查通过: ${pdf.name}`);
 
-// 生成模拟embedding向量
-function generateMockEmbedding(length = 1536) {
-  return Array.from({ length }, () => Math.random() * 2 - 1);
-}
+    console.log(`[聊天API] 处理PDF ${pdfId} 的问题，使用${quality}模式`);
+    console.log(`[聊天API] 消息数量: ${messages.length}`);
+    console.log(`[聊天API] 用户邮箱: ${user.email}`);
 
-// 生成模拟回答
-function generateMockAnswer(question: string, chunks: string[], quality: ModelQuality) {
-  const combinedText = chunks.join('\n');
-  const shortText = combinedText.slice(0, 200) + '...';
-  
-  if (quality === 'fast') {
-    return `[快速模式] 这是对问题"${question}"的模拟回答。\n\n根据文档内容，我找到了以下相关信息：\n\n${shortText}\n\n希望这个回答对您有所帮助！`;
-  } else {
-    return `[高质量模式] 这是对问题"${question}"的详细模拟回答。\n\n根据文档内容，我找到了以下相关信息：\n\n${shortText}\n\n基于上述内容，我可以提供更深入的分析...\n\n希望这个详细回答对您有所帮助！`;
-  }
-}
+    // 获取最后一条用户消息
+    const lastUserMessage = messages[messages.length - 1].content;
+    console.log(`[聊天API] 用户问题: ${lastUserMessage}`);
 
-// 获取真实回答
-async function getAnswer(question: string, chunks: string[], quality: ModelQuality) {
-  try {
+    // 提取PDF文本内容
+    console.log(`[聊天API] 开始提取PDF文本内容`);
+    let pdfContent = '';
+    try {
+      // 构建完整的PDF URL
+      const pdfUrl = pdf.url.startsWith('http') ? pdf.url : 
+                     `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}${pdf.url}`;
+      
+      console.log(`[聊天API] PDF URL: ${pdfUrl}`);
+      pdfContent = await extractTextFromPDF(pdfUrl);
+      
+      // 如果文本太长，进行智能摘要
+      pdfContent = summarizeTextForContext(pdfContent, 6000);
+      console.log(`[聊天API] PDF内容提取成功，最终长度: ${pdfContent.length}`);
+    } catch (extractError) {
+      console.error('[聊天API] PDF文本提取失败:', extractError);
+      // 如果提取失败，使用文件名作为上下文
+      pdfContent = `文档标题: ${pdf.name}\n注意: 无法提取PDF文本内容，请基于文档标题回答相关问题。`;
+    }
+
+    // 使用OpenRouter API
+    const modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS];
+    if (!modelConfig) {
+      console.error(`[聊天API] 无效的quality参数: ${quality}`);
+      return NextResponse.json({ error: '无效的模型质量参数' }, { status: 400 });
+    }
+    
+    console.log(`[聊天API] 使用模型: ${modelConfig.model}`);
+    
     const client = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: process.env.OPENROUTER_API_KEY_FAST,
+      apiKey: modelConfig.apiKey,
       defaultHeaders: {
         'HTTP-Referer': 'https://maoge.pdf',
         'X-Title': 'Maoge PDF',
       }
     });
-    console.log(`使用${quality}质量模式获取回答`);
-    
-    // 这里仍然使用模拟回答，实际使用时可以替换为真实API调用
-    // 真实实现示例:
-    /*
-    const context = chunks.join('\n\n');
-    const response = await client.chat.completions.create({
-      model: MODEL_CONFIGS[quality].model,
-      messages: [
-        {
-          role: "system",
-          content: "你是一个有用的AI助手，专门用于回答PDF文档中的问题。请基于提供的上下文回答问题，如果答案不在上下文中，请说你不知道。"
-        },
-        {
-          role: "user",
-          content: `上下文信息：\n${context}\n\n问题：${question}`
-        }
-      ],
-    });
-    
-    return response.choices[0].message.content || "无法生成回答";
-    */
-    
-    // 模拟实现
-    return generateMockAnswer(question, chunks, quality);
-  } catch (error) {
-    console.error('获取回答错误:', error);
-    throw error;
-  }
-}
 
-async function loadEmbeddings(pdfId: string): Promise<any[]> {
-  try {
-    // 从数据库获取PDF的embeddings文件路径
-    const pdf = await prisma.pDF.findUnique({
-      where: { id: pdfId }
-    });
+    // 构建系统提示，包含PDF内容
+    const systemPrompt = `你是一个专业的PDF文档助手。用户正在与一个PDF文档进行对话。
 
-    // 暂时返回空数组，因为embeddings功能已移除
-    return [];
-  } catch (error) {
-    console.error('加载embeddings错误:', error);
-    return [];
-  }
-}
+PDF文档内容：
+${pdfContent}
 
-async function findSimilarChunks(query: string, embeddings: any[], topK: number = 3): Promise<string[]> {
-  try {
-    if (embeddings.length === 0) {
-      return ["没有找到相关文档内容。"];
-    }
-    
-    // 获取查询的embedding
-    const response = await openai.embeddings.create({
-      model: 'text-embedding-ada-002',
-      input: query,
-    });
-    
-    const queryEmbedding = response.data[0].embedding;
-
-    // 计算相似度并排序
-    const similarities = embeddings.map((item: any) => ({
-      chunk: item.chunk,
-      similarity: cosineSimilarity(queryEmbedding, item.embedding),
-    }));
-
-    similarities.sort((a, b) => b.similarity - a.similarity);
-    return similarities.slice(0, topK).map(item => item.chunk);
-  } catch (error) {
-    console.error('查找相似文本块错误:', error);
-    return embeddings.slice(0, topK).map((item: any) => item.chunk);
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    // 检查用户是否已登录
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
-    }
-
-    const { messages, pdfId } = await req.json();
-    
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({ error: '无效的消息格式' }, { status: 400 });
-    }
-
-    if (!pdfId) {
-      return NextResponse.json({ error: '未提供PDF ID' }, { status: 400 });
-    }
-
-    // 检查用户是否有权限访问该PDF
-    const pdf = await getPDF(pdfId, session.user.email);
-    if (!pdf) {
-      return NextResponse.json({ error: '无权访问该PDF' }, { status: 403 });
-    }
-    
-    // 加载embeddings
-    const embeddings = await loadEmbeddings(pdfId);
-    
-    if (embeddings.length === 0) {
-      return NextResponse.json({ 
-        content: "抱歉，我无法访问文档内容。请确保文档已正确上传并处理。", 
-        role: "assistant" 
-      });
-    }
-
-    // 获取最后一条用户消息
-    const lastUserMessage = messages[messages.length - 1].content;
-
-    // 查找相关文本块
-    const relevantChunks = await findSimilarChunks(lastUserMessage, embeddings);
-
-    // 构建系统提示
-    const systemPrompt = `你是一个专业的文档助手。请基于以下文档内容回答用户的问题。如果问题超出文档范围，请明确告知。
-
-相关文档内容：
-${relevantChunks.join('\n\n')}
-
-请用简洁、专业的语言回答，必要时可以使用markdown格式。`;
+请基于上述PDF文档内容回答用户的问题。要求：
+1. 只基于提供的PDF内容回答问题
+2. 如果问题涉及文档中没有的信息，请明确说明"文档中没有相关信息"
+3. 引用具体的页面或段落（如果可能）
+4. 保持回答简洁、准确、专业
+5. 如果用户问候或进行一般性对话，可以友好回应，但要引导回到文档内容`;
 
     // 准备消息列表
     const chatMessages = [
@@ -214,23 +137,46 @@ ${relevantChunks.join('\n\n')}
       ...messages
     ];
 
-    // 调用ChatGPT API
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+    console.log(`[聊天API] 调用${modelConfig.model}模型`);
+
+    // 调用OpenRouter API
+    const completion = await client.chat.completions.create({
+      model: modelConfig.model,
       messages: chatMessages as any,
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 2000,
     });
 
+    const response = completion.choices[0].message.content || "抱歉，我无法生成回答。";
+
+    console.log(`[聊天API] 成功生成回答，长度: ${response.length}`);
+
     return NextResponse.json({
-      content: completion.choices[0].message.content,
+      content: response,
       role: 'assistant'
     });
-  } catch (error) {
-    console.error('聊天API错误:', error);
-    return NextResponse.json({
-      content: "处理您的问题时出错了。请稍后再试。",
-      role: "assistant"
+  } catch (error: any) {
+    console.error('[聊天API] 详细错误:', {
+      message: error.message,
+      status: error.status,
+      response: error.response?.data,
+      stack: error.stack?.split('\n').slice(0, 5) // 只显示前5行堆栈
     });
+    
+    let errorMessage = "抱歉，处理您的问题时出错了。请稍后再试。";
+    
+    // 处理具体的API错误
+    if (error.response?.status === 401) {
+      errorMessage = "API密钥验证失败，请检查配置。";
+    } else if (error.response?.status === 429) {
+      errorMessage = "请求过于频繁，请稍后再试。";
+    } else if (error.response?.status >= 500) {
+      errorMessage = "服务器暂时不可用，请稍后再试。";
+    }
+    
+    return NextResponse.json({
+      content: errorMessage,
+      role: "assistant"
+    }, { status: 500 });
   }
 } 
