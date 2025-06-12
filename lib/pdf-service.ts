@@ -98,13 +98,13 @@ export async function uploadPDF(file: File | Blob, userId: string, fileName?: st
     // 2. 在数据库中创建PDF记录
     console.log('正在创建数据库记录...');
     
-    // 首先检查用户是否存在
-    const user = await prisma.user.findUnique({
+    // 首先检查用户是否存在 - 使用user_profiles表
+    const userProfile = await prisma.user_profiles.findUnique({
       where: { id: userId }
     });
     
-    if (!user) {
-      console.log(`用户ID ${userId} 不存在，尝试创建用户记录...`);
+    if (!userProfile) {
+      console.log(`用户ID ${userId} 不存在于user_profiles表，尝试创建用户记录...`);
       
       // 尝试从Supabase获取用户信息
       const adminClient = createAdminClient();
@@ -115,8 +115,8 @@ export async function uploadPDF(file: File | Blob, userId: string, fileName?: st
         throw new Error(`无法获取用户信息: ${userId}`);
       }
       
-      // 创建用户记录
-      await prisma.user.create({
+      // 创建用户记录 - 使用user_profiles表
+      await prisma.user_profiles.create({
         data: {
           id: userId,
           email: authUser.user.email || `user-${userId}@example.com`,
@@ -124,16 +124,16 @@ export async function uploadPDF(file: File | Blob, userId: string, fileName?: st
         }
       });
       
-      console.log(`已创建用户记录: ${userId}`);
+      console.log(`已创建用户记录到user_profiles表: ${userId}`);
     }
     
-    // 使用用户ID创建PDF记录
-    const pdf = await prisma.pDF.create({
+    // 使用用户ID创建PDF记录  
+    const pdf = await prisma.pdfs.create({
       data: {
         name: actualFileName,
         url: fileUrl,
         size: fileSize,
-        userId: userId,
+        user_id: userId,
       }
     });
     
@@ -157,12 +157,12 @@ export async function uploadPDF(file: File | Blob, userId: string, fileName?: st
 // 获取用户的所有PDF
 export async function getUserPDFs(userId: string) {
   try {
-    const pdfs = await prisma.pDF.findMany({
+    const pdfs = await prisma.pdfs.findMany({
       where: {
-        userId: userId
+        user_id: userId
       },
       orderBy: {
-        lastViewed: 'desc'
+        last_viewed: 'desc'
       }
     });
     return pdfs;
@@ -172,39 +172,64 @@ export async function getUserPDFs(userId: string) {
   }
 }
 
-// 获取单个PDF
+// 获取单个PDF（带重试机制）
 export async function getPDF(pdfId: string, userId: string) {
-  try {
-    const pdf = await prisma.pDF.findFirst({
-      where: {
-        id: pdfId,
-        userId: userId
-      }
-    });
-    
-    if (pdf) {
-      // 更新最后查看时间
-      await prisma.pDF.update({
-        where: { id: pdfId },
-        data: { lastViewed: new Date() }
+  let attempts = 0;
+  const maxAttempts = 3;
+  const retryDelay = 500; // 500ms
+  
+  while (attempts < maxAttempts) {
+    try {
+      console.log(`获取PDF尝试 ${attempts + 1}/${maxAttempts}，ID: ${pdfId}, 用户: ${userId}`);
+      
+      const pdf = await prisma.pdfs.findFirst({
+        where: {
+          id: pdfId,
+          user_id: userId
+        }
       });
+      
+      if (pdf) {
+        console.log('PDF找到，正在更新最后查看时间');
+        // 更新最后查看时间
+        await prisma.pdfs.update({
+          where: { id: pdfId },
+          data: { last_viewed: new Date() }
+        });
+        
+        return pdf;
+      } else {
+        console.log(`PDF未找到，尝试 ${attempts + 1}/${maxAttempts}`);
+        attempts++;
+        
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+    } catch (error) {
+      console.error(`获取PDF出错 (尝试 ${attempts + 1}):`, error);
+      attempts++;
+      
+      if (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        throw error;
+      }
     }
-    
-    return pdf;
-  } catch (error) {
-    console.error('获取PDF出错:', error);
-    throw error;
   }
+  
+  console.log('所有尝试均失败，PDF未找到');
+  return null;
 }
 
 // 删除PDF
 export async function deletePDF(pdfId: string, userId: string) {
   try {
     // 1. 获取PDF信息
-    const pdf = await prisma.pDF.findFirst({
+    const pdf = await prisma.pdfs.findFirst({
       where: {
         id: pdfId,
-        userId: userId
+        user_id: userId
       }
     });
 
@@ -219,7 +244,7 @@ export async function deletePDF(pdfId: string, userId: string) {
     await deleteFileFromStorage(filePath);
     
     // 4. 从数据库中删除记录
-    await prisma.pDF.delete({
+    await prisma.pdfs.delete({
       where: {
         id: pdfId
       }
@@ -232,20 +257,12 @@ export async function deletePDF(pdfId: string, userId: string) {
   }
 }
 
-// 更新PDF的embeddings路径
+// 更新PDF的embeddings路径 - 现在PDF表支持embeddings
 export async function updatePDFEmbeddings(pdfId: string, embeddingsPath: string, userId: string) {
   try {
-    const pdf = await prisma.pDF.update({
-      where: {
-        id: pdfId,
-        userId: userId
-      },
-      data: {
-        embeddings: embeddingsPath
-      }
-    });
-    
-    return pdf;
+    // 如果需要embeddings功能，可以在PDF表中添加embeddings字段
+    console.log('embeddings功能待开发：需要在PDF表中添加embeddings字段');
+    throw new Error('embeddings功能待开发');
   } catch (error) {
     console.error('更新PDF embeddings出错:', error);
     throw error;

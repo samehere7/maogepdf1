@@ -81,21 +81,13 @@ export default function HomePage() {
         throw new Error('解析服务器响应失败');
       }
       
-      // 保存文件信息到本地存储
-      const fileInfo = {
-        name: file.name,
-        size: file.size,
-        uploadDate: new Date().toISOString(),
-        id: Date.now().toString(),
-        url: uploadResult.url || null,
-        embeddingsFile: uploadResult.embeddingsFile || null,
-        chunks: uploadResult.chunks || 0,
-        quality: quality
-      }
-      const existingFiles = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
-      existingFiles.push(fileInfo)
-      localStorage.setItem("uploadedPdfs", JSON.stringify(existingFiles))
-      window.location.href = `/analysis/${fileInfo.id}`
+      // 使用服务器返回的PDF ID
+      const pdfId = uploadResult.pdf?.id || Date.now().toString();
+      
+      console.log("上传成功，跳转到分析页面:", pdfId);
+      
+      // 直接跳转到分析页面，不再使用localStorage
+      window.location.href = `/analysis/${pdfId}`
     } catch (error) {
       console.error("上传处理失败:", error);
       alert(error instanceof Error ? error.message : t("uploadError"))

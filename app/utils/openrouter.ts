@@ -27,18 +27,7 @@ export async function callOpenRouterChat({
   const { model, apiKey: envApiKey } = MODEL_CONFIGS[quality];
   // 优先用传入的apiKey，没有则用环境变量
   const apiKey = customApiKey || envApiKey;
-  // debug: 打印apiKey，帮助排查环境变量问题
-  console.log('[openrouter] 当前apiKey:', apiKey);
   if (!apiKey) throw new Error('缺少 openrouter key');
-
-  // debug: 打印请求参数
-  console.log('[openrouter] 请求参数:', {
-    model,
-    apiKey: apiKey?.slice(0, 12) + '...',
-    messages,
-    siteUrl,
-    siteTitle
-  });
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',

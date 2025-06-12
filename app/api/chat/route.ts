@@ -124,15 +124,8 @@ async function loadEmbeddings(pdfId: string): Promise<any[]> {
       where: { id: pdfId }
     });
 
-    if (!pdf?.embeddings) {
-      return [];
-    }
-
-    // 读取embeddings文件
-    const response = await fetch(pdf.embeddings);
-    const embeddings = await response.json();
-    
-    return embeddings;
+    // 暂时返回空数组，因为embeddings功能已移除
+    return [];
   } catch (error) {
     console.error('加载embeddings错误:', error);
     return [];

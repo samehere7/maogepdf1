@@ -95,7 +95,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext)
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
+    // 提供默认值而不是抛出错误，避免在SSR/hydration过程中出错
+    console.warn('useLanguage called outside of LanguageProvider, using defaults')
+    return {
+      language: 'zh' as Language,
+      setLanguage: () => {},
+      t: (key: string) => key
+    }
   }
   return context
 } 

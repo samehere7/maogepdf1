@@ -82,15 +82,15 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
     setIsLoading(true)
 
     try {
-      // 获取文档信息，包括embeddingsFile
+      // 获取文档信息
       const files = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]");
       const fileInfo = files.find((f: any) => f.id === documentId);
       
-      if (!fileInfo || !fileInfo.embeddingsFile) {
-        throw new Error('找不到文档嵌入信息');
+      if (!fileInfo) {
+        throw new Error('找不到文档信息');
       }
       
-      console.log("开始提问:", input.trim(), "文档:", fileInfo.embeddingsFile);
+      console.log("开始提问:", input.trim(), "文档:", fileInfo.name);
       
       // 调用PDF问答API
       const response = await fetch("/api/chat", {
@@ -98,7 +98,7 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           question: input.trim(),
-          embeddingsFile: fileInfo.embeddingsFile
+          pdfId: documentId
         }),
       })
       

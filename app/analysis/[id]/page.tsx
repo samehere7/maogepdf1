@@ -13,8 +13,7 @@ import { LoginModal } from "@/components/login-modal"
 import { Sidebar } from "@/components/sidebar"
 import dynamic from 'next/dynamic'
 import * as pdfjsLib from 'pdfjs-dist'
-import { getPDF } from '@/lib/pdf-service'
-import { useSession } from 'next-auth/react'
+import { createClient } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FlashcardList from "@/components/flashcard-list"
 import FlashcardStudy from "@/components/flashcard-study"
@@ -61,7 +60,8 @@ export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
   const { t } = useLanguage()
-  const { data: session } = useSession()
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [fileInfo, setFileInfo] = useState<any>(null)
@@ -88,65 +88,82 @@ export default function AnalysisPage() {
 
   useEffect(() => {
     const loadPDF = async () => {
-      if (!session?.user?.email) {
-        router.push('/login');
+      // 获取当前用户
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error || !user) {
+        router.push('/auth/login');
         return;
       }
+      
+      setUser(user);
 
       try {
         setLoading(true);
         setPdfError(null);
 
-        // 从数据库获取PDF信息
-        const pdf = await getPDF(params.id as string, session.user.email);
+        console.log(`[Analysis] 开始加载PDF，ID: ${params.id}, 用户: ${user.id}`);
+
+        // 从API获取PDF信息
+        const response = await fetch(`/api/pdfs/${params.id}/details`);
+        
+        if (!response.ok) {
+          console.log('[Analysis] API请求失败:', response.status);
+          setPdfError('无法获取PDF信息，请检查网络连接');
+          setTimeout(() => router.push('/'), 3000);
+          return;
+        }
+        
+        const data = await response.json();
+        const pdf = data.pdf;
         
         if (!pdf) {
-          router.push('/');
+          console.log('[Analysis] 数据库中未找到PDF');
+          setPdfError('PDF文件未找到，可能已被删除或您没有访问权限');
+          setTimeout(() => router.push('/'), 3000);
           return;
         }
 
+        console.log('[Analysis] 从数据库成功获取PDF信息');
         setFileInfo(pdf);
 
-        // 加载分析结果
-        const existingAnalysis = localStorage.getItem(`analysis-${params.id}`);
-        let analysisData = null;
-        
-        if (existingAnalysis) {
-          try {
-            analysisData = JSON.parse(existingAnalysis);
-          } catch (e) {
-            console.error('解析已存在的分析数据失败:', e);
-            analysisData = null;
-          }
-        }
-        
-        if (analysisData) {
-          setAnalysis(analysisData);
-        } else {
-          try {
-            analysisData = await analyzeDocument(pdf.name);
-            if (analysisData) {
-              setAnalysis(analysisData);
-              localStorage.setItem(`analysis-${params.id}`, JSON.stringify(analysisData));
-            }
-          } catch (err) {
-            console.error('生成分析失败:', err);
-            analysisData = {
-              theme: '无法生成分析',
-              mainPoints: [],
-              conclusions: '暂时无法生成分析结果，但您仍可以提问文档相关问题。'
-            };
+        // TODO: 从数据库加载分析结果，而不是localStorage
+        // 这里暂时生成新的分析，后续可以添加分析结果的数据库存储
+        try {
+          const analysisData = await analyzeDocument(pdf.name);
+          if (analysisData) {
             setAnalysis(analysisData);
           }
+        } catch (err) {
+          console.error('生成分析失败:', err);
+          const fallbackAnalysis = {
+            theme: '无法生成分析',
+            mainPoints: [],
+            conclusions: '暂时无法生成分析结果，但您仍可以提问文档相关问题。'
+          };
+          setAnalysis(fallbackAnalysis);
         }
 
-        // 设置欢迎消息
-        const greeting = `你好，PDF已加载成功！`;
-        const summary = `一句话总结：${analysisData?.theme || '本PDF内容丰富，欢迎提问。'}`;
-        setMessages([
-          { role: "assistant", content: greeting },
-          { role: "assistant", content: summary }
-        ]);
+        // 从数据库加载聊天记录
+        const chatMessages = await loadChatMessages(pdf.id);
+        
+        if (chatMessages.length > 0) {
+          setMessages(chatMessages);
+        } else {
+          // 设置并保存欢迎消息
+          const greeting = `你好，PDF已加载成功！`;
+          const summary = `一句话总结：${analysis?.theme || '本PDF内容丰富，欢迎提问。'}`;
+          const welcomeMessages = [
+            { role: "assistant", content: greeting },
+            { role: "assistant", content: summary }
+          ];
+          setMessages(welcomeMessages);
+          
+          // 保存欢迎消息到数据库
+          for (const msg of welcomeMessages) {
+            await saveChatMessage(pdf.id, msg.content, msg.role === 'user');
+          }
+        }
 
       } catch (error) {
         console.error("Error loading PDF:", error);
@@ -157,7 +174,7 @@ export default function AnalysisPage() {
     };
 
     loadPDF();
-  }, [params.id, router, session]);
+  }, [params.id, router, supabase]);
 
   useEffect(() => {
     // 当fileInfo更新时，设置初始modelQuality
@@ -212,17 +229,9 @@ export default function AnalysisPage() {
   const switchModelQuality = (quality: 'fast' | 'highQuality') => {
     setModelQuality(quality);
     
-    // 更新本地存储中的文件质量设置
+    // 更新模型质量设置（仅在前端状态中）
     if (fileInfo) {
-      const updatedFileInfo = { ...fileInfo, quality: quality === 'fast' ? 'fast' : 'highQuality' };
-      setFileInfo(updatedFileInfo);
-      
-      // 更新localStorage中的文件信息
-      const files = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]");
-      const updatedFiles = files.map((f: any) => 
-        f.id === updatedFileInfo.id ? updatedFileInfo : f
-      );
-      localStorage.setItem("uploadedPdfs", JSON.stringify(updatedFiles));
+      setFileInfo({ ...fileInfo, quality: quality === 'fast' ? 'fast' : 'highQuality' });
       
       // 添加模型切换消息
       setMessages(prev => [...prev, { 
@@ -241,6 +250,9 @@ export default function AnalysisPage() {
     setMessages(prev => [...prev, { role: "user", content: userQuestion }]);
     setQuestion("");
     setAnswering(true);
+
+    // 保存用户问题到数据库
+    await saveChatMessage(fileInfo.id, userQuestion, true);
 
     try {
       // 确保fileUrl是完整的URL路径
@@ -267,15 +279,24 @@ export default function AnalysisPage() {
       }
 
       const data = await response.json();
+      const assistantReply = data.content || "无法生成回答";
       
       // 添加AI回答到消息列表
-      setMessages(prev => [...prev, { role: "assistant", content: data.content || "无法生成回答" }]);
+      setMessages(prev => [...prev, { role: "assistant", content: assistantReply }]);
+      
+      // 保存AI回答到数据库
+      await saveChatMessage(fileInfo.id, assistantReply, false);
+      
     } catch (error) {
       console.error("聊天错误:", error);
+      const errorMessage = "抱歉，处理您的问题时出错了。请稍后再试。";
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "抱歉，处理您的问题时出错了。请稍后再试。" 
+        content: errorMessage 
       }]);
+      
+      // 保存错误消息到数据库
+      await saveChatMessage(fileInfo.id, errorMessage, false);
     } finally {
       setAnswering(false);
     }
@@ -306,6 +327,39 @@ export default function AnalysisPage() {
     }
   }, [fileInfo?.url]);
 
+  // 加载聊天消息
+  const loadChatMessages = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/chat-messages?documentId=${documentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.messages || [];
+      }
+    } catch (error) {
+      console.error('加载聊天记录失败:', error);
+    }
+    return [];
+  };
+
+  // 保存聊天消息
+  const saveChatMessage = async (documentId: string, content: string, isUser: boolean) => {
+    try {
+      await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          documentId,
+          content,
+          isUser
+        })
+      });
+    } catch (error) {
+      console.error('保存聊天消息失败:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -315,6 +369,16 @@ export default function AnalysisPage() {
         </div>
       </div>
     )
+  }
+
+  if (pdfError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold mb-4">文件未找到</h1>
+        <p className="text-gray-600 mb-6">{pdfError}</p>
+        <Button onClick={() => window.location.href = "/"}>返回首页</Button>
+      </div>
+    );
   }
 
   if (!fileInfo) {

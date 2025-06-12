@@ -22,12 +22,15 @@ export const authOptions: NextAuthOptions = {
         token.email = profile.email
         token.name = profile.name
         token.picture = (profile as any).picture
+        // 使用email作为唯一标识符生成一致的ID
+        token.id = Buffer.from(profile.email || '').toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20)
       }
       return token
     },
     async session({ session, token }) {
       session.user = {
         ...session.user,
+        id: token.id,
         email: token.email,
         name: token.name,
         image: token.picture,

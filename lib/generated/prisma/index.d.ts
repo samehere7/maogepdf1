@@ -134,17 +134,17 @@ export type PDF = $Result.DefaultSelection<Prisma.$PDFPayload>
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
  * Model chat_messages
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type chat_messages = $Result.DefaultSelection<Prisma.$chat_messagesPayload>
 /**
  * Model document_chunks
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type document_chunks = $Result.DefaultSelection<Prisma.$document_chunksPayload>
 /**
  * Model pdfs
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type pdfs = $Result.DefaultSelection<Prisma.$pdfsPayload>
 /**
@@ -159,12 +159,12 @@ export type plus = $Result.DefaultSelection<Prisma.$plusPayload>
 export type user_daily_quota = $Result.DefaultSelection<Prisma.$user_daily_quotaPayload>
 /**
  * Model user_profiles
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type user_profiles = $Result.DefaultSelection<Prisma.$user_profilesPayload>
 /**
  * Model vector_embeddings
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type vector_embeddings = $Result.DefaultSelection<Prisma.$vector_embeddingsPayload>
 

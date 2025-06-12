@@ -111,5 +111,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 // 导出自定义Hook
 export function useUser() {
-  return useContext(UserContext);
+  const context = useContext(UserContext);
+  if (!context) {
+    // 提供默认值，避免在SSR/hydration过程中出错
+    console.warn('useUser called outside of UserProvider, using defaults')
+    return {
+      profile: null,
+      loading: false,
+      error: null,
+      refreshProfile: async () => {},
+      setProfile: () => {},
+      user: null
+    };
+  }
+  return context;
 } 

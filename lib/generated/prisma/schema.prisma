@@ -377,7 +377,6 @@ model User {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model chat_messages {
   id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id     String?   @db.Uuid
@@ -395,7 +394,6 @@ model chat_messages {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model document_chunks {
   id                String             @id
   documentId        String
@@ -411,7 +409,6 @@ model document_chunks {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model pdfs {
   id            String          @id @default(dbgenerated("(gen_random_uuid())::text"))
   name          String
@@ -454,7 +451,6 @@ model user_daily_quota {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_profiles {
   id         String    @id @db.Uuid
   email      String?
@@ -470,7 +466,6 @@ model user_profiles {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model vector_embeddings {
   id              String          @id
   chunkId         String          @unique

@@ -6,33 +6,33 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
-    // 检查用户是否已登录
+    // 检查用户是否已登录 - 使用更安全的getUser方法
     const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    console.log('[Upload API] 会话状态:', session ? '已登录' : '未登录');
+    console.log('[Upload API] 会话状态:', user ? '已登录' : '未登录');
     
-    if (!session?.user?.id || !session?.user?.email) {
-      console.log('[Upload API] 用户未登录，拒绝上传');
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
+    if (authError || !user?.id || !user?.email) {
+      console.log('[Upload API] 用户未登录或认证失败，拒绝上传', authError);
+      return NextResponse.json({ error: '未登录或认证失败' }, { status: 401 });
     }
 
-    const userEmail = session.user.email;
-    const userId = session.user.id;
+    const userEmail = user.email;
+    const userId = user.id;
     console.log('[Upload API] 用户已登录:', userEmail, '用户ID:', userId);
 
-    // 确保用户在数据库中存在
-    const userExists = await prisma.user.findUnique({
+    // 确保用户在数据库中存在 - 使用user_profiles表
+    const userExists = await prisma.user_profiles.findUnique({
       where: { id: userId }
     });
     
     if (!userExists) {
       console.log('[Upload API] 用户在数据库中不存在，创建用户记录');
-      await prisma.user.create({
+      await prisma.user_profiles.create({
         data: {
           id: userId,
           email: userEmail,
-          name: session.user.user_metadata?.name || userEmail.split('@')[0]
+          name: user.user_metadata?.name || userEmail.split('@')[0]
         }
       });
       console.log('[Upload API] 用户记录已创建');
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       const { data: userData } = await supabase
         .from('user_with_plus')
         .select('plus, is_active')
-        .eq('id', session.user.id)
+        .eq('id', userId)
         .single();
         
       isPlus = userData?.plus || false;
@@ -55,22 +55,22 @@ export async function POST(req: Request) {
     } catch (viewError) {
       console.log('[Upload API] user_with_plus视图不可用，直接从User表获取数据');
       
-      // 如果视图不可用，直接从User表获取
-      const user = await prisma.user.findUnique({
+      // 如果视图不可用，直接从user_profiles表获取
+      const userProfile = await prisma.user_profiles.findUnique({
         where: { id: userId },
         select: { plus: true, is_active: true }
       });
       
-      isPlus = user?.plus || false;
-      isActive = user?.is_active !== false;
+      isPlus = userProfile?.plus || false;
+      isActive = userProfile?.is_active !== false;
     }
       
     // 非Plus用户的上传数量限制检查
     if (!isPlus || !isActive) {
       const { data: pdfCount } = await supabase
-        .from('PDF')
+        .from('pdfs')
         .select('id', { count: 'exact' })
-        .eq('userId', userId);
+        .eq('user_id', userId);
         
       const count = pdfCount?.length || 0;
       if (count >= 5) {  // 免费用户最多5个PDF
@@ -152,21 +152,27 @@ export async function POST(req: Request) {
         
       console.log('[Upload API] 文件已上传，URL:', publicUrl);
       
-      // 使用Prisma创建PDF记录
-      const pdf = await prisma.pDF.create({
+      // 使用Prisma创建PDF记录 - 使用pdfs表（小写）而不是PDF表
+      console.log('[Upload API] 准备创建数据库记录');
+      
+      const pdf = await prisma.pdfs.create({
         data: {
           name: fileName,
           url: publicUrl,
           size: file.size,
-          userId: userId
+          user_id: userId
         }
       });
+      
+      console.log('[Upload API] 数据库记录创建成功，PDF ID:', pdf.id);
+      
+      // 确保数据库事务完成
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       return NextResponse.json({
         message: '文件上传成功',
         pdf: pdf,
-        url: publicUrl,
-        embeddingsFile: null
+        url: publicUrl
       });
       
     } catch (directUploadError) {
@@ -180,8 +186,7 @@ export async function POST(req: Request) {
         JSON.stringify({
           message: '文件上传成功',
           pdf: pdf,
-          url: pdf.url,
-          embeddingsFile: pdf.embeddings || null
+          url: pdf.url
         }),
         {
           status: 200,
