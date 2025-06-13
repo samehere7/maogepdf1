@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OpenAI } from 'openai';
 import { getPDF } from '@/lib/pdf-service';
 import { createClient } from '@/lib/supabase/server';
 import { extractTextFromPDF, summarizeTextForContext } from '@/lib/pdf-text-extractor';
@@ -109,15 +108,6 @@ export async function POST(req: Request) {
     
     console.log(`[聊天API] 使用模型: ${modelConfig.model}`);
     
-    const client = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: modelConfig.apiKey,
-      defaultHeaders: {
-        'HTTP-Referer': 'https://maoge.pdf',
-        'X-Title': 'Maoge PDF',
-      }
-    });
-
     // 构建系统提示，包含PDF内容
     const systemPrompt = `你是一个专业的PDF文档助手。用户正在与一个PDF文档进行对话。
 
@@ -138,24 +128,41 @@ ${pdfContent}
     ];
 
     console.log(`[聊天API] 调用${modelConfig.model}模型`);
-    console.log(`[聊天API] API密钥前缀: ${modelConfig.apiKey.substring(0, 10)}...`);
+    console.log(`[聊天API] API密钥前缀: ${modelConfig.apiKey.substring(0, 15)}...`);
+    console.log(`[聊天API] API密钥长度: ${modelConfig.apiKey.length}`);
     console.log(`[聊天API] 消息数量: ${chatMessages.length}`);
 
-    // 调用OpenRouter API
-    const completion = await client.chat.completions.create({
-      model: modelConfig.model,
-      messages: chatMessages as any,
-      temperature: 0.7,
-      max_tokens: 2000,
+    // 使用原生fetch调用OpenRouter API
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${modelConfig.apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://maoge.pdf',
+        'X-Title': 'Maoge PDF',
+      },
+      body: JSON.stringify({
+        model: modelConfig.model,
+        messages: chatMessages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
     });
 
-    const response = completion.choices[0].message.content || "抱歉，我无法生成回答。";
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[聊天API] OpenRouter API错误: ${response.status}`, errorText);
+      throw new Error(`OpenRouter API错误: ${response.status} - ${errorText}`);
+    }
 
-    console.log(`[聊天API] 成功生成回答，长度: ${response.length}`);
-    console.log(`[聊天API] 回答预览: ${response.substring(0, 100)}...`);
+    const completion = await response.json();
+    const aiResponse = completion.choices[0].message.content || "抱歉，我无法生成回答。";
+
+    console.log(`[聊天API] 成功生成回答，长度: ${aiResponse.length}`);
+    console.log(`[聊天API] 回答预览: ${aiResponse.substring(0, 100)}...`);
 
     return NextResponse.json({
-      content: response,
+      content: aiResponse,
       role: 'assistant'
     });
   } catch (error: any) {

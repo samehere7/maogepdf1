@@ -705,7 +705,7 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
             setTimeout(() => {
               console.log('强制检查选择器状态:', { 
                 showColorPicker: true, 
-                hasPosition: !!testPosition,
+                hasPosition: !!position,
                 actualState: { showColorPicker, colorPickerPosition }
               });
             }, 100);
