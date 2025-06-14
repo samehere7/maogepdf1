@@ -123,11 +123,6 @@ export type users = $Result.DefaultSelection<Prisma.$usersPayload>
  */
 export type chat_messages = $Result.DefaultSelection<Prisma.$chat_messagesPayload>
 /**
- * Model document_chunks
- * 
- */
-export type document_chunks = $Result.DefaultSelection<Prisma.$document_chunksPayload>
-/**
  * Model pdfs
  * 
  */
@@ -147,11 +142,6 @@ export type user_daily_quota = $Result.DefaultSelection<Prisma.$user_daily_quota
  * 
  */
 export type user_profiles = $Result.DefaultSelection<Prisma.$user_profilesPayload>
-/**
- * Model vector_embeddings
- * 
- */
-export type vector_embeddings = $Result.DefaultSelection<Prisma.$vector_embeddingsPayload>
 
 /**
  * Enums
@@ -520,16 +510,6 @@ export class PrismaClient<
   get chat_messages(): Prisma.chat_messagesDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.document_chunks`: Exposes CRUD operations for the **document_chunks** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Document_chunks
-    * const document_chunks = await prisma.document_chunks.findMany()
-    * ```
-    */
-  get document_chunks(): Prisma.document_chunksDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.pdfs`: Exposes CRUD operations for the **pdfs** model.
     * Example usage:
     * ```ts
@@ -568,16 +548,6 @@ export class PrismaClient<
     * ```
     */
   get user_profiles(): Prisma.user_profilesDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.vector_embeddings`: Exposes CRUD operations for the **vector_embeddings** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Vector_embeddings
-    * const vector_embeddings = await prisma.vector_embeddings.findMany()
-    * ```
-    */
-  get vector_embeddings(): Prisma.vector_embeddingsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1035,12 +1005,10 @@ export namespace Prisma {
     sso_providers: 'sso_providers',
     users: 'users',
     chat_messages: 'chat_messages',
-    document_chunks: 'document_chunks',
     pdfs: 'pdfs',
     plus: 'plus',
     user_daily_quota: 'user_daily_quota',
-    user_profiles: 'user_profiles',
-    vector_embeddings: 'vector_embeddings'
+    user_profiles: 'user_profiles'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1059,7 +1027,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chat_messages" | "document_chunks" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles" | "vector_embeddings"
+      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chat_messages" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2321,80 +2289,6 @@ export namespace Prisma {
           }
         }
       }
-      document_chunks: {
-        payload: Prisma.$document_chunksPayload<ExtArgs>
-        fields: Prisma.document_chunksFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.document_chunksFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.document_chunksFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          findFirst: {
-            args: Prisma.document_chunksFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.document_chunksFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          findMany: {
-            args: Prisma.document_chunksFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>[]
-          }
-          create: {
-            args: Prisma.document_chunksCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          createMany: {
-            args: Prisma.document_chunksCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.document_chunksCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>[]
-          }
-          delete: {
-            args: Prisma.document_chunksDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          update: {
-            args: Prisma.document_chunksUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          deleteMany: {
-            args: Prisma.document_chunksDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.document_chunksUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.document_chunksUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>[]
-          }
-          upsert: {
-            args: Prisma.document_chunksUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$document_chunksPayload>
-          }
-          aggregate: {
-            args: Prisma.Document_chunksAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateDocument_chunks>
-          }
-          groupBy: {
-            args: Prisma.document_chunksGroupByArgs<ExtArgs>
-            result: $Utils.Optional<Document_chunksGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.document_chunksCountArgs<ExtArgs>
-            result: $Utils.Optional<Document_chunksCountAggregateOutputType> | number
-          }
-        }
-      }
       pdfs: {
         payload: Prisma.$pdfsPayload<ExtArgs>
         fields: Prisma.pdfsFieldRefs
@@ -2691,80 +2585,6 @@ export namespace Prisma {
           }
         }
       }
-      vector_embeddings: {
-        payload: Prisma.$vector_embeddingsPayload<ExtArgs>
-        fields: Prisma.vector_embeddingsFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.vector_embeddingsFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.vector_embeddingsFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          findFirst: {
-            args: Prisma.vector_embeddingsFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.vector_embeddingsFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          findMany: {
-            args: Prisma.vector_embeddingsFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>[]
-          }
-          create: {
-            args: Prisma.vector_embeddingsCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          createMany: {
-            args: Prisma.vector_embeddingsCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.vector_embeddingsCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>[]
-          }
-          delete: {
-            args: Prisma.vector_embeddingsDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          update: {
-            args: Prisma.vector_embeddingsUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          deleteMany: {
-            args: Prisma.vector_embeddingsDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.vector_embeddingsUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.vector_embeddingsUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>[]
-          }
-          upsert: {
-            args: Prisma.vector_embeddingsUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$vector_embeddingsPayload>
-          }
-          aggregate: {
-            args: Prisma.Vector_embeddingsAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateVector_embeddings>
-          }
-          groupBy: {
-            args: Prisma.vector_embeddingsGroupByArgs<ExtArgs>
-            result: $Utils.Optional<Vector_embeddingsGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.vector_embeddingsCountArgs<ExtArgs>
-            result: $Utils.Optional<Vector_embeddingsCountAggregateOutputType> | number
-          }
-        }
-      }
     }
   } & {
     other: {
@@ -2866,12 +2686,10 @@ export namespace Prisma {
     sso_providers?: sso_providersOmit
     users?: usersOmit
     chat_messages?: chat_messagesOmit
-    document_chunks?: document_chunksOmit
     pdfs?: pdfsOmit
     plus?: plusOmit
     user_daily_quota?: user_daily_quotaOmit
     user_profiles?: user_profilesOmit
-    vector_embeddings?: vector_embeddingsOmit
   }
 
   /* Types for Logging */
@@ -3194,12 +3012,10 @@ export namespace Prisma {
 
   export type PdfsCountOutputType = {
     chat_messages: number
-    document_chunks: number
   }
 
   export type PdfsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | PdfsCountOutputTypeCountChat_messagesArgs
-    document_chunks?: boolean | PdfsCountOutputTypeCountDocument_chunksArgs
   }
 
   // Custom InputTypes
@@ -3218,13 +3034,6 @@ export namespace Prisma {
    */
   export type PdfsCountOutputTypeCountChat_messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: chat_messagesWhereInput
-  }
-
-  /**
-   * PdfsCountOutputType without action
-   */
-  export type PdfsCountOutputTypeCountDocument_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: document_chunksWhereInput
   }
 
 
@@ -22409,1151 +22218,6 @@ export namespace Prisma {
 
 
   /**
-   * Model document_chunks
-   */
-
-  export type AggregateDocument_chunks = {
-    _count: Document_chunksCountAggregateOutputType | null
-    _avg: Document_chunksAvgAggregateOutputType | null
-    _sum: Document_chunksSumAggregateOutputType | null
-    _min: Document_chunksMinAggregateOutputType | null
-    _max: Document_chunksMaxAggregateOutputType | null
-  }
-
-  export type Document_chunksAvgAggregateOutputType = {
-    pageNumber: number | null
-    chunkNumber: number | null
-  }
-
-  export type Document_chunksSumAggregateOutputType = {
-    pageNumber: number | null
-    chunkNumber: number | null
-  }
-
-  export type Document_chunksMinAggregateOutputType = {
-    id: string | null
-    documentId: string | null
-    content: string | null
-    pageNumber: number | null
-    chunkNumber: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type Document_chunksMaxAggregateOutputType = {
-    id: string | null
-    documentId: string | null
-    content: string | null
-    pageNumber: number | null
-    chunkNumber: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type Document_chunksCountAggregateOutputType = {
-    id: number
-    documentId: number
-    content: number
-    pageNumber: number
-    chunkNumber: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type Document_chunksAvgAggregateInputType = {
-    pageNumber?: true
-    chunkNumber?: true
-  }
-
-  export type Document_chunksSumAggregateInputType = {
-    pageNumber?: true
-    chunkNumber?: true
-  }
-
-  export type Document_chunksMinAggregateInputType = {
-    id?: true
-    documentId?: true
-    content?: true
-    pageNumber?: true
-    chunkNumber?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type Document_chunksMaxAggregateInputType = {
-    id?: true
-    documentId?: true
-    content?: true
-    pageNumber?: true
-    chunkNumber?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type Document_chunksCountAggregateInputType = {
-    id?: true
-    documentId?: true
-    content?: true
-    pageNumber?: true
-    chunkNumber?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type Document_chunksAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which document_chunks to aggregate.
-     */
-    where?: document_chunksWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of document_chunks to fetch.
-     */
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: document_chunksWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` document_chunks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` document_chunks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned document_chunks
-    **/
-    _count?: true | Document_chunksCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: Document_chunksAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: Document_chunksSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: Document_chunksMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: Document_chunksMaxAggregateInputType
-  }
-
-  export type GetDocument_chunksAggregateType<T extends Document_chunksAggregateArgs> = {
-        [P in keyof T & keyof AggregateDocument_chunks]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateDocument_chunks[P]>
-      : GetScalarType<T[P], AggregateDocument_chunks[P]>
-  }
-
-
-
-
-  export type document_chunksGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: document_chunksWhereInput
-    orderBy?: document_chunksOrderByWithAggregationInput | document_chunksOrderByWithAggregationInput[]
-    by: Document_chunksScalarFieldEnum[] | Document_chunksScalarFieldEnum
-    having?: document_chunksScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: Document_chunksCountAggregateInputType | true
-    _avg?: Document_chunksAvgAggregateInputType
-    _sum?: Document_chunksSumAggregateInputType
-    _min?: Document_chunksMinAggregateInputType
-    _max?: Document_chunksMaxAggregateInputType
-  }
-
-  export type Document_chunksGroupByOutputType = {
-    id: string
-    documentId: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt: Date
-    updatedAt: Date
-    _count: Document_chunksCountAggregateOutputType | null
-    _avg: Document_chunksAvgAggregateOutputType | null
-    _sum: Document_chunksSumAggregateOutputType | null
-    _min: Document_chunksMinAggregateOutputType | null
-    _max: Document_chunksMaxAggregateOutputType | null
-  }
-
-  type GetDocument_chunksGroupByPayload<T extends document_chunksGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<Document_chunksGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof Document_chunksGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], Document_chunksGroupByOutputType[P]>
-            : GetScalarType<T[P], Document_chunksGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type document_chunksSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    documentId?: boolean
-    content?: boolean
-    pageNumber?: boolean
-    chunkNumber?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-    vector_embeddings?: boolean | document_chunks$vector_embeddingsArgs<ExtArgs>
-  }, ExtArgs["result"]["document_chunks"]>
-
-  export type document_chunksSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    documentId?: boolean
-    content?: boolean
-    pageNumber?: boolean
-    chunkNumber?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["document_chunks"]>
-
-  export type document_chunksSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    documentId?: boolean
-    content?: boolean
-    pageNumber?: boolean
-    chunkNumber?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["document_chunks"]>
-
-  export type document_chunksSelectScalar = {
-    id?: boolean
-    documentId?: boolean
-    content?: boolean
-    pageNumber?: boolean
-    chunkNumber?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type document_chunksOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "documentId" | "content" | "pageNumber" | "chunkNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["document_chunks"]>
-  export type document_chunksInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-    vector_embeddings?: boolean | document_chunks$vector_embeddingsArgs<ExtArgs>
-  }
-  export type document_chunksIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-  }
-  export type document_chunksIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
-  }
-
-  export type $document_chunksPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "document_chunks"
-    objects: {
-      pdfs: Prisma.$pdfsPayload<ExtArgs>
-      vector_embeddings: Prisma.$vector_embeddingsPayload<ExtArgs> | null
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      documentId: string
-      content: string
-      pageNumber: number
-      chunkNumber: number
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["document_chunks"]>
-    composites: {}
-  }
-
-  type document_chunksGetPayload<S extends boolean | null | undefined | document_chunksDefaultArgs> = $Result.GetResult<Prisma.$document_chunksPayload, S>
-
-  type document_chunksCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<document_chunksFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: Document_chunksCountAggregateInputType | true
-    }
-
-  export interface document_chunksDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['document_chunks'], meta: { name: 'document_chunks' } }
-    /**
-     * Find zero or one Document_chunks that matches the filter.
-     * @param {document_chunksFindUniqueArgs} args - Arguments to find a Document_chunks
-     * @example
-     * // Get one Document_chunks
-     * const document_chunks = await prisma.document_chunks.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends document_chunksFindUniqueArgs>(args: SelectSubset<T, document_chunksFindUniqueArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Document_chunks that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {document_chunksFindUniqueOrThrowArgs} args - Arguments to find a Document_chunks
-     * @example
-     * // Get one Document_chunks
-     * const document_chunks = await prisma.document_chunks.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends document_chunksFindUniqueOrThrowArgs>(args: SelectSubset<T, document_chunksFindUniqueOrThrowArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Document_chunks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksFindFirstArgs} args - Arguments to find a Document_chunks
-     * @example
-     * // Get one Document_chunks
-     * const document_chunks = await prisma.document_chunks.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends document_chunksFindFirstArgs>(args?: SelectSubset<T, document_chunksFindFirstArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Document_chunks that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksFindFirstOrThrowArgs} args - Arguments to find a Document_chunks
-     * @example
-     * // Get one Document_chunks
-     * const document_chunks = await prisma.document_chunks.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends document_chunksFindFirstOrThrowArgs>(args?: SelectSubset<T, document_chunksFindFirstOrThrowArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Document_chunks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Document_chunks
-     * const document_chunks = await prisma.document_chunks.findMany()
-     * 
-     * // Get first 10 Document_chunks
-     * const document_chunks = await prisma.document_chunks.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const document_chunksWithIdOnly = await prisma.document_chunks.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends document_chunksFindManyArgs>(args?: SelectSubset<T, document_chunksFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Document_chunks.
-     * @param {document_chunksCreateArgs} args - Arguments to create a Document_chunks.
-     * @example
-     * // Create one Document_chunks
-     * const Document_chunks = await prisma.document_chunks.create({
-     *   data: {
-     *     // ... data to create a Document_chunks
-     *   }
-     * })
-     * 
-     */
-    create<T extends document_chunksCreateArgs>(args: SelectSubset<T, document_chunksCreateArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Document_chunks.
-     * @param {document_chunksCreateManyArgs} args - Arguments to create many Document_chunks.
-     * @example
-     * // Create many Document_chunks
-     * const document_chunks = await prisma.document_chunks.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends document_chunksCreateManyArgs>(args?: SelectSubset<T, document_chunksCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Document_chunks and returns the data saved in the database.
-     * @param {document_chunksCreateManyAndReturnArgs} args - Arguments to create many Document_chunks.
-     * @example
-     * // Create many Document_chunks
-     * const document_chunks = await prisma.document_chunks.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Document_chunks and only return the `id`
-     * const document_chunksWithIdOnly = await prisma.document_chunks.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends document_chunksCreateManyAndReturnArgs>(args?: SelectSubset<T, document_chunksCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Document_chunks.
-     * @param {document_chunksDeleteArgs} args - Arguments to delete one Document_chunks.
-     * @example
-     * // Delete one Document_chunks
-     * const Document_chunks = await prisma.document_chunks.delete({
-     *   where: {
-     *     // ... filter to delete one Document_chunks
-     *   }
-     * })
-     * 
-     */
-    delete<T extends document_chunksDeleteArgs>(args: SelectSubset<T, document_chunksDeleteArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Document_chunks.
-     * @param {document_chunksUpdateArgs} args - Arguments to update one Document_chunks.
-     * @example
-     * // Update one Document_chunks
-     * const document_chunks = await prisma.document_chunks.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends document_chunksUpdateArgs>(args: SelectSubset<T, document_chunksUpdateArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Document_chunks.
-     * @param {document_chunksDeleteManyArgs} args - Arguments to filter Document_chunks to delete.
-     * @example
-     * // Delete a few Document_chunks
-     * const { count } = await prisma.document_chunks.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends document_chunksDeleteManyArgs>(args?: SelectSubset<T, document_chunksDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Document_chunks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Document_chunks
-     * const document_chunks = await prisma.document_chunks.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends document_chunksUpdateManyArgs>(args: SelectSubset<T, document_chunksUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Document_chunks and returns the data updated in the database.
-     * @param {document_chunksUpdateManyAndReturnArgs} args - Arguments to update many Document_chunks.
-     * @example
-     * // Update many Document_chunks
-     * const document_chunks = await prisma.document_chunks.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Document_chunks and only return the `id`
-     * const document_chunksWithIdOnly = await prisma.document_chunks.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends document_chunksUpdateManyAndReturnArgs>(args: SelectSubset<T, document_chunksUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Document_chunks.
-     * @param {document_chunksUpsertArgs} args - Arguments to update or create a Document_chunks.
-     * @example
-     * // Update or create a Document_chunks
-     * const document_chunks = await prisma.document_chunks.upsert({
-     *   create: {
-     *     // ... data to create a Document_chunks
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Document_chunks we want to update
-     *   }
-     * })
-     */
-    upsert<T extends document_chunksUpsertArgs>(args: SelectSubset<T, document_chunksUpsertArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Document_chunks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksCountArgs} args - Arguments to filter Document_chunks to count.
-     * @example
-     * // Count the number of Document_chunks
-     * const count = await prisma.document_chunks.count({
-     *   where: {
-     *     // ... the filter for the Document_chunks we want to count
-     *   }
-     * })
-    **/
-    count<T extends document_chunksCountArgs>(
-      args?: Subset<T, document_chunksCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], Document_chunksCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Document_chunks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {Document_chunksAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends Document_chunksAggregateArgs>(args: Subset<T, Document_chunksAggregateArgs>): Prisma.PrismaPromise<GetDocument_chunksAggregateType<T>>
-
-    /**
-     * Group by Document_chunks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {document_chunksGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends document_chunksGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: document_chunksGroupByArgs['orderBy'] }
-        : { orderBy?: document_chunksGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, document_chunksGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDocument_chunksGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the document_chunks model
-   */
-  readonly fields: document_chunksFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for document_chunks.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__document_chunksClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    pdfs<T extends pdfsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, pdfsDefaultArgs<ExtArgs>>): Prisma__pdfsClient<$Result.GetResult<Prisma.$pdfsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    vector_embeddings<T extends document_chunks$vector_embeddingsArgs<ExtArgs> = {}>(args?: Subset<T, document_chunks$vector_embeddingsArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the document_chunks model
-   */
-  interface document_chunksFieldRefs {
-    readonly id: FieldRef<"document_chunks", 'String'>
-    readonly documentId: FieldRef<"document_chunks", 'String'>
-    readonly content: FieldRef<"document_chunks", 'String'>
-    readonly pageNumber: FieldRef<"document_chunks", 'Int'>
-    readonly chunkNumber: FieldRef<"document_chunks", 'Int'>
-    readonly createdAt: FieldRef<"document_chunks", 'DateTime'>
-    readonly updatedAt: FieldRef<"document_chunks", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * document_chunks findUnique
-   */
-  export type document_chunksFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter, which document_chunks to fetch.
-     */
-    where: document_chunksWhereUniqueInput
-  }
-
-  /**
-   * document_chunks findUniqueOrThrow
-   */
-  export type document_chunksFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter, which document_chunks to fetch.
-     */
-    where: document_chunksWhereUniqueInput
-  }
-
-  /**
-   * document_chunks findFirst
-   */
-  export type document_chunksFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter, which document_chunks to fetch.
-     */
-    where?: document_chunksWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of document_chunks to fetch.
-     */
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for document_chunks.
-     */
-    cursor?: document_chunksWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` document_chunks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` document_chunks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of document_chunks.
-     */
-    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
-  }
-
-  /**
-   * document_chunks findFirstOrThrow
-   */
-  export type document_chunksFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter, which document_chunks to fetch.
-     */
-    where?: document_chunksWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of document_chunks to fetch.
-     */
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for document_chunks.
-     */
-    cursor?: document_chunksWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` document_chunks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` document_chunks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of document_chunks.
-     */
-    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
-  }
-
-  /**
-   * document_chunks findMany
-   */
-  export type document_chunksFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter, which document_chunks to fetch.
-     */
-    where?: document_chunksWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of document_chunks to fetch.
-     */
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing document_chunks.
-     */
-    cursor?: document_chunksWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` document_chunks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` document_chunks.
-     */
-    skip?: number
-    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
-  }
-
-  /**
-   * document_chunks create
-   */
-  export type document_chunksCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * The data needed to create a document_chunks.
-     */
-    data: XOR<document_chunksCreateInput, document_chunksUncheckedCreateInput>
-  }
-
-  /**
-   * document_chunks createMany
-   */
-  export type document_chunksCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many document_chunks.
-     */
-    data: document_chunksCreateManyInput | document_chunksCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * document_chunks createManyAndReturn
-   */
-  export type document_chunksCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * The data used to create many document_chunks.
-     */
-    data: document_chunksCreateManyInput | document_chunksCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * document_chunks update
-   */
-  export type document_chunksUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * The data needed to update a document_chunks.
-     */
-    data: XOR<document_chunksUpdateInput, document_chunksUncheckedUpdateInput>
-    /**
-     * Choose, which document_chunks to update.
-     */
-    where: document_chunksWhereUniqueInput
-  }
-
-  /**
-   * document_chunks updateMany
-   */
-  export type document_chunksUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update document_chunks.
-     */
-    data: XOR<document_chunksUpdateManyMutationInput, document_chunksUncheckedUpdateManyInput>
-    /**
-     * Filter which document_chunks to update
-     */
-    where?: document_chunksWhereInput
-    /**
-     * Limit how many document_chunks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * document_chunks updateManyAndReturn
-   */
-  export type document_chunksUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * The data used to update document_chunks.
-     */
-    data: XOR<document_chunksUpdateManyMutationInput, document_chunksUncheckedUpdateManyInput>
-    /**
-     * Filter which document_chunks to update
-     */
-    where?: document_chunksWhereInput
-    /**
-     * Limit how many document_chunks to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * document_chunks upsert
-   */
-  export type document_chunksUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * The filter to search for the document_chunks to update in case it exists.
-     */
-    where: document_chunksWhereUniqueInput
-    /**
-     * In case the document_chunks found by the `where` argument doesn't exist, create a new document_chunks with this data.
-     */
-    create: XOR<document_chunksCreateInput, document_chunksUncheckedCreateInput>
-    /**
-     * In case the document_chunks was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<document_chunksUpdateInput, document_chunksUncheckedUpdateInput>
-  }
-
-  /**
-   * document_chunks delete
-   */
-  export type document_chunksDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    /**
-     * Filter which document_chunks to delete.
-     */
-    where: document_chunksWhereUniqueInput
-  }
-
-  /**
-   * document_chunks deleteMany
-   */
-  export type document_chunksDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which document_chunks to delete
-     */
-    where?: document_chunksWhereInput
-    /**
-     * Limit how many document_chunks to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * document_chunks.vector_embeddings
-   */
-  export type document_chunks$vector_embeddingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    where?: vector_embeddingsWhereInput
-  }
-
-  /**
-   * document_chunks without action
-   */
-  export type document_chunksDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model pdfs
    */
 
@@ -23582,6 +22246,7 @@ export namespace Prisma {
     last_viewed: Date | null
     user_id: string | null
     content_type: string | null
+    summary: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -23595,6 +22260,7 @@ export namespace Prisma {
     last_viewed: Date | null
     user_id: string | null
     content_type: string | null
+    summary: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -23608,6 +22274,7 @@ export namespace Prisma {
     last_viewed: number
     user_id: number
     content_type: number
+    summary: number
     created_at: number
     updated_at: number
     _all: number
@@ -23631,6 +22298,7 @@ export namespace Prisma {
     last_viewed?: true
     user_id?: true
     content_type?: true
+    summary?: true
     created_at?: true
     updated_at?: true
   }
@@ -23644,6 +22312,7 @@ export namespace Prisma {
     last_viewed?: true
     user_id?: true
     content_type?: true
+    summary?: true
     created_at?: true
     updated_at?: true
   }
@@ -23657,6 +22326,7 @@ export namespace Prisma {
     last_viewed?: true
     user_id?: true
     content_type?: true
+    summary?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -23757,6 +22427,7 @@ export namespace Prisma {
     last_viewed: Date | null
     user_id: string | null
     content_type: string | null
+    summary: string | null
     created_at: Date | null
     updated_at: Date | null
     _count: PdfsCountAggregateOutputType | null
@@ -23789,10 +22460,10 @@ export namespace Prisma {
     last_viewed?: boolean
     user_id?: boolean
     content_type?: boolean
+    summary?: boolean
     created_at?: boolean
     updated_at?: boolean
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
-    document_chunks?: boolean | pdfs$document_chunksArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["pdfs"]>
@@ -23806,6 +22477,7 @@ export namespace Prisma {
     last_viewed?: boolean
     user_id?: boolean
     content_type?: boolean
+    summary?: boolean
     created_at?: boolean
     updated_at?: boolean
     users?: boolean | pdfs$usersArgs<ExtArgs>
@@ -23820,6 +22492,7 @@ export namespace Prisma {
     last_viewed?: boolean
     user_id?: boolean
     content_type?: boolean
+    summary?: boolean
     created_at?: boolean
     updated_at?: boolean
     users?: boolean | pdfs$usersArgs<ExtArgs>
@@ -23834,14 +22507,14 @@ export namespace Prisma {
     last_viewed?: boolean
     user_id?: boolean
     content_type?: boolean
+    summary?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type pdfsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "size" | "upload_date" | "last_viewed" | "user_id" | "content_type" | "created_at" | "updated_at", ExtArgs["result"]["pdfs"]>
+  export type pdfsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "size" | "upload_date" | "last_viewed" | "user_id" | "content_type" | "summary" | "created_at" | "updated_at", ExtArgs["result"]["pdfs"]>
   export type pdfsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
-    document_chunks?: boolean | pdfs$document_chunksArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -23856,7 +22529,6 @@ export namespace Prisma {
     name: "pdfs"
     objects: {
       chat_messages: Prisma.$chat_messagesPayload<ExtArgs>[]
-      document_chunks: Prisma.$document_chunksPayload<ExtArgs>[]
       users: Prisma.$usersPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -23868,6 +22540,7 @@ export namespace Prisma {
       last_viewed: Date | null
       user_id: string | null
       content_type: string | null
+      summary: string | null
       created_at: Date | null
       updated_at: Date | null
     }, ExtArgs["result"]["pdfs"]>
@@ -24265,7 +22938,6 @@ export namespace Prisma {
   export interface Prisma__pdfsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     chat_messages<T extends pdfs$chat_messagesArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$chat_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$chat_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    document_chunks<T extends pdfs$document_chunksArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$document_chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends pdfs$usersArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$usersArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -24304,6 +22976,7 @@ export namespace Prisma {
     readonly last_viewed: FieldRef<"pdfs", 'DateTime'>
     readonly user_id: FieldRef<"pdfs", 'String'>
     readonly content_type: FieldRef<"pdfs", 'String'>
+    readonly summary: FieldRef<"pdfs", 'String'>
     readonly created_at: FieldRef<"pdfs", 'DateTime'>
     readonly updated_at: FieldRef<"pdfs", 'DateTime'>
   }
@@ -24723,30 +23396,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Chat_messagesScalarFieldEnum | Chat_messagesScalarFieldEnum[]
-  }
-
-  /**
-   * pdfs.document_chunks
-   */
-  export type pdfs$document_chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the document_chunks
-     */
-    select?: document_chunksSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the document_chunks
-     */
-    omit?: document_chunksOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: document_chunksInclude<ExtArgs> | null
-    where?: document_chunksWhereInput
-    orderBy?: document_chunksOrderByWithRelationInput | document_chunksOrderByWithRelationInput[]
-    cursor?: document_chunksWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Document_chunksScalarFieldEnum | Document_chunksScalarFieldEnum[]
   }
 
   /**
@@ -28103,1120 +26752,6 @@ export namespace Prisma {
 
 
   /**
-   * Model vector_embeddings
-   */
-
-  export type AggregateVector_embeddings = {
-    _count: Vector_embeddingsCountAggregateOutputType | null
-    _avg: Vector_embeddingsAvgAggregateOutputType | null
-    _sum: Vector_embeddingsSumAggregateOutputType | null
-    _min: Vector_embeddingsMinAggregateOutputType | null
-    _max: Vector_embeddingsMaxAggregateOutputType | null
-  }
-
-  export type Vector_embeddingsAvgAggregateOutputType = {
-    dimension: number | null
-  }
-
-  export type Vector_embeddingsSumAggregateOutputType = {
-    dimension: number | null
-  }
-
-  export type Vector_embeddingsMinAggregateOutputType = {
-    id: string | null
-    chunkId: string | null
-    embedding: Uint8Array | null
-    dimension: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type Vector_embeddingsMaxAggregateOutputType = {
-    id: string | null
-    chunkId: string | null
-    embedding: Uint8Array | null
-    dimension: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type Vector_embeddingsCountAggregateOutputType = {
-    id: number
-    chunkId: number
-    embedding: number
-    dimension: number
-    metadata: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type Vector_embeddingsAvgAggregateInputType = {
-    dimension?: true
-  }
-
-  export type Vector_embeddingsSumAggregateInputType = {
-    dimension?: true
-  }
-
-  export type Vector_embeddingsMinAggregateInputType = {
-    id?: true
-    chunkId?: true
-    embedding?: true
-    dimension?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type Vector_embeddingsMaxAggregateInputType = {
-    id?: true
-    chunkId?: true
-    embedding?: true
-    dimension?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type Vector_embeddingsCountAggregateInputType = {
-    id?: true
-    chunkId?: true
-    embedding?: true
-    dimension?: true
-    metadata?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type Vector_embeddingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which vector_embeddings to aggregate.
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of vector_embeddings to fetch.
-     */
-    orderBy?: vector_embeddingsOrderByWithRelationInput | vector_embeddingsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: vector_embeddingsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` vector_embeddings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` vector_embeddings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned vector_embeddings
-    **/
-    _count?: true | Vector_embeddingsCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: Vector_embeddingsAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: Vector_embeddingsSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: Vector_embeddingsMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: Vector_embeddingsMaxAggregateInputType
-  }
-
-  export type GetVector_embeddingsAggregateType<T extends Vector_embeddingsAggregateArgs> = {
-        [P in keyof T & keyof AggregateVector_embeddings]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateVector_embeddings[P]>
-      : GetScalarType<T[P], AggregateVector_embeddings[P]>
-  }
-
-
-
-
-  export type vector_embeddingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: vector_embeddingsWhereInput
-    orderBy?: vector_embeddingsOrderByWithAggregationInput | vector_embeddingsOrderByWithAggregationInput[]
-    by: Vector_embeddingsScalarFieldEnum[] | Vector_embeddingsScalarFieldEnum
-    having?: vector_embeddingsScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: Vector_embeddingsCountAggregateInputType | true
-    _avg?: Vector_embeddingsAvgAggregateInputType
-    _sum?: Vector_embeddingsSumAggregateInputType
-    _min?: Vector_embeddingsMinAggregateInputType
-    _max?: Vector_embeddingsMaxAggregateInputType
-  }
-
-  export type Vector_embeddingsGroupByOutputType = {
-    id: string
-    chunkId: string
-    embedding: Uint8Array
-    dimension: number
-    metadata: JsonValue | null
-    createdAt: Date
-    updatedAt: Date
-    _count: Vector_embeddingsCountAggregateOutputType | null
-    _avg: Vector_embeddingsAvgAggregateOutputType | null
-    _sum: Vector_embeddingsSumAggregateOutputType | null
-    _min: Vector_embeddingsMinAggregateOutputType | null
-    _max: Vector_embeddingsMaxAggregateOutputType | null
-  }
-
-  type GetVector_embeddingsGroupByPayload<T extends vector_embeddingsGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<Vector_embeddingsGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof Vector_embeddingsGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], Vector_embeddingsGroupByOutputType[P]>
-            : GetScalarType<T[P], Vector_embeddingsGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type vector_embeddingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    chunkId?: boolean
-    embedding?: boolean
-    dimension?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vector_embeddings"]>
-
-  export type vector_embeddingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    chunkId?: boolean
-    embedding?: boolean
-    dimension?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vector_embeddings"]>
-
-  export type vector_embeddingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    chunkId?: boolean
-    embedding?: boolean
-    dimension?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vector_embeddings"]>
-
-  export type vector_embeddingsSelectScalar = {
-    id?: boolean
-    chunkId?: boolean
-    embedding?: boolean
-    dimension?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type vector_embeddingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chunkId" | "embedding" | "dimension" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["vector_embeddings"]>
-  export type vector_embeddingsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }
-  export type vector_embeddingsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }
-  export type vector_embeddingsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    document_chunks?: boolean | document_chunksDefaultArgs<ExtArgs>
-  }
-
-  export type $vector_embeddingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "vector_embeddings"
-    objects: {
-      document_chunks: Prisma.$document_chunksPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      chunkId: string
-      embedding: Uint8Array
-      dimension: number
-      metadata: Prisma.JsonValue | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["vector_embeddings"]>
-    composites: {}
-  }
-
-  type vector_embeddingsGetPayload<S extends boolean | null | undefined | vector_embeddingsDefaultArgs> = $Result.GetResult<Prisma.$vector_embeddingsPayload, S>
-
-  type vector_embeddingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<vector_embeddingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: Vector_embeddingsCountAggregateInputType | true
-    }
-
-  export interface vector_embeddingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['vector_embeddings'], meta: { name: 'vector_embeddings' } }
-    /**
-     * Find zero or one Vector_embeddings that matches the filter.
-     * @param {vector_embeddingsFindUniqueArgs} args - Arguments to find a Vector_embeddings
-     * @example
-     * // Get one Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends vector_embeddingsFindUniqueArgs>(args: SelectSubset<T, vector_embeddingsFindUniqueArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Vector_embeddings that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {vector_embeddingsFindUniqueOrThrowArgs} args - Arguments to find a Vector_embeddings
-     * @example
-     * // Get one Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends vector_embeddingsFindUniqueOrThrowArgs>(args: SelectSubset<T, vector_embeddingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Vector_embeddings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsFindFirstArgs} args - Arguments to find a Vector_embeddings
-     * @example
-     * // Get one Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends vector_embeddingsFindFirstArgs>(args?: SelectSubset<T, vector_embeddingsFindFirstArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Vector_embeddings that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsFindFirstOrThrowArgs} args - Arguments to find a Vector_embeddings
-     * @example
-     * // Get one Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends vector_embeddingsFindFirstOrThrowArgs>(args?: SelectSubset<T, vector_embeddingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Vector_embeddings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findMany()
-     * 
-     * // Get first 10 Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const vector_embeddingsWithIdOnly = await prisma.vector_embeddings.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends vector_embeddingsFindManyArgs>(args?: SelectSubset<T, vector_embeddingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Vector_embeddings.
-     * @param {vector_embeddingsCreateArgs} args - Arguments to create a Vector_embeddings.
-     * @example
-     * // Create one Vector_embeddings
-     * const Vector_embeddings = await prisma.vector_embeddings.create({
-     *   data: {
-     *     // ... data to create a Vector_embeddings
-     *   }
-     * })
-     * 
-     */
-    create<T extends vector_embeddingsCreateArgs>(args: SelectSubset<T, vector_embeddingsCreateArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Vector_embeddings.
-     * @param {vector_embeddingsCreateManyArgs} args - Arguments to create many Vector_embeddings.
-     * @example
-     * // Create many Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends vector_embeddingsCreateManyArgs>(args?: SelectSubset<T, vector_embeddingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Vector_embeddings and returns the data saved in the database.
-     * @param {vector_embeddingsCreateManyAndReturnArgs} args - Arguments to create many Vector_embeddings.
-     * @example
-     * // Create many Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Vector_embeddings and only return the `id`
-     * const vector_embeddingsWithIdOnly = await prisma.vector_embeddings.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends vector_embeddingsCreateManyAndReturnArgs>(args?: SelectSubset<T, vector_embeddingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Vector_embeddings.
-     * @param {vector_embeddingsDeleteArgs} args - Arguments to delete one Vector_embeddings.
-     * @example
-     * // Delete one Vector_embeddings
-     * const Vector_embeddings = await prisma.vector_embeddings.delete({
-     *   where: {
-     *     // ... filter to delete one Vector_embeddings
-     *   }
-     * })
-     * 
-     */
-    delete<T extends vector_embeddingsDeleteArgs>(args: SelectSubset<T, vector_embeddingsDeleteArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Vector_embeddings.
-     * @param {vector_embeddingsUpdateArgs} args - Arguments to update one Vector_embeddings.
-     * @example
-     * // Update one Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends vector_embeddingsUpdateArgs>(args: SelectSubset<T, vector_embeddingsUpdateArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Vector_embeddings.
-     * @param {vector_embeddingsDeleteManyArgs} args - Arguments to filter Vector_embeddings to delete.
-     * @example
-     * // Delete a few Vector_embeddings
-     * const { count } = await prisma.vector_embeddings.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends vector_embeddingsDeleteManyArgs>(args?: SelectSubset<T, vector_embeddingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Vector_embeddings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends vector_embeddingsUpdateManyArgs>(args: SelectSubset<T, vector_embeddingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Vector_embeddings and returns the data updated in the database.
-     * @param {vector_embeddingsUpdateManyAndReturnArgs} args - Arguments to update many Vector_embeddings.
-     * @example
-     * // Update many Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Vector_embeddings and only return the `id`
-     * const vector_embeddingsWithIdOnly = await prisma.vector_embeddings.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends vector_embeddingsUpdateManyAndReturnArgs>(args: SelectSubset<T, vector_embeddingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Vector_embeddings.
-     * @param {vector_embeddingsUpsertArgs} args - Arguments to update or create a Vector_embeddings.
-     * @example
-     * // Update or create a Vector_embeddings
-     * const vector_embeddings = await prisma.vector_embeddings.upsert({
-     *   create: {
-     *     // ... data to create a Vector_embeddings
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Vector_embeddings we want to update
-     *   }
-     * })
-     */
-    upsert<T extends vector_embeddingsUpsertArgs>(args: SelectSubset<T, vector_embeddingsUpsertArgs<ExtArgs>>): Prisma__vector_embeddingsClient<$Result.GetResult<Prisma.$vector_embeddingsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Vector_embeddings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsCountArgs} args - Arguments to filter Vector_embeddings to count.
-     * @example
-     * // Count the number of Vector_embeddings
-     * const count = await prisma.vector_embeddings.count({
-     *   where: {
-     *     // ... the filter for the Vector_embeddings we want to count
-     *   }
-     * })
-    **/
-    count<T extends vector_embeddingsCountArgs>(
-      args?: Subset<T, vector_embeddingsCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], Vector_embeddingsCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Vector_embeddings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vector_embeddingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends Vector_embeddingsAggregateArgs>(args: Subset<T, Vector_embeddingsAggregateArgs>): Prisma.PrismaPromise<GetVector_embeddingsAggregateType<T>>
-
-    /**
-     * Group by Vector_embeddings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {vector_embeddingsGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends vector_embeddingsGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: vector_embeddingsGroupByArgs['orderBy'] }
-        : { orderBy?: vector_embeddingsGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, vector_embeddingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVector_embeddingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the vector_embeddings model
-   */
-  readonly fields: vector_embeddingsFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for vector_embeddings.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__vector_embeddingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    document_chunks<T extends document_chunksDefaultArgs<ExtArgs> = {}>(args?: Subset<T, document_chunksDefaultArgs<ExtArgs>>): Prisma__document_chunksClient<$Result.GetResult<Prisma.$document_chunksPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the vector_embeddings model
-   */
-  interface vector_embeddingsFieldRefs {
-    readonly id: FieldRef<"vector_embeddings", 'String'>
-    readonly chunkId: FieldRef<"vector_embeddings", 'String'>
-    readonly embedding: FieldRef<"vector_embeddings", 'Bytes'>
-    readonly dimension: FieldRef<"vector_embeddings", 'Int'>
-    readonly metadata: FieldRef<"vector_embeddings", 'Json'>
-    readonly createdAt: FieldRef<"vector_embeddings", 'DateTime'>
-    readonly updatedAt: FieldRef<"vector_embeddings", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * vector_embeddings findUnique
-   */
-  export type vector_embeddingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter, which vector_embeddings to fetch.
-     */
-    where: vector_embeddingsWhereUniqueInput
-  }
-
-  /**
-   * vector_embeddings findUniqueOrThrow
-   */
-  export type vector_embeddingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter, which vector_embeddings to fetch.
-     */
-    where: vector_embeddingsWhereUniqueInput
-  }
-
-  /**
-   * vector_embeddings findFirst
-   */
-  export type vector_embeddingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter, which vector_embeddings to fetch.
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of vector_embeddings to fetch.
-     */
-    orderBy?: vector_embeddingsOrderByWithRelationInput | vector_embeddingsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for vector_embeddings.
-     */
-    cursor?: vector_embeddingsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` vector_embeddings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` vector_embeddings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of vector_embeddings.
-     */
-    distinct?: Vector_embeddingsScalarFieldEnum | Vector_embeddingsScalarFieldEnum[]
-  }
-
-  /**
-   * vector_embeddings findFirstOrThrow
-   */
-  export type vector_embeddingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter, which vector_embeddings to fetch.
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of vector_embeddings to fetch.
-     */
-    orderBy?: vector_embeddingsOrderByWithRelationInput | vector_embeddingsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for vector_embeddings.
-     */
-    cursor?: vector_embeddingsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` vector_embeddings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` vector_embeddings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of vector_embeddings.
-     */
-    distinct?: Vector_embeddingsScalarFieldEnum | Vector_embeddingsScalarFieldEnum[]
-  }
-
-  /**
-   * vector_embeddings findMany
-   */
-  export type vector_embeddingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter, which vector_embeddings to fetch.
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of vector_embeddings to fetch.
-     */
-    orderBy?: vector_embeddingsOrderByWithRelationInput | vector_embeddingsOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing vector_embeddings.
-     */
-    cursor?: vector_embeddingsWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` vector_embeddings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` vector_embeddings.
-     */
-    skip?: number
-    distinct?: Vector_embeddingsScalarFieldEnum | Vector_embeddingsScalarFieldEnum[]
-  }
-
-  /**
-   * vector_embeddings create
-   */
-  export type vector_embeddingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * The data needed to create a vector_embeddings.
-     */
-    data: XOR<vector_embeddingsCreateInput, vector_embeddingsUncheckedCreateInput>
-  }
-
-  /**
-   * vector_embeddings createMany
-   */
-  export type vector_embeddingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many vector_embeddings.
-     */
-    data: vector_embeddingsCreateManyInput | vector_embeddingsCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * vector_embeddings createManyAndReturn
-   */
-  export type vector_embeddingsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * The data used to create many vector_embeddings.
-     */
-    data: vector_embeddingsCreateManyInput | vector_embeddingsCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * vector_embeddings update
-   */
-  export type vector_embeddingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * The data needed to update a vector_embeddings.
-     */
-    data: XOR<vector_embeddingsUpdateInput, vector_embeddingsUncheckedUpdateInput>
-    /**
-     * Choose, which vector_embeddings to update.
-     */
-    where: vector_embeddingsWhereUniqueInput
-  }
-
-  /**
-   * vector_embeddings updateMany
-   */
-  export type vector_embeddingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update vector_embeddings.
-     */
-    data: XOR<vector_embeddingsUpdateManyMutationInput, vector_embeddingsUncheckedUpdateManyInput>
-    /**
-     * Filter which vector_embeddings to update
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * Limit how many vector_embeddings to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * vector_embeddings updateManyAndReturn
-   */
-  export type vector_embeddingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * The data used to update vector_embeddings.
-     */
-    data: XOR<vector_embeddingsUpdateManyMutationInput, vector_embeddingsUncheckedUpdateManyInput>
-    /**
-     * Filter which vector_embeddings to update
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * Limit how many vector_embeddings to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * vector_embeddings upsert
-   */
-  export type vector_embeddingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * The filter to search for the vector_embeddings to update in case it exists.
-     */
-    where: vector_embeddingsWhereUniqueInput
-    /**
-     * In case the vector_embeddings found by the `where` argument doesn't exist, create a new vector_embeddings with this data.
-     */
-    create: XOR<vector_embeddingsCreateInput, vector_embeddingsUncheckedCreateInput>
-    /**
-     * In case the vector_embeddings was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<vector_embeddingsUpdateInput, vector_embeddingsUncheckedUpdateInput>
-  }
-
-  /**
-   * vector_embeddings delete
-   */
-  export type vector_embeddingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-    /**
-     * Filter which vector_embeddings to delete.
-     */
-    where: vector_embeddingsWhereUniqueInput
-  }
-
-  /**
-   * vector_embeddings deleteMany
-   */
-  export type vector_embeddingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which vector_embeddings to delete
-     */
-    where?: vector_embeddingsWhereInput
-    /**
-     * Limit how many vector_embeddings to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * vector_embeddings without action
-   */
-  export type vector_embeddingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the vector_embeddings
-     */
-    select?: vector_embeddingsSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the vector_embeddings
-     */
-    omit?: vector_embeddingsOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: vector_embeddingsInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Enums
    */
 
@@ -29483,19 +27018,6 @@ export namespace Prisma {
   export type Chat_messagesScalarFieldEnum = (typeof Chat_messagesScalarFieldEnum)[keyof typeof Chat_messagesScalarFieldEnum]
 
 
-  export const Document_chunksScalarFieldEnum: {
-    id: 'id',
-    documentId: 'documentId',
-    content: 'content',
-    pageNumber: 'pageNumber',
-    chunkNumber: 'chunkNumber',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type Document_chunksScalarFieldEnum = (typeof Document_chunksScalarFieldEnum)[keyof typeof Document_chunksScalarFieldEnum]
-
-
   export const PdfsScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -29505,6 +27027,7 @@ export namespace Prisma {
     last_viewed: 'last_viewed',
     user_id: 'user_id',
     content_type: 'content_type',
+    summary: 'summary',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
@@ -29548,19 +27071,6 @@ export namespace Prisma {
   };
 
   export type User_profilesScalarFieldEnum = (typeof User_profilesScalarFieldEnum)[keyof typeof User_profilesScalarFieldEnum]
-
-
-  export const Vector_embeddingsScalarFieldEnum: {
-    id: 'id',
-    chunkId: 'chunkId',
-    embedding: 'embedding',
-    dimension: 'dimension',
-    metadata: 'metadata',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type Vector_embeddingsScalarFieldEnum = (typeof Vector_embeddingsScalarFieldEnum)[keyof typeof Vector_embeddingsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -29760,20 +27270,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Bytes'
-   */
-  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
-    
-
-
-  /**
-   * Reference to a field of type 'Bytes[]'
-   */
-  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -31103,76 +28599,6 @@ export namespace Prisma {
     created_at?: DateTimeNullableWithAggregatesFilter<"chat_messages"> | Date | string | null
   }
 
-  export type document_chunksWhereInput = {
-    AND?: document_chunksWhereInput | document_chunksWhereInput[]
-    OR?: document_chunksWhereInput[]
-    NOT?: document_chunksWhereInput | document_chunksWhereInput[]
-    id?: StringFilter<"document_chunks"> | string
-    documentId?: StringFilter<"document_chunks"> | string
-    content?: StringFilter<"document_chunks"> | string
-    pageNumber?: IntFilter<"document_chunks"> | number
-    chunkNumber?: IntFilter<"document_chunks"> | number
-    createdAt?: DateTimeFilter<"document_chunks"> | Date | string
-    updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
-    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
-    vector_embeddings?: XOR<Vector_embeddingsNullableScalarRelationFilter, vector_embeddingsWhereInput> | null
-  }
-
-  export type document_chunksOrderByWithRelationInput = {
-    id?: SortOrder
-    documentId?: SortOrder
-    content?: SortOrder
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    pdfs?: pdfsOrderByWithRelationInput
-    vector_embeddings?: vector_embeddingsOrderByWithRelationInput
-  }
-
-  export type document_chunksWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: document_chunksWhereInput | document_chunksWhereInput[]
-    OR?: document_chunksWhereInput[]
-    NOT?: document_chunksWhereInput | document_chunksWhereInput[]
-    documentId?: StringFilter<"document_chunks"> | string
-    content?: StringFilter<"document_chunks"> | string
-    pageNumber?: IntFilter<"document_chunks"> | number
-    chunkNumber?: IntFilter<"document_chunks"> | number
-    createdAt?: DateTimeFilter<"document_chunks"> | Date | string
-    updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
-    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
-    vector_embeddings?: XOR<Vector_embeddingsNullableScalarRelationFilter, vector_embeddingsWhereInput> | null
-  }, "id">
-
-  export type document_chunksOrderByWithAggregationInput = {
-    id?: SortOrder
-    documentId?: SortOrder
-    content?: SortOrder
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: document_chunksCountOrderByAggregateInput
-    _avg?: document_chunksAvgOrderByAggregateInput
-    _max?: document_chunksMaxOrderByAggregateInput
-    _min?: document_chunksMinOrderByAggregateInput
-    _sum?: document_chunksSumOrderByAggregateInput
-  }
-
-  export type document_chunksScalarWhereWithAggregatesInput = {
-    AND?: document_chunksScalarWhereWithAggregatesInput | document_chunksScalarWhereWithAggregatesInput[]
-    OR?: document_chunksScalarWhereWithAggregatesInput[]
-    NOT?: document_chunksScalarWhereWithAggregatesInput | document_chunksScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"document_chunks"> | string
-    documentId?: StringWithAggregatesFilter<"document_chunks"> | string
-    content?: StringWithAggregatesFilter<"document_chunks"> | string
-    pageNumber?: IntWithAggregatesFilter<"document_chunks"> | number
-    chunkNumber?: IntWithAggregatesFilter<"document_chunks"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"document_chunks"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"document_chunks"> | Date | string
-  }
-
   export type pdfsWhereInput = {
     AND?: pdfsWhereInput | pdfsWhereInput[]
     OR?: pdfsWhereInput[]
@@ -31185,10 +28611,10 @@ export namespace Prisma {
     last_viewed?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     user_id?: UuidNullableFilter<"pdfs"> | string | null
     content_type?: StringNullableFilter<"pdfs"> | string | null
+    summary?: StringNullableFilter<"pdfs"> | string | null
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
-    document_chunks?: Document_chunksListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }
 
@@ -31201,10 +28627,10 @@ export namespace Prisma {
     last_viewed?: SortOrderInput | SortOrder
     user_id?: SortOrderInput | SortOrder
     content_type?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     chat_messages?: chat_messagesOrderByRelationAggregateInput
-    document_chunks?: document_chunksOrderByRelationAggregateInput
     users?: usersOrderByWithRelationInput
   }
 
@@ -31220,10 +28646,10 @@ export namespace Prisma {
     last_viewed?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     user_id?: UuidNullableFilter<"pdfs"> | string | null
     content_type?: StringNullableFilter<"pdfs"> | string | null
+    summary?: StringNullableFilter<"pdfs"> | string | null
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
-    document_chunks?: Document_chunksListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }, "id">
 
@@ -31236,6 +28662,7 @@ export namespace Prisma {
     last_viewed?: SortOrderInput | SortOrder
     user_id?: SortOrderInput | SortOrder
     content_type?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     _count?: pdfsCountOrderByAggregateInput
@@ -31257,6 +28684,7 @@ export namespace Prisma {
     last_viewed?: DateTimeNullableWithAggregatesFilter<"pdfs"> | Date | string | null
     user_id?: UuidNullableWithAggregatesFilter<"pdfs"> | string | null
     content_type?: StringNullableWithAggregatesFilter<"pdfs"> | string | null
+    summary?: StringNullableWithAggregatesFilter<"pdfs"> | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"pdfs"> | Date | string | null
   }
@@ -31453,73 +28881,6 @@ export namespace Prisma {
     expire_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
-  }
-
-  export type vector_embeddingsWhereInput = {
-    AND?: vector_embeddingsWhereInput | vector_embeddingsWhereInput[]
-    OR?: vector_embeddingsWhereInput[]
-    NOT?: vector_embeddingsWhereInput | vector_embeddingsWhereInput[]
-    id?: StringFilter<"vector_embeddings"> | string
-    chunkId?: StringFilter<"vector_embeddings"> | string
-    embedding?: BytesFilter<"vector_embeddings"> | Uint8Array
-    dimension?: IntFilter<"vector_embeddings"> | number
-    metadata?: JsonNullableFilter<"vector_embeddings">
-    createdAt?: DateTimeFilter<"vector_embeddings"> | Date | string
-    updatedAt?: DateTimeFilter<"vector_embeddings"> | Date | string
-    document_chunks?: XOR<Document_chunksScalarRelationFilter, document_chunksWhereInput>
-  }
-
-  export type vector_embeddingsOrderByWithRelationInput = {
-    id?: SortOrder
-    chunkId?: SortOrder
-    embedding?: SortOrder
-    dimension?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    document_chunks?: document_chunksOrderByWithRelationInput
-  }
-
-  export type vector_embeddingsWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    chunkId?: string
-    AND?: vector_embeddingsWhereInput | vector_embeddingsWhereInput[]
-    OR?: vector_embeddingsWhereInput[]
-    NOT?: vector_embeddingsWhereInput | vector_embeddingsWhereInput[]
-    embedding?: BytesFilter<"vector_embeddings"> | Uint8Array
-    dimension?: IntFilter<"vector_embeddings"> | number
-    metadata?: JsonNullableFilter<"vector_embeddings">
-    createdAt?: DateTimeFilter<"vector_embeddings"> | Date | string
-    updatedAt?: DateTimeFilter<"vector_embeddings"> | Date | string
-    document_chunks?: XOR<Document_chunksScalarRelationFilter, document_chunksWhereInput>
-  }, "id" | "chunkId">
-
-  export type vector_embeddingsOrderByWithAggregationInput = {
-    id?: SortOrder
-    chunkId?: SortOrder
-    embedding?: SortOrder
-    dimension?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: vector_embeddingsCountOrderByAggregateInput
-    _avg?: vector_embeddingsAvgOrderByAggregateInput
-    _max?: vector_embeddingsMaxOrderByAggregateInput
-    _min?: vector_embeddingsMinOrderByAggregateInput
-    _sum?: vector_embeddingsSumOrderByAggregateInput
-  }
-
-  export type vector_embeddingsScalarWhereWithAggregatesInput = {
-    AND?: vector_embeddingsScalarWhereWithAggregatesInput | vector_embeddingsScalarWhereWithAggregatesInput[]
-    OR?: vector_embeddingsScalarWhereWithAggregatesInput[]
-    NOT?: vector_embeddingsScalarWhereWithAggregatesInput | vector_embeddingsScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"vector_embeddings"> | string
-    chunkId?: StringWithAggregatesFilter<"vector_embeddings"> | string
-    embedding?: BytesWithAggregatesFilter<"vector_embeddings"> | Uint8Array
-    dimension?: IntWithAggregatesFilter<"vector_embeddings"> | number
-    metadata?: JsonNullableWithAggregatesFilter<"vector_embeddings">
-    createdAt?: DateTimeWithAggregatesFilter<"vector_embeddings"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"vector_embeddings"> | Date | string
   }
 
   export type audit_log_entriesCreateInput = {
@@ -32987,79 +30348,6 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type document_chunksCreateInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    pdfs: pdfsCreateNestedOneWithoutDocument_chunksInput
-    vector_embeddings?: vector_embeddingsCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksUncheckedCreateInput = {
-    id: string
-    documentId: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    vector_embeddings?: vector_embeddingsUncheckedCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pdfs?: pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput
-    vector_embeddings?: vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    documentId?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    vector_embeddings?: vector_embeddingsUncheckedUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksCreateManyInput = {
-    id: string
-    documentId: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type document_chunksUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type document_chunksUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    documentId?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type pdfsCreateInput = {
     id?: string
     name: string
@@ -33068,10 +30356,10 @@ export namespace Prisma {
     upload_date?: Date | string | null
     last_viewed?: Date | string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
-    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -33084,10 +30372,10 @@ export namespace Prisma {
     last_viewed?: Date | string | null
     user_id?: string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
-    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUpdateInput = {
@@ -33098,10 +30386,10 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
-    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -33114,10 +30402,10 @@ export namespace Prisma {
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user_id?: NullableStringFieldUpdateOperationsInput | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
-    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsCreateManyInput = {
@@ -33129,6 +30417,7 @@ export namespace Prisma {
     last_viewed?: Date | string | null
     user_id?: string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -33141,6 +30430,7 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -33154,6 +30444,7 @@ export namespace Prisma {
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user_id?: NullableStringFieldUpdateOperationsInput | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -33356,75 +30647,6 @@ export namespace Prisma {
     expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type vector_embeddingsCreateInput = {
-    id: string
-    embedding: Uint8Array
-    dimension: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt: Date | string
-    document_chunks: document_chunksCreateNestedOneWithoutVector_embeddingsInput
-  }
-
-  export type vector_embeddingsUncheckedCreateInput = {
-    id: string
-    chunkId: string
-    embedding: Uint8Array
-    dimension: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type vector_embeddingsUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    document_chunks?: document_chunksUpdateOneRequiredWithoutVector_embeddingsNestedInput
-  }
-
-  export type vector_embeddingsUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    chunkId?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type vector_embeddingsCreateManyInput = {
-    id: string
-    chunkId: string
-    embedding: Uint8Array
-    dimension: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type vector_embeddingsUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type vector_embeddingsUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    chunkId?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidNullableFilter<$PrismaModel = never> = {
@@ -34679,82 +31901,6 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type PdfsScalarRelationFilter = {
-    is?: pdfsWhereInput
-    isNot?: pdfsWhereInput
-  }
-
-  export type Vector_embeddingsNullableScalarRelationFilter = {
-    is?: vector_embeddingsWhereInput | null
-    isNot?: vector_embeddingsWhereInput | null
-  }
-
-  export type document_chunksCountOrderByAggregateInput = {
-    id?: SortOrder
-    documentId?: SortOrder
-    content?: SortOrder
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type document_chunksAvgOrderByAggregateInput = {
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-  }
-
-  export type document_chunksMaxOrderByAggregateInput = {
-    id?: SortOrder
-    documentId?: SortOrder
-    content?: SortOrder
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type document_chunksMinOrderByAggregateInput = {
-    id?: SortOrder
-    documentId?: SortOrder
-    content?: SortOrder
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type document_chunksSumOrderByAggregateInput = {
-    pageNumber?: SortOrder
-    chunkNumber?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type Document_chunksListRelationFilter = {
-    every?: document_chunksWhereInput
-    some?: document_chunksWhereInput
-    none?: document_chunksWhereInput
-  }
-
-  export type document_chunksOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type pdfsCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -34764,6 +31910,7 @@ export namespace Prisma {
     last_viewed?: SortOrder
     user_id?: SortOrder
     content_type?: SortOrder
+    summary?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -34781,6 +31928,7 @@ export namespace Prisma {
     last_viewed?: SortOrder
     user_id?: SortOrder
     content_type?: SortOrder
+    summary?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -34794,12 +31942,29 @@ export namespace Prisma {
     last_viewed?: SortOrder
     user_id?: SortOrder
     content_type?: SortOrder
+    summary?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
 
   export type pdfsSumOrderByAggregateInput = {
     size?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type plusCountOrderByAggregateInput = {
@@ -34907,64 +32072,6 @@ export namespace Prisma {
     expire_at?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
-  }
-
-  export type BytesFilter<$PrismaModel = never> = {
-    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
-    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Uint8Array
-  }
-
-  export type Document_chunksScalarRelationFilter = {
-    is?: document_chunksWhereInput
-    isNot?: document_chunksWhereInput
-  }
-
-  export type vector_embeddingsCountOrderByAggregateInput = {
-    id?: SortOrder
-    chunkId?: SortOrder
-    embedding?: SortOrder
-    dimension?: SortOrder
-    metadata?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type vector_embeddingsAvgOrderByAggregateInput = {
-    dimension?: SortOrder
-  }
-
-  export type vector_embeddingsMaxOrderByAggregateInput = {
-    id?: SortOrder
-    chunkId?: SortOrder
-    embedding?: SortOrder
-    dimension?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type vector_embeddingsMinOrderByAggregateInput = {
-    id?: SortOrder
-    chunkId?: SortOrder
-    embedding?: SortOrder
-    dimension?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type vector_embeddingsSumOrderByAggregateInput = {
-    dimension?: SortOrder
-  }
-
-  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
-    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Uint8Array
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -35859,72 +32966,11 @@ export namespace Prisma {
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutChat_messagesInput, usersUpdateWithoutChat_messagesInput>, usersUncheckedUpdateWithoutChat_messagesInput>
   }
 
-  export type pdfsCreateNestedOneWithoutDocument_chunksInput = {
-    create?: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: pdfsCreateOrConnectWithoutDocument_chunksInput
-    connect?: pdfsWhereUniqueInput
-  }
-
-  export type vector_embeddingsCreateNestedOneWithoutDocument_chunksInput = {
-    create?: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: vector_embeddingsCreateOrConnectWithoutDocument_chunksInput
-    connect?: vector_embeddingsWhereUniqueInput
-  }
-
-  export type vector_embeddingsUncheckedCreateNestedOneWithoutDocument_chunksInput = {
-    create?: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: vector_embeddingsCreateOrConnectWithoutDocument_chunksInput
-    connect?: vector_embeddingsWhereUniqueInput
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput = {
-    create?: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: pdfsCreateOrConnectWithoutDocument_chunksInput
-    upsert?: pdfsUpsertWithoutDocument_chunksInput
-    connect?: pdfsWhereUniqueInput
-    update?: XOR<XOR<pdfsUpdateToOneWithWhereWithoutDocument_chunksInput, pdfsUpdateWithoutDocument_chunksInput>, pdfsUncheckedUpdateWithoutDocument_chunksInput>
-  }
-
-  export type vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput = {
-    create?: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: vector_embeddingsCreateOrConnectWithoutDocument_chunksInput
-    upsert?: vector_embeddingsUpsertWithoutDocument_chunksInput
-    disconnect?: vector_embeddingsWhereInput | boolean
-    delete?: vector_embeddingsWhereInput | boolean
-    connect?: vector_embeddingsWhereUniqueInput
-    update?: XOR<XOR<vector_embeddingsUpdateToOneWithWhereWithoutDocument_chunksInput, vector_embeddingsUpdateWithoutDocument_chunksInput>, vector_embeddingsUncheckedUpdateWithoutDocument_chunksInput>
-  }
-
-  export type vector_embeddingsUncheckedUpdateOneWithoutDocument_chunksNestedInput = {
-    create?: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-    connectOrCreate?: vector_embeddingsCreateOrConnectWithoutDocument_chunksInput
-    upsert?: vector_embeddingsUpsertWithoutDocument_chunksInput
-    disconnect?: vector_embeddingsWhereInput | boolean
-    delete?: vector_embeddingsWhereInput | boolean
-    connect?: vector_embeddingsWhereUniqueInput
-    update?: XOR<XOR<vector_embeddingsUpdateToOneWithWhereWithoutDocument_chunksInput, vector_embeddingsUpdateWithoutDocument_chunksInput>, vector_embeddingsUncheckedUpdateWithoutDocument_chunksInput>
-  }
-
   export type chat_messagesCreateNestedManyWithoutPdfsInput = {
     create?: XOR<chat_messagesCreateWithoutPdfsInput, chat_messagesUncheckedCreateWithoutPdfsInput> | chat_messagesCreateWithoutPdfsInput[] | chat_messagesUncheckedCreateWithoutPdfsInput[]
     connectOrCreate?: chat_messagesCreateOrConnectWithoutPdfsInput | chat_messagesCreateOrConnectWithoutPdfsInput[]
     createMany?: chat_messagesCreateManyPdfsInputEnvelope
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
-  }
-
-  export type document_chunksCreateNestedManyWithoutPdfsInput = {
-    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
-    createMany?: document_chunksCreateManyPdfsInputEnvelope
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
   }
 
   export type usersCreateNestedOneWithoutPdfsInput = {
@@ -35940,11 +32986,12 @@ export namespace Prisma {
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
   }
 
-  export type document_chunksUncheckedCreateNestedManyWithoutPdfsInput = {
-    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
-    createMany?: document_chunksCreateManyPdfsInputEnvelope
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type chat_messagesUpdateManyWithoutPdfsNestedInput = {
@@ -35959,20 +33006,6 @@ export namespace Prisma {
     update?: chat_messagesUpdateWithWhereUniqueWithoutPdfsInput | chat_messagesUpdateWithWhereUniqueWithoutPdfsInput[]
     updateMany?: chat_messagesUpdateManyWithWhereWithoutPdfsInput | chat_messagesUpdateManyWithWhereWithoutPdfsInput[]
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
-  }
-
-  export type document_chunksUpdateManyWithoutPdfsNestedInput = {
-    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
-    upsert?: document_chunksUpsertWithWhereUniqueWithoutPdfsInput | document_chunksUpsertWithWhereUniqueWithoutPdfsInput[]
-    createMany?: document_chunksCreateManyPdfsInputEnvelope
-    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    update?: document_chunksUpdateWithWhereUniqueWithoutPdfsInput | document_chunksUpdateWithWhereUniqueWithoutPdfsInput[]
-    updateMany?: document_chunksUpdateManyWithWhereWithoutPdfsInput | document_chunksUpdateManyWithWhereWithoutPdfsInput[]
-    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
   }
 
   export type usersUpdateOneWithoutPdfsNestedInput = {
@@ -35997,20 +33030,6 @@ export namespace Prisma {
     update?: chat_messagesUpdateWithWhereUniqueWithoutPdfsInput | chat_messagesUpdateWithWhereUniqueWithoutPdfsInput[]
     updateMany?: chat_messagesUpdateManyWithWhereWithoutPdfsInput | chat_messagesUpdateManyWithWhereWithoutPdfsInput[]
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
-  }
-
-  export type document_chunksUncheckedUpdateManyWithoutPdfsNestedInput = {
-    create?: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput> | document_chunksCreateWithoutPdfsInput[] | document_chunksUncheckedCreateWithoutPdfsInput[]
-    connectOrCreate?: document_chunksCreateOrConnectWithoutPdfsInput | document_chunksCreateOrConnectWithoutPdfsInput[]
-    upsert?: document_chunksUpsertWithWhereUniqueWithoutPdfsInput | document_chunksUpsertWithWhereUniqueWithoutPdfsInput[]
-    createMany?: document_chunksCreateManyPdfsInputEnvelope
-    set?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    disconnect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    delete?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    connect?: document_chunksWhereUniqueInput | document_chunksWhereUniqueInput[]
-    update?: document_chunksUpdateWithWhereUniqueWithoutPdfsInput | document_chunksUpdateWithWhereUniqueWithoutPdfsInput[]
-    updateMany?: document_chunksUpdateManyWithWhereWithoutPdfsInput | document_chunksUpdateManyWithWhereWithoutPdfsInput[]
-    deleteMany?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
   }
 
   export type usersCreateNestedOneWithoutPlusInput = {
@@ -36053,24 +33072,6 @@ export namespace Prisma {
     upsert?: usersUpsertWithoutUser_profilesInput
     connect?: usersWhereUniqueInput
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutUser_profilesInput, usersUpdateWithoutUser_profilesInput>, usersUncheckedUpdateWithoutUser_profilesInput>
-  }
-
-  export type document_chunksCreateNestedOneWithoutVector_embeddingsInput = {
-    create?: XOR<document_chunksCreateWithoutVector_embeddingsInput, document_chunksUncheckedCreateWithoutVector_embeddingsInput>
-    connectOrCreate?: document_chunksCreateOrConnectWithoutVector_embeddingsInput
-    connect?: document_chunksWhereUniqueInput
-  }
-
-  export type BytesFieldUpdateOperationsInput = {
-    set?: Uint8Array
-  }
-
-  export type document_chunksUpdateOneRequiredWithoutVector_embeddingsNestedInput = {
-    create?: XOR<document_chunksCreateWithoutVector_embeddingsInput, document_chunksUncheckedCreateWithoutVector_embeddingsInput>
-    connectOrCreate?: document_chunksCreateOrConnectWithoutVector_embeddingsInput
-    upsert?: document_chunksUpsertWithoutVector_embeddingsInput
-    connect?: document_chunksWhereUniqueInput
-    update?: XOR<XOR<document_chunksUpdateToOneWithWhereWithoutVector_embeddingsInput, document_chunksUpdateWithoutVector_embeddingsInput>, document_chunksUncheckedUpdateWithoutVector_embeddingsInput>
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -36493,23 +33494,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedBytesFilter<$PrismaModel = never> = {
-    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
-    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Uint8Array
-  }
-
-  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Uint8Array | BytesFieldRefInput<$PrismaModel>
-    in?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Uint8Array[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Uint8Array
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type saml_relay_statesCreateWithoutFlow_stateInput = {
@@ -38339,10 +35323,10 @@ export namespace Prisma {
     upload_date?: Date | string | null
     last_viewed?: Date | string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
-    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUncheckedCreateWithoutUsersInput = {
@@ -38353,10 +35337,10 @@ export namespace Prisma {
     upload_date?: Date | string | null
     last_viewed?: Date | string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
-    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutUsersInput = {
@@ -38620,6 +35604,7 @@ export namespace Prisma {
     last_viewed?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     user_id?: UuidNullableFilter<"pdfs"> | string | null
     content_type?: StringNullableFilter<"pdfs"> | string | null
+    summary?: StringNullableFilter<"pdfs"> | string | null
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
   }
@@ -38717,9 +35702,9 @@ export namespace Prisma {
     upload_date?: Date | string | null
     last_viewed?: Date | string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
-    document_chunks?: document_chunksCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -38732,9 +35717,9 @@ export namespace Prisma {
     last_viewed?: Date | string | null
     user_id?: string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
-    document_chunks?: document_chunksUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutChat_messagesInput = {
@@ -38858,9 +35843,9 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -38873,9 +35858,9 @@ export namespace Prisma {
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user_id?: NullableStringFieldUpdateOperationsInput | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type usersUpsertWithoutChat_messagesInput = {
@@ -38981,130 +35966,6 @@ export namespace Prisma {
     user_profiles?: user_profilesUncheckedUpdateOneWithoutUsersNestedInput
   }
 
-  export type pdfsCreateWithoutDocument_chunksInput = {
-    id?: string
-    name: string
-    url: string
-    size: number
-    upload_date?: Date | string | null
-    last_viewed?: Date | string | null
-    content_type?: string | null
-    created_at?: Date | string | null
-    updated_at?: Date | string | null
-    chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
-    users?: usersCreateNestedOneWithoutPdfsInput
-  }
-
-  export type pdfsUncheckedCreateWithoutDocument_chunksInput = {
-    id?: string
-    name: string
-    url: string
-    size: number
-    upload_date?: Date | string | null
-    last_viewed?: Date | string | null
-    user_id?: string | null
-    content_type?: string | null
-    created_at?: Date | string | null
-    updated_at?: Date | string | null
-    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
-  }
-
-  export type pdfsCreateOrConnectWithoutDocument_chunksInput = {
-    where: pdfsWhereUniqueInput
-    create: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
-  }
-
-  export type vector_embeddingsCreateWithoutDocument_chunksInput = {
-    id: string
-    embedding: Uint8Array
-    dimension: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type vector_embeddingsUncheckedCreateWithoutDocument_chunksInput = {
-    id: string
-    embedding: Uint8Array
-    dimension: number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type vector_embeddingsCreateOrConnectWithoutDocument_chunksInput = {
-    where: vector_embeddingsWhereUniqueInput
-    create: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-  }
-
-  export type pdfsUpsertWithoutDocument_chunksInput = {
-    update: XOR<pdfsUpdateWithoutDocument_chunksInput, pdfsUncheckedUpdateWithoutDocument_chunksInput>
-    create: XOR<pdfsCreateWithoutDocument_chunksInput, pdfsUncheckedCreateWithoutDocument_chunksInput>
-    where?: pdfsWhereInput
-  }
-
-  export type pdfsUpdateToOneWithWhereWithoutDocument_chunksInput = {
-    where?: pdfsWhereInput
-    data: XOR<pdfsUpdateWithoutDocument_chunksInput, pdfsUncheckedUpdateWithoutDocument_chunksInput>
-  }
-
-  export type pdfsUpdateWithoutDocument_chunksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    content_type?: NullableStringFieldUpdateOperationsInput | string | null
-    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
-    users?: usersUpdateOneWithoutPdfsNestedInput
-  }
-
-  export type pdfsUncheckedUpdateWithoutDocument_chunksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    url?: StringFieldUpdateOperationsInput | string
-    size?: IntFieldUpdateOperationsInput | number
-    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    user_id?: NullableStringFieldUpdateOperationsInput | string | null
-    content_type?: NullableStringFieldUpdateOperationsInput | string | null
-    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
-  }
-
-  export type vector_embeddingsUpsertWithoutDocument_chunksInput = {
-    update: XOR<vector_embeddingsUpdateWithoutDocument_chunksInput, vector_embeddingsUncheckedUpdateWithoutDocument_chunksInput>
-    create: XOR<vector_embeddingsCreateWithoutDocument_chunksInput, vector_embeddingsUncheckedCreateWithoutDocument_chunksInput>
-    where?: vector_embeddingsWhereInput
-  }
-
-  export type vector_embeddingsUpdateToOneWithWhereWithoutDocument_chunksInput = {
-    where?: vector_embeddingsWhereInput
-    data: XOR<vector_embeddingsUpdateWithoutDocument_chunksInput, vector_embeddingsUncheckedUpdateWithoutDocument_chunksInput>
-  }
-
-  export type vector_embeddingsUpdateWithoutDocument_chunksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type vector_embeddingsUncheckedUpdateWithoutDocument_chunksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    embedding?: BytesFieldUpdateOperationsInput | Uint8Array
-    dimension?: IntFieldUpdateOperationsInput | number
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type chat_messagesCreateWithoutPdfsInput = {
     id?: string
     content: string
@@ -39130,36 +35991,6 @@ export namespace Prisma {
 
   export type chat_messagesCreateManyPdfsInputEnvelope = {
     data: chat_messagesCreateManyPdfsInput | chat_messagesCreateManyPdfsInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type document_chunksCreateWithoutPdfsInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    vector_embeddings?: vector_embeddingsCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksUncheckedCreateWithoutPdfsInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    vector_embeddings?: vector_embeddingsUncheckedCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksCreateOrConnectWithoutPdfsInput = {
-    where: document_chunksWhereUniqueInput
-    create: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput>
-  }
-
-  export type document_chunksCreateManyPdfsInputEnvelope = {
-    data: document_chunksCreateManyPdfsInput | document_chunksCreateManyPdfsInput[]
     skipDuplicates?: boolean
   }
 
@@ -39274,35 +36105,6 @@ export namespace Prisma {
   export type chat_messagesUpdateManyWithWhereWithoutPdfsInput = {
     where: chat_messagesScalarWhereInput
     data: XOR<chat_messagesUpdateManyMutationInput, chat_messagesUncheckedUpdateManyWithoutPdfsInput>
-  }
-
-  export type document_chunksUpsertWithWhereUniqueWithoutPdfsInput = {
-    where: document_chunksWhereUniqueInput
-    update: XOR<document_chunksUpdateWithoutPdfsInput, document_chunksUncheckedUpdateWithoutPdfsInput>
-    create: XOR<document_chunksCreateWithoutPdfsInput, document_chunksUncheckedCreateWithoutPdfsInput>
-  }
-
-  export type document_chunksUpdateWithWhereUniqueWithoutPdfsInput = {
-    where: document_chunksWhereUniqueInput
-    data: XOR<document_chunksUpdateWithoutPdfsInput, document_chunksUncheckedUpdateWithoutPdfsInput>
-  }
-
-  export type document_chunksUpdateManyWithWhereWithoutPdfsInput = {
-    where: document_chunksScalarWhereInput
-    data: XOR<document_chunksUpdateManyMutationInput, document_chunksUncheckedUpdateManyWithoutPdfsInput>
-  }
-
-  export type document_chunksScalarWhereInput = {
-    AND?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-    OR?: document_chunksScalarWhereInput[]
-    NOT?: document_chunksScalarWhereInput | document_chunksScalarWhereInput[]
-    id?: StringFilter<"document_chunks"> | string
-    documentId?: StringFilter<"document_chunks"> | string
-    content?: StringFilter<"document_chunks"> | string
-    pageNumber?: IntFilter<"document_chunks"> | number
-    chunkNumber?: IntFilter<"document_chunks"> | number
-    createdAt?: DateTimeFilter<"document_chunks"> | Date | string
-    updatedAt?: DateTimeFilter<"document_chunks"> | Date | string
   }
 
   export type usersUpsertWithoutPdfsInput = {
@@ -40008,62 +36810,6 @@ export namespace Prisma {
     user_daily_quota?: user_daily_quotaUncheckedUpdateOneWithoutUsersNestedInput
   }
 
-  export type document_chunksCreateWithoutVector_embeddingsInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-    pdfs: pdfsCreateNestedOneWithoutDocument_chunksInput
-  }
-
-  export type document_chunksUncheckedCreateWithoutVector_embeddingsInput = {
-    id: string
-    documentId: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
-  }
-
-  export type document_chunksCreateOrConnectWithoutVector_embeddingsInput = {
-    where: document_chunksWhereUniqueInput
-    create: XOR<document_chunksCreateWithoutVector_embeddingsInput, document_chunksUncheckedCreateWithoutVector_embeddingsInput>
-  }
-
-  export type document_chunksUpsertWithoutVector_embeddingsInput = {
-    update: XOR<document_chunksUpdateWithoutVector_embeddingsInput, document_chunksUncheckedUpdateWithoutVector_embeddingsInput>
-    create: XOR<document_chunksCreateWithoutVector_embeddingsInput, document_chunksUncheckedCreateWithoutVector_embeddingsInput>
-    where?: document_chunksWhereInput
-  }
-
-  export type document_chunksUpdateToOneWithWhereWithoutVector_embeddingsInput = {
-    where?: document_chunksWhereInput
-    data: XOR<document_chunksUpdateWithoutVector_embeddingsInput, document_chunksUncheckedUpdateWithoutVector_embeddingsInput>
-  }
-
-  export type document_chunksUpdateWithoutVector_embeddingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    pdfs?: pdfsUpdateOneRequiredWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateWithoutVector_embeddingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    documentId?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type saml_relay_statesCreateManyFlow_stateInput = {
     id: string
     sso_provider_id: string
@@ -40388,6 +37134,7 @@ export namespace Prisma {
     upload_date?: Date | string | null
     last_viewed?: Date | string | null
     content_type?: string | null
+    summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -40574,10 +37321,10 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
-    document_chunks?: document_chunksUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateWithoutUsersInput = {
@@ -40588,10 +37335,10 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
-    document_chunks?: document_chunksUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateManyWithoutUsersInput = {
@@ -40602,6 +37349,7 @@ export namespace Prisma {
     upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -40613,15 +37361,6 @@ export namespace Prisma {
     is_user?: boolean | null
     timestamp?: Date | string | null
     created_at?: Date | string | null
-  }
-
-  export type document_chunksCreateManyPdfsInput = {
-    id: string
-    content: string
-    pageNumber: number
-    chunkNumber: number
-    createdAt?: Date | string
-    updatedAt: Date | string
   }
 
   export type chat_messagesUpdateWithoutPdfsInput = {
@@ -40649,35 +37388,6 @@ export namespace Prisma {
     is_user?: NullableBoolFieldUpdateOperationsInput | boolean | null
     timestamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type document_chunksUpdateWithoutPdfsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    vector_embeddings?: vector_embeddingsUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateWithoutPdfsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    vector_embeddings?: vector_embeddingsUncheckedUpdateOneWithoutDocument_chunksNestedInput
-  }
-
-  export type document_chunksUncheckedUpdateManyWithoutPdfsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    pageNumber?: IntFieldUpdateOperationsInput | number
-    chunkNumber?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

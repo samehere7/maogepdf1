@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
@@ -11,29 +11,18 @@ import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { Sidebar } from "@/components/sidebar"
-import dynamic from 'next/dynamic'
 import * as pdfjsLib from 'pdfjs-dist'
 import { createClient } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import FlashcardList from "@/components/flashcard-list"
 import FlashcardStudy from "@/components/flashcard-study"
-
-// 动态导入 InteractivePDFViewer 组件，确保只在客户端渲染
-const InteractivePDFViewer = dynamic(
-  () => import('@/components/interactive-pdf-viewer'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-full bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-          <p className="text-slate-600">加载PDF中...</p>
-        </div>
-      </div>
-    )
-  }
-);
+import { PDFViewerRef } from "@/components/interactive-pdf-viewer"
+import { PageAnchorText } from "@/components/page-anchor-button"
+import InteractivePDFViewer from "@/components/interactive-pdf-viewer"
+import { WelcomeQuestions, WelcomeQuestionsLoading } from "@/components/welcome-questions"
+import { generatePDFQuestions } from "@/lib/pdf-question-generator"
+import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 
 interface AnalysisResult {
   theme: string
@@ -90,6 +79,21 @@ export default function AnalysisPage() {
   // PDF标题编辑状态
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
+  
+  // PDF查看器ref
+  const pdfViewerRef = useRef<PDFViewerRef>(null);
+  
+  // 客户端渲染检查
+  const [isClient, setIsClient] = useState(false);
+  
+  // 欢迎问题相关状态
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeQuestions, setWelcomeQuestions] = useState<any[]>([]);
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -132,6 +136,22 @@ export default function AnalysisPage() {
         console.log('[Analysis] 从数据库成功获取PDF信息');
         setFileInfo(pdf);
 
+        // 从数据库加载聊天记录
+        const chatMessages = await loadChatMessages(pdf.id);
+        console.log('[智能推荐] 加载的聊天记录数量:', chatMessages.length);
+        
+        // 如果是首次访问（没有聊天记录），显示欢迎问题
+        if (chatMessages.length === 0) {
+          console.log('[欢迎问题] 首次访问，准备生成欢迎问题');
+          setIsGeneratingQuestions(true);
+          // 异步生成欢迎问题，不阻塞PDF加载
+          generateWelcomeQuestions(pdf.url, pdf.name);
+        } else {
+          // 直接加载聊天记录
+          console.log('[聊天记录] 加载现有聊天记录');
+          setMessages(chatMessages);
+        }
+
         // TODO: 从数据库加载分析结果，而不是localStorage
         // 这里暂时生成新的分析，后续可以添加分析结果的数据库存储
         try {
@@ -149,24 +169,6 @@ export default function AnalysisPage() {
           setAnalysis(fallbackAnalysis);
         }
 
-        // 从数据库加载聊天记录
-        const chatMessages = await loadChatMessages(pdf.id);
-        
-        if (chatMessages.length > 0) {
-          setMessages(chatMessages);
-        } else {
-          // 设置并保存欢迎消息
-          const greeting = `你好！PDF已成功加载，我是您的文档助手。`;
-          const welcomeMessages = [
-            { role: "assistant", content: greeting },
-            { role: "assistant", content: "WELCOME_ACTIONS" } // 特殊标记，用于显示欢迎按钮
-          ];
-          setMessages(welcomeMessages);
-          
-          // 保存欢迎消息到数据库
-          await saveChatMessage(pdf.id, greeting, false);
-        }
-
       } catch (error) {
         console.error("Error loading PDF:", error);
         setPdfError('加载PDF失败，请重试');
@@ -177,6 +179,32 @@ export default function AnalysisPage() {
 
     loadPDF();
   }, [params.id, router, supabase]);
+
+  // 监听PDF删除事件，处理页面导航
+  useEffect(() => {
+    const handlePdfDeleted = (event: CustomEvent) => {
+      const { deletedId, nextPdfId } = event.detail;
+      
+      // 如果删除的是当前正在查看的PDF
+      if (deletedId === params.id) {
+        console.log('[PDF删除导航] 当前PDF被删除，下一个PDF ID:', nextPdfId);
+        
+        if (nextPdfId) {
+          // 导航到下一个PDF
+          router.push(`/analysis/${nextPdfId}`);
+        } else {
+          // 没有其他PDF了，回到主页
+          router.push('/');
+        }
+      }
+    };
+
+    window.addEventListener('pdf-deleted', handlePdfDeleted as EventListener);
+
+    return () => {
+      window.removeEventListener('pdf-deleted', handlePdfDeleted as EventListener);
+    };
+  }, [params.id, router]);
 
   useEffect(() => {
     // 当fileInfo更新时，设置初始modelQuality
@@ -387,85 +415,279 @@ export default function AnalysisPage() {
     handleSendQuestion(prompt);
   };
 
-  // 处理功能按钮点击
-  const handleActionClick = async (action: 'summary' | 'examples' | 'rewrite') => {
-    let prompt = '';
-    let loadingText = '';
-    
-    switch (action) {
-      case 'summary':
-        prompt = '请为这个PDF文档生成一个详细的总结，包括主要观点、关键信息和结论。';
-        loadingText = '正在生成文档总结...';
-        break;
-      case 'examples':
-        prompt = '请基于这个PDF文档的内容，生成5个有针对性的问题示例，这些问题应该能帮助用户更好地理解文档内容。';
-        loadingText = '正在生成示例问题...';
-        break;
-      case 'rewrite':
-        prompt = '请用简洁易懂的语言重新组织这个PDF文档的主要内容，使其更容易理解。';
-        loadingText = '正在改写文档内容...';
-        break;
-    }
-
-    // 移除欢迎按钮消息
-    setMessages(prev => prev.filter(msg => msg.content !== 'WELCOME_ACTIONS'));
-    
-    // 添加加载消息
-    const loadingMessage = { role: "assistant", content: loadingText };
-    setMessages(prev => [...prev, loadingMessage]);
-    setAnswering(true);
-
+  // 生成欢迎问题
+  const generateWelcomeQuestions = async (pdfUrl: string, fileName: string) => {
     try {
-      // 确保fileUrl是完整的URL路径
-      const fileUrl = fileInfo!.url.startsWith('http') 
-        ? fileInfo!.url 
-        : (typeof window !== 'undefined' ? window.location.origin + fileInfo!.url : fileInfo!.url);
-        
-      console.log('发送功能请求，文件URL:', fileUrl);
+      console.log('[欢迎问题] 开始生成推荐问题...');
+      setIsGeneratingQuestions(true);
       
-      // 调用聊天API
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: prompt }],
-          pdfId: fileInfo!.id,
-          quality: modelQuality
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("请求失败");
-      }
-
-      const data = await response.json();
-      const assistantReply = data.content || "无法生成回答";
+      // 提取PDF文本内容
+      const pdfContent = await extractTextFromPDF(pdfUrl);
+      console.log('[欢迎问题] PDF内容提取完成，长度:', pdfContent.length);
       
-      // 替换加载消息为实际回答
-      setMessages(prev => prev.map(msg => 
-        msg.content === loadingText ? { role: "assistant", content: assistantReply } : msg
-      ));
+      // 生成推荐问题
+      const questions = await generatePDFQuestions(pdfContent, fileName);
+      console.log('[欢迎问题] 推荐问题生成完成:', questions);
       
-      // 保存AI回答到数据库
-      await saveChatMessage(fileInfo!.id, assistantReply, false);
+      setWelcomeQuestions(questions);
+      setShowWelcome(true);
       
     } catch (error) {
-      console.error("功能请求错误:", error);
-      const errorMessage = "抱歉，处理您的请求时出错了。请稍后再试。";
-      
-      // 替换加载消息为错误消息
-      setMessages(prev => prev.map(msg => 
-        msg.content === loadingText ? { role: "assistant", content: errorMessage } : msg
-      ));
-      
-      // 保存错误消息到数据库
-      await saveChatMessage(fileInfo!.id, errorMessage, false);
+      console.error('[欢迎问题] 生成推荐问题失败:', error);
+      // 即使失败也显示欢迎界面，但不包含推荐问题
+      setWelcomeQuestions([]);
+      setShowWelcome(true);
     } finally {
-      setAnswering(false);
+      setIsGeneratingQuestions(false);
     }
   };
+
+  // 处理推荐问题点击
+  const handleWelcomeQuestionClick = (questionText: string) => {
+    console.log('[欢迎问题] 用户点击问题:', questionText);
+    
+    // 添加用户问题到消息列表
+    const userMessage = {
+      role: "user" as const,
+      content: questionText
+    };
+    setMessages(prev => [...prev, userMessage]);
+    
+    // 自动发送问题
+    handleSendQuestion(questionText);
+    
+    // 隐藏欢迎界面
+    setShowWelcome(false);
+  };
+
+  // 跳转到指定页面的函数 - 使用新的ref系统
+  const handlePageJump = (pageNumber: number) => {
+    console.log(`[页码跳转] 跳转到第${pageNumber}页`);
+    console.log(`[页码跳转] isClient:`, isClient);
+    console.log(`[页码跳转] PDF查看器ref状态:`, pdfViewerRef.current);
+    console.log(`[页码跳转] PDF查看器ref方法:`, pdfViewerRef.current ? Object.keys(pdfViewerRef.current) : 'null');
+    console.log(`[页码跳转] 文件信息:`, fileInfo?.name);
+    
+    if (!isClient) {
+      console.warn('[页码跳转] 客户端未准备好');
+      return;
+    }
+    
+    if (pdfViewerRef.current && pdfViewerRef.current.jumpToPage) {
+      console.log(`[页码跳转] 调用jumpToPage方法`);
+      try {
+        pdfViewerRef.current.jumpToPage(pageNumber);
+        console.log(`[页码跳转] jumpToPage调用成功`);
+      } catch (error) {
+        console.error(`[页码跳转] jumpToPage调用失败:`, error);
+      }
+    } else {
+      console.warn('[页码跳转] PDF查看器ref或jumpToPage方法未准备好');
+      // 尝试延迟执行
+      setTimeout(() => {
+        if (pdfViewerRef.current && pdfViewerRef.current.jumpToPage) {
+          console.log(`[页码跳转] 延迟执行成功`);
+          try {
+            pdfViewerRef.current.jumpToPage(pageNumber);
+          } catch (error) {
+            console.error(`[页码跳转] 延迟执行失败:`, error);
+          }
+        } else {
+          console.error('[页码跳转] 延迟执行仍然失败');
+        }
+      }, 2000);
+    }
+  };
+
+  // 渲染包含页码链接的文本
+  const renderTextWithPageLinks = (text: string) => {
+    if (!text) return text;
+    
+    // 匹配页码模式：增强版，支持更多格式
+    const pagePatterns = [
+      /第(\d+)页/g,                    // 第X页
+      /根据第(\d+)页/g,                // 根据第X页
+      /如第(\d+)页所示/g,              // 如第X页所示
+      /第(\d+)页提到/g,                // 第X页提到
+      /第(\d+)页的?内容/g,             // 第X页内容/第X页的内容
+      /第(\d+)页描述/g,                // 第X页描述
+      /页码?(\d+)/g,                   // 页X/页码X
+      /第(\d+)-(\d+)页/g,              // 第X-Y页
+      /(\d+)页/g,                      // X页
+      /（第(\d+)页）/g,                // （第X页）
+      /\(第(\d+)页\)/g,                // (第X页)
+      /见第(\d+)页/g,                  // 见第X页
+      /参考第(\d+)页/g,                // 参考第X页
+      /详见第(\d+)页/g,                // 详见第X页
+      /第(\d+)页中/g,                  // 第X页中
+      /第(\d+)页说明/g,                // 第X页说明
+      /第(\d+)页指出/g                 // 第X页指出
+    ];
+    
+    let processedText = text;
+    const pageReferences: Array<{pageNum: number, originalText: string}> = [];
+    
+    // 提取所有页码引用
+    pagePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        const fullMatch = match[0];
+        // 处理不同的捕获组结构 - 增强版
+        let pageNum: number;
+        if (pattern.source.includes('（第') || pattern.source.includes('\\(第')) {
+          // 处理括号格式：（第X页）或(第X页)
+          pageNum = parseInt(match[1]);
+        } else if (pattern.source.includes('第') && pattern.source.includes('-')) {
+          // 处理范围格式：第X-Y页，取第一个数字
+          pageNum = parseInt(match[1]);
+        } else if (pattern.source.includes('根据第') || pattern.source.includes('如第') || 
+                   pattern.source.includes('见第') || pattern.source.includes('参考第') || 
+                   pattern.source.includes('详见第')) {
+          // 处理复合格式：根据第X页、如第X页所示等
+          pageNum = parseInt(match[1]);
+        } else {
+          // 其他格式，取第一个捕获组
+          pageNum = parseInt(match[1]);
+        }
+        
+        if (pageNum > 0 && pageNum <= numPages) {
+          pageReferences.push({
+            pageNum,
+            originalText: fullMatch
+          });
+        }
+      });
+    });
+    
+    // 如果没有页码引用，返回原文本
+    if (pageReferences.length === 0) {
+      return <span>{text}</span>;
+    }
+    
+    // 分割文本并插入页码按钮
+    const parts = [];
+    let lastIndex = 0;
+    
+    // 重新匹配所有页码引用以获取正确的位置
+    const allMatches = [];
+    pagePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        // 处理不同的捕获组结构 - 增强版（第二处）
+        let pageNum: number;
+        if (pattern.source.includes('（第') || pattern.source.includes('\\(第')) {
+          // 处理括号格式：（第X页）或(第X页)
+          pageNum = parseInt(match[1]);
+        } else if (pattern.source.includes('第') && pattern.source.includes('-')) {
+          // 处理范围格式：第X-Y页，取第一个数字
+          pageNum = parseInt(match[1]);
+        } else if (pattern.source.includes('根据第') || pattern.source.includes('如第') || 
+                   pattern.source.includes('见第') || pattern.source.includes('参考第') || 
+                   pattern.source.includes('详见第')) {
+          // 处理复合格式：根据第X页、如第X页所示等
+          pageNum = parseInt(match[1]);
+        } else {
+          // 其他格式，取第一个捕获组
+          pageNum = parseInt(match[1]);
+        }
+        
+        if (pageNum > 0 && pageNum <= numPages) {
+          allMatches.push({
+            index: match.index || 0,
+            length: match[0].length,
+            pageNum,
+            text: match[0]
+          });
+        }
+      });
+    });
+    
+    // 按位置排序
+    allMatches.sort((a, b) => a.index - b.index);
+    
+    // 构建结果
+    allMatches.forEach((match, i) => {
+      // 添加匹配前的文本
+      if (match.index > lastIndex) {
+        parts.push(
+          <span key={`text-${i}`}>
+            {text.substring(lastIndex, match.index)}
+          </span>
+        );
+      }
+      
+      // 添加页码按钮 - 区分括号格式和普通格式
+      const isParentheses = match.text.includes('（') || match.text.includes('(');
+      
+      if (isParentheses) {
+        // 括号格式：显示为高亮文字样式
+        parts.push(
+          <span
+            key={`page-${i}`}
+            className="inline cursor-pointer text-blue-600 hover:text-blue-800 font-medium underline decoration-dotted underline-offset-2 transition-colors duration-200"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handlePageJump(match.pageNum);
+            }}
+            title={`点击跳转到第${match.pageNum}页`}
+          >
+            {match.text}
+          </span>
+        );
+      } else {
+        // 普通格式：使用增强的圆形数字样式（页码气泡）
+        parts.push(
+          <span
+            key={`page-${i}`}
+            className="page-bubble"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // 添加点击动画效果
+              e.currentTarget.classList.add('page-bubble-click');
+              setTimeout(() => {
+                e.currentTarget.classList.remove('page-bubble-click');
+              }, 200);
+              
+              // 执行页面跳转
+              handlePageJump(match.pageNum);
+              
+              console.log(`[页码气泡] 用户点击页码 ${match.pageNum}`);
+            }}
+            title={`点击跳转到第${match.pageNum}页`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handlePageJump(match.pageNum);
+              }
+            }}
+          >
+            {match.pageNum}
+          </span>
+        );
+      }
+      
+      lastIndex = match.index + match.length;
+    });
+    
+    // 添加最后部分的文本
+    if (lastIndex < text.length) {
+      parts.push(
+        <span key="text-end">
+          {text.substring(lastIndex)}
+        </span>
+      );
+    }
+    
+    return <>{parts}</>;
+  };
+
+
+
 
   // 移除全屏loading，在主界面中显示加载状态
 
@@ -491,13 +713,13 @@ export default function AnalysisPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* 左侧边栏 - 占1/6 */}
-      <div className="w-1/6 min-w-[240px] max-w-[280px] flex-shrink-0 border-r border-gray-200 bg-white">
+      {/* 左侧边栏 - 固定宽度与主页一致 */}
+      <div className="w-80 min-w-[240px] max-w-[320px] flex-shrink-0 border-r border-gray-200 bg-white">
         <Sidebar />
       </div>
 
-      {/* 中间PDF展示区 - 占1/2 */}
-      <div className="w-1/2 flex flex-col min-w-[400px] border-r border-gray-200 bg-gray-50">
+      {/* 中间PDF展示区 - 占剩余空间的50% */}
+      <div className="flex-1 flex flex-col min-w-[400px] border-r border-gray-200 bg-gray-50">
         {/* PDF文件信息 */}
         <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -591,11 +813,21 @@ export default function AnalysisPage() {
               <div className="flex items-center justify-center h-full text-red-500">{pdfError}</div>
             ) : fileInfo?.url ? (
               <div className="h-full">
-                <InteractivePDFViewer 
-                  file={fileInfo.url.startsWith('http') ? fileInfo.url : 
-                        (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url)}
-                  onTextSelect={handleTextSelect}
-                />
+                {isClient ? (
+                  <InteractivePDFViewer 
+                    ref={pdfViewerRef}
+                    file={fileInfo.url.startsWith('http') ? fileInfo.url : 
+                          (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url)}
+                    onTextSelect={handleTextSelect}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-50">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
+                      <p className="text-slate-600">初始化PDF查看器...</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">
@@ -624,8 +856,8 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* 右侧聊天区 - 占1/3 */}
-      <div className="w-1/3 flex-shrink-0 h-full flex flex-col bg-white" onClick={(e) => e.stopPropagation()}>
+      {/* 右侧聊天区 - 占剩余空间的50% */}
+      <div className="flex-1 flex-shrink-0 h-full flex flex-col bg-white" onClick={(e) => e.stopPropagation()}>
           {/* 聊天标题 */}
           <div className="p-3 border-b border-gray-200 bg-white">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -650,79 +882,36 @@ export default function AnalysisPage() {
                     <p className="text-gray-400 text-sm">PDF加载完成后即可开始对话</p>
                   </div>
                 </div>
-              ) : messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-4 ${
-                    msg.role === "user" ? "flex justify-end" : "flex justify-start"
-                  }`}
-                >
-                  {msg.content === "WELCOME_ACTIONS" ? (
-                    // 欢迎功能按钮
-                    <div className="w-full max-w-[85%]">
-                      <div className="bg-white border border-gray-200 shadow-sm p-4 rounded-lg">
-                        <p className="text-gray-600 mb-4 text-sm">我可以帮您：</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start text-left h-auto p-3 hover:bg-purple-50 hover:border-purple-300"
-                                onClick={() => handleActionClick('summary')}
-                                disabled={answering}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                  <span>总结文档</span>
-                                </div>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>生成文档的详细总结，包括主要观点和结论</p>
-                            </TooltipContent>
-                          </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start text-left h-auto p-3 hover:bg-purple-50 hover:border-purple-300"
-                                onClick={() => handleActionClick('examples')}
-                                disabled={answering}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <span>示例问题</span>
-                                </div>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>基于文档内容生成5个针对性问题示例</p>
-                            </TooltipContent>
-                          </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start text-left h-auto p-3 hover:bg-purple-50 hover:border-purple-300"
-                                onClick={() => handleActionClick('rewrite')}
-                                disabled={answering}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                  <span>改写内容</span>
-                                </div>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>用简洁易懂的语言重新组织文档内容</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </div>
+              ) : (
+                <>
+                  {/* 欢迎问题组件 */}
+                  {(showWelcome || isGeneratingQuestions) && fileInfo && (
+                    <div className="mb-4">
+                      {isGeneratingQuestions ? (
+                        <WelcomeQuestionsLoading pdfName={fileInfo.name} />
+                      ) : (
+                        <WelcomeQuestions
+                          pdfName={fileInfo.name}
+                          questions={welcomeQuestions}
+                          onQuestionClick={handleWelcomeQuestionClick}
+                          onClose={() => setShowWelcome(false)}
+                        />
+                      )}
                     </div>
-                  ) : (
+                  )}
+                  
+                  {/* 聊天消息 */}
+                  {messages.map((msg, index) => {
+                console.log(`[渲染消息] 索引${index}:`, msg);
+                return (
+                  <div
+                    key={index}
+                    className={`mb-4 ${
+                      msg.role === "user" ? "flex justify-end" : "flex justify-start"
+                    }`}
+                  >
+                    {/* 移除智能推荐功能，直接显示普通消息 */}
+                    {msg.content === "SMART_RECOMMENDATIONS" ? null : (
                     // 普通聊天消息
                     <div
                       className={`max-w-[85%] p-3 rounded-lg ${
@@ -731,18 +920,29 @@ export default function AnalysisPage() {
                           : "bg-white border border-gray-200 shadow-sm"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      <div className="whitespace-pre-wrap overflow-hidden">
+                        {/* 使用 PageAnchorText 组件支持【X】格式页码跳转 */}
+                        <div className="text-xs leading-relaxed">
+                          <PageAnchorText 
+                            content={msg.content} 
+                            onPageClick={handlePageJump}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
+                </>
+              )}
             {/* 示例问题按钮 - 只在非加载状态显示 */}
             {!loading && exampleQuestions.length > 0 && (
               <div className="flex flex-col gap-2 mt-2">
                 {exampleQuestions.map((q, idx) => (
                   <button
                     key={idx}
-                    className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-sm text-purple-800 transition"
+                    className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-xs text-purple-800 transition"
                     onClick={() => setQuestion(q)}
                   >
                     你可以问我：{q}
@@ -781,6 +981,7 @@ export default function AnalysisPage() {
               高质量
             </Button>
           </div>
+
 
           {/* 输入区域 */}
           <div className="p-3 border-t border-gray-200 bg-white">

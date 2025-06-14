@@ -3,6 +3,23 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { uploadPDF } from '@/lib/pdf-service';
 import { prisma } from '@/lib/prisma';
+import { pdfRAGSystem } from '@/lib/pdf-rag-system';
+
+
+// 异步处理PDF到RAG系统
+async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: string): Promise<void> {
+  try {
+    console.log('[RAG处理] 开始处理PDF到RAG系统:', fileName, 'ID:', pdfId);
+    
+    // 处理PDF文档到RAG系统，传入PDF ID
+    await pdfRAGSystem.extractAndChunkPDF(pdfUrl, pdfId);
+    
+    console.log('[RAG处理] PDF成功添加到RAG系统:', fileName, 'ID:', pdfId);
+  } catch (error) {
+    console.error('[RAG处理] 处理失败:', error);
+    // 这里可以选择将错误记录到数据库或者重试队列
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -155,16 +172,25 @@ export async function POST(req: Request) {
       // 使用Prisma创建PDF记录 - 使用pdfs表（小写）而不是PDF表
       console.log('[Upload API] 准备创建数据库记录');
       
+      // 使用原始文件名，不生成智能总结
+      const summary = fileName;
+      
       const pdf = await prisma.pdfs.create({
         data: {
           name: fileName,
           url: publicUrl,
           size: file.size,
-          user_id: userId
-        }
+          user_id: userId,
+          summary: summary
+        } as any  // 临时解决类型问题
       });
       
       console.log('[Upload API] 数据库记录创建成功，PDF ID:', pdf.id);
+      
+      // 后台处理PDF到RAG系统（不阻塞响应）
+      processPDFToRAGSystem(pdf.id, fileName, publicUrl).catch(error => {
+        console.error('[Upload API] RAG系统处理失败:', error);
+      });
       
       // 确保数据库事务完成
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -181,6 +207,11 @@ export async function POST(req: Request) {
       // 如果管理员上传失败，回退到使用pdf-service
       const pdf = await uploadPDF(file, userId, fileName);  // 使用userId而不是email
       console.log('[Upload API] 文件上传成功, ID:', pdf.id);
+      
+      // 后台处理PDF到RAG系统（不阻塞响应）
+      processPDFToRAGSystem(pdf.id, fileName, pdf.url).catch(error => {
+        console.error('[Upload API] RAG系统处理失败:', error);
+      });
       
       return new NextResponse(
         JSON.stringify({

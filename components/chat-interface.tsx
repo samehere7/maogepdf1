@@ -9,6 +9,7 @@ import { Send, MessageCircle } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { chatWithDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
+import { PageAnchorText } from "@/components/page-anchor-button"
 
 interface Message {
   id: string
@@ -20,9 +21,11 @@ interface Message {
 interface MaogeInterfaceProps {
   documentId: string
   documentName: string
+  initialMessages?: Array<{role: string, content: string}>
+  onPageJump?: (pageNumber: number) => void
 }
 
-export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps) {
+export function MaogeInterface({ documentId, documentName, initialMessages, onPageJump }: MaogeInterfaceProps) {
   const { t, language } = useLanguage()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -41,29 +44,75 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
   }, [messages])
 
   useEffect(() => {
-    // Load maoge history from localStorage
-    const maogeHistory = JSON.parse(localStorage.getItem(`maoge-${documentId}`) || "[]")
-    setMessages(
-      maogeHistory.map((msg: any) => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp),
-      })),
-    )
-
-    // Add welcome message if no history
-    if (maogeHistory.length === 0) {
-      const welcomeMessage: Message = {
-        id: Date.now().toString(),
-        content: t("chatWelcomeMessage").replace("{documentName}", documentName),
-        isUser: false,
+    // 优先使用传入的初始消息
+    if (initialMessages && initialMessages.length > 0) {
+      const formattedMessages = initialMessages.map((msg, index) => ({
+        id: (Date.now() + index).toString(),
+        content: msg.content,
+        isUser: msg.role === 'user',
         timestamp: new Date(),
+      }));
+      setMessages(formattedMessages);
+      // 同时保存到localStorage
+      saveMessages(formattedMessages);
+    } else {
+      // 如果没有初始消息，检查localStorage
+      const maogeHistory = JSON.parse(localStorage.getItem(`maoge-${documentId}`) || "[]")
+      
+      if (maogeHistory.length > 0) {
+        setMessages(
+          maogeHistory.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          })),
+        )
+      } else {
+        // 显示欢迎消息
+        const welcomeMessage: Message = {
+          id: Date.now().toString(),
+          content: t("chatWelcomeMessage").replace("{documentName}", documentName),
+          isUser: false,
+          timestamp: new Date(),
+        }
+        setMessages([welcomeMessage])
+        saveMessages([welcomeMessage])
       }
-      setMessages([welcomeMessage])
     }
-  }, [documentId, documentName, t])
+  }, [documentId, documentName, initialMessages, t])
 
   const saveMessages = (newMessages: Message[]) => {
     localStorage.setItem(`maoge-${documentId}`, JSON.stringify(newMessages))
+  }
+
+  // 保存聊天记录到数据库
+  const saveChatToDatabase = async (userMessage: Message, aiMessage: Message) => {
+    try {
+      // 保存用户消息
+      await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: documentId,
+          content: userMessage.content,
+          isUser: true
+        })
+      });
+
+      // 保存AI回复
+      await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: documentId,
+          content: aiMessage.content,
+          isUser: false
+        })
+      });
+      
+      console.log('[聊天记录] 成功保存到数据库');
+    } catch (error) {
+      console.error('[聊天记录] 保存到数据库失败:', error);
+    }
   }
 
   const handleSend = async () => {
@@ -82,38 +131,41 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
     setIsLoading(true)
 
     try {
-      // 获取文档信息
-      const files = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]");
-      const fileInfo = files.find((f: any) => f.id === documentId);
+      console.log("开始PDF对话:", input.trim(), "文档ID:", documentId);
       
-      if (!fileInfo) {
-        throw new Error('找不到文档信息');
-      }
-      
-      console.log("开始提问:", input.trim(), "文档:", fileInfo.name);
-      
-      // 调用PDF问答API
+      // 调用正确的聊天API，使用正确的消息格式
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          question: input.trim(),
-          pdfId: documentId
+          messages: [
+            ...newMessages.map(msg => ({
+              role: msg.isUser ? 'user' : 'assistant',
+              content: msg.content
+            })),
+            {
+              role: 'user',
+              content: input.trim()
+            }
+          ],
+          pdfId: documentId,
+          quality: modelType === 'quality' ? 'highQuality' : 'fast'
         }),
       })
       
-      console.log("问答响应状态:", response.status);
+      console.log("聊天API响应状态:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("问答错误:", errorData);
-        throw new Error(errorData.error || '问答请求失败');
+        console.error("聊天API错误:", errorData);
+        throw new Error(errorData.error || '聊天请求失败');
       }
       
       const data = await response.json();
-      console.log("问答成功:", data);
+      console.log("聊天API成功:", data);
       
-      const aiContent = data.answer || t("chatErrorMessage");
+      // 正确解析API响应 - 聊天API返回的是content字段
+      const aiContent = data.content || t("chatErrorMessage");
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -125,6 +177,9 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
       const finalMessages = [...newMessages, aiMessage]
       setMessages(finalMessages)
       saveMessages(finalMessages)
+      
+      // 保存对话到数据库
+      await saveChatToDatabase(userMessage, aiMessage)
     } catch (error) {
       console.error("问答失败:", error);
       const errorMessage: Message = {
@@ -149,6 +204,13 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
     }
   }
 
+  const handlePageClick = (pageNumber: number) => {
+    console.log(`点击页码: ${pageNumber}`);
+    if (onPageJump) {
+      onPageJump(pageNumber);
+    }
+  }
+
   return (
     <section className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-[700px] min-h-[700px]">
       {/* Messages */}
@@ -160,7 +222,16 @@ export function MaogeInterface({ documentId, documentName }: MaogeInterfaceProps
                 message.isUser ? "bg-[#0A52A1] text-white" : "bg-slate-100 text-slate-800"
               }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              <div className="text-xs leading-relaxed">
+                {message.isUser ? (
+                  <span className="whitespace-pre-wrap">{message.content}</span>
+                ) : (
+                  <PageAnchorText 
+                    content={message.content} 
+                    onPageClick={handlePageClick}
+                  />
+                )}
+              </div>
               <p className={`text-xs mt-2 ${message.isUser ? "text-slate-200" : "text-slate-500"}`}>
                 {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </p>

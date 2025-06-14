@@ -29,6 +29,7 @@ export function Sidebar({ className }: { className?: string }) {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingPdf, setDeletingPdf] = useState<{id: string, name: string} | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
@@ -177,13 +178,24 @@ export function Sidebar({ className }: { className?: string }) {
   const confirmDeletePdf = async () => {
     if (!deletingPdf) return;
 
+    setIsDeleting(true);
+
     try {
       const response = await fetch(`/api/pdfs/${deletingPdf.id}`, {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        console.log('[Sidebar] PDF删除成功')
+        const deleteResult = await response.json();
+        console.log('[Sidebar] PDF删除成功，结果:', deleteResult)
+        
+        // 发送删除事件，通知父组件处理页面跳转
+        window.dispatchEvent(new CustomEvent('pdf-deleted', { 
+          detail: { 
+            deletedId: deletingPdf.id, 
+            nextPdfId: deleteResult.nextPdfId 
+          } 
+        }));
         
         // 重新加载PDF列表
         await loadPDFsFromAPI()
@@ -203,6 +215,7 @@ export function Sidebar({ className }: { className?: string }) {
       console.error('[Sidebar] 删除PDF失败:', error)
       alert('删除失败，请重试')
     } finally {
+      setIsDeleting(false);
       setShowDeleteModal(false)
       setDeletingPdf(null)
     }
@@ -401,7 +414,7 @@ export function Sidebar({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn("flex flex-col h-screen bg-[#18181b] text-white w-60 min-w-[180px]", className)}>
+    <div className={cn("flex flex-col h-screen bg-[#18181b] text-white w-full", className)}>
       {/* 顶部标题 */}
       <div 
         className="flex items-center gap-2 p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800/50 transition-colors"
@@ -508,26 +521,38 @@ export function Sidebar({ className }: { className?: string }) {
                   touchAction: 'none'
                 }}
               >
-                <div className="flex items-center flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col gap-1">
-                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                    </div>
-                    <span className="text-gray-300 truncate">{pdf.name}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-1">
+                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeletePdf(pdf.id);
-                    }}
-                    className="p-1 hover:bg-gray-700 rounded"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: Add rename functionality
+                        console.log('Rename PDF:', pdf.id);
+                      }}
+                      className="p-1 hover:bg-gray-700 rounded"
+                      title="重命名"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePdf(pdf.id);
+                      }}
+                      className="p-1 hover:bg-gray-700 rounded"
+                      title="删除"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <span className="text-gray-300 truncate flex-1 min-w-0" title={pdf.name}>
+                    {pdf.name}
+                  </span>
                 </div>
               </div>
             ))}
@@ -644,26 +669,38 @@ export function Sidebar({ className }: { className?: string }) {
                           touchAction: 'none'
                         }}
                       >
-                        <div className="flex items-center flex-1">
-                          <div className="flex items-center gap-2">
-                            <div className="flex flex-col gap-1">
-                              <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                              <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                              <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                            </div>
-                            <span className="text-gray-300 truncate">{pdf.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-1">
+                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeletePdf(pdf.id);
-                            }}
-                            className="p-1 hover:bg-gray-700 rounded"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // TODO: Add rename functionality
+                                console.log('Rename PDF:', pdf.id);
+                              }}
+                              className="p-1 hover:bg-gray-700 rounded"
+                              title="重命名"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePdf(pdf.id);
+                              }}
+                              className="p-1 hover:bg-gray-700 rounded"
+                              title="删除"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <span className="text-gray-300 truncate flex-1 min-w-0" title={pdf.name}>
+                    {pdf.name}
+                  </span>
                         </div>
                       </div>
                     ))
@@ -731,14 +768,23 @@ export function Sidebar({ className }: { className?: string }) {
               variant="outline" 
               onClick={() => setShowDeleteModal(false)}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
+              disabled={isDeleting}
             >
               取消
             </Button>
             <Button 
               onClick={confirmDeletePdf}
               className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={isDeleting}
             >
-              删除
+              {isDeleting ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  删除中...
+                </div>
+              ) : (
+                '删除'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页码点击功能测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ChatPDF风格气泡按钮 */
+        .page-bubble {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin: 0 4px;
+            background: #3b82f6;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .page-bubble:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .page-bubble:active {
+            transform: scale(0.95);
+        }
+        
+        /* 页码高亮按钮 */
+        .page-highlight {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            margin: 0 4px;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .page-highlight:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">页码点击功能测试结果</h1>
+        
+        <div class="space-y-6">
+            <!-- 测试结果摘要 -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-green-800 mb-2">✅ 修复完成</h2>
+                <p class="text-green-700 text-sm">【X】格式的页码现在应该可以正常点击跳转了！</p>
+            </div>
+            
+            <!-- 修复详情 -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-blue-800 mb-3">🔧 修复内容</h2>
+                <ul class="space-y-2 text-blue-700 text-sm">
+                    <li><strong>1. 导出组件：</strong>将 PageBubbleButton 组件添加 export 关键字</li>
+                    <li><strong>2. 添加导入：</strong>在 analysis/[id]/page.tsx 中导入 PageAnchorText 组件</li>
+                    <li><strong>3. 更换渲染：</strong>将原有的 renderTextWithPageLinks 改为使用 PageAnchorText 组件</li>
+                    <li><strong>4. 传递处理函数：</strong>正确传递 handlePageJump 函数给页码按钮</li>
+                </ul>
+            </div>
+            
+            <!-- 支持的页码格式演示 -->
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3">📋 支持的页码格式</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-700 mb-2">1. ChatPDF风格气泡按钮【X】：</h3>
+                        <div class="text-sm bg-gray-50 p-3 rounded">
+                            Git分支允许开发者独立开发功能，避免影响主线代码<span class="page-bubble" onclick="showAlert('第3页')">3</span>。合并时使用git merge命令即可<span class="page-bubble" onclick="showAlert('第5页')">5</span>。
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-medium text-gray-700 mb-2">2. 高亮按钮（第X页）：</h3>
+                        <div class="text-sm bg-gray-50 p-3 rounded">
+                            根据文档说明<span class="page-highlight" onclick="showAlert('第2页')">（第2页）</span>，可以通过命令行操作<span class="page-highlight" onclick="showAlert('第4页')">（第4页）</span>。
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-medium text-gray-700 mb-2">3. 普通页码链接：</h3>
+                        <div class="text-sm bg-gray-50 p-3 rounded">
+                            详见第<span class="text-blue-600 underline cursor-pointer" onclick="showAlert('第6页')">6</span>页和第<span class="text-blue-600 underline cursor-pointer" onclick="showAlert('第8页')">8</span>页的说明。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 技术说明 -->}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-yellow-800 mb-3">⚙️ 技术实现</h2>
+                <div class="text-yellow-700 text-sm space-y-2">
+                    <p><strong>组件架构：</strong>PageAnchorText 统一处理各种页码格式，根据格式自动选择合适的按钮样式</p>
+                    <p><strong>正则匹配：</strong>支持 /【(\d+)】/g 等多种页码格式的识别</p>
+                    <p><strong>事件处理：</strong>点击事件通过 onPageClick prop 传递到 PDF 查看器进行页面跳转</p>
+                    <p><strong>样式优化：</strong>不同格式使用不同的视觉样式（气泡、高亮、下划线）</p>
+                </div>
+            </div>
+            
+            <!-- 下一步测试建议 -->
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-purple-800 mb-3">🚀 测试建议</h2>
+                <ol class="list-decimal list-inside space-y-1 text-purple-700 text-sm">
+                    <li>打开任意 PDF 文档分析页面</li>
+                    <li>与 AI 对话，询问包含页码引用的问题</li>
+                    <li>验证 AI 回答中的【8】等页码是否显示为蓝色圆形按钮</li>
+                    <li>点击页码按钮，检查是否正确跳转到对应 PDF 页面</li>
+                    <li>测试不同格式的页码引用是否都能正常工作</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showAlert(page) {
+            alert(`模拟跳转到${page}！在实际应用中，这会跳转到PDF的相应页面。`);
+        }
+        
+        // 页面加载完成提示
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页码点击功能测试页面加载完成');
+        });
+    </script>
+</body>
+</html>

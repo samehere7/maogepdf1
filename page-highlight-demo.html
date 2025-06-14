@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页码高亮按钮演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 页码高亮按钮动画效果 */
+        @keyframes clickRipple {
+            0% {
+                opacity: 0.3;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 0.1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2);
+            }
+        }
+
+        /* 页码高亮按钮点击波纹效果 */
+        .page-highlight-button:active .click-ripple {
+            animation: clickRipple 0.4s ease-out;
+        }
+
+        /* 页码高亮按钮悬停发光效果 */
+        .page-highlight-button:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* 页码按钮脉冲动画 */
+        @keyframes pagePulse {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); 
+            }
+            70% { 
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); 
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); 
+            }
+        }
+
+        .page-highlight-button:focus {
+            animation: pagePulse 1s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">页码高亮按钮演示</h1>
+        
+        <div class="space-y-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-semibold mb-2">AI回答示例 - 增强版页码高亮：</h3>
+                <div class="text-sm leading-relaxed">
+                    为什么需要Git？
+                    <span class="page-highlight-button inline-flex items-center px-2 py-1 mx-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 border border-blue-400 shadow-md select-none relative overflow-hidden"
+                          onclick="alert('跳转到第1页')"
+                          title="点击跳转到第1页">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="opacity-80 mr-1">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                        </svg>
+                        （第1页）
+                        <span class="absolute inset-0 rounded-lg bg-white opacity-0 scale-0 transition-all duration-300 pointer-events-none click-ripple"></span>
+                    </span>
+                    
+                    <p class="mt-2">因为手动进行版本管理太复杂，尤其是多个人的时候。想象一下，如果好几个人在一起写代码，然后别人在增加新功能，需要把代码发给你，由你手动添加新增的代码，那多复杂？</p>
+                    
+                    <p class="mt-2">Git的工作流包括：</p>
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                        <li>Centralized Workflow (集中式工作流)：所有人在主分支上开发 
+                            <span class="page-highlight-button inline-flex items-center px-2 py-1 mx-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 border border-blue-400 shadow-md select-none relative overflow-hidden"
+                                  onclick="alert('跳转到第4页')"
+                                  title="点击跳转到第4页">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="opacity-80 mr-1">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                </svg>
+                                （第4页）
+                                <span class="absolute inset-0 rounded-lg bg-white opacity-0 scale-0 transition-all duration-300 pointer-events-none click-ripple"></span>
+                            </span>
+                        </li>
+                        <li>Feature Branch Workflow (功能分支工作流)：为新功能创建独立分支 
+                            <span class="page-highlight-button inline-flex items-center px-2 py-1 mx-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 border border-blue-400 shadow-md select-none relative overflow-hidden"
+                                  onclick="alert('跳转到第4页')"
+                                  title="点击跳转到第4页">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="opacity-80 mr-1">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                </svg>
+                                （第4页）
+                                <span class="absolute inset-0 rounded-lg bg-white opacity-0 scale-0 transition-all duration-300 pointer-events-none click-ripple"></span>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 class="font-semibold mb-2 text-blue-800">✨ 页码高亮特点：</h3>
+                <ul class="text-sm space-y-1 text-blue-700">
+                    <li>🎯 <strong>视觉突出</strong>：蓝色渐变背景，白色文字，立体感强</li>
+                    <li>🖱️ <strong>交互反馈</strong>：悬停放大、发光效果，点击缩放动画</li>
+                    <li>📄 <strong>PDF图标</strong>：内置PDF图标，明确表示页面跳转</li>
+                    <li>⚡ <strong>波纹效果</strong>：点击时有波纹扩散动画</li>
+                    <li>🔍 <strong>焦点提示</strong>：聚焦时有脉冲动画</li>
+                    <li>📱 <strong>移动友好</strong>：支持触摸操作和键盘导航</li>
+                </ul>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h3 class="font-semibold mb-2 text-green-800">🚀 用户体验提升：</h3>
+                <ul class="text-sm space-y-1 text-green-700">
+                    <li>✅ 页码信息一目了然，具有明显的可点击视觉提示</li>
+                    <li>✅ 点击后立即跳转到PDF对应页面，无需手动翻页</li>
+                    <li>✅ 高亮效果让用户确信这是一个交互元素</li>
+                    <li>✅ 与普通文本形成明显对比，提升信息层级</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

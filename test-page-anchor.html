@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页码按钮测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 测试页面样式 */
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        /* ChatPDF风格气泡按钮 */
+        .page-bubble {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin: 0 4px;
+            background: #3b82f6;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .page-bubble:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .page-bubble:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="test-container">
+        <h1 class="text-2xl font-bold mb-6">页码按钮渲染测试</h1>
+        
+        <div class="test-section bg-white">
+            <h2 class="text-lg font-semibold mb-3">测试1: 基本【X】格式</h2>
+            <div class="text-sm">
+                Git分支允许开发者独立开发功能，避免影响主线代码<span class="page-bubble" onclick="alert('跳转到第3页')">3</span>。合并时使用git merge命令即可<span class="page-bubble" onclick="alert('跳转到第5页')">5</span>。
+            </div>
+        </div>
+        
+        <div class="test-section bg-blue-50">
+            <h2 class="text-lg font-semibold mb-3">测试2: 多个页码引用</h2>
+            <div class="text-sm">
+                根据文档，主要包括三个步骤：首先创建分支<span class="page-bubble" onclick="alert('跳转到第2页')">2</span>，然后开发功能<span class="page-bubble" onclick="alert('跳转到第4页')">4</span>，最后合并代码<span class="page-bubble" onclick="alert('跳转到第6页')">6</span>。
+            </div>
+        </div>
+        
+        <div class="test-section bg-green-50">
+            <h2 class="text-lg font-semibold mb-3">测试3: 原始【X】格式模拟</h2>
+            <div class="text-sm" id="original-format">
+                这是一个包含【8】和【12】页码的测试文本。
+            </div>
+            <button onclick="processText()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                转换为可点击按钮
+            </button>
+        </div>
+        
+        <div class="test-section bg-yellow-50">
+            <h2 class="text-lg font-semibold mb-3">调试信息</h2>
+            <div id="debug-info" class="text-xs text-gray-600"></div>
+        </div>
+    </div>
+
+    <script>
+        function processText() {
+            const element = document.getElementById('original-format');
+            const debugElement = document.getElementById('debug-info');
+            
+            let text = element.innerHTML;
+            debugElement.innerHTML += `原始文本: ${text}<br>`;
+            
+            // 模拟React组件的正则表达式处理
+            const regex = /【(\d+)】/g;
+            let match;
+            const matches = [];
+            
+            while ((match = regex.exec(text)) !== null) {
+                matches.push({
+                    fullMatch: match[0],
+                    pageNumber: parseInt(match[1]),
+                    index: match.index
+                });
+            }
+            
+            debugElement.innerHTML += `找到匹配: ${JSON.stringify(matches)}<br>`;
+            
+            // 替换文本
+            let processedText = text;
+            matches.reverse().forEach(match => {
+                const button = `<span class="page-bubble" onclick="alert('跳转到第${match.pageNumber}页')">${match.pageNumber}</span>`;
+                processedText = processedText.replace(match.fullMatch, button);
+            });
+            
+            debugElement.innerHTML += `处理后文本: ${processedText}<br>`;
+            element.innerHTML = processedText;
+        }
+        
+        // 页面加载时的调试信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugElement = document.getElementById('debug-info');
+            debugElement.innerHTML = '页面加载完成，准备测试页码按钮功能...<br>';
+        });
+    </script>
+</body>
+</html>

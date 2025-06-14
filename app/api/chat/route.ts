@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPDF } from '@/lib/pdf-service';
 import { createClient } from '@/lib/supabase/server';
-import { extractTextFromPDF, summarizeTextForContext } from '@/lib/pdf-text-extractor';
+import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 
 // 定义模型配置
 const MODEL_CONFIGS = {
@@ -10,12 +10,91 @@ const MODEL_CONFIGS = {
     apiKey: "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"
   },
   highQuality: {
-    model: "openai/gpt-4o-2024-11-20",
+    model: "openai/gpt-4o-2024-11-20", 
     apiKey: "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"
+  },
+  // 普通用户默认使用的免费模型
+  default: {
+    model: "deepseek/deepseek-chat-v3-0324:free",
+    apiKey: "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"
   }
 };
 
-// 移除所有不需要的函数，直接使用OpenRouter API
+// 简化的降级回答生成器
+function generateSmartAnswer(userMessage: string, pdf: any): string {
+  return `抱歉，无法连接到AI服务。
+
+**您的问题：** ${userMessage}
+**文档：** ${pdf.name}
+
+请稍后重试，或检查网络连接。`;
+}
+
+
+
+// 构建简化的系统提示词
+function buildSystemPrompt(pdf: any): string {
+  const fileName = pdf.name || 'PDF文档';
+  const summary = pdf.summary || '';
+  
+  return `你是一个专业的PDF文档助手，正在帮助用户理解和分析文档内容。
+
+文档信息：
+- 文件名：${fileName}
+- 内容概述：${summary}
+
+请根据以下要求回答用户问题：
+- 仅根据PDF文档内容回答用户问题，不要凭空编造。
+- 回答要自然、准确、简明，必要时引用原文页码。
+- 支持多轮对话，理解用户上下文追问。
+- 如果文档中没有相关信息，请直接说明。
+- 回答语言与用户界面一致（如中文、英文等）。
+
+请用中文回答，保持简洁实用。`;
+}
+
+// 构建增强的系统提示词（使用RAG检索结果）
+function buildEnhancedSystemPrompt(pdf: any, relevantChunks: any[], userQuestion: string): string {
+  const fileName = pdf.name || 'PDF文档';
+  const summary = pdf.summary || '';
+  
+  // 构建相关内容上下文
+  let contextContent = '';
+  if (relevantChunks.length > 0) {
+    contextContent = '\n\n【文档相关内容】\n';
+    relevantChunks.forEach((result, index) => {
+      // 适配现有RAG系统的数据结构
+      const pageNumber = result.chunk.pageNumber || '未知';
+      const chunkText = result.chunk.text || '';
+      
+      contextContent += `页面${pageNumber}：${chunkText}\n\n`;
+    });
+  }
+  
+  const basePrompt = `你是专业的PDF文档助手，基于提供的文档内容自然回答用户问题。
+
+文档：${fileName}
+${summary ? `概述：${summary}` : ''}
+
+用户问题：${userQuestion}
+${contextContent}
+
+回答要求：
+1. **自然对话风格**：用流畅、简洁的语言回答，就像面对面交流一样
+2. **基于文档内容**：根据【文档相关内容】中的信息回答，可以自然重组表达
+3. **标注页码引用**：引用内容时用【页码】格式标注，如【8】【12】
+4. **重点突出**：适当分点说明，但保持自然流畅
+5. **信息不足时**：如果文档中没有相关信息，直接说明"文档中未找到相关内容"
+6. **禁止免责声明**：不要添加"注：由于提供的内容不完整..."等免责说明，直接基于提供内容回答
+
+**回答风格示例：**
+- "Git分支允许开发者独立开发功能，避免影响主线代码【3】。合并时使用git merge命令即可【5】。"
+- "根据文档，主要包括三个步骤：首先...【2】，然后...【4】，最后...【6】。"
+
+请用自然、准确、简洁的中文回答用户问题。`;
+
+  return basePrompt;
+}
 
 export async function POST(req: Request) {
   console.log('[聊天API] 开始处理请求');
@@ -79,130 +158,122 @@ export async function POST(req: Request) {
     const lastUserMessage = messages[messages.length - 1].content;
     console.log(`[聊天API] 用户问题: ${lastUserMessage}`);
 
-    // 提取PDF文本内容
-    console.log(`[聊天API] 开始提取PDF文本内容`);
-    let pdfContent = '';
+    // 检查用户Plus状态并选择合适的模型
+    let isPlus = false;
     try {
-      // 构建完整的PDF URL
-      const pdfUrl = pdf.url.startsWith('http') ? pdf.url : 
-                     `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}${pdf.url}`;
-      
-      console.log(`[聊天API] PDF URL: ${pdfUrl}`);
-      pdfContent = await extractTextFromPDF(pdfUrl);
-      
-      // 如果文本太长，进行智能摘要
-      pdfContent = summarizeTextForContext(pdfContent, 6000);
-      console.log(`[聊天API] PDF内容提取成功，最终长度: ${pdfContent.length}`);
-    } catch (extractError) {
-      console.error('[聊天API] PDF文本提取失败:', extractError);
-      // 如果提取失败，使用文件名作为上下文
-      pdfContent = `文档标题: ${pdf.name}\n注意: 无法提取PDF文本内容，请基于文档标题回答相关问题。`;
+      const supabaseForPlus = createClient();
+      const { data: userData } = await supabaseForPlus
+        .from('user_with_plus')
+        .select('plus, is_active')
+        .eq('id', user.id)
+        .single();
+        
+      isPlus = userData?.plus && userData?.is_active;
+    } catch (error) {
+      // 降级检查user_profiles表
+      try {
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('plus, is_active')
+          .eq('id', user.id)
+          .single();
+        isPlus = profiles?.plus && profiles?.is_active;
+      } catch (profileError) {
+        console.log('[聊天API] 无法获取用户Plus状态，使用默认模型');
+      }
     }
 
-    // 使用OpenRouter API
-    const modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS];
-    if (!modelConfig) {
-      console.error(`[聊天API] 无效的quality参数: ${quality}`);
-      return NextResponse.json({ error: '无效的模型质量参数' }, { status: 400 });
-    }
-    
-    console.log(`[聊天API] 使用模型: ${modelConfig.model}`);
-    
-    // 构建系统提示，包含PDF内容
-    const systemPrompt = `你是一个专业的PDF文档助手。用户正在与一个PDF文档进行对话。
-
-PDF文档内容：
-${pdfContent}
-
-请基于上述PDF文档内容回答用户的问题。要求：
-1. 只基于提供的PDF内容回答问题
-2. 如果问题涉及文档中没有的信息，请明确说明"文档中没有相关信息"
-3. 引用具体的页面或段落（如果可能）
-4. 保持回答简洁、准确、专业
-5. 如果用户问候或进行一般性对话，可以友好回应，但要引导回到文档内容`;
-
-    // 准备消息列表
-    const chatMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages
-    ];
-
-    console.log(`[聊天API] 调用${modelConfig.model}模型`);
-    console.log(`[聊天API] API密钥前缀: ${modelConfig.apiKey.substring(0, 15)}...`);
-    console.log(`[聊天API] API密钥长度: ${modelConfig.apiKey.length}`);
-    console.log(`[聊天API] 消息数量: ${chatMessages.length}`);
-
-    // 使用原生fetch调用OpenRouter API
-    console.log(`[聊天API] 发送请求到OpenRouter，模型: ${modelConfig.model}`);
-    console.log(`[聊天API] 请求体预览:`, JSON.stringify({
-      model: modelConfig.model,
-      messages: chatMessages.map(m => ({ role: m.role, content: m.content.substring(0, 100) + '...' })),
-      temperature: 0.7,
-      max_tokens: 2000,
-    }, null, 2));
-    
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${modelConfig.apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://maoge.pdf',
-        'X-Title': 'Maoge PDF',
-      },
-      body: JSON.stringify({
-        model: modelConfig.model,
-        messages: chatMessages,
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[聊天API] OpenRouter API错误: ${response.status}`, errorText);
-      
-      // 暂时返回基于PDF内容的模拟回复，避免功能完全无法使用
-      const userQuestion = lastUserMessage.toLowerCase();
-      let mockResponse = "";
-      
-      if (userQuestion.includes('总结') || userQuestion.includes('git')) {
-        mockResponse = `基于PDF文档《Git快速入门》的内容：
-
-Git是一个分布式版本控制系统，主要用于：
-
-1. **版本管理**：跟踪文件的修改历史
-2. **团队协作**：多人同时开发项目
-3. **分支管理**：并行开发不同功能
-4. **代码备份**：防止代码丢失
-
-关键命令包括：git init, git add, git commit, git push, git pull 等。
-
-Git的优势在于其分布式特性，每个开发者都有完整的代码历史，即使服务器出现问题也不会丢失代码。`;
-      } else if (userQuestion.includes('解释')) {
-        mockResponse = `根据PDF文档内容，这部分主要解释了Git版本控制的重要性和基本概念。Git帮助开发者管理代码变更，确保项目的稳定性和可追溯性。`;
-      } else if (userQuestion.includes('改写')) {
-        mockResponse = `根据文档内容，可以用更简单的语言表达为：Git是一个帮助程序员管理代码的工具，它可以记录每次修改，方便团队合作开发软件。`;
+    // 使用AI模型进行智能对话
+    console.log(`[聊天API] 用户Plus状态: ${isPlus}, 请求质量: ${quality}`);
+    try {
+      // 选择模型配置
+      let modelConfig;
+      if (isPlus) {
+        // Plus用户可以选择高质量或快速模式
+        modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS] || MODEL_CONFIGS.highQuality;
       } else {
-        mockResponse = `根据PDF文档《Git快速入门》，我可以帮您了解Git版本控制系统的相关内容。请告诉我您想了解Git的哪个方面？`;
+        // 普通用户使用免费模型
+        modelConfig = MODEL_CONFIGS.default;
       }
       
-      console.log(`[聊天API] 使用模拟回复，长度: ${mockResponse.length}`);
+      // 使用RAG系统检索相关内容
+      let enhancedSystemPrompt;
+      try {
+        console.log('[聊天API] 开始RAG检索相关内容');
+        
+        // 确保PDF已在RAG系统中处理
+        const ragStats = pdfRAGSystem.getDocumentStats();
+        if (ragStats.totalChunks === 0 || !pdfRAGSystem.switchToPDF(pdfId)) {
+          console.log('[聊天API] PDF未在RAG系统中，开始处理...');
+          await pdfRAGSystem.extractAndChunkPDF(pdf.url, pdfId);
+        } else {
+          console.log('[聊天API] 已切换到目标PDF的RAG内容');
+        }
+        
+        // 检索所有相关内容片段（不限制数量，获取完整信息）
+        const relevantChunks = await pdfRAGSystem.searchRelevantChunks(lastUserMessage, 999);
+        console.log(`[聊天API] RAG检索到${relevantChunks.length}个相关片段`);
+        
+        // 构建增强的系统提示词
+        enhancedSystemPrompt = buildEnhancedSystemPrompt(pdf, relevantChunks, lastUserMessage);
+        
+      } catch (ragError) {
+        console.error('[聊天API] RAG检索失败，使用基础提示词:', ragError);
+        enhancedSystemPrompt = buildSystemPrompt(pdf);
+        
+        // 记录RAG失败的详细信息，用于后续优化
+        console.log('[聊天API] RAG失败详情:', {
+          error: ragError instanceof Error ? ragError.message : String(ragError),
+          pdfId: pdfId,
+          pdfName: pdf.name,
+          question: lastUserMessage.substring(0, 100) // 只记录前100字符
+        });
+      }
+      
+      // 调用OpenAI API
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${modelConfig.apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+          'X-Title': 'Maoge PDF Chat'
+        },
+        body: JSON.stringify({
+          model: modelConfig.model,
+          messages: [
+            { role: 'system', content: enhancedSystemPrompt },
+            { role: 'user', content: lastUserMessage }
+          ],
+          temperature: 0.7,
+          max_tokens: 300
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiAnswer = data.choices[0]?.message?.content || '抱歉，AI回答生成失败，请重试。';
+      
+      console.log(`[聊天API] GPT-4o回答生成成功，长度: ${aiAnswer.length}`);
+      
       return NextResponse.json({
-        content: mockResponse,
+        content: aiAnswer,
+        role: 'assistant'
+      });
+      
+    } catch (answerError) {
+      console.error('[聊天API] AI服务调用失败:', answerError);
+      // 降级到简单错误提示
+      const fallbackAnswer = generateSmartAnswer(lastUserMessage, pdf);
+      return NextResponse.json({
+        content: fallbackAnswer,
         role: 'assistant'
       });
     }
 
-    const completion = await response.json();
-    const aiResponse = completion.choices[0].message.content || "抱歉，我无法生成回答。";
-
-    console.log(`[聊天API] 成功生成回答，长度: ${aiResponse.length}`);
-    console.log(`[聊天API] 回答预览: ${aiResponse.substring(0, 100)}...`);
-
-    return NextResponse.json({
-      content: aiResponse,
-      role: 'assistant'
-    });
   } catch (error: any) {
     console.error('[聊天API] 详细错误:', {
       message: error.message,

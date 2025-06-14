@@ -21,6 +21,17 @@
   transform-origin: 0% 0%;
   user-select: text;
   pointer-events: auto;
+  
+  /* 扩大选择区域 - 让拖拽更宽容 */
+  padding: 2px 1px;
+  margin: -2px -1px;
+  min-width: 2px;
+  min-height: 1em;
+  
+  /* 确保选择区域覆盖更大范围 */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .textLayer.selecting .endOfContent {
@@ -130,39 +141,335 @@
   box-shadow: none !important;
 }
 
-/* 强制设置选择样式，彻底避免重影 */
-.textLayer ::selection,
-.textLayer span::selection,
-.textLayer span *::selection {
-  background: rgba(0, 123, 255, 0.12) !important;
-  color: inherit !important;
+/* 完全重写选择样式 - 彻底消除重影和深色区域 */
+.textLayer,
+.textLayer *,
+.textLayer span,
+.textLayer span * {
+  /* 移除所有可能的重影源 */
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
   text-shadow: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
   text-decoration: none !important;
+  
+  /* 强制统一字体渲染 - 解决混合字符问题 */
+  font-variant: normal !important;
+  font-feature-settings: normal !important;
+  font-optical-sizing: none !important;
+  text-rendering: geometricPrecision !important;
 }
 
-.textLayer ::-moz-selection,
-.textLayer span::-moz-selection,
-.textLayer span *::-moz-selection {
-  background: rgba(0, 123, 255, 0.12) !important;
+/* 统一深蓝色选择样式 - 消除颜色混合和重影 */
+.textLayer ::selection {
+  background: rgba(37, 99, 235, 0.25) !important;
   color: inherit !important;
   text-shadow: none !important;
-  text-decoration: none !important;
+  -webkit-text-fill-color: initial !important;
 }
 
-/* 强制清除所有可能的选择相关样式 */
-.textLayer span {
+.textLayer ::-moz-selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+/* 针对span元素的选择样式 - 使用相同深蓝色 */
+.textLayer span::selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.textLayer span::-moz-selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+/* 彻底禁用伪元素 - 但保留选择扩展层 */
+.textLayer span::after,
+.textLayer *::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+}
+
+/* 保留before伪元素用于扩展选择区域 */
+.textLayer span::before {
+  display: block !important;
+  background: none !important;
+}
+
+/* 禁用所有悬停和焦点效果 */
+.textLayer span:hover,
+.textLayer span:focus,
+.textLayer span:active,
+.textLayer *:hover,
+.textLayer *:focus,
+.textLayer *:active {
   background: transparent !important;
   background-color: transparent !important;
   text-shadow: none !important;
   box-shadow: none !important;
   outline: none !important;
   border: none !important;
-  text-decoration: none !important;
 }
 
-/* 禁用悬停效果，避免与选择冲突 */
-.textLayer span:hover {
-  background: transparent !important;
-  background-color: transparent !important;
+/* 确保文本渲染干净并统一多语言字体属性 */
+.textLayer span {
+  /* 统一字体渲染属性 - 解决中英文符号选择差异 */
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: none !important;
+  -webkit-font-feature-settings: normal !important;
+  -webkit-font-kerning: auto !important;
+  -webkit-font-variant-ligatures: normal !important;
+  
+  /* 文本渲染优化 */
+  text-rendering: geometricPrecision !important;
+  -webkit-font-smoothing: subpixel-antialiased !important;
+  -moz-osx-font-smoothing: auto !important;
+  
+  /* 强制防止颜色混合和重影 */
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+  will-change: auto !important;
+  transform: translateZ(0) !important;
+  
+  /* 统一所有字符类型的选择行为 */
+  font-synthesis: none !important;
+  font-optical-sizing: auto !important;
+  font-variation-settings: normal !important;
+  
+  /* 确保英文和符号字符的选择稳定性 */
+  unicode-bidi: normal !important;
+  direction: ltr !important;
+  writing-mode: horizontal-tb !important;
+}
+
+/* 额外保护 - 防止任何浏览器默认选择颜色干扰 */
+.textLayer,
+.textLayer * {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* 最强制的选择样式统一 - 彻底解决混合字符重影问题 */
+.textLayer ::selection,
+.textLayer *::selection,
+.textLayer span::selection,
+.textLayer span *::selection,
+.textLayer > *::selection,
+.textLayer > * *::selection {
+  background: rgba(37, 99, 235, 0.25) !important; /* 使用rgba确保透明度一致 */
+  color: transparent !important;
   text-shadow: none !important;
+  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  background-clip: content-box !important; /* 改为content-box避免padding重叠 */
+  -webkit-background-clip: content-box !important;
+  /* 强制统一混合模式，防止重影 */
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+  /* 禁用任何可能导致重影的属性 */
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.textLayer ::-moz-selection,
+.textLayer *::-moz-selection,
+.textLayer span::-moz-selection,
+.textLayer span *::-moz-selection,
+.textLayer > *::-moz-selection,
+.textLayer > * *::-moz-selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  background-clip: content-box !important;
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+}
+
+/* 强制覆盖任何内联样式和特殊字体的选择 - 防止重影 */
+.textLayer [style*="font"]::selection,
+.textLayer [style*="font"] *::selection,
+.textLayer [class*="font"]::selection,
+.textLayer [class*="font"] *::selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: content-box !important;
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+}
+
+.textLayer [style*="font"]::-moz-selection,
+.textLayer [style*="font"] *::-moz-selection,
+.textLayer [class*="font"]::-moz-selection,
+.textLayer [class*="font"] *::-moz-selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  background-clip: content-box !important;
+  mix-blend-mode: normal !important;
+}
+
+/* 通用强制覆盖 - 最高优先级，确保没有任何遗漏和重影 */
+body .textLayer ::selection,
+html .textLayer ::selection,
+* .textLayer ::selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  background-clip: content-box !important;
+  mix-blend-mode: normal !important;
+  isolation: isolate !important;
+}
+
+body .textLayer ::-moz-selection,
+html .textLayer ::-moz-selection,
+* .textLayer ::-moz-selection {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: transparent !important;
+  background-clip: content-box !important;
+  mix-blend-mode: normal !important;
+}
+
+/* 优化文本选择体验 - 解决拖拽偏移和边界问题 */
+.textLayer {
+  /* 改善拖拽选择的边界行为 */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  /* 添加选择容器标识 */
+  touch-action: manipulation;
+  /* 防止拖拽时的跳跃 */
+  contain: layout style;
+}
+
+.textLayer::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  z-index: -1;
+  background: transparent;
+  /* 平滑的选择边界 */
+  border-radius: 2px;
+}
+
+/* 优化span选择区域 - 减少偏移感 */
+.textLayer span {
+  /* 改善字符级选择体验 */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  
+  /* 确保选择区域紧贴文字 */
+  padding: 1px 0px;
+  margin: -1px 0px;
+  
+  /* 防止拖拽时的视觉跳跃 */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.textLayer span::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -1px;
+  right: -1px;
+  bottom: -2px;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  z-index: -1;
+  background: transparent;
+  /* 平滑边界 */
+  border-radius: 1px;
+}
+
+/* 高亮矩形样式优化 - 借鉴react-pdf-highlighter */
+.highlight-rect {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: multiply;
+  border-radius: 1px;
+  transform-origin: 0% 0%;
+  z-index: 5;
+}
+
+.highlight-rect:hover {
+  opacity: 0.8 !important;
+  transform: scale(1.02);
+  transition: all 0.15s ease;
+}
+
+/* 高亮层容器 */
+.highlight-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 兼容性降级 - 针对不支持mix-blend-mode的浏览器 */
+@supports not (mix-blend-mode: multiply) {
+  .highlight-rect {
+    mix-blend-mode: normal;
+    opacity: 0.35;
+  }
+  
+  .highlight-rect:hover {
+    opacity: 0.5 !important;
+  }
+}
+
+/* 选择区域拖拽视觉反馈 */
+.selection-area {
+  position: absolute;
+  border: 2px dashed rgba(59, 130, 246, 0.8);
+  background: rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+  z-index: 100;
+  border-radius: 2px;
+  animation: selection-appear 0.2s ease-out;
+}
+
+@keyframes selection-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

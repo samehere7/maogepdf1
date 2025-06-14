@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist';
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,11 @@ interface InteractivePDFViewerProps {
   onTextSelect?: (text: string, action: 'explain' | 'summarize' | 'rewrite') => void;
 }
 
+export interface PDFViewerRef {
+  jumpToPage: (pageNumber: number) => void;
+  getCurrentPage: () => number;
+}
+
 // 预定义的高亮颜色
 const HIGHLIGHT_COLORS = [
   { name: '红色', value: '#ef4444', bg: 'rgba(239, 68, 68, 0.25)' },
@@ -49,13 +54,14 @@ const HIGHLIGHT_COLORS = [
   { name: '灰色', value: '#6b7280', bg: 'rgba(107, 114, 128, 0.25)' },
 ];
 
-export default function InteractivePDFViewer({ file, onTextSelect }: InteractivePDFViewerProps) {
+const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>(({ file, onTextSelect }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentVisiblePage, setCurrentVisiblePage] = useState(1);
   const [scale, setScale] = useState(1.0);
+  const [isUserScale, setIsUserScale] = useState(false); // 跟踪用户是否手动设置了缩放
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
@@ -69,6 +75,95 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
   const [colorPickerPosition, setColorPickerPosition] = useState<{x: number, y: number} | null>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [textLayers, setTextLayers] = useState<Map<number, TextItem[]>>(new Map());
+
+  // 滚动到指定页面 - 增强容错和重试机制
+  const scrollToPage = useCallback((pageNum: number, retryCount = 0) => {
+    console.log(`[PDF查看器] scrollToPage被调用，目标页码: ${pageNum}, 重试次数: ${retryCount}`);
+    
+    // 检查基本条件
+    if (!containerRef.current || !viewerRef.current) {
+      console.log(`[PDF查看器] 容器未准备好 - containerRef: ${!!containerRef.current}, viewerRef: ${!!viewerRef.current}`);
+      
+      // 如果重试次数少于3次，则延迟重试
+      if (retryCount < 3) {
+        setTimeout(() => {
+          scrollToPage(pageNum, retryCount + 1);
+        }, 200 * (retryCount + 1)); // 递增延迟时间
+        return;
+      } else {
+        console.warn(`[PDF查看器] 重试${retryCount}次后仍无法找到容器，放弃滚动`);
+        return;
+      }
+    }
+    
+    const pageElement = containerRef.current.querySelector(`.pdf-page[data-page-num="${pageNum}"]`);
+    console.log(`[PDF查看器] 找到的页面元素:`, pageElement);
+    
+    if (pageElement) {
+      console.log(`[PDF查看器] 开始滚动到页面 ${pageNum}`);
+      pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      console.log(`[PDF查看器] 页面元素未找到，当前DOM中的页面:`, 
+        Array.from(containerRef.current.querySelectorAll('.pdf-page')).map(el => el.getAttribute('data-page-num')));
+      
+      // 如果页面元素未找到且重试次数少于5次，延迟重试
+      if (retryCount < 5) {
+        setTimeout(() => {
+          scrollToPage(pageNum, retryCount + 1);
+        }, 300 * (retryCount + 1));
+      } else {
+        console.warn(`[PDF查看器] 重试${retryCount}次后仍无法找到页面${pageNum}，放弃滚动`);
+      }
+    }
+  }, []);
+
+  // 暴露给父组件的方法
+  useImperativeHandle(ref, () => ({
+    jumpToPage: (pageNumber: number) => {
+      console.log(`PDF查看器跳转到第${pageNumber}页，当前总页数: ${numPages}`);
+      
+      // 如果页数还没有加载完成，延迟执行
+      if (numPages === 0) {
+        console.log(`PDF还在加载中，延迟执行跳转`);
+        setTimeout(() => {
+          if (pageNumber >= 1 && (numPages === 0 || pageNumber <= numPages)) {
+            scrollToPage(pageNumber);
+            setCurrentVisiblePage(pageNumber);
+          }
+        }, 1000);
+        return;
+      }
+      
+      if (pageNumber >= 1 && pageNumber <= numPages) {
+        scrollToPage(pageNumber);
+        setCurrentVisiblePage(pageNumber);
+      } else {
+        console.warn(`页码${pageNumber}超出范围 (1-${numPages})`);
+      }
+    },
+    getCurrentPage: () => currentVisiblePage
+  }), [numPages, currentVisiblePage, scrollToPage]);
+
+  // 自适应缩放到容器宽度
+  const fitToWidth = useCallback(async () => {
+    if (!pdfDoc || !viewerRef.current) return;
+    
+    try {
+      const page = await pdfDoc.getPage(1);
+      const viewport = page.getViewport({ scale: 1.0 });
+      const containerWidth = viewerRef.current.clientWidth - 40; // 减去padding
+      const optimalScale = containerWidth / viewport.width;
+      
+      // 限制缩放范围
+      const clampedScale = Math.max(0.5, Math.min(2.5, optimalScale));
+      setScale(clampedScale);
+      setIsUserScale(false); // 标记为自动缩放
+      
+      console.log(`[PDF自适应] 容器宽度: ${containerWidth}, PDF原始宽度: ${viewport.width}, 计算缩放: ${optimalScale}, 实际缩放: ${clampedScale}`);
+    } catch (error) {
+      console.error('自适应缩放失败:', error);
+    }
+  }, [pdfDoc]);
 
   // 加载PDF文件
   useEffect(() => {
@@ -98,6 +193,11 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
         setPdfDoc(doc);
         setNumPages(doc.numPages);
         setError(null);
+        
+        // 延迟调用自适应缩放，确保容器已渲染
+        setTimeout(() => {
+          fitToWidth();
+        }, 100);
       } catch (err) {
         console.error('PDF文件加载错误:', err);
         setError('无法加载PDF文件: ' + (err instanceof Error ? err.message : String(err)));
@@ -110,26 +210,32 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
   }, [file]);
 
   // 渲染单个PDF页面
-  const renderPage = async (pageNum: number) => {
-    if (!pdfDoc || !containerRef.current || renderedPages.has(pageNum)) return;
+  const renderPage = async (pageNum: number, forceRender: boolean = false) => {
+    if (!pdfDoc || !containerRef.current) return;
+    if (!forceRender && renderedPages.has(pageNum)) return;
 
     const container = containerRef.current;
     const pageContainer = container.querySelector(`.pdf-page[data-page-num="${pageNum}"]`) as HTMLElement;
     if (!pageContainer) return;
 
     try {
-      console.log(`渲染页面 ${pageNum}`);
       const page = await pdfDoc.getPage(pageNum);
       const viewport = page.getViewport({ scale });
       
-      // 设置页面容器样式
+      // 如果是强制渲染，先清理容器内容
+      if (forceRender) {
+        pageContainer.innerHTML = '';
+      }
+      
+      // 设置页面容器样式 - 更简洁的排版
       pageContainer.style.position = 'relative';
       pageContainer.style.width = `${viewport.width}px`;
       pageContainer.style.height = `${viewport.height}px`;
-      pageContainer.style.margin = '0 auto 10px';
-      pageContainer.style.border = '1px solid #e5e7eb';
+      pageContainer.style.margin = '0 auto';
+      pageContainer.style.border = '1px solid #e0e0e0';
       pageContainer.style.backgroundColor = 'white';
-      pageContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+      pageContainer.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      pageContainer.style.borderRadius = '2px';
       
       // 创建canvas
       const canvas = document.createElement('canvas');
@@ -173,38 +279,26 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
   
   // 渲染所有页面
   const renderAllPages = async () => {
-    if (!pdfDoc || !containerRef.current) return;
+    if (!pdfDoc || !containerRef.current) return Promise.resolve();
     
     const container = containerRef.current;
     container.innerHTML = '';
     
-    // 创建所有页面容器
+    // 创建所有页面容器 - 移除页面标签，避免影响PDF排版
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       const pageContainer = document.createElement('div');
       pageContainer.className = 'pdf-page-container';
       pageContainer.setAttribute('data-page-num', pageNum.toString());
-      pageContainer.style.marginBottom = '10px';
-      
-      // 添加页面编号
-      const pageLabel = document.createElement('div');
-      pageLabel.className = 'page-label';
-      pageLabel.style.textAlign = 'center';
-      pageLabel.style.padding = '8px';
-      pageLabel.style.fontSize = '12px';
-      pageLabel.style.color = '#666';
-      pageLabel.style.backgroundColor = '#f9f9f9';
-      pageLabel.style.borderBottom = '1px solid #e5e7eb';
-      pageLabel.textContent = `第 ${pageNum} 页`;
+      pageContainer.style.marginBottom = '15px'; // 增加页面间距
       
       const pageContent = document.createElement('div');
       pageContent.className = 'pdf-page';
       pageContent.setAttribute('data-page-num', pageNum.toString());
       
-      pageContainer.appendChild(pageLabel);
       pageContainer.appendChild(pageContent);
       container.appendChild(pageContainer);
       
-      // 立即渲染前几页，其余页面懒加载
+      // 优化初始加载：只渲染前3页
       if (pageNum <= 3) {
         await renderPage(pageNum);
       }
@@ -212,28 +306,34 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     
     // 设置懒加载
     setupLazyLoading();
+    
+    return Promise.resolve();
   };
   
-  // 设置懒加载
+  // 优化的懒加载设置 - 提高缩放时的响应性
   const setupLazyLoading = () => {
     if (!viewerRef.current) return;
     
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const pageElement = entry.target as HTMLElement;
-            const pageNum = parseInt(pageElement.getAttribute('data-page-num') || '0');
-            if (pageNum > 0 && !renderedPages.has(pageNum)) {
-              renderPage(pageNum);
+        // 使用requestAnimationFrame避免渲染阻塞
+        requestAnimationFrame(() => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const pageElement = entry.target as HTMLElement;
+              const pageNum = parseInt(pageElement.getAttribute('data-page-num') || '0');
+              if (pageNum > 0 && !renderedPages.has(pageNum)) {
+                // 延迟渲染，避免同时渲染多页造成卡顿
+                setTimeout(() => renderPage(pageNum), pageNum * 30);
+              }
             }
-          }
+          });
         });
       },
       {
         root: viewerRef.current,
-        rootMargin: '200px',
-        threshold: 0.1
+        rootMargin: '300px', // 适中的预加载距离
+        threshold: 0.1 // 适中的触发阈值
       }
     );
     
@@ -264,31 +364,9 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       textLayerDiv.style.zIndex = '0';
       textLayerDiv.style.transformOrigin = '0 0';
       
-      // 强制设置选择样式，防止重影 - 使用唯一ID确保样式生效
-      const uniqueId = `text-layer-${pageNum}-${Date.now()}`;
+      // 简化ID设置，减少动态样式注入
+      const uniqueId = `text-layer-${pageNum}`;
       textLayerDiv.id = uniqueId;
-      
-      const selectionStyle = document.createElement('style');
-      selectionStyle.textContent = `
-        #${uniqueId} ::selection {
-          background: rgba(0, 123, 255, 0.12) !important;
-          color: inherit !important;
-          text-shadow: none !important;
-        }
-        #${uniqueId} ::-moz-selection {
-          background: rgba(0, 123, 255, 0.12) !important;
-          color: inherit !important;
-          text-shadow: none !important;
-        }
-        #${uniqueId} span {
-          background: transparent !important;
-          background-color: transparent !important;
-          outline: none !important;
-          text-shadow: none !important;
-          box-shadow: none !important;
-        }
-      `;
-      document.head.appendChild(selectionStyle);
       
       const textItems: TextItem[] = [];
       
@@ -345,6 +423,44 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
         span.style.textShadow = 'none';
         span.style.filter = 'none';
         span.style.backdropFilter = 'none';
+        
+        // 统一多语言字符的选择属性 - 彻底修复重影和偏移问题
+        span.style.webkitTextFillColor = 'transparent';
+        span.style.webkitTextStroke = 'none';
+        span.style.textRendering = 'optimizeSpeed'; // 改为optimizeSpeed避免渲染差异
+        span.style.fontKerning = 'none'; // 禁用字距调整避免重影
+        span.style.fontOpticalSizing = 'none';
+        span.style.fontSynthesis = 'none';
+        span.style.unicodeBidi = 'normal';
+        span.style.direction = 'ltr';
+        span.style.writingMode = 'horizontal-tb';
+        span.style.fontVariant = 'normal';
+        span.style.fontFeatureSettings = 'normal';
+        span.style.fontVariationSettings = 'normal';
+        
+        // 强化选择行为一致性和防重影
+        span.style.webkitFontSmoothing = 'antialiased'; // 统一抗锯齿
+        span.style.mozOsxFontSmoothing = 'grayscale';
+        span.style.textSizeAdjust = 'none';
+        span.style.webkitTextSizeAdjust = 'none';
+        
+        // 优化选择区域 - 减少偏移感
+        span.style.padding = '1px 0px'; // 减少padding避免重叠
+        span.style.margin = '-1px 0px';
+        span.style.minWidth = '1px';
+        span.style.minHeight = '1em';
+        
+        // 强制统一背景和混合模式，防止重影
+        span.style.backgroundImage = 'none';
+        span.style.backgroundClip = 'content-box'; // 改为content-box
+        span.style.webkitBackgroundClip = 'content-box';
+        span.style.mixBlendMode = 'normal';
+        span.style.isolation = 'isolate';
+        
+        // 防止拖拽偏移的关键属性
+        span.style.contain = 'layout style';
+        span.style.willChange = 'auto';
+        span.style.backfaceVisibility = 'hidden';
         
         // 处理旋转
         if (angle !== 0) {
@@ -427,11 +543,48 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     }
   };
 
-  // 渲染所有页面
+  // 渲染所有页面 - 优化缩放体验
   useEffect(() => {
     if (pdfDoc && numPages > 0) {
+      // 获取当前可见页面位置，保持用户视野
+      const currentVisiblePage = getCurrentVisiblePage();
+      const previouslyRendered = new Set(renderedPages);
+      
       setRenderedPages(new Set()); // 重置已渲染页面
-      renderAllPages();
+      renderAllPages().then(() => {
+        // 优先渲染当前可见页面及其周围页面
+        const pagesToRender = new Set<number>();
+        
+        // 添加当前可见页面及其前后页面
+        for (let i = Math.max(1, currentVisiblePage - 2); i <= Math.min(numPages, currentVisiblePage + 2); i++) {
+          pagesToRender.add(i);
+        }
+        
+        // 添加之前已渲染的页面（用户可能很快滚回去）
+        previouslyRendered.forEach(pageNum => {
+          if (pageNum <= numPages) {
+            pagesToRender.add(pageNum);
+          }
+        });
+        
+        // 批量渲染，避免阻塞UI
+        const renderPromises = Array.from(pagesToRender).map(pageNum => 
+          new Promise<void>(resolve => {
+            setTimeout(() => {
+              renderPage(pageNum, true); // 强制重新渲染
+              resolve();
+            }, pageNum * 50); // 错开渲染时间，避免卡顿
+          })
+        );
+        
+        Promise.all(renderPromises).then(() => {
+          // 渲染完成后，滚动回到原来的可见页面
+          // 增加延迟，确保DOM元素已正确挂载
+          setTimeout(() => {
+            scrollToPage(currentVisiblePage);
+          }, 500);
+        });
+      });
     }
   }, [pdfDoc, numPages, scale]);
   
@@ -491,296 +644,281 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     return position;
   }, []);
 
-  // 添加PDF.js官方的选择事件处理 - 简化版本
+  // 优化的选择事件处理 - 解决拖拽偏移和边界问题
   const addPdfJsSelectionEvents = useCallback((textLayerDiv: HTMLElement, pageNum: number) => {
-    let isMouseDown = false;
-    let startTime = 0;
-    let startPos = { x: 0, y: 0 };
-    let hasSelection = false;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
     
-    // 鼠标按下事件
+    // 处理拖拽开始
     const handleMouseDown = (e: MouseEvent) => {
-      isMouseDown = true;
-      startTime = Date.now();
-      startPos = { x: e.clientX, y: e.clientY };
-      hasSelection = false;
-      textLayerDiv.classList.add('selecting');
+      // 只处理左键
+      if (e.button !== 0) return;
       
-      console.log('鼠标按下，开始选择');
-    };
-    
-    // 鼠标移动事件 - 检测是否开始拖拽
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isMouseDown) return;
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
       
-      const distance = Math.sqrt(
-        Math.pow(e.clientX - startPos.x, 2) + Math.pow(e.clientY - startPos.y, 2)
-      );
-      
-      // 如果移动距离超过5px，认为开始拖拽选择
-      if (distance > 5) {
-        hasSelection = true;
-        console.log('检测到拖拽选择');
-      }
-    };
-    
-    // 鼠标抬起事件
-    const handleMouseUp = (e: MouseEvent) => {
-      if (!isMouseDown) return;
-      
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-      const distance = Math.sqrt(
-        Math.pow(e.clientX - startPos.x, 2) + Math.pow(e.clientY - startPos.y, 2)
-      );
-      
-      textLayerDiv.classList.remove('selecting');
-      isMouseDown = false;
-      
-      console.log('鼠标抬起，持续时间:', duration, 'ms，移动距离:', distance, 'px');
-      
-      // 判断是否为点击（而非拖拽）
-      const isClick = duration < 300 && distance < 5;
-      
-      if (isClick) {
-        // 点击事件：选择整个单词或span
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'SPAN' && target.closest('.textLayer')) {
-          const span = target;
-          const textContent = span.textContent?.trim();
+      // 清除之前的选择，避免干扰
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        // 如果点击不在当前选择区域内，清除选择
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        if (range) {
+          const rects = range.getClientRects();
+          let clickInSelection = false;
           
-          if (textContent && textContent.length > 0) {
-            console.log('单击选择文本:', textContent);
-            
-            // 延迟执行，确保不干扰原生选择
-            setTimeout(() => {
-              // 清除现有选择
-              window.getSelection()?.removeAllRanges();
-              
-              // 创建新的选择范围
-              const range = document.createRange();
-              range.selectNodeContents(span);
-              
-              const selection = window.getSelection();
-              if (selection) {
-                selection.addRange(range);
-                console.log('单击选择完成');
-              }
-            }, 10);
+          for (let i = 0; i < rects.length; i++) {
+            const rect = rects[i];
+            if (e.clientX >= rect.left && e.clientX <= rect.right && 
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+              clickInSelection = true;
+              break;
+            }
+          }
+          
+          if (!clickInSelection) {
+            selection.removeAllRanges();
           }
         }
-      } else if (hasSelection) {
-        // 拖拽选择结束，延迟检查选择状态
-        console.log('拖拽选择结束，检查选择状态');
-        setTimeout(() => {
-          const selection = window.getSelection();
-          if (selection && !selection.isCollapsed) {
-            const selectedText = selection.toString().trim();
-            console.log('拖拽选择的内容:', selectedText);
-            
-            // 不要手动触发 selectionchange 事件，这可能导致冲突
-            // 让自然的选择处理机制工作
-            console.log('保持选择状态，等待自然处理');
-          } else {
-            console.log('拖拽结束后没有选择内容');
-          }
-        }, 20);
       }
     };
     
+    // 处理拖拽过程
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      // 计算拖拽距离，防止微小移动触发选择
+      const deltaX = Math.abs(e.clientX - dragStartX);
+      const deltaY = Math.abs(e.clientY - dragStartY);
+      
+      if (deltaX < 3 && deltaY < 3) {
+        return; // 忽略微小移动
+      }
+      
+      // 确保拖拽在文本层边界内
+      const textLayerRect = textLayerDiv.getBoundingClientRect();
+      const isInBounds = e.clientX >= textLayerRect.left - 10 && 
+                        e.clientX <= textLayerRect.right + 10 &&
+                        e.clientY >= textLayerRect.top - 10 && 
+                        e.clientY <= textLayerRect.bottom + 10;
+      
+      if (!isInBounds) {
+        // 拖拽超出边界时，限制选择范围
+        e.preventDefault();
+        return;
+      }
+    };
+    
+    // 处理拖拽结束
+    const handleMouseUp = (e: MouseEvent) => {
+      isDragging = false;
+      
+      // 短暂延迟后检查选择结果，确保选择稳定
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (selection && !selection.isCollapsed) {
+          const selectedText = selection.toString().trim();
+          if (selectedText.length > 0) {
+            console.log('选择完成:', selectedText);
+          }
+        }
+      }, 50);
+    };
+    
+    // 双击选择整个词
+    const handleDoubleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'SPAN' && target.closest('.textLayer')) {
+        e.preventDefault();
+        
+        const selection = window.getSelection();
+        if (selection) {
+          try {
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          } catch (error) {
+            console.warn('双击选择失败:', error);
+          }
+        }
+      }
+    };
+    
+    // 添加事件监听器
     textLayerDiv.addEventListener('mousedown', handleMouseDown);
     textLayerDiv.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    textLayerDiv.addEventListener('mouseup', handleMouseUp);
+    textLayerDiv.addEventListener('dblclick', handleDoubleClick);
     
     // 返回清理函数
     return () => {
       textLayerDiv.removeEventListener('mousedown', handleMouseDown);
       textLayerDiv.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      textLayerDiv.removeEventListener('mouseup', handleMouseUp);
+      textLayerDiv.removeEventListener('dblclick', handleDoubleClick);
     };
   }, []);
 
   
-  // PDF.js官方的选择监听机制 - 强化版本
+  // 优化的选择处理机制 - 减少选择丢失，提高稳定性
   useEffect(() => {
     let selectionTimeout: NodeJS.Timeout | null = null;
     let lastSelectionText = '';
-    let processingSelection = false;
-    let isMouseOperationActive = false;
+    let isProcessing = false;
+    
+    // 延长防抖时间，减少频繁处理
+    const debouncedProcessSelection = () => {
+      if (selectionTimeout) {
+        clearTimeout(selectionTimeout);
+      }
+      selectionTimeout = setTimeout(processSelection, 300); // 延长防抖时间
+    };
     
     const processSelection = () => {
-      if (processingSelection) return;
-      processingSelection = true;
+      if (isProcessing) return; // 防止重复处理
       
-      // 如果鼠标操作还在进行中，延迟处理
-      if (isMouseOperationActive) {
-        setTimeout(() => {
-          processingSelection = false;
-          processSelection();
-        }, 100);
+      const selection = window.getSelection();
+      
+      // 检查选择是否有效
+      if (!selection || selection.isCollapsed) {
+        if (lastSelectionText || showColorPicker) { // 只在之前有选择或弹窗显示时才清除
+          setShowColorPicker(false);
+          setSelectedText('');
+          lastSelectionText = '';
+        }
         return;
       }
       
-      setTimeout(() => {
-        const selection = window.getSelection();
-        
-        console.log('处理选择，当前选择状态:', {
-          hasSelection: !!selection,
-          isCollapsed: selection?.isCollapsed,
-          text: selection?.toString()
-        });
-        
-        if (!selection || selection.isCollapsed) {
-          // 延迟检查，给选择操作更多时间
-          setTimeout(() => {
-            const delayedSelection = window.getSelection();
-            if (!delayedSelection || delayedSelection.isCollapsed) {
-              console.log('确认没有选择，隐藏颜色选择器');
-              setShowColorPicker(false);
-              setSelectedText('');
-              lastSelectionText = '';
-              
-              // 清除所有选中样式
-              const allSelected = containerRef.current?.querySelectorAll('span.selected');
-              allSelected?.forEach(span => span.classList.remove('selected'));
-            }
-          }, 100);
-          processingSelection = false;
-          return;
-        }
-        
-        const selectedText = selection.toString().trim();
-        if (!selectedText || selectedText.length < 1) {
-          console.log('选择的文本为空');
-          setShowColorPicker(false);
-          processingSelection = false;
-          return;
-        }
-        
-        // 检查是否是新的选择（避免重复处理）
-        if (selectedText === lastSelectionText) {
-          console.log('相同的选择，跳过处理');
-          processingSelection = false;
-          return;
-        }
-        lastSelectionText = selectedText;
-        
-        // 检查选择是否在PDF文本层内
-        try {
-          const range = selection.getRangeAt(0);
-          const startElement = range.startContainer.nodeType === Node.TEXT_NODE 
-            ? range.startContainer.parentElement 
-            : range.startContainer as Element;
-            
-          const textLayer = startElement?.closest('.textLayer');
-          if (!textLayer) {
-            console.log('选择不在PDF文本层内');
-            processingSelection = false;
-            return; // 不在PDF文本层内的选择
-          }
-          
-          console.log('✓ 检测到有效的PDF文本选择:', selectedText);
-          setSelectedText(selectedText);
-          
-          // 获取选择范围的位置
-          const rect = range.getBoundingClientRect();
-          const viewerRect = viewerRef.current?.getBoundingClientRect();
-          
-          if (viewerRect && rect.width > 0 && rect.height > 0) {
-            console.log('✓ 显示颜色选择器，位置:', { 
-              rectWidth: rect.width, 
-              rectHeight: rect.height,
-              rectTop: rect.top,
-              rectLeft: rect.left
-            });
-            
-            // 使用优化的位置计算，显示在选中内容上方
-            const position = calculateOptimalPosition(rect, viewerRect);
-            console.log('✓ 计算的位置:', position);
-            
-            setColorPickerPosition(position);
-            setShowColorPicker(true);
-            
-            // 强制重新渲染以确保状态更新
-            setTimeout(() => {
-              console.log('强制检查选择器状态:', { 
-                showColorPicker: true, 
-                hasPosition: !!position,
-                actualState: { showColorPicker, colorPickerPosition }
-              });
-            }, 100);
-          } else {
-            console.log('选择区域无效，rect:', { width: rect.width, height: rect.height });
-          }
-        } catch (error) {
-          console.error('处理选择时出错:', error);
-        }
-        
-        processingSelection = false;
-      }, 10);
-    };
-    
-    const handleSelectionChange = () => {
-      console.log('selectionchange事件触发');
-      
-      // 清除之前的延时器
-      if (selectionTimeout) {
-        clearTimeout(selectionTimeout);
+      const selectedText = selection.toString().trim();
+      // 降低最小长度要求，支持单个英文字符和符号选择
+      if (!selectedText || selectedText.length < 1) {
+        return;
       }
       
-      // 延迟处理选择变化
-      selectionTimeout = setTimeout(processSelection, 30);
+      // 特别处理：确保英文和符号字符能被正确选择
+      const range = selection.getRangeAt(0);
+      if (range && range.collapsed) {
+        return; // 如果range是collapsed但有selectedText，说明是浏览器bug
+      }
+      
+      // 避免重复处理相同的选择
+      if (selectedText === lastSelectionText) {
+        return;
+      }
+      
+      // 检查选择是否在PDF文本层内
+      try {
+        isProcessing = true;
+        const range = selection.getRangeAt(0);
+        const startElement = range.startContainer.nodeType === Node.TEXT_NODE 
+          ? range.startContainer.parentElement 
+          : range.startContainer as Element;
+            
+        const textLayer = startElement?.closest('.textLayer');
+        if (!textLayer) {
+          return; // 不在PDF文本层内的选择
+        }
+        
+        // 特殊处理：检查选择内容的字符类型，确保英文和符号正确处理
+        const hasEnglish = /[a-zA-Z]/.test(selectedText);
+        const hasSymbols = /[^\u4e00-\u9fa5a-zA-Z0-9\s]/.test(selectedText);
+        
+        if (hasEnglish || hasSymbols) {
+          // 为英文和符号字符提供额外的选择稳定性检查
+          const rects = range.getClientRects();
+          if (!rects || rects.length === 0) {
+            console.warn('英文/符号字符选择范围无效，跳过处理');
+            return;
+          }
+        }
+        
+        lastSelectionText = selectedText;
+        setSelectedText(selectedText);
+        
+        // 获取选择范围的位置并显示颜色选择器
+        const rect = range.getBoundingClientRect();
+        const viewerRect = viewerRef.current?.getBoundingClientRect();
+        
+        if (viewerRect && rect.width > 0 && rect.height > 0) {
+          const position = calculateOptimalPosition(rect, viewerRect);
+          setColorPickerPosition(position);
+          setShowColorPicker(true);
+        }
+      } catch (error) {
+        console.warn('处理选择时出错:', error);
+      } finally {
+        isProcessing = false;
+      }
     };
     
-    // 添加多个事件监听，确保不遗漏选择
-    const handleMouseUp = (e: MouseEvent) => {
-      console.log('全局mouseup事件触发');
-      setTimeout(processSelection, 50);
+    // 统一的选择变化处理
+    const handleSelectionChange = () => {
+      // 只有在没有弹窗显示时才处理新选择
+      if (!showColorPicker || !isProcessing) {
+        debouncedProcessSelection();
+      }
     };
     
-    const handleTouchEnd = () => {
-      console.log('touchend事件触发');
-      setTimeout(processSelection, 50);
-    };
-    
-    // 跟踪鼠标操作状态
-    const handleGlobalMouseDown = () => {
-      isMouseOperationActive = true;
-      console.log('全局鼠标按下，设置操作状态为活跃');
-    };
-    
-    const handleGlobalMouseUp = (e: MouseEvent) => {
-      console.log('全局mouseup事件触发');
-      // 延迟清除鼠标操作状态，给选择处理更多时间
-      setTimeout(() => {
-        isMouseOperationActive = false;
-        console.log('清除鼠标操作状态');
-        // 在鼠标操作结束后触发选择处理
-        setTimeout(processSelection, 50);
-      }, 200);
-    };
-    
-    // 使用多种事件确保选择被正确检测
+    // 监听选择变化事件
     document.addEventListener('selectionchange', handleSelectionChange);
-    document.addEventListener('mousedown', handleGlobalMouseDown);
-    document.addEventListener('mouseup', handleGlobalMouseUp);
-    document.addEventListener('touchend', handleTouchEnd);
-    
-    // 初始检查
-    setTimeout(processSelection, 100);
     
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('mousedown', handleGlobalMouseDown);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-      document.removeEventListener('touchend', handleTouchEnd);
       if (selectionTimeout) {
         clearTimeout(selectionTimeout);
       }
     };
-  }, [calculateOptimalPosition]);
+  }, [calculateOptimalPosition, showColorPicker]);
   
-  // 处理颜色选择 - 使用标准window.getSelection()
+  // 矩形优化算法 - 借鉴react-pdf-highlighter的optimize-client-rects
+  const optimizeClientRects = useCallback((clientRects: DOMRectList) => {
+    const rects = Array.from(clientRects).filter(rect => rect.width > 0 && rect.height > 0);
+    if (rects.length === 0) return [];
+    
+    // 按位置排序
+    const sortedRects = rects.sort((a, b) => {
+      if (Math.abs(a.top - b.top) < 5) { // 同一行
+        return a.left - b.left;
+      }
+      return a.top - b.top;
+    });
+    
+    const optimizedRects = [];
+    let currentRect = sortedRects[0];
+    
+    for (let i = 1; i < sortedRects.length; i++) {
+      const nextRect = sortedRects[i];
+      
+      // 检查是否可以合并（同一行且相邻）
+      const sameLine = Math.abs(currentRect.top - nextRect.top) < 5 && 
+                       Math.abs(currentRect.height - nextRect.height) < 5;
+      const adjacent = Math.abs(currentRect.right - nextRect.left) < 10;
+      
+      if (sameLine && adjacent) {
+        // 合并矩形
+        currentRect = {
+          left: Math.min(currentRect.left, nextRect.left),
+          top: Math.min(currentRect.top, nextRect.top),
+          right: Math.max(currentRect.right, nextRect.right),
+          bottom: Math.max(currentRect.bottom, nextRect.bottom),
+          width: Math.max(currentRect.right, nextRect.right) - Math.min(currentRect.left, nextRect.left),
+          height: Math.max(currentRect.bottom, nextRect.bottom) - Math.min(currentRect.top, nextRect.top),
+          x: Math.min(currentRect.left, nextRect.left),
+          y: Math.min(currentRect.top, nextRect.top),
+        } as DOMRect;
+      } else {
+        optimizedRects.push(currentRect);
+        currentRect = nextRect;
+      }
+    }
+    
+    optimizedRects.push(currentRect);
+    return optimizedRects;
+  }, []);
+
+  // 处理颜色选择 - 使用优化的矩形算法
   const handleColorSelect = useCallback(async (color: typeof HIGHLIGHT_COLORS[0]) => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !selectedText) return;
@@ -810,8 +948,9 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
         textItems: []
       };
       
-      // 获取选中范围的矩形信息 - 使用PDF.js坐标系统
-      const rects = range.getClientRects();
+      // 获取选中范围的矩形信息并优化
+      const clientRects = range.getClientRects();
+      const optimizedRects = optimizeClientRects(clientRects);
       const textLayer = pageElement.querySelector('.textLayer') as HTMLElement;
       
       if (!textLayer) {
@@ -823,27 +962,25 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       const pageWidth = textLayerRect.width;
       const pageHeight = textLayerRect.height;
       
-      for (let i = 0; i < rects.length; i++) {
-        const rect = rects[i];
-        if (rect.width > 0 && rect.height > 0) {
-          // 转换为相对于textLayer的百分比坐标（与文本使用相同的坐标系）
-          const relativeX = rect.left - textLayerRect.left;
-          const relativeY = rect.top - textLayerRect.top;
-          
-          // 使用百分比坐标确保跨缩放精确对齐
-          const percentX = (relativeX / pageWidth) * 100;
-          const percentY = (relativeY / pageHeight) * 100;
-          const percentWidth = (rect.width / pageWidth) * 100;
-          const percentHeight = (rect.height / pageHeight) * 100;
-          
-          highlight.rects.push({
-            x: percentX,
-            y: percentY,
-            width: percentWidth,
-            height: percentHeight
-          });
-        }
-      }
+      // 处理优化后的矩形
+      optimizedRects.forEach(rect => {
+        // 转换为相对于textLayer的百分比坐标
+        const relativeX = rect.left - textLayerRect.left;
+        const relativeY = rect.top - textLayerRect.top;
+        
+        // 使用百分比坐标确保跨缩放精确对齐
+        const percentX = (relativeX / pageWidth) * 100;
+        const percentY = (relativeY / pageHeight) * 100;
+        const percentWidth = (rect.width / pageWidth) * 100;
+        const percentHeight = (rect.height / pageHeight) * 100;
+        
+        highlight.rects.push({
+          x: percentX,
+          y: percentY,
+          width: percentWidth,
+          height: percentHeight
+        });
+      });
       
       if (highlight.rects.length === 0) return;
       
@@ -870,9 +1007,9 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
         selection.removeAllRanges();
         setShowColorPicker(false);
         setSelectedText('');
-      }, 500);
+      }, 300); // 缩短延迟时间，提升响应性
     }
-  }, [selectedText, highlights, scale, pdfDoc]);
+  }, [selectedText, highlights, scale, pdfDoc, optimizeClientRects]);
   
   // 渲染高亮层
   const renderHighlights = useCallback((pageContainer: HTMLElement, pageNum: number, viewport: any) => {
@@ -1022,21 +1159,26 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     }
   }, [file]);
   
-  // 点击其他地方关闭颜色选择器
+  // 优化点击外部区域的处理 - 修复长文本拖拽后弹窗不消失问题
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Element;
       if (showColorPicker && !target.closest('.color-picker')) {
-        // 延迟清除，避免干扰正在进行的选择操作
-        setTimeout(() => {
-          setShowColorPicker(false);
-          setSelectedText('');
-          window.getSelection()?.removeAllRanges();
-          
-          // 清除所有选中样式
-          const allSelected = containerRef.current?.querySelectorAll('span.selected');
-          allSelected?.forEach(span => span.classList.remove('selected'));
-        }, 50);
+        // 检查是否点击在文本层内，但如果没有当前选择，总是清除弹窗
+        const isTextLayerClick = target.closest('.textLayer');
+        const currentSelection = window.getSelection();
+        const hasActiveSelection = currentSelection && !currentSelection.isCollapsed;
+        
+        // 如果没有活动选择或点击在文本层外，清除弹窗
+        if (!hasActiveSelection || !isTextLayerClick) {
+          setTimeout(() => {
+            setShowColorPicker(false);
+            setSelectedText('');
+            if (currentSelection) {
+              currentSelection.removeAllRanges();
+            }
+          }, 50); // 缩短延迟时间，提高响应性
+        }
       }
     };
 
@@ -1052,13 +1194,6 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
     }
   }, [file, loadHighlights]);
 
-  // 滚动到指定页面
-  const scrollToPage = (pageNum: number) => {
-    const pageElement = containerRef.current?.querySelector(`.pdf-page[data-page-num="${pageNum}"]`);
-    if (pageElement && viewerRef.current) {
-      pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
   
   // 获取当前可见页面
   const getCurrentVisiblePage = useCallback(() => {
@@ -1108,11 +1243,60 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
   }, [getCurrentVisiblePage]);
 
   const zoomIn = () => {
-    setScale(prev => Math.min(prev + 0.2, 3.0));
+    setScale(prev => Math.min(prev + 0.25, 3.0)); // 增大缩放步长，减少点击次数
+    setIsUserScale(true); // 标记为用户手动缩放
   };
 
   const zoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, 0.6));
+    setScale(prev => Math.max(prev - 0.25, 0.5)); // 增大缩放步长，减少点击次数
+    setIsUserScale(true); // 标记为用户手动缩放
+  };
+
+  // 创建稳定的fitToWidth引用
+  const fitToWidthRef = useRef(fitToWidth);
+  useEffect(() => {
+    fitToWidthRef.current = fitToWidth;
+  }, [fitToWidth]);
+
+  // 监听容器尺寸变化，只在非用户手动缩放时自动重新适配
+  useEffect(() => {
+    if (!pdfDoc || !viewerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      // 只在非用户手动缩放时才自动适应
+      if (!isUserScale) {
+        // 延迟执行，避免频繁调用
+        setTimeout(() => {
+          fitToWidthRef.current();
+        }, 100);
+      }
+    });
+
+    resizeObserver.observe(viewerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [pdfDoc, isUserScale]);
+
+  // 强制渲染当前可见的页面
+  const forceRenderVisiblePages = () => {
+    if (!viewerRef.current || !containerRef.current) return;
+    
+    const viewerRect = viewerRef.current.getBoundingClientRect();
+    const pageContainers = containerRef.current.querySelectorAll('.pdf-page');
+    
+    pageContainers.forEach(pageElement => {
+      const pageRect = pageElement.getBoundingClientRect();
+      const isVisible = pageRect.bottom > viewerRect.top && pageRect.top < viewerRect.bottom;
+      
+      if (isVisible) {
+        const pageNum = parseInt(pageElement.getAttribute('data-page-num') || '0');
+        if (pageNum > 0) {
+          renderPage(pageNum, true); // 强制重新渲染
+        }
+      }
+    });
   };
 
   if (isLoading) {
@@ -1189,9 +1373,31 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
             <ZoomOut size={14} />
           </Button>
           
-          <span className="px-2 py-1 bg-gray-100 rounded text-xs min-w-[50px] text-center">
-            {Math.round(scale * 100)}%
-          </span>
+          <input
+            type="number"
+            min="50"
+            max="300"
+            value={Math.round(scale * 100)}
+            onChange={(e) => {
+              const percentage = parseInt(e.target.value);
+              if (percentage >= 50 && percentage <= 300) {
+                setScale(percentage / 100);
+                setIsUserScale(true); // 标记为用户手动缩放
+              }
+            }}
+            className="w-16 h-8 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-100"
+          />
+          <span className="text-xs text-gray-600">%</span>
+          
+          <Button
+            onClick={fitToWidth}
+            variant="outline"
+            size="sm"
+            className="h-8 px-2 text-xs"
+            title="适应宽度"
+          >
+            适应
+          </Button>
           
           <Button
             onClick={zoomIn}
@@ -1358,4 +1564,8 @@ export default function InteractivePDFViewer({ file, onTextSelect }: Interactive
       )}
     </div>
   );
-}
+});
+
+InteractivePDFViewer.displayName = 'InteractivePDFViewer';
+
+export default InteractivePDFViewer;

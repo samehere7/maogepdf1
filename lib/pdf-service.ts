@@ -134,7 +134,8 @@ export async function uploadPDF(file: File | Blob, userId: string, fileName?: st
         url: fileUrl,
         size: fileSize,
         user_id: userId,
-      }
+        summary: `📄 ${actualFileName.replace(/\.(pdf|PDF)$/, '')}`,
+      } as any  // 临时解决类型问题
     });
     
     console.log(`数据库记录已创建, ID: ${pdf.id}`);

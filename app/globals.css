@@ -9,6 +9,193 @@ html, body {
   padding: 0;
 }
 
+/* 页面跳转高亮效果 - 增强版本 */
+.page-highlight {
+  animation: pageHighlight 2s ease-in-out;
+  border: 3px solid #3b82f6 !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5) !important;
+}
+
+.page-highlight-animation {
+  animation: pageHighlightPulse 2s ease-in-out;
+}
+
+@keyframes pageHighlight {
+  0% {
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+  50% {
+    border-color: #1d4ed8;
+    box-shadow: 0 0 30px rgba(29, 78, 216, 0.6);
+  }
+  100% {
+    border-color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes pageHighlightPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.02);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.01);
+    opacity: 0.9;
+  }
+  75% {
+    transform: scale(1.005);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 页码气泡相关样式 */
+.page-bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin: 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-shadow: 
+    0 2px 8px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.page-bubble:hover {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.page-bubble:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+.page-bubble::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(29, 78, 216, 0.4));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.page-bubble:hover::before {
+  opacity: 1;
+}
+
+/* 页码气泡点击动画 */
+@keyframes bubbleClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.page-bubble-click {
+  animation: bubbleClick 0.2s ease-in-out;
+}
+
+/* 页面跳转覆盖层动画 */
+@keyframes pageJumpHighlight {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    background: rgba(59, 130, 246, 0.2);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+    background: rgba(59, 130, 246, 0.15);
+  }
+  80% {
+    opacity: 1;
+    background: rgba(59, 130, 246, 0.1);
+  }
+  100% {
+    opacity: 0;
+    background: rgba(59, 130, 246, 0.05);
+  }
+}
+
+.page-jump-highlight {
+  animation: pageJumpHighlight 2s ease-out forwards;
+}
+
+/* 页码高亮按钮动画效果 */
+@keyframes clickRipple {
+  0% {
+    opacity: 0.3;
+    scale: 0;
+  }
+  50% {
+    opacity: 0.1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.2;
+  }
+}
+
+/* 页码高亮按钮点击波纹效果 */
+.page-highlight-button:active .click-ripple {
+  animation: clickRipple 0.4s ease-out;
+}
+
+/* 页码高亮按钮悬停发光效果 */
+.page-highlight-button:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* 页码按钮脉冲动画 */
+@keyframes pagePulse {
+  0% { 
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); 
+  }
+  70% { 
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); 
+  }
+  100% { 
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); 
+  }
+}
+
+.page-highlight-button:focus {
+  animation: pagePulse 1s infinite;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(

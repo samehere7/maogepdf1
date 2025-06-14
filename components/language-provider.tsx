@@ -31,6 +31,32 @@ const translations = {
     pdfMaxSize: 'PDF up to 10MB',
     heroTitleV2: 'Chat with your PDF',
     heroDescriptionV2: 'The best way to chat with your PDF documents for students, researchers and professionals',
+    
+    // 智能推荐功能
+    smartRecommendations: 'Smart Recommendations:',
+    directQuestion: 'You can also ask questions directly below',
+    analyzing: 'Analyzing',
+    
+    // Git文档推荐
+    summarizeGuide: 'Summarize this guide',
+    summarizeGuideSubtitle: 'Summarize this guide',
+    syncCommands: 'Main sync commands', 
+    syncCommandsSubtitle: 'Main commands for syncing code',
+    branchingWorkflow: 'Branching advantages',
+    branchingWorkflowSubtitle: 'How branching workflows improve collaboration',
+    
+    // 通用文档推荐
+    documentSummary: 'Document summary',
+    documentSummarySubtitle: 'Document summary',
+    keyPoints: 'Key points',
+    keyPointsSubtitle: 'Key points',
+    commonQuestions: 'Common questions',
+    commonQuestionsSubtitle: 'Frequently asked questions',
+    
+    // 欢迎消息
+    welcomeGitDoc: '📚 Successfully analyzed "{{fileName}}"! This is a Git version control related document. I can help you understand Git concepts, commands and best practices. You can ask questions directly or use the smart recommendations below to quickly understand the core content.',
+    welcomeGuideDoc: '📖 Successfully analyzed "{{fileName}}"! This guide document is ready. I can answer any questions about the document, provide detailed explanations, or generate content summaries. Please select the functions below or start asking questions directly.',
+    welcomeGeneralDoc: '📄 Successfully analyzed "{{fileName}}"! Document content has been loaded successfully, I am your dedicated document assistant. You can ask about any content in the document, and I will provide accurate answers based on the document. Please use the recommended functions below or ask questions directly.',
   },
   zh: {
     about: '关于',
@@ -52,6 +78,32 @@ const translations = {
     pdfMaxSize: 'PDF最大10MB',
     heroTitleV2: '与您的PDF对话',
     heroDescriptionV2: '为学生、研究者和专业人士提供的最佳PDF对话方式',
+    
+    // 智能推荐功能
+    smartRecommendations: '智能推荐功能：',
+    directQuestion: '您也可以在下方输入框直接提问',
+    analyzing: '正在分析',
+    
+    // Git文档推荐
+    summarizeGuide: '总结本指南',
+    summarizeGuideSubtitle: 'Summarize this guide',
+    syncCommands: '主要同步命令',
+    syncCommandsSubtitle: 'Main commands for syncing code',
+    branchingWorkflow: '分支协作优势',
+    branchingWorkflowSubtitle: 'How branching workflows improve collaboration',
+    
+    // 通用文档推荐
+    documentSummary: '文档摘要',
+    documentSummarySubtitle: 'Document summary',
+    keyPoints: '关键要点',
+    keyPointsSubtitle: 'Key points',
+    commonQuestions: '常见问题',
+    commonQuestionsSubtitle: 'Frequently asked questions',
+    
+    // 欢迎消息
+    welcomeGitDoc: '📚 已成功分析《{{fileName}}》！这是一份Git版本控制相关的文档。我可以帮您理解Git的概念、命令和最佳实践。您可以直接提问，或使用下方的智能推荐功能快速了解核心内容。',
+    welcomeGuideDoc: '📖 已成功分析《{{fileName}}》！这份指南文档已准备就绪。我可以为您解答文档中的任何问题，提供详细说明，或生成内容摘要。请选择下方功能或直接开始提问。',
+    welcomeGeneralDoc: '📄 已成功分析《{{fileName}}》！文档内容已加载完成，我是您的专属文档助手。您可以询问文档的任何内容，我会基于文档为您提供准确的回答。请使用下方推荐功能或直接提问。',
   },
   ja: {
     about: '概要',
@@ -79,7 +131,7 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en')
+  const [language, setLanguage] = useState<Language>('zh')
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations[typeof language]] || key

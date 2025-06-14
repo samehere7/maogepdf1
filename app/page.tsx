@@ -126,11 +126,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* 固定侧边栏 */}
-      <div className="fixed top-0 left-0 h-screen w-64 z-30 bg-[#18181b]">
+      <div className="fixed top-0 left-0 h-screen w-80 min-w-[240px] max-w-[320px] z-30 bg-[#18181b]">
         <Sidebar />
       </div>
       {/* 主内容区，留出侧边栏宽度 */}
-      <div className="ml-64 flex-1 bg-white shadow-lg p-8 sm:p-12 md:p-16 lg:p-20 xl:p-24" style={{boxShadow: 'rgba(0,0,0,0.06) -4px 0 16px'}}>
+      <div className="ml-80 flex-1 bg-white shadow-lg p-8 sm:p-12 md:p-16 lg:p-20 xl:p-24" style={{boxShadow: 'rgba(0,0,0,0.06) -4px 0 16px'}}>
         <UpgradePlusModal
           open={showUpgrade}
           onOpenChange={setShowUpgrade}

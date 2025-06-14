@@ -1,1 +1,36 @@
-PDF智能问答API已启动，端口3002
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 14.1.0
+   - Local:        http://localhost:3000
+   - Environments: .env.local, .env
+
+ ✓ Ready in 1989ms
+ ✓ Compiled /middleware in 98ms (135 modules)
+[Middleware] 路径: /api/debug/rag-status, 会话状态: 未登录
+ ✓ Compiled /api/debug/rag-status in 317ms (166 modules)
+[Middleware] 路径: /api/debug/rag-status, 会话状态: 未登录
+[Middleware] 路径: /api/chat, 会话状态: 未登录
+ ✓ Compiled /api/chat in 154ms (185 modules)
+[聊天API] 开始处理请求
+[聊天API] 检查用户登录状态
+[聊天API] 用户未登录
+[Middleware] 路径: /api/upload, 会话状态: 未登录
+ ✓ Compiled /api/upload in 29ms (187 modules)
+[Upload API] 会话状态: 未登录
+[Upload API] 用户未登录或认证失败，拒绝上传 AuthSessionMissingError: Auth session missing!
+    at eval (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:1227:32)
+    at SupabaseAuthClient._useSession (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:1107:26)
+    at async SupabaseAuthClient._getUser (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:1215:20)
+    at async eval (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:1202:20)
+    at async eval (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:1055:28) {
+  __isAuthError: true,
+  status: 400,
+  code: undefined
+}
+ ✓ Compiled in 14ms
+[Middleware] 路径: /api/debug/rag-status, 会话状态: 未登录
+ ✓ Compiled /api/debug/rag-status in 79ms (166 modules)
+ ✓ Compiled in 9ms
+[?25h
