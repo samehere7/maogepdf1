@@ -3,20 +3,23 @@ import { getPDF } from '@/lib/pdf-service';
 import { createClient } from '@/lib/supabase/server';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 
-// 定义模型配置
+// 定义模型配置 - 全部使用DeepSeek免费模型
 const MODEL_CONFIGS = {
   fast: {
-    model: "openai/gpt-4o-mini",
-    apiKey: "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"
+    model: "deepseek/deepseek-chat-v3-0324:free",
+    apiKey: process.env.OPENROUTER_API_KEY_FAST || process.env.OPENROUTER_API_KEY,
+    maxTokens: 200 // 增加token确保回答完整
   },
   highQuality: {
-    model: "openai/gpt-4o-2024-11-20", 
-    apiKey: "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"
+    model: "deepseek/deepseek-chat-v3-0324:free",
+    apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
+    maxTokens: 300 // 高质量模式更多token
   },
   // 普通用户默认使用的免费模型
   default: {
     model: "deepseek/deepseek-chat-v3-0324:free",
-    apiKey: "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"
+    apiKey: process.env.OPENROUTER_API_KEY_FREE || process.env.OPENROUTER_API_KEY,
+    maxTokens: 250 // 免费模式适中token
   }
 };
 
@@ -157,6 +160,9 @@ export async function POST(req: Request) {
     // 获取最后一条用户消息
     const lastUserMessage = messages[messages.length - 1].content;
     console.log(`[聊天API] 用户问题: ${lastUserMessage}`);
+    
+    // 检测是否为简单文本操作（解释、总结、改写）
+    const isSimpleTextOperation = /^请(简洁地)?(解释|总结|改写|用一句话总结)/.test(lastUserMessage);
 
     // 检查用户Plus状态并选择合适的模型
     let isPlus = false;
@@ -196,38 +202,54 @@ export async function POST(req: Request) {
         modelConfig = MODEL_CONFIGS.default;
       }
       
-      // 使用RAG系统检索相关内容
+      // 根据请求类型选择处理方式
       let enhancedSystemPrompt;
-      try {
-        console.log('[聊天API] 开始RAG检索相关内容');
+      
+      if (isSimpleTextOperation) {
+        // 简单文本操作，使用简化的提示词
+        console.log('[聊天API] 检测到简单文本操作，使用简化处理');
+        enhancedSystemPrompt = `你是一个专业的文本处理助手。请根据用户要求直接处理文本，给出简洁准确的回答。
+
+要求：
+1. 直接回答，不添加解释或额外信息
+2. 保持简洁明了
+3. 专注于用户的具体要求
+
+用户请求：${lastUserMessage}`;
         
-        // 确保PDF已在RAG系统中处理
-        const ragStats = pdfRAGSystem.getDocumentStats();
-        if (ragStats.totalChunks === 0 || !pdfRAGSystem.switchToPDF(pdfId)) {
-          console.log('[聊天API] PDF未在RAG系统中，开始处理...');
-          await pdfRAGSystem.extractAndChunkPDF(pdf.url, pdfId);
-        } else {
-          console.log('[聊天API] 已切换到目标PDF的RAG内容');
+      } else {
+        // 复杂问题，使用RAG系统检索相关内容
+        try {
+          console.log('[聊天API] 开始RAG检索相关内容');
+          
+          // 确保PDF已在RAG系统中处理
+          const ragStats = pdfRAGSystem.getDocumentStats();
+          if (ragStats.totalChunks === 0 || !pdfRAGSystem.switchToPDF(pdfId)) {
+            console.log('[聊天API] PDF未在RAG系统中，开始处理...');
+            await pdfRAGSystem.extractAndChunkPDF(pdf.url, pdfId);
+          } else {
+            console.log('[聊天API] 已切换到目标PDF的RAG内容');
+          }
+          
+          // 检索最相关的内容片段（优化性能，减少数量）
+          const relevantChunks = await pdfRAGSystem.searchRelevantChunks(lastUserMessage, 10);
+          console.log(`[聊天API] RAG检索到${relevantChunks.length}个相关片段`);
+          
+          // 构建增强的系统提示词
+          enhancedSystemPrompt = buildEnhancedSystemPrompt(pdf, relevantChunks, lastUserMessage);
+          
+        } catch (ragError) {
+          console.error('[聊天API] RAG检索失败，使用基础提示词:', ragError);
+          enhancedSystemPrompt = buildSystemPrompt(pdf);
+          
+          // 记录RAG失败的详细信息，用于后续优化
+          console.log('[聊天API] RAG失败详情:', {
+            error: ragError instanceof Error ? ragError.message : String(ragError),
+            pdfId: pdfId,
+            pdfName: pdf.name,
+            question: lastUserMessage.substring(0, 100) // 只记录前100字符
+          });
         }
-        
-        // 检索所有相关内容片段（不限制数量，获取完整信息）
-        const relevantChunks = await pdfRAGSystem.searchRelevantChunks(lastUserMessage, 999);
-        console.log(`[聊天API] RAG检索到${relevantChunks.length}个相关片段`);
-        
-        // 构建增强的系统提示词
-        enhancedSystemPrompt = buildEnhancedSystemPrompt(pdf, relevantChunks, lastUserMessage);
-        
-      } catch (ragError) {
-        console.error('[聊天API] RAG检索失败，使用基础提示词:', ragError);
-        enhancedSystemPrompt = buildSystemPrompt(pdf);
-        
-        // 记录RAG失败的详细信息，用于后续优化
-        console.log('[聊天API] RAG失败详情:', {
-          error: ragError instanceof Error ? ragError.message : String(ragError),
-          pdfId: pdfId,
-          pdfName: pdf.name,
-          question: lastUserMessage.substring(0, 100) // 只记录前100字符
-        });
       }
       
       // 调用OpenAI API
@@ -246,7 +268,8 @@ export async function POST(req: Request) {
             { role: 'user', content: lastUserMessage }
           ],
           temperature: 0.7,
-          max_tokens: 300
+          max_tokens: isSimpleTextOperation ? 100 : modelConfig.maxTokens, // 简单操作使用更少token
+          stream: false // 确保非流式响应以简化处理
         })
       });
 

@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import AccountModal from "@/components/AccountModal"
 import UpgradePlusModal from "@/components/UpgradePlusModal"
 import { useUser } from "@/components/UserProvider"
@@ -10,7 +10,6 @@ export default function SidebarUserInfo() {
   const [open, setOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const { user, profile, setProfile } = useUser();
-  const supabase = createClient();
 
   if (!user) return null;
 

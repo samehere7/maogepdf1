@@ -438,6 +438,21 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         span.style.fontFeatureSettings = 'normal';
         span.style.fontVariationSettings = 'normal';
         
+        // 针对中英文混合的额外选择优化
+        span.style.fontVariantLigatures = 'none'; // 禁用连字
+        span.style.fontVariantNumeric = 'normal';
+        span.style.fontVariantCaps = 'normal';
+        span.style.fontVariantAlternates = 'normal';
+        span.style.fontVariantEastAsian = 'normal';
+        span.style.fontLanguageOverride = 'normal';
+        span.style.letterSpacing = 'normal';
+        span.style.wordSpacing = 'normal';
+        span.style.textIndent = '0';
+        
+        // 强制边界装饰一致性，防止选择重影
+        span.style.boxDecorationBreak = 'clone';
+        span.style.webkitBoxDecorationBreak = 'clone';
+        
         // 强化选择行为一致性和防重影
         span.style.webkitFontSmoothing = 'antialiased'; // 统一抗锯齿
         span.style.mozOsxFontSmoothing = 'grayscale';
@@ -470,6 +485,12 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         span.textContent = item.str;
         span.setAttribute('data-text-index', index.toString());
         span.setAttribute('data-page-num', pageNum.toString());
+        
+        // 为英文、数字和符号字符添加标识，用于CSS选择器优化
+        const hasLatin = /[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;':".,<>\?\/\\`~]/.test(item.str);
+        if (hasLatin) {
+          span.setAttribute('data-font-type', 'latin');
+        }
         
         textLayerDiv.appendChild(span);
         
@@ -824,13 +845,48 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         // 特殊处理：检查选择内容的字符类型，确保英文和符号正确处理
         const hasEnglish = /[a-zA-Z]/.test(selectedText);
         const hasSymbols = /[^\u4e00-\u9fa5a-zA-Z0-9\s]/.test(selectedText);
+        const hasMixed = /[\u4e00-\u9fa5].*[a-zA-Z]|[a-zA-Z].*[\u4e00-\u9fa5]/.test(selectedText);
         
-        if (hasEnglish || hasSymbols) {
-          // 为英文和符号字符提供额外的选择稳定性检查
+        if (hasEnglish || hasSymbols || hasMixed) {
+          // 为英文、符号和中英文混合字符提供额外的选择稳定性检查
           const rects = range.getClientRects();
           if (!rects || rects.length === 0) {
-            console.warn('英文/符号字符选择范围无效，跳过处理');
+            console.warn('混合字符选择范围无效，跳过处理');
             return;
+          }
+          
+          // 针对中英文混合内容，验证选择范围的连续性
+          if (hasMixed) {
+            let isValidMixedSelection = true;
+            
+            // 检查选择的起始和结束元素是否都在文本层内
+            const endElement = range.endContainer.nodeType === Node.TEXT_NODE 
+              ? range.endContainer.parentElement 
+              : range.endContainer as Element;
+            
+            if (!startElement?.closest('.textLayer') || !endElement?.closest('.textLayer')) {
+              isValidMixedSelection = false;
+            }
+            
+            // 检查选择范围是否跨越了多个不相邻的文本元素
+            if (isValidMixedSelection && rects.length > 5) {
+              // 如果选择范围矩形过多，可能是跨页面或不连续选择，需要额外验证
+              let lastBottom = -1;
+              for (let i = 0; i < rects.length; i++) {
+                const rect = rects[i];
+                if (lastBottom > 0 && rect.top > lastBottom + rect.height * 2) {
+                  // 如果垂直间距过大，可能是不连续选择
+                  console.log('检测到可能的不连续混合字符选择，需要优化处理');
+                  break;
+                }
+                lastBottom = Math.max(lastBottom, rect.bottom);
+              }
+            }
+            
+            if (!isValidMixedSelection) {
+              console.warn('中英文混合选择验证失败，跳过处理');
+              return;
+            }
           }
         }
         

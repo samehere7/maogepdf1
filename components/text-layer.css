@@ -271,13 +271,13 @@
 .textLayer span *::selection,
 .textLayer > *::selection,
 .textLayer > * *::selection {
-  background: rgba(37, 99, 235, 0.25) !important; /* 使用rgba确保透明度一致 */
+  background: rgba(37, 99, 235, 0.18) !important; /* 降低透明度，减少重叠时的深色效果 */
   color: transparent !important;
   text-shadow: none !important;
   -webkit-text-fill-color: transparent !important;
   background-image: none !important;
-  background-clip: content-box !important; /* 改为content-box避免padding重叠 */
-  -webkit-background-clip: content-box !important;
+  background-clip: padding-box !important; /* 改为padding-box，避免边界重叠问题 */
+  -webkit-background-clip: padding-box !important;
   /* 强制统一混合模式，防止重影 */
   mix-blend-mode: normal !important;
   isolation: isolate !important;
@@ -287,6 +287,13 @@
   box-shadow: none !important;
   border: none !important;
   outline: none !important;
+  /* 强制统一边界行为，防止字符间空隙 */
+  background-origin: padding-box !important;
+  -webkit-background-origin: padding-box !important;
+  background-attachment: scroll !important;
+  background-size: auto !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
 }
 
 .textLayer ::-moz-selection,
@@ -295,13 +302,19 @@
 .textLayer span *::-moz-selection,
 .textLayer > *::-moz-selection,
 .textLayer > * *::-moz-selection {
-  background: rgba(37, 99, 235, 0.25) !important;
+  background: rgba(37, 99, 235, 0.18) !important; /* 保持与webkit版本一致的透明度 */
   color: transparent !important;
   text-shadow: none !important;
   background-image: none !important;
-  background-clip: content-box !important;
+  background-clip: padding-box !important; /* 统一边界裁剪方式 */
   mix-blend-mode: normal !important;
   isolation: isolate !important;
+  /* 统一Firefox的边界行为 */
+  background-origin: padding-box !important;
+  background-attachment: scroll !important;
+  background-size: auto !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
 }
 
 /* 强制覆盖任何内联样式和特殊字体的选择 - 防止重影 */
@@ -309,42 +322,51 @@
 .textLayer [style*="font"] *::selection,
 .textLayer [class*="font"]::selection,
 .textLayer [class*="font"] *::selection {
-  background: rgba(37, 99, 235, 0.25) !important;
+  background: rgba(37, 99, 235, 0.18) !important; /* 统一透明度 */
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
-  background-clip: content-box !important;
+  background-clip: padding-box !important; /* 统一裁剪方式 */
   mix-blend-mode: normal !important;
   isolation: isolate !important;
+  /* 确保特殊字体元素的边界行为一致 */
+  background-origin: padding-box !important;
+  -webkit-background-origin: padding-box !important;
 }
 
 .textLayer [style*="font"]::-moz-selection,
 .textLayer [style*="font"] *::-moz-selection,
 .textLayer [class*="font"]::-moz-selection,
 .textLayer [class*="font"] *::-moz-selection {
-  background: rgba(37, 99, 235, 0.25) !important;
+  background: rgba(37, 99, 235, 0.18) !important; /* 统一透明度 */
   color: transparent !important;
-  background-clip: content-box !important;
+  background-clip: padding-box !important; /* 统一裁剪方式 */
   mix-blend-mode: normal !important;
+  background-origin: padding-box !important;
 }
 
 /* 通用强制覆盖 - 最高优先级，确保没有任何遗漏和重影 */
 body .textLayer ::selection,
 html .textLayer ::selection,
 * .textLayer ::selection {
-  background: rgba(37, 99, 235, 0.25) !important;
+  background: rgba(37, 99, 235, 0.18) !important; /* 统一低透明度，避免重叠深色 */
   color: transparent !important;
-  background-clip: content-box !important;
+  background-clip: padding-box !important; /* 统一边界裁剪 */
   mix-blend-mode: normal !important;
   isolation: isolate !important;
+  /* 最终级别的边界统一 */
+  background-origin: padding-box !important;
+  background-attachment: scroll !important;
 }
 
 body .textLayer ::-moz-selection,
 html .textLayer ::-moz-selection,
 * .textLayer ::-moz-selection {
-  background: rgba(37, 99, 235, 0.25) !important;
+  background: rgba(37, 99, 235, 0.18) !important; /* 统一透明度 */
   color: transparent !important;
-  background-clip: content-box !important;
+  background-clip: padding-box !important; /* 统一边界裁剪 */
   mix-blend-mode: normal !important;
+  background-origin: padding-box !important;
+  background-attachment: scroll !important;
 }
 
 /* 优化文本选择体验 - 解决拖拽偏移和边界问题 */
@@ -471,5 +493,95 @@ html .textLayer ::-moz-selection,
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* 针对中英文混合选择的特殊优化 - 解决重影和选择不稳定问题 */
+.textLayer span[style*="font-family"] {
+  /* 强制统一所有字体族的选择行为 */
+  font-feature-settings: normal !important;
+  font-variant-numeric: normal !important;
+  font-variant-ligatures: none !important; /* 禁用连字，避免选择边界问题 */
+  font-variant-caps: normal !important;
+  font-variant-alternates: normal !important;
+  font-variant-east-asian: normal !important;
+  font-language-override: normal !important;
+  
+  /* 统一字符渲染模式 */
+  text-orientation: mixed !important;
+  writing-mode: horizontal-tb !important;
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  
+  /* 防止字符间距差异影响选择 */
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  text-indent: 0 !important;
+  
+  /* 强制统一的选择区域边界 */
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
+}
+
+/* 专门优化英文、数字和符号字符的选择稳定性 */
+.textLayer span[data-font-type="latin"],
+.textLayer span[style*="font-family"] {
+  /* 防止英文字符选择时的跳跃 */
+  font-synthesis: none !important;
+  font-optical-sizing: none !important;
+  text-rendering: optimizeSpeed !important; /* 使用速度优化，避免渲染差异 */
+  -webkit-font-feature-settings: normal !important;
+  -webkit-font-kerning: none !important; /* 禁用字距调整 */
+}
+
+/* 强化选择边界的视觉一致性 - 特别针对混合字符 */
+.textLayer ::selection {
+  /* 确保选择背景不会因字符类型而变化 */
+  background-blend-mode: normal !important;
+  -webkit-background-blend-mode: normal !important;
+  
+  /* 强制边界行为一致 */
+  box-shadow: none !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: solid !important;
+  text-decoration-color: transparent !important;
+  
+  /* 防止选择时的渲染闪烁 */
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+  will-change: auto !important;
+  contain: style !important;
+}
+
+/* 浏览器兼容性增强 - 确保在不同浏览器下选择行为一致 */
+@supports (-webkit-text-fill-color: transparent) {
+  .textLayer span {
+    -webkit-text-fill-color: transparent !important;
+    -webkit-text-stroke-width: 0 !important;
+    -webkit-text-stroke-color: transparent !important;
+  }
+}
+
+@supports (-moz-text-fill-color: transparent) {
+  .textLayer span {
+    -moz-text-fill-color: transparent !important;
+  }
+}
+
+/* 修复Safari和Chrome中选择背景的差异 */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .textLayer ::selection {
+    background-color: rgba(37, 99, 235, 0.18) !important;
+    background-image: none !important;
+  }
+}
+
+/* 修复Firefox中的选择行为 */
+@-moz-document url-prefix() {
+  .textLayer ::selection,
+  .textLayer ::-moz-selection {
+    background-color: rgba(37, 99, 235, 0.18) !important;
+    background-image: none !important;
   }
 }

@@ -3,11 +3,10 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import { LoginModal } from "@/components/login-modal"
 
 export default function SidebarSignIn() {
-  const supabase = createClient()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {

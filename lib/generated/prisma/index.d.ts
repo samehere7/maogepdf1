@@ -142,6 +142,21 @@ export type user_daily_quota = $Result.DefaultSelection<Prisma.$user_daily_quota
  * 
  */
 export type user_profiles = $Result.DefaultSelection<Prisma.$user_profilesPayload>
+/**
+ * Model flashcards
+ * 
+ */
+export type flashcards = $Result.DefaultSelection<Prisma.$flashcardsPayload>
+/**
+ * Model flashcard_sessions
+ * 
+ */
+export type flashcard_sessions = $Result.DefaultSelection<Prisma.$flashcard_sessionsPayload>
+/**
+ * Model flashcard_reviews
+ * 
+ */
+export type flashcard_reviews = $Result.DefaultSelection<Prisma.$flashcard_reviewsPayload>
 
 /**
  * Enums
@@ -548,6 +563,36 @@ export class PrismaClient<
     * ```
     */
   get user_profiles(): Prisma.user_profilesDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.flashcards`: Exposes CRUD operations for the **flashcards** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Flashcards
+    * const flashcards = await prisma.flashcards.findMany()
+    * ```
+    */
+  get flashcards(): Prisma.flashcardsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.flashcard_sessions`: Exposes CRUD operations for the **flashcard_sessions** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Flashcard_sessions
+    * const flashcard_sessions = await prisma.flashcard_sessions.findMany()
+    * ```
+    */
+  get flashcard_sessions(): Prisma.flashcard_sessionsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.flashcard_reviews`: Exposes CRUD operations for the **flashcard_reviews** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Flashcard_reviews
+    * const flashcard_reviews = await prisma.flashcard_reviews.findMany()
+    * ```
+    */
+  get flashcard_reviews(): Prisma.flashcard_reviewsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1008,7 +1053,10 @@ export namespace Prisma {
     pdfs: 'pdfs',
     plus: 'plus',
     user_daily_quota: 'user_daily_quota',
-    user_profiles: 'user_profiles'
+    user_profiles: 'user_profiles',
+    flashcards: 'flashcards',
+    flashcard_sessions: 'flashcard_sessions',
+    flashcard_reviews: 'flashcard_reviews'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1027,7 +1075,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chat_messages" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles"
+      modelProps: "audit_log_entries" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "users" | "chat_messages" | "pdfs" | "plus" | "user_daily_quota" | "user_profiles" | "flashcards" | "flashcard_sessions" | "flashcard_reviews"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2585,6 +2633,228 @@ export namespace Prisma {
           }
         }
       }
+      flashcards: {
+        payload: Prisma.$flashcardsPayload<ExtArgs>
+        fields: Prisma.flashcardsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.flashcardsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.flashcardsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          findFirst: {
+            args: Prisma.flashcardsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.flashcardsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          findMany: {
+            args: Prisma.flashcardsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>[]
+          }
+          create: {
+            args: Prisma.flashcardsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          createMany: {
+            args: Prisma.flashcardsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.flashcardsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>[]
+          }
+          delete: {
+            args: Prisma.flashcardsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          update: {
+            args: Prisma.flashcardsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          deleteMany: {
+            args: Prisma.flashcardsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.flashcardsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.flashcardsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>[]
+          }
+          upsert: {
+            args: Prisma.flashcardsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcardsPayload>
+          }
+          aggregate: {
+            args: Prisma.FlashcardsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFlashcards>
+          }
+          groupBy: {
+            args: Prisma.flashcardsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FlashcardsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.flashcardsCountArgs<ExtArgs>
+            result: $Utils.Optional<FlashcardsCountAggregateOutputType> | number
+          }
+        }
+      }
+      flashcard_sessions: {
+        payload: Prisma.$flashcard_sessionsPayload<ExtArgs>
+        fields: Prisma.flashcard_sessionsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.flashcard_sessionsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.flashcard_sessionsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          findFirst: {
+            args: Prisma.flashcard_sessionsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.flashcard_sessionsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          findMany: {
+            args: Prisma.flashcard_sessionsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>[]
+          }
+          create: {
+            args: Prisma.flashcard_sessionsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          createMany: {
+            args: Prisma.flashcard_sessionsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.flashcard_sessionsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>[]
+          }
+          delete: {
+            args: Prisma.flashcard_sessionsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          update: {
+            args: Prisma.flashcard_sessionsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          deleteMany: {
+            args: Prisma.flashcard_sessionsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.flashcard_sessionsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.flashcard_sessionsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>[]
+          }
+          upsert: {
+            args: Prisma.flashcard_sessionsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_sessionsPayload>
+          }
+          aggregate: {
+            args: Prisma.Flashcard_sessionsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFlashcard_sessions>
+          }
+          groupBy: {
+            args: Prisma.flashcard_sessionsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Flashcard_sessionsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.flashcard_sessionsCountArgs<ExtArgs>
+            result: $Utils.Optional<Flashcard_sessionsCountAggregateOutputType> | number
+          }
+        }
+      }
+      flashcard_reviews: {
+        payload: Prisma.$flashcard_reviewsPayload<ExtArgs>
+        fields: Prisma.flashcard_reviewsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.flashcard_reviewsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.flashcard_reviewsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          findFirst: {
+            args: Prisma.flashcard_reviewsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.flashcard_reviewsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          findMany: {
+            args: Prisma.flashcard_reviewsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>[]
+          }
+          create: {
+            args: Prisma.flashcard_reviewsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          createMany: {
+            args: Prisma.flashcard_reviewsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.flashcard_reviewsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>[]
+          }
+          delete: {
+            args: Prisma.flashcard_reviewsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          update: {
+            args: Prisma.flashcard_reviewsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          deleteMany: {
+            args: Prisma.flashcard_reviewsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.flashcard_reviewsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.flashcard_reviewsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>[]
+          }
+          upsert: {
+            args: Prisma.flashcard_reviewsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$flashcard_reviewsPayload>
+          }
+          aggregate: {
+            args: Prisma.Flashcard_reviewsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFlashcard_reviews>
+          }
+          groupBy: {
+            args: Prisma.flashcard_reviewsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Flashcard_reviewsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.flashcard_reviewsCountArgs<ExtArgs>
+            result: $Utils.Optional<Flashcard_reviewsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2690,6 +2960,9 @@ export namespace Prisma {
     plus?: plusOmit
     user_daily_quota?: user_daily_quotaOmit
     user_profiles?: user_profilesOmit
+    flashcards?: flashcardsOmit
+    flashcard_sessions?: flashcard_sessionsOmit
+    flashcard_reviews?: flashcard_reviewsOmit
   }
 
   /* Types for Logging */
@@ -3012,10 +3285,14 @@ export namespace Prisma {
 
   export type PdfsCountOutputType = {
     chat_messages: number
+    flashcards: number
+    flashcard_sessions: number
   }
 
   export type PdfsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | PdfsCountOutputTypeCountChat_messagesArgs
+    flashcards?: boolean | PdfsCountOutputTypeCountFlashcardsArgs
+    flashcard_sessions?: boolean | PdfsCountOutputTypeCountFlashcard_sessionsArgs
   }
 
   // Custom InputTypes
@@ -3034,6 +3311,131 @@ export namespace Prisma {
    */
   export type PdfsCountOutputTypeCountChat_messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: chat_messagesWhereInput
+  }
+
+  /**
+   * PdfsCountOutputType without action
+   */
+  export type PdfsCountOutputTypeCountFlashcardsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcardsWhereInput
+  }
+
+  /**
+   * PdfsCountOutputType without action
+   */
+  export type PdfsCountOutputTypeCountFlashcard_sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_sessionsWhereInput
+  }
+
+
+  /**
+   * Count Type User_profilesCountOutputType
+   */
+
+  export type User_profilesCountOutputType = {
+    flashcards: number
+    flashcard_sessions: number
+    flashcard_reviews: number
+  }
+
+  export type User_profilesCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcards?: boolean | User_profilesCountOutputTypeCountFlashcardsArgs
+    flashcard_sessions?: boolean | User_profilesCountOutputTypeCountFlashcard_sessionsArgs
+    flashcard_reviews?: boolean | User_profilesCountOutputTypeCountFlashcard_reviewsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * User_profilesCountOutputType without action
+   */
+  export type User_profilesCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User_profilesCountOutputType
+     */
+    select?: User_profilesCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * User_profilesCountOutputType without action
+   */
+  export type User_profilesCountOutputTypeCountFlashcardsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcardsWhereInput
+  }
+
+  /**
+   * User_profilesCountOutputType without action
+   */
+  export type User_profilesCountOutputTypeCountFlashcard_sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_sessionsWhereInput
+  }
+
+  /**
+   * User_profilesCountOutputType without action
+   */
+  export type User_profilesCountOutputTypeCountFlashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_reviewsWhereInput
+  }
+
+
+  /**
+   * Count Type FlashcardsCountOutputType
+   */
+
+  export type FlashcardsCountOutputType = {
+    flashcard_reviews: number
+  }
+
+  export type FlashcardsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcard_reviews?: boolean | FlashcardsCountOutputTypeCountFlashcard_reviewsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * FlashcardsCountOutputType without action
+   */
+  export type FlashcardsCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FlashcardsCountOutputType
+     */
+    select?: FlashcardsCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * FlashcardsCountOutputType without action
+   */
+  export type FlashcardsCountOutputTypeCountFlashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_reviewsWhereInput
+  }
+
+
+  /**
+   * Count Type Flashcard_sessionsCountOutputType
+   */
+
+  export type Flashcard_sessionsCountOutputType = {
+    flashcard_reviews: number
+  }
+
+  export type Flashcard_sessionsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcard_reviews?: boolean | Flashcard_sessionsCountOutputTypeCountFlashcard_reviewsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * Flashcard_sessionsCountOutputType without action
+   */
+  export type Flashcard_sessionsCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Flashcard_sessionsCountOutputType
+     */
+    select?: Flashcard_sessionsCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * Flashcard_sessionsCountOutputType without action
+   */
+  export type Flashcard_sessionsCountOutputTypeCountFlashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_reviewsWhereInput
   }
 
 
@@ -22464,6 +22866,8 @@ export namespace Prisma {
     created_at?: boolean
     updated_at?: boolean
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
+    flashcards?: boolean | pdfs$flashcardsArgs<ExtArgs>
+    flashcard_sessions?: boolean | pdfs$flashcard_sessionsArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["pdfs"]>
@@ -22515,6 +22919,8 @@ export namespace Prisma {
   export type pdfsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "url" | "size" | "upload_date" | "last_viewed" | "user_id" | "content_type" | "summary" | "created_at" | "updated_at", ExtArgs["result"]["pdfs"]>
   export type pdfsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat_messages?: boolean | pdfs$chat_messagesArgs<ExtArgs>
+    flashcards?: boolean | pdfs$flashcardsArgs<ExtArgs>
+    flashcard_sessions?: boolean | pdfs$flashcard_sessionsArgs<ExtArgs>
     users?: boolean | pdfs$usersArgs<ExtArgs>
     _count?: boolean | PdfsCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -22529,6 +22935,8 @@ export namespace Prisma {
     name: "pdfs"
     objects: {
       chat_messages: Prisma.$chat_messagesPayload<ExtArgs>[]
+      flashcards: Prisma.$flashcardsPayload<ExtArgs>[]
+      flashcard_sessions: Prisma.$flashcard_sessionsPayload<ExtArgs>[]
       users: Prisma.$usersPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -22938,6 +23346,8 @@ export namespace Prisma {
   export interface Prisma__pdfsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     chat_messages<T extends pdfs$chat_messagesArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$chat_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$chat_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    flashcards<T extends pdfs$flashcardsArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$flashcardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    flashcard_sessions<T extends pdfs$flashcard_sessionsArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$flashcard_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends pdfs$usersArgs<ExtArgs> = {}>(args?: Subset<T, pdfs$usersArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -23396,6 +23806,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Chat_messagesScalarFieldEnum | Chat_messagesScalarFieldEnum[]
+  }
+
+  /**
+   * pdfs.flashcards
+   */
+  export type pdfs$flashcardsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    where?: flashcardsWhereInput
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    cursor?: flashcardsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FlashcardsScalarFieldEnum | FlashcardsScalarFieldEnum[]
+  }
+
+  /**
+   * pdfs.flashcard_sessions
+   */
+  export type pdfs$flashcard_sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    where?: flashcard_sessionsWhereInput
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    cursor?: flashcard_sessionsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Flashcard_sessionsScalarFieldEnum | Flashcard_sessionsScalarFieldEnum[]
   }
 
   /**
@@ -25838,6 +26296,10 @@ export namespace Prisma {
     created_at?: boolean
     updated_at?: boolean
     users?: boolean | usersDefaultArgs<ExtArgs>
+    flashcards?: boolean | user_profiles$flashcardsArgs<ExtArgs>
+    flashcard_sessions?: boolean | user_profiles$flashcard_sessionsArgs<ExtArgs>
+    flashcard_reviews?: boolean | user_profiles$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | User_profilesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user_profiles"]>
 
   export type user_profilesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -25881,6 +26343,10 @@ export namespace Prisma {
   export type user_profilesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "avatar_url" | "plus" | "is_active" | "expire_at" | "created_at" | "updated_at", ExtArgs["result"]["user_profiles"]>
   export type user_profilesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | usersDefaultArgs<ExtArgs>
+    flashcards?: boolean | user_profiles$flashcardsArgs<ExtArgs>
+    flashcard_sessions?: boolean | user_profiles$flashcard_sessionsArgs<ExtArgs>
+    flashcard_reviews?: boolean | user_profiles$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | User_profilesCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type user_profilesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | usersDefaultArgs<ExtArgs>
@@ -25893,6 +26359,9 @@ export namespace Prisma {
     name: "user_profiles"
     objects: {
       users: Prisma.$usersPayload<ExtArgs>
+      flashcards: Prisma.$flashcardsPayload<ExtArgs>[]
+      flashcard_sessions: Prisma.$flashcard_sessionsPayload<ExtArgs>[]
+      flashcard_reviews: Prisma.$flashcard_reviewsPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -26299,6 +26768,9 @@ export namespace Prisma {
   export interface Prisma__user_profilesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     users<T extends usersDefaultArgs<ExtArgs> = {}>(args?: Subset<T, usersDefaultArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    flashcards<T extends user_profiles$flashcardsArgs<ExtArgs> = {}>(args?: Subset<T, user_profiles$flashcardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    flashcard_sessions<T extends user_profiles$flashcard_sessionsArgs<ExtArgs> = {}>(args?: Subset<T, user_profiles$flashcard_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    flashcard_reviews<T extends user_profiles$flashcard_reviewsArgs<ExtArgs> = {}>(args?: Subset<T, user_profiles$flashcard_reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -26733,6 +27205,78 @@ export namespace Prisma {
   }
 
   /**
+   * user_profiles.flashcards
+   */
+  export type user_profiles$flashcardsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    where?: flashcardsWhereInput
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    cursor?: flashcardsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FlashcardsScalarFieldEnum | FlashcardsScalarFieldEnum[]
+  }
+
+  /**
+   * user_profiles.flashcard_sessions
+   */
+  export type user_profiles$flashcard_sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    where?: flashcard_sessionsWhereInput
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    cursor?: flashcard_sessionsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Flashcard_sessionsScalarFieldEnum | Flashcard_sessionsScalarFieldEnum[]
+  }
+
+  /**
+   * user_profiles.flashcard_reviews
+   */
+  export type user_profiles$flashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    where?: flashcard_reviewsWhereInput
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    cursor?: flashcard_reviewsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
    * user_profiles without action
    */
   export type user_profilesDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26748,6 +27292,3599 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: user_profilesInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model flashcards
+   */
+
+  export type AggregateFlashcards = {
+    _count: FlashcardsCountAggregateOutputType | null
+    _avg: FlashcardsAvgAggregateOutputType | null
+    _sum: FlashcardsSumAggregateOutputType | null
+    _min: FlashcardsMinAggregateOutputType | null
+    _max: FlashcardsMaxAggregateOutputType | null
+  }
+
+  export type FlashcardsAvgAggregateOutputType = {
+    page_number: number | null
+    difficulty: number | null
+    review_count: number | null
+  }
+
+  export type FlashcardsSumAggregateOutputType = {
+    page_number: number | null
+    difficulty: number | null
+    review_count: number | null
+  }
+
+  export type FlashcardsMinAggregateOutputType = {
+    id: string | null
+    pdf_id: string | null
+    user_id: string | null
+    question: string | null
+    answer: string | null
+    page_number: number | null
+    difficulty: number | null
+    last_reviewed_at: Date | null
+    next_review_at: Date | null
+    review_count: number | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type FlashcardsMaxAggregateOutputType = {
+    id: string | null
+    pdf_id: string | null
+    user_id: string | null
+    question: string | null
+    answer: string | null
+    page_number: number | null
+    difficulty: number | null
+    last_reviewed_at: Date | null
+    next_review_at: Date | null
+    review_count: number | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type FlashcardsCountAggregateOutputType = {
+    id: number
+    pdf_id: number
+    user_id: number
+    question: number
+    answer: number
+    page_number: number
+    difficulty: number
+    last_reviewed_at: number
+    next_review_at: number
+    review_count: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type FlashcardsAvgAggregateInputType = {
+    page_number?: true
+    difficulty?: true
+    review_count?: true
+  }
+
+  export type FlashcardsSumAggregateInputType = {
+    page_number?: true
+    difficulty?: true
+    review_count?: true
+  }
+
+  export type FlashcardsMinAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    question?: true
+    answer?: true
+    page_number?: true
+    difficulty?: true
+    last_reviewed_at?: true
+    next_review_at?: true
+    review_count?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type FlashcardsMaxAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    question?: true
+    answer?: true
+    page_number?: true
+    difficulty?: true
+    last_reviewed_at?: true
+    next_review_at?: true
+    review_count?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type FlashcardsCountAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    question?: true
+    answer?: true
+    page_number?: true
+    difficulty?: true
+    last_reviewed_at?: true
+    next_review_at?: true
+    review_count?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type FlashcardsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcards to aggregate.
+     */
+    where?: flashcardsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcards to fetch.
+     */
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: flashcardsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned flashcards
+    **/
+    _count?: true | FlashcardsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FlashcardsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FlashcardsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FlashcardsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FlashcardsMaxAggregateInputType
+  }
+
+  export type GetFlashcardsAggregateType<T extends FlashcardsAggregateArgs> = {
+        [P in keyof T & keyof AggregateFlashcards]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFlashcards[P]>
+      : GetScalarType<T[P], AggregateFlashcards[P]>
+  }
+
+
+
+
+  export type flashcardsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcardsWhereInput
+    orderBy?: flashcardsOrderByWithAggregationInput | flashcardsOrderByWithAggregationInput[]
+    by: FlashcardsScalarFieldEnum[] | FlashcardsScalarFieldEnum
+    having?: flashcardsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FlashcardsCountAggregateInputType | true
+    _avg?: FlashcardsAvgAggregateInputType
+    _sum?: FlashcardsSumAggregateInputType
+    _min?: FlashcardsMinAggregateInputType
+    _max?: FlashcardsMaxAggregateInputType
+  }
+
+  export type FlashcardsGroupByOutputType = {
+    id: string
+    pdf_id: string
+    user_id: string
+    question: string
+    answer: string
+    page_number: number | null
+    difficulty: number
+    last_reviewed_at: Date | null
+    next_review_at: Date | null
+    review_count: number
+    created_at: Date | null
+    updated_at: Date | null
+    _count: FlashcardsCountAggregateOutputType | null
+    _avg: FlashcardsAvgAggregateOutputType | null
+    _sum: FlashcardsSumAggregateOutputType | null
+    _min: FlashcardsMinAggregateOutputType | null
+    _max: FlashcardsMaxAggregateOutputType | null
+  }
+
+  type GetFlashcardsGroupByPayload<T extends flashcardsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FlashcardsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FlashcardsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FlashcardsGroupByOutputType[P]>
+            : GetScalarType<T[P], FlashcardsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type flashcardsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    question?: boolean
+    answer?: boolean
+    page_number?: boolean
+    difficulty?: boolean
+    last_reviewed_at?: boolean
+    next_review_at?: boolean
+    review_count?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+    flashcard_reviews?: boolean | flashcards$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | FlashcardsCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcards"]>
+
+  export type flashcardsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    question?: boolean
+    answer?: boolean
+    page_number?: boolean
+    difficulty?: boolean
+    last_reviewed_at?: boolean
+    next_review_at?: boolean
+    review_count?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcards"]>
+
+  export type flashcardsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    question?: boolean
+    answer?: boolean
+    page_number?: boolean
+    difficulty?: boolean
+    last_reviewed_at?: boolean
+    next_review_at?: boolean
+    review_count?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcards"]>
+
+  export type flashcardsSelectScalar = {
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    question?: boolean
+    answer?: boolean
+    page_number?: boolean
+    difficulty?: boolean
+    last_reviewed_at?: boolean
+    next_review_at?: boolean
+    review_count?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type flashcardsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "pdf_id" | "user_id" | "question" | "answer" | "page_number" | "difficulty" | "last_reviewed_at" | "next_review_at" | "review_count" | "created_at" | "updated_at", ExtArgs["result"]["flashcards"]>
+  export type flashcardsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+    flashcard_reviews?: boolean | flashcards$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | FlashcardsCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type flashcardsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+  export type flashcardsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+
+  export type $flashcardsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "flashcards"
+    objects: {
+      pdfs: Prisma.$pdfsPayload<ExtArgs>
+      user_profiles: Prisma.$user_profilesPayload<ExtArgs>
+      flashcard_reviews: Prisma.$flashcard_reviewsPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      pdf_id: string
+      user_id: string
+      question: string
+      answer: string
+      page_number: number | null
+      difficulty: number
+      last_reviewed_at: Date | null
+      next_review_at: Date | null
+      review_count: number
+      created_at: Date | null
+      updated_at: Date | null
+    }, ExtArgs["result"]["flashcards"]>
+    composites: {}
+  }
+
+  type flashcardsGetPayload<S extends boolean | null | undefined | flashcardsDefaultArgs> = $Result.GetResult<Prisma.$flashcardsPayload, S>
+
+  type flashcardsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<flashcardsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FlashcardsCountAggregateInputType | true
+    }
+
+  export interface flashcardsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['flashcards'], meta: { name: 'flashcards' } }
+    /**
+     * Find zero or one Flashcards that matches the filter.
+     * @param {flashcardsFindUniqueArgs} args - Arguments to find a Flashcards
+     * @example
+     * // Get one Flashcards
+     * const flashcards = await prisma.flashcards.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends flashcardsFindUniqueArgs>(args: SelectSubset<T, flashcardsFindUniqueArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Flashcards that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {flashcardsFindUniqueOrThrowArgs} args - Arguments to find a Flashcards
+     * @example
+     * // Get one Flashcards
+     * const flashcards = await prisma.flashcards.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends flashcardsFindUniqueOrThrowArgs>(args: SelectSubset<T, flashcardsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcards that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsFindFirstArgs} args - Arguments to find a Flashcards
+     * @example
+     * // Get one Flashcards
+     * const flashcards = await prisma.flashcards.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends flashcardsFindFirstArgs>(args?: SelectSubset<T, flashcardsFindFirstArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcards that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsFindFirstOrThrowArgs} args - Arguments to find a Flashcards
+     * @example
+     * // Get one Flashcards
+     * const flashcards = await prisma.flashcards.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends flashcardsFindFirstOrThrowArgs>(args?: SelectSubset<T, flashcardsFindFirstOrThrowArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Flashcards that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Flashcards
+     * const flashcards = await prisma.flashcards.findMany()
+     * 
+     * // Get first 10 Flashcards
+     * const flashcards = await prisma.flashcards.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const flashcardsWithIdOnly = await prisma.flashcards.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends flashcardsFindManyArgs>(args?: SelectSubset<T, flashcardsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Flashcards.
+     * @param {flashcardsCreateArgs} args - Arguments to create a Flashcards.
+     * @example
+     * // Create one Flashcards
+     * const Flashcards = await prisma.flashcards.create({
+     *   data: {
+     *     // ... data to create a Flashcards
+     *   }
+     * })
+     * 
+     */
+    create<T extends flashcardsCreateArgs>(args: SelectSubset<T, flashcardsCreateArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Flashcards.
+     * @param {flashcardsCreateManyArgs} args - Arguments to create many Flashcards.
+     * @example
+     * // Create many Flashcards
+     * const flashcards = await prisma.flashcards.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends flashcardsCreateManyArgs>(args?: SelectSubset<T, flashcardsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Flashcards and returns the data saved in the database.
+     * @param {flashcardsCreateManyAndReturnArgs} args - Arguments to create many Flashcards.
+     * @example
+     * // Create many Flashcards
+     * const flashcards = await prisma.flashcards.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Flashcards and only return the `id`
+     * const flashcardsWithIdOnly = await prisma.flashcards.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends flashcardsCreateManyAndReturnArgs>(args?: SelectSubset<T, flashcardsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Flashcards.
+     * @param {flashcardsDeleteArgs} args - Arguments to delete one Flashcards.
+     * @example
+     * // Delete one Flashcards
+     * const Flashcards = await prisma.flashcards.delete({
+     *   where: {
+     *     // ... filter to delete one Flashcards
+     *   }
+     * })
+     * 
+     */
+    delete<T extends flashcardsDeleteArgs>(args: SelectSubset<T, flashcardsDeleteArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Flashcards.
+     * @param {flashcardsUpdateArgs} args - Arguments to update one Flashcards.
+     * @example
+     * // Update one Flashcards
+     * const flashcards = await prisma.flashcards.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends flashcardsUpdateArgs>(args: SelectSubset<T, flashcardsUpdateArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Flashcards.
+     * @param {flashcardsDeleteManyArgs} args - Arguments to filter Flashcards to delete.
+     * @example
+     * // Delete a few Flashcards
+     * const { count } = await prisma.flashcards.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends flashcardsDeleteManyArgs>(args?: SelectSubset<T, flashcardsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Flashcards
+     * const flashcards = await prisma.flashcards.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends flashcardsUpdateManyArgs>(args: SelectSubset<T, flashcardsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcards and returns the data updated in the database.
+     * @param {flashcardsUpdateManyAndReturnArgs} args - Arguments to update many Flashcards.
+     * @example
+     * // Update many Flashcards
+     * const flashcards = await prisma.flashcards.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Flashcards and only return the `id`
+     * const flashcardsWithIdOnly = await prisma.flashcards.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends flashcardsUpdateManyAndReturnArgs>(args: SelectSubset<T, flashcardsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Flashcards.
+     * @param {flashcardsUpsertArgs} args - Arguments to update or create a Flashcards.
+     * @example
+     * // Update or create a Flashcards
+     * const flashcards = await prisma.flashcards.upsert({
+     *   create: {
+     *     // ... data to create a Flashcards
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Flashcards we want to update
+     *   }
+     * })
+     */
+    upsert<T extends flashcardsUpsertArgs>(args: SelectSubset<T, flashcardsUpsertArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Flashcards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsCountArgs} args - Arguments to filter Flashcards to count.
+     * @example
+     * // Count the number of Flashcards
+     * const count = await prisma.flashcards.count({
+     *   where: {
+     *     // ... the filter for the Flashcards we want to count
+     *   }
+     * })
+    **/
+    count<T extends flashcardsCountArgs>(
+      args?: Subset<T, flashcardsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FlashcardsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Flashcards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FlashcardsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FlashcardsAggregateArgs>(args: Subset<T, FlashcardsAggregateArgs>): Prisma.PrismaPromise<GetFlashcardsAggregateType<T>>
+
+    /**
+     * Group by Flashcards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcardsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends flashcardsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: flashcardsGroupByArgs['orderBy'] }
+        : { orderBy?: flashcardsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, flashcardsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFlashcardsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the flashcards model
+   */
+  readonly fields: flashcardsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for flashcards.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__flashcardsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    pdfs<T extends pdfsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, pdfsDefaultArgs<ExtArgs>>): Prisma__pdfsClient<$Result.GetResult<Prisma.$pdfsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user_profiles<T extends user_profilesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, user_profilesDefaultArgs<ExtArgs>>): Prisma__user_profilesClient<$Result.GetResult<Prisma.$user_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    flashcard_reviews<T extends flashcards$flashcard_reviewsArgs<ExtArgs> = {}>(args?: Subset<T, flashcards$flashcard_reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the flashcards model
+   */
+  interface flashcardsFieldRefs {
+    readonly id: FieldRef<"flashcards", 'String'>
+    readonly pdf_id: FieldRef<"flashcards", 'String'>
+    readonly user_id: FieldRef<"flashcards", 'String'>
+    readonly question: FieldRef<"flashcards", 'String'>
+    readonly answer: FieldRef<"flashcards", 'String'>
+    readonly page_number: FieldRef<"flashcards", 'Int'>
+    readonly difficulty: FieldRef<"flashcards", 'Int'>
+    readonly last_reviewed_at: FieldRef<"flashcards", 'DateTime'>
+    readonly next_review_at: FieldRef<"flashcards", 'DateTime'>
+    readonly review_count: FieldRef<"flashcards", 'Int'>
+    readonly created_at: FieldRef<"flashcards", 'DateTime'>
+    readonly updated_at: FieldRef<"flashcards", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * flashcards findUnique
+   */
+  export type flashcardsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcards to fetch.
+     */
+    where: flashcardsWhereUniqueInput
+  }
+
+  /**
+   * flashcards findUniqueOrThrow
+   */
+  export type flashcardsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcards to fetch.
+     */
+    where: flashcardsWhereUniqueInput
+  }
+
+  /**
+   * flashcards findFirst
+   */
+  export type flashcardsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcards to fetch.
+     */
+    where?: flashcardsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcards to fetch.
+     */
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcards.
+     */
+    cursor?: flashcardsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcards.
+     */
+    distinct?: FlashcardsScalarFieldEnum | FlashcardsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcards findFirstOrThrow
+   */
+  export type flashcardsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcards to fetch.
+     */
+    where?: flashcardsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcards to fetch.
+     */
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcards.
+     */
+    cursor?: flashcardsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcards.
+     */
+    distinct?: FlashcardsScalarFieldEnum | FlashcardsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcards findMany
+   */
+  export type flashcardsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcards to fetch.
+     */
+    where?: flashcardsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcards to fetch.
+     */
+    orderBy?: flashcardsOrderByWithRelationInput | flashcardsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing flashcards.
+     */
+    cursor?: flashcardsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcards.
+     */
+    skip?: number
+    distinct?: FlashcardsScalarFieldEnum | FlashcardsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcards create
+   */
+  export type flashcardsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a flashcards.
+     */
+    data: XOR<flashcardsCreateInput, flashcardsUncheckedCreateInput>
+  }
+
+  /**
+   * flashcards createMany
+   */
+  export type flashcardsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many flashcards.
+     */
+    data: flashcardsCreateManyInput | flashcardsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * flashcards createManyAndReturn
+   */
+  export type flashcardsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * The data used to create many flashcards.
+     */
+    data: flashcardsCreateManyInput | flashcardsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcards update
+   */
+  export type flashcardsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a flashcards.
+     */
+    data: XOR<flashcardsUpdateInput, flashcardsUncheckedUpdateInput>
+    /**
+     * Choose, which flashcards to update.
+     */
+    where: flashcardsWhereUniqueInput
+  }
+
+  /**
+   * flashcards updateMany
+   */
+  export type flashcardsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update flashcards.
+     */
+    data: XOR<flashcardsUpdateManyMutationInput, flashcardsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcards to update
+     */
+    where?: flashcardsWhereInput
+    /**
+     * Limit how many flashcards to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcards updateManyAndReturn
+   */
+  export type flashcardsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * The data used to update flashcards.
+     */
+    data: XOR<flashcardsUpdateManyMutationInput, flashcardsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcards to update
+     */
+    where?: flashcardsWhereInput
+    /**
+     * Limit how many flashcards to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcards upsert
+   */
+  export type flashcardsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the flashcards to update in case it exists.
+     */
+    where: flashcardsWhereUniqueInput
+    /**
+     * In case the flashcards found by the `where` argument doesn't exist, create a new flashcards with this data.
+     */
+    create: XOR<flashcardsCreateInput, flashcardsUncheckedCreateInput>
+    /**
+     * In case the flashcards was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<flashcardsUpdateInput, flashcardsUncheckedUpdateInput>
+  }
+
+  /**
+   * flashcards delete
+   */
+  export type flashcardsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+    /**
+     * Filter which flashcards to delete.
+     */
+    where: flashcardsWhereUniqueInput
+  }
+
+  /**
+   * flashcards deleteMany
+   */
+  export type flashcardsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcards to delete
+     */
+    where?: flashcardsWhereInput
+    /**
+     * Limit how many flashcards to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcards.flashcard_reviews
+   */
+  export type flashcards$flashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    where?: flashcard_reviewsWhereInput
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    cursor?: flashcard_reviewsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcards without action
+   */
+  export type flashcardsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcards
+     */
+    select?: flashcardsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcards
+     */
+    omit?: flashcardsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcardsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model flashcard_sessions
+   */
+
+  export type AggregateFlashcard_sessions = {
+    _count: Flashcard_sessionsCountAggregateOutputType | null
+    _avg: Flashcard_sessionsAvgAggregateOutputType | null
+    _sum: Flashcard_sessionsSumAggregateOutputType | null
+    _min: Flashcard_sessionsMinAggregateOutputType | null
+    _max: Flashcard_sessionsMaxAggregateOutputType | null
+  }
+
+  export type Flashcard_sessionsAvgAggregateOutputType = {
+    cards_studied: number | null
+    cards_easy: number | null
+    cards_medium: number | null
+    cards_hard: number | null
+  }
+
+  export type Flashcard_sessionsSumAggregateOutputType = {
+    cards_studied: number | null
+    cards_easy: number | null
+    cards_medium: number | null
+    cards_hard: number | null
+  }
+
+  export type Flashcard_sessionsMinAggregateOutputType = {
+    id: string | null
+    pdf_id: string | null
+    user_id: string | null
+    cards_studied: number | null
+    cards_easy: number | null
+    cards_medium: number | null
+    cards_hard: number | null
+    start_time: Date | null
+    end_time: Date | null
+    created_at: Date | null
+  }
+
+  export type Flashcard_sessionsMaxAggregateOutputType = {
+    id: string | null
+    pdf_id: string | null
+    user_id: string | null
+    cards_studied: number | null
+    cards_easy: number | null
+    cards_medium: number | null
+    cards_hard: number | null
+    start_time: Date | null
+    end_time: Date | null
+    created_at: Date | null
+  }
+
+  export type Flashcard_sessionsCountAggregateOutputType = {
+    id: number
+    pdf_id: number
+    user_id: number
+    cards_studied: number
+    cards_easy: number
+    cards_medium: number
+    cards_hard: number
+    start_time: number
+    end_time: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type Flashcard_sessionsAvgAggregateInputType = {
+    cards_studied?: true
+    cards_easy?: true
+    cards_medium?: true
+    cards_hard?: true
+  }
+
+  export type Flashcard_sessionsSumAggregateInputType = {
+    cards_studied?: true
+    cards_easy?: true
+    cards_medium?: true
+    cards_hard?: true
+  }
+
+  export type Flashcard_sessionsMinAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    cards_studied?: true
+    cards_easy?: true
+    cards_medium?: true
+    cards_hard?: true
+    start_time?: true
+    end_time?: true
+    created_at?: true
+  }
+
+  export type Flashcard_sessionsMaxAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    cards_studied?: true
+    cards_easy?: true
+    cards_medium?: true
+    cards_hard?: true
+    start_time?: true
+    end_time?: true
+    created_at?: true
+  }
+
+  export type Flashcard_sessionsCountAggregateInputType = {
+    id?: true
+    pdf_id?: true
+    user_id?: true
+    cards_studied?: true
+    cards_easy?: true
+    cards_medium?: true
+    cards_hard?: true
+    start_time?: true
+    end_time?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type Flashcard_sessionsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcard_sessions to aggregate.
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_sessions to fetch.
+     */
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: flashcard_sessionsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned flashcard_sessions
+    **/
+    _count?: true | Flashcard_sessionsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Flashcard_sessionsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Flashcard_sessionsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Flashcard_sessionsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Flashcard_sessionsMaxAggregateInputType
+  }
+
+  export type GetFlashcard_sessionsAggregateType<T extends Flashcard_sessionsAggregateArgs> = {
+        [P in keyof T & keyof AggregateFlashcard_sessions]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFlashcard_sessions[P]>
+      : GetScalarType<T[P], AggregateFlashcard_sessions[P]>
+  }
+
+
+
+
+  export type flashcard_sessionsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_sessionsWhereInput
+    orderBy?: flashcard_sessionsOrderByWithAggregationInput | flashcard_sessionsOrderByWithAggregationInput[]
+    by: Flashcard_sessionsScalarFieldEnum[] | Flashcard_sessionsScalarFieldEnum
+    having?: flashcard_sessionsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Flashcard_sessionsCountAggregateInputType | true
+    _avg?: Flashcard_sessionsAvgAggregateInputType
+    _sum?: Flashcard_sessionsSumAggregateInputType
+    _min?: Flashcard_sessionsMinAggregateInputType
+    _max?: Flashcard_sessionsMaxAggregateInputType
+  }
+
+  export type Flashcard_sessionsGroupByOutputType = {
+    id: string
+    pdf_id: string
+    user_id: string
+    cards_studied: number
+    cards_easy: number
+    cards_medium: number
+    cards_hard: number
+    start_time: Date | null
+    end_time: Date | null
+    created_at: Date | null
+    _count: Flashcard_sessionsCountAggregateOutputType | null
+    _avg: Flashcard_sessionsAvgAggregateOutputType | null
+    _sum: Flashcard_sessionsSumAggregateOutputType | null
+    _min: Flashcard_sessionsMinAggregateOutputType | null
+    _max: Flashcard_sessionsMaxAggregateOutputType | null
+  }
+
+  type GetFlashcard_sessionsGroupByPayload<T extends flashcard_sessionsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Flashcard_sessionsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Flashcard_sessionsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Flashcard_sessionsGroupByOutputType[P]>
+            : GetScalarType<T[P], Flashcard_sessionsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type flashcard_sessionsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    cards_studied?: boolean
+    cards_easy?: boolean
+    cards_medium?: boolean
+    cards_hard?: boolean
+    start_time?: boolean
+    end_time?: boolean
+    created_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+    flashcard_reviews?: boolean | flashcard_sessions$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | Flashcard_sessionsCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_sessions"]>
+
+  export type flashcard_sessionsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    cards_studied?: boolean
+    cards_easy?: boolean
+    cards_medium?: boolean
+    cards_hard?: boolean
+    start_time?: boolean
+    end_time?: boolean
+    created_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_sessions"]>
+
+  export type flashcard_sessionsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    cards_studied?: boolean
+    cards_easy?: boolean
+    cards_medium?: boolean
+    cards_hard?: boolean
+    start_time?: boolean
+    end_time?: boolean
+    created_at?: boolean
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_sessions"]>
+
+  export type flashcard_sessionsSelectScalar = {
+    id?: boolean
+    pdf_id?: boolean
+    user_id?: boolean
+    cards_studied?: boolean
+    cards_easy?: boolean
+    cards_medium?: boolean
+    cards_hard?: boolean
+    start_time?: boolean
+    end_time?: boolean
+    created_at?: boolean
+  }
+
+  export type flashcard_sessionsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "pdf_id" | "user_id" | "cards_studied" | "cards_easy" | "cards_medium" | "cards_hard" | "start_time" | "end_time" | "created_at", ExtArgs["result"]["flashcard_sessions"]>
+  export type flashcard_sessionsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+    flashcard_reviews?: boolean | flashcard_sessions$flashcard_reviewsArgs<ExtArgs>
+    _count?: boolean | Flashcard_sessionsCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type flashcard_sessionsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+  export type flashcard_sessionsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pdfs?: boolean | pdfsDefaultArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+
+  export type $flashcard_sessionsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "flashcard_sessions"
+    objects: {
+      pdfs: Prisma.$pdfsPayload<ExtArgs>
+      user_profiles: Prisma.$user_profilesPayload<ExtArgs>
+      flashcard_reviews: Prisma.$flashcard_reviewsPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      pdf_id: string
+      user_id: string
+      cards_studied: number
+      cards_easy: number
+      cards_medium: number
+      cards_hard: number
+      start_time: Date | null
+      end_time: Date | null
+      created_at: Date | null
+    }, ExtArgs["result"]["flashcard_sessions"]>
+    composites: {}
+  }
+
+  type flashcard_sessionsGetPayload<S extends boolean | null | undefined | flashcard_sessionsDefaultArgs> = $Result.GetResult<Prisma.$flashcard_sessionsPayload, S>
+
+  type flashcard_sessionsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<flashcard_sessionsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Flashcard_sessionsCountAggregateInputType | true
+    }
+
+  export interface flashcard_sessionsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['flashcard_sessions'], meta: { name: 'flashcard_sessions' } }
+    /**
+     * Find zero or one Flashcard_sessions that matches the filter.
+     * @param {flashcard_sessionsFindUniqueArgs} args - Arguments to find a Flashcard_sessions
+     * @example
+     * // Get one Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends flashcard_sessionsFindUniqueArgs>(args: SelectSubset<T, flashcard_sessionsFindUniqueArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Flashcard_sessions that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {flashcard_sessionsFindUniqueOrThrowArgs} args - Arguments to find a Flashcard_sessions
+     * @example
+     * // Get one Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends flashcard_sessionsFindUniqueOrThrowArgs>(args: SelectSubset<T, flashcard_sessionsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcard_sessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsFindFirstArgs} args - Arguments to find a Flashcard_sessions
+     * @example
+     * // Get one Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends flashcard_sessionsFindFirstArgs>(args?: SelectSubset<T, flashcard_sessionsFindFirstArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcard_sessions that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsFindFirstOrThrowArgs} args - Arguments to find a Flashcard_sessions
+     * @example
+     * // Get one Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends flashcard_sessionsFindFirstOrThrowArgs>(args?: SelectSubset<T, flashcard_sessionsFindFirstOrThrowArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Flashcard_sessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findMany()
+     * 
+     * // Get first 10 Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const flashcard_sessionsWithIdOnly = await prisma.flashcard_sessions.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends flashcard_sessionsFindManyArgs>(args?: SelectSubset<T, flashcard_sessionsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Flashcard_sessions.
+     * @param {flashcard_sessionsCreateArgs} args - Arguments to create a Flashcard_sessions.
+     * @example
+     * // Create one Flashcard_sessions
+     * const Flashcard_sessions = await prisma.flashcard_sessions.create({
+     *   data: {
+     *     // ... data to create a Flashcard_sessions
+     *   }
+     * })
+     * 
+     */
+    create<T extends flashcard_sessionsCreateArgs>(args: SelectSubset<T, flashcard_sessionsCreateArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Flashcard_sessions.
+     * @param {flashcard_sessionsCreateManyArgs} args - Arguments to create many Flashcard_sessions.
+     * @example
+     * // Create many Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends flashcard_sessionsCreateManyArgs>(args?: SelectSubset<T, flashcard_sessionsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Flashcard_sessions and returns the data saved in the database.
+     * @param {flashcard_sessionsCreateManyAndReturnArgs} args - Arguments to create many Flashcard_sessions.
+     * @example
+     * // Create many Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Flashcard_sessions and only return the `id`
+     * const flashcard_sessionsWithIdOnly = await prisma.flashcard_sessions.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends flashcard_sessionsCreateManyAndReturnArgs>(args?: SelectSubset<T, flashcard_sessionsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Flashcard_sessions.
+     * @param {flashcard_sessionsDeleteArgs} args - Arguments to delete one Flashcard_sessions.
+     * @example
+     * // Delete one Flashcard_sessions
+     * const Flashcard_sessions = await prisma.flashcard_sessions.delete({
+     *   where: {
+     *     // ... filter to delete one Flashcard_sessions
+     *   }
+     * })
+     * 
+     */
+    delete<T extends flashcard_sessionsDeleteArgs>(args: SelectSubset<T, flashcard_sessionsDeleteArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Flashcard_sessions.
+     * @param {flashcard_sessionsUpdateArgs} args - Arguments to update one Flashcard_sessions.
+     * @example
+     * // Update one Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends flashcard_sessionsUpdateArgs>(args: SelectSubset<T, flashcard_sessionsUpdateArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Flashcard_sessions.
+     * @param {flashcard_sessionsDeleteManyArgs} args - Arguments to filter Flashcard_sessions to delete.
+     * @example
+     * // Delete a few Flashcard_sessions
+     * const { count } = await prisma.flashcard_sessions.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends flashcard_sessionsDeleteManyArgs>(args?: SelectSubset<T, flashcard_sessionsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcard_sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends flashcard_sessionsUpdateManyArgs>(args: SelectSubset<T, flashcard_sessionsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcard_sessions and returns the data updated in the database.
+     * @param {flashcard_sessionsUpdateManyAndReturnArgs} args - Arguments to update many Flashcard_sessions.
+     * @example
+     * // Update many Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Flashcard_sessions and only return the `id`
+     * const flashcard_sessionsWithIdOnly = await prisma.flashcard_sessions.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends flashcard_sessionsUpdateManyAndReturnArgs>(args: SelectSubset<T, flashcard_sessionsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Flashcard_sessions.
+     * @param {flashcard_sessionsUpsertArgs} args - Arguments to update or create a Flashcard_sessions.
+     * @example
+     * // Update or create a Flashcard_sessions
+     * const flashcard_sessions = await prisma.flashcard_sessions.upsert({
+     *   create: {
+     *     // ... data to create a Flashcard_sessions
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Flashcard_sessions we want to update
+     *   }
+     * })
+     */
+    upsert<T extends flashcard_sessionsUpsertArgs>(args: SelectSubset<T, flashcard_sessionsUpsertArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Flashcard_sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsCountArgs} args - Arguments to filter Flashcard_sessions to count.
+     * @example
+     * // Count the number of Flashcard_sessions
+     * const count = await prisma.flashcard_sessions.count({
+     *   where: {
+     *     // ... the filter for the Flashcard_sessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends flashcard_sessionsCountArgs>(
+      args?: Subset<T, flashcard_sessionsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Flashcard_sessionsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Flashcard_sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Flashcard_sessionsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Flashcard_sessionsAggregateArgs>(args: Subset<T, Flashcard_sessionsAggregateArgs>): Prisma.PrismaPromise<GetFlashcard_sessionsAggregateType<T>>
+
+    /**
+     * Group by Flashcard_sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_sessionsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends flashcard_sessionsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: flashcard_sessionsGroupByArgs['orderBy'] }
+        : { orderBy?: flashcard_sessionsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, flashcard_sessionsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFlashcard_sessionsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the flashcard_sessions model
+   */
+  readonly fields: flashcard_sessionsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for flashcard_sessions.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__flashcard_sessionsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    pdfs<T extends pdfsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, pdfsDefaultArgs<ExtArgs>>): Prisma__pdfsClient<$Result.GetResult<Prisma.$pdfsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user_profiles<T extends user_profilesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, user_profilesDefaultArgs<ExtArgs>>): Prisma__user_profilesClient<$Result.GetResult<Prisma.$user_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    flashcard_reviews<T extends flashcard_sessions$flashcard_reviewsArgs<ExtArgs> = {}>(args?: Subset<T, flashcard_sessions$flashcard_reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the flashcard_sessions model
+   */
+  interface flashcard_sessionsFieldRefs {
+    readonly id: FieldRef<"flashcard_sessions", 'String'>
+    readonly pdf_id: FieldRef<"flashcard_sessions", 'String'>
+    readonly user_id: FieldRef<"flashcard_sessions", 'String'>
+    readonly cards_studied: FieldRef<"flashcard_sessions", 'Int'>
+    readonly cards_easy: FieldRef<"flashcard_sessions", 'Int'>
+    readonly cards_medium: FieldRef<"flashcard_sessions", 'Int'>
+    readonly cards_hard: FieldRef<"flashcard_sessions", 'Int'>
+    readonly start_time: FieldRef<"flashcard_sessions", 'DateTime'>
+    readonly end_time: FieldRef<"flashcard_sessions", 'DateTime'>
+    readonly created_at: FieldRef<"flashcard_sessions", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * flashcard_sessions findUnique
+   */
+  export type flashcard_sessionsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_sessions to fetch.
+     */
+    where: flashcard_sessionsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_sessions findUniqueOrThrow
+   */
+  export type flashcard_sessionsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_sessions to fetch.
+     */
+    where: flashcard_sessionsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_sessions findFirst
+   */
+  export type flashcard_sessionsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_sessions to fetch.
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_sessions to fetch.
+     */
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcard_sessions.
+     */
+    cursor?: flashcard_sessionsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcard_sessions.
+     */
+    distinct?: Flashcard_sessionsScalarFieldEnum | Flashcard_sessionsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_sessions findFirstOrThrow
+   */
+  export type flashcard_sessionsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_sessions to fetch.
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_sessions to fetch.
+     */
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcard_sessions.
+     */
+    cursor?: flashcard_sessionsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcard_sessions.
+     */
+    distinct?: Flashcard_sessionsScalarFieldEnum | Flashcard_sessionsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_sessions findMany
+   */
+  export type flashcard_sessionsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_sessions to fetch.
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_sessions to fetch.
+     */
+    orderBy?: flashcard_sessionsOrderByWithRelationInput | flashcard_sessionsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing flashcard_sessions.
+     */
+    cursor?: flashcard_sessionsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_sessions.
+     */
+    skip?: number
+    distinct?: Flashcard_sessionsScalarFieldEnum | Flashcard_sessionsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_sessions create
+   */
+  export type flashcard_sessionsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a flashcard_sessions.
+     */
+    data: XOR<flashcard_sessionsCreateInput, flashcard_sessionsUncheckedCreateInput>
+  }
+
+  /**
+   * flashcard_sessions createMany
+   */
+  export type flashcard_sessionsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many flashcard_sessions.
+     */
+    data: flashcard_sessionsCreateManyInput | flashcard_sessionsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * flashcard_sessions createManyAndReturn
+   */
+  export type flashcard_sessionsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * The data used to create many flashcard_sessions.
+     */
+    data: flashcard_sessionsCreateManyInput | flashcard_sessionsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcard_sessions update
+   */
+  export type flashcard_sessionsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a flashcard_sessions.
+     */
+    data: XOR<flashcard_sessionsUpdateInput, flashcard_sessionsUncheckedUpdateInput>
+    /**
+     * Choose, which flashcard_sessions to update.
+     */
+    where: flashcard_sessionsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_sessions updateMany
+   */
+  export type flashcard_sessionsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update flashcard_sessions.
+     */
+    data: XOR<flashcard_sessionsUpdateManyMutationInput, flashcard_sessionsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcard_sessions to update
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * Limit how many flashcard_sessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcard_sessions updateManyAndReturn
+   */
+  export type flashcard_sessionsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * The data used to update flashcard_sessions.
+     */
+    data: XOR<flashcard_sessionsUpdateManyMutationInput, flashcard_sessionsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcard_sessions to update
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * Limit how many flashcard_sessions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcard_sessions upsert
+   */
+  export type flashcard_sessionsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the flashcard_sessions to update in case it exists.
+     */
+    where: flashcard_sessionsWhereUniqueInput
+    /**
+     * In case the flashcard_sessions found by the `where` argument doesn't exist, create a new flashcard_sessions with this data.
+     */
+    create: XOR<flashcard_sessionsCreateInput, flashcard_sessionsUncheckedCreateInput>
+    /**
+     * In case the flashcard_sessions was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<flashcard_sessionsUpdateInput, flashcard_sessionsUncheckedUpdateInput>
+  }
+
+  /**
+   * flashcard_sessions delete
+   */
+  export type flashcard_sessionsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    /**
+     * Filter which flashcard_sessions to delete.
+     */
+    where: flashcard_sessionsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_sessions deleteMany
+   */
+  export type flashcard_sessionsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcard_sessions to delete
+     */
+    where?: flashcard_sessionsWhereInput
+    /**
+     * Limit how many flashcard_sessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcard_sessions.flashcard_reviews
+   */
+  export type flashcard_sessions$flashcard_reviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    where?: flashcard_reviewsWhereInput
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    cursor?: flashcard_reviewsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_sessions without action
+   */
+  export type flashcard_sessionsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model flashcard_reviews
+   */
+
+  export type AggregateFlashcard_reviews = {
+    _count: Flashcard_reviewsCountAggregateOutputType | null
+    _avg: Flashcard_reviewsAvgAggregateOutputType | null
+    _sum: Flashcard_reviewsSumAggregateOutputType | null
+    _min: Flashcard_reviewsMinAggregateOutputType | null
+    _max: Flashcard_reviewsMaxAggregateOutputType | null
+  }
+
+  export type Flashcard_reviewsAvgAggregateOutputType = {
+    difficulty_rating: number | null
+    response_time: number | null
+  }
+
+  export type Flashcard_reviewsSumAggregateOutputType = {
+    difficulty_rating: number | null
+    response_time: number | null
+  }
+
+  export type Flashcard_reviewsMinAggregateOutputType = {
+    id: string | null
+    flashcard_id: string | null
+    session_id: string | null
+    user_id: string | null
+    difficulty_rating: number | null
+    response_time: number | null
+    created_at: Date | null
+  }
+
+  export type Flashcard_reviewsMaxAggregateOutputType = {
+    id: string | null
+    flashcard_id: string | null
+    session_id: string | null
+    user_id: string | null
+    difficulty_rating: number | null
+    response_time: number | null
+    created_at: Date | null
+  }
+
+  export type Flashcard_reviewsCountAggregateOutputType = {
+    id: number
+    flashcard_id: number
+    session_id: number
+    user_id: number
+    difficulty_rating: number
+    response_time: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type Flashcard_reviewsAvgAggregateInputType = {
+    difficulty_rating?: true
+    response_time?: true
+  }
+
+  export type Flashcard_reviewsSumAggregateInputType = {
+    difficulty_rating?: true
+    response_time?: true
+  }
+
+  export type Flashcard_reviewsMinAggregateInputType = {
+    id?: true
+    flashcard_id?: true
+    session_id?: true
+    user_id?: true
+    difficulty_rating?: true
+    response_time?: true
+    created_at?: true
+  }
+
+  export type Flashcard_reviewsMaxAggregateInputType = {
+    id?: true
+    flashcard_id?: true
+    session_id?: true
+    user_id?: true
+    difficulty_rating?: true
+    response_time?: true
+    created_at?: true
+  }
+
+  export type Flashcard_reviewsCountAggregateInputType = {
+    id?: true
+    flashcard_id?: true
+    session_id?: true
+    user_id?: true
+    difficulty_rating?: true
+    response_time?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type Flashcard_reviewsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcard_reviews to aggregate.
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_reviews to fetch.
+     */
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: flashcard_reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned flashcard_reviews
+    **/
+    _count?: true | Flashcard_reviewsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: Flashcard_reviewsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: Flashcard_reviewsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Flashcard_reviewsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Flashcard_reviewsMaxAggregateInputType
+  }
+
+  export type GetFlashcard_reviewsAggregateType<T extends Flashcard_reviewsAggregateArgs> = {
+        [P in keyof T & keyof AggregateFlashcard_reviews]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFlashcard_reviews[P]>
+      : GetScalarType<T[P], AggregateFlashcard_reviews[P]>
+  }
+
+
+
+
+  export type flashcard_reviewsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: flashcard_reviewsWhereInput
+    orderBy?: flashcard_reviewsOrderByWithAggregationInput | flashcard_reviewsOrderByWithAggregationInput[]
+    by: Flashcard_reviewsScalarFieldEnum[] | Flashcard_reviewsScalarFieldEnum
+    having?: flashcard_reviewsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Flashcard_reviewsCountAggregateInputType | true
+    _avg?: Flashcard_reviewsAvgAggregateInputType
+    _sum?: Flashcard_reviewsSumAggregateInputType
+    _min?: Flashcard_reviewsMinAggregateInputType
+    _max?: Flashcard_reviewsMaxAggregateInputType
+  }
+
+  export type Flashcard_reviewsGroupByOutputType = {
+    id: string
+    flashcard_id: string
+    session_id: string | null
+    user_id: string
+    difficulty_rating: number
+    response_time: number | null
+    created_at: Date | null
+    _count: Flashcard_reviewsCountAggregateOutputType | null
+    _avg: Flashcard_reviewsAvgAggregateOutputType | null
+    _sum: Flashcard_reviewsSumAggregateOutputType | null
+    _min: Flashcard_reviewsMinAggregateOutputType | null
+    _max: Flashcard_reviewsMaxAggregateOutputType | null
+  }
+
+  type GetFlashcard_reviewsGroupByPayload<T extends flashcard_reviewsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Flashcard_reviewsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Flashcard_reviewsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Flashcard_reviewsGroupByOutputType[P]>
+            : GetScalarType<T[P], Flashcard_reviewsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type flashcard_reviewsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flashcard_id?: boolean
+    session_id?: boolean
+    user_id?: boolean
+    difficulty_rating?: boolean
+    response_time?: boolean
+    created_at?: boolean
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_reviews"]>
+
+  export type flashcard_reviewsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flashcard_id?: boolean
+    session_id?: boolean
+    user_id?: boolean
+    difficulty_rating?: boolean
+    response_time?: boolean
+    created_at?: boolean
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_reviews"]>
+
+  export type flashcard_reviewsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flashcard_id?: boolean
+    session_id?: boolean
+    user_id?: boolean
+    difficulty_rating?: boolean
+    response_time?: boolean
+    created_at?: boolean
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["flashcard_reviews"]>
+
+  export type flashcard_reviewsSelectScalar = {
+    id?: boolean
+    flashcard_id?: boolean
+    session_id?: boolean
+    user_id?: boolean
+    difficulty_rating?: boolean
+    response_time?: boolean
+    created_at?: boolean
+  }
+
+  export type flashcard_reviewsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "flashcard_id" | "session_id" | "user_id" | "difficulty_rating" | "response_time" | "created_at", ExtArgs["result"]["flashcard_reviews"]>
+  export type flashcard_reviewsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+  export type flashcard_reviewsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+  export type flashcard_reviewsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    flashcards?: boolean | flashcardsDefaultArgs<ExtArgs>
+    flashcard_sessions?: boolean | flashcard_reviews$flashcard_sessionsArgs<ExtArgs>
+    user_profiles?: boolean | user_profilesDefaultArgs<ExtArgs>
+  }
+
+  export type $flashcard_reviewsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "flashcard_reviews"
+    objects: {
+      flashcards: Prisma.$flashcardsPayload<ExtArgs>
+      flashcard_sessions: Prisma.$flashcard_sessionsPayload<ExtArgs> | null
+      user_profiles: Prisma.$user_profilesPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      flashcard_id: string
+      session_id: string | null
+      user_id: string
+      difficulty_rating: number
+      response_time: number | null
+      created_at: Date | null
+    }, ExtArgs["result"]["flashcard_reviews"]>
+    composites: {}
+  }
+
+  type flashcard_reviewsGetPayload<S extends boolean | null | undefined | flashcard_reviewsDefaultArgs> = $Result.GetResult<Prisma.$flashcard_reviewsPayload, S>
+
+  type flashcard_reviewsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<flashcard_reviewsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Flashcard_reviewsCountAggregateInputType | true
+    }
+
+  export interface flashcard_reviewsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['flashcard_reviews'], meta: { name: 'flashcard_reviews' } }
+    /**
+     * Find zero or one Flashcard_reviews that matches the filter.
+     * @param {flashcard_reviewsFindUniqueArgs} args - Arguments to find a Flashcard_reviews
+     * @example
+     * // Get one Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends flashcard_reviewsFindUniqueArgs>(args: SelectSubset<T, flashcard_reviewsFindUniqueArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Flashcard_reviews that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {flashcard_reviewsFindUniqueOrThrowArgs} args - Arguments to find a Flashcard_reviews
+     * @example
+     * // Get one Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends flashcard_reviewsFindUniqueOrThrowArgs>(args: SelectSubset<T, flashcard_reviewsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcard_reviews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsFindFirstArgs} args - Arguments to find a Flashcard_reviews
+     * @example
+     * // Get one Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends flashcard_reviewsFindFirstArgs>(args?: SelectSubset<T, flashcard_reviewsFindFirstArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Flashcard_reviews that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsFindFirstOrThrowArgs} args - Arguments to find a Flashcard_reviews
+     * @example
+     * // Get one Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends flashcard_reviewsFindFirstOrThrowArgs>(args?: SelectSubset<T, flashcard_reviewsFindFirstOrThrowArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Flashcard_reviews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findMany()
+     * 
+     * // Get first 10 Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const flashcard_reviewsWithIdOnly = await prisma.flashcard_reviews.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends flashcard_reviewsFindManyArgs>(args?: SelectSubset<T, flashcard_reviewsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Flashcard_reviews.
+     * @param {flashcard_reviewsCreateArgs} args - Arguments to create a Flashcard_reviews.
+     * @example
+     * // Create one Flashcard_reviews
+     * const Flashcard_reviews = await prisma.flashcard_reviews.create({
+     *   data: {
+     *     // ... data to create a Flashcard_reviews
+     *   }
+     * })
+     * 
+     */
+    create<T extends flashcard_reviewsCreateArgs>(args: SelectSubset<T, flashcard_reviewsCreateArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Flashcard_reviews.
+     * @param {flashcard_reviewsCreateManyArgs} args - Arguments to create many Flashcard_reviews.
+     * @example
+     * // Create many Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends flashcard_reviewsCreateManyArgs>(args?: SelectSubset<T, flashcard_reviewsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Flashcard_reviews and returns the data saved in the database.
+     * @param {flashcard_reviewsCreateManyAndReturnArgs} args - Arguments to create many Flashcard_reviews.
+     * @example
+     * // Create many Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Flashcard_reviews and only return the `id`
+     * const flashcard_reviewsWithIdOnly = await prisma.flashcard_reviews.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends flashcard_reviewsCreateManyAndReturnArgs>(args?: SelectSubset<T, flashcard_reviewsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Flashcard_reviews.
+     * @param {flashcard_reviewsDeleteArgs} args - Arguments to delete one Flashcard_reviews.
+     * @example
+     * // Delete one Flashcard_reviews
+     * const Flashcard_reviews = await prisma.flashcard_reviews.delete({
+     *   where: {
+     *     // ... filter to delete one Flashcard_reviews
+     *   }
+     * })
+     * 
+     */
+    delete<T extends flashcard_reviewsDeleteArgs>(args: SelectSubset<T, flashcard_reviewsDeleteArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Flashcard_reviews.
+     * @param {flashcard_reviewsUpdateArgs} args - Arguments to update one Flashcard_reviews.
+     * @example
+     * // Update one Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends flashcard_reviewsUpdateArgs>(args: SelectSubset<T, flashcard_reviewsUpdateArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Flashcard_reviews.
+     * @param {flashcard_reviewsDeleteManyArgs} args - Arguments to filter Flashcard_reviews to delete.
+     * @example
+     * // Delete a few Flashcard_reviews
+     * const { count } = await prisma.flashcard_reviews.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends flashcard_reviewsDeleteManyArgs>(args?: SelectSubset<T, flashcard_reviewsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcard_reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends flashcard_reviewsUpdateManyArgs>(args: SelectSubset<T, flashcard_reviewsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Flashcard_reviews and returns the data updated in the database.
+     * @param {flashcard_reviewsUpdateManyAndReturnArgs} args - Arguments to update many Flashcard_reviews.
+     * @example
+     * // Update many Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Flashcard_reviews and only return the `id`
+     * const flashcard_reviewsWithIdOnly = await prisma.flashcard_reviews.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends flashcard_reviewsUpdateManyAndReturnArgs>(args: SelectSubset<T, flashcard_reviewsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Flashcard_reviews.
+     * @param {flashcard_reviewsUpsertArgs} args - Arguments to update or create a Flashcard_reviews.
+     * @example
+     * // Update or create a Flashcard_reviews
+     * const flashcard_reviews = await prisma.flashcard_reviews.upsert({
+     *   create: {
+     *     // ... data to create a Flashcard_reviews
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Flashcard_reviews we want to update
+     *   }
+     * })
+     */
+    upsert<T extends flashcard_reviewsUpsertArgs>(args: SelectSubset<T, flashcard_reviewsUpsertArgs<ExtArgs>>): Prisma__flashcard_reviewsClient<$Result.GetResult<Prisma.$flashcard_reviewsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Flashcard_reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsCountArgs} args - Arguments to filter Flashcard_reviews to count.
+     * @example
+     * // Count the number of Flashcard_reviews
+     * const count = await prisma.flashcard_reviews.count({
+     *   where: {
+     *     // ... the filter for the Flashcard_reviews we want to count
+     *   }
+     * })
+    **/
+    count<T extends flashcard_reviewsCountArgs>(
+      args?: Subset<T, flashcard_reviewsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Flashcard_reviewsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Flashcard_reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Flashcard_reviewsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Flashcard_reviewsAggregateArgs>(args: Subset<T, Flashcard_reviewsAggregateArgs>): Prisma.PrismaPromise<GetFlashcard_reviewsAggregateType<T>>
+
+    /**
+     * Group by Flashcard_reviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {flashcard_reviewsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends flashcard_reviewsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: flashcard_reviewsGroupByArgs['orderBy'] }
+        : { orderBy?: flashcard_reviewsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, flashcard_reviewsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFlashcard_reviewsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the flashcard_reviews model
+   */
+  readonly fields: flashcard_reviewsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for flashcard_reviews.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__flashcard_reviewsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    flashcards<T extends flashcardsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, flashcardsDefaultArgs<ExtArgs>>): Prisma__flashcardsClient<$Result.GetResult<Prisma.$flashcardsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    flashcard_sessions<T extends flashcard_reviews$flashcard_sessionsArgs<ExtArgs> = {}>(args?: Subset<T, flashcard_reviews$flashcard_sessionsArgs<ExtArgs>>): Prisma__flashcard_sessionsClient<$Result.GetResult<Prisma.$flashcard_sessionsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    user_profiles<T extends user_profilesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, user_profilesDefaultArgs<ExtArgs>>): Prisma__user_profilesClient<$Result.GetResult<Prisma.$user_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the flashcard_reviews model
+   */
+  interface flashcard_reviewsFieldRefs {
+    readonly id: FieldRef<"flashcard_reviews", 'String'>
+    readonly flashcard_id: FieldRef<"flashcard_reviews", 'String'>
+    readonly session_id: FieldRef<"flashcard_reviews", 'String'>
+    readonly user_id: FieldRef<"flashcard_reviews", 'String'>
+    readonly difficulty_rating: FieldRef<"flashcard_reviews", 'Int'>
+    readonly response_time: FieldRef<"flashcard_reviews", 'Int'>
+    readonly created_at: FieldRef<"flashcard_reviews", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * flashcard_reviews findUnique
+   */
+  export type flashcard_reviewsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_reviews to fetch.
+     */
+    where: flashcard_reviewsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_reviews findUniqueOrThrow
+   */
+  export type flashcard_reviewsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_reviews to fetch.
+     */
+    where: flashcard_reviewsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_reviews findFirst
+   */
+  export type flashcard_reviewsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_reviews to fetch.
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_reviews to fetch.
+     */
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcard_reviews.
+     */
+    cursor?: flashcard_reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcard_reviews.
+     */
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_reviews findFirstOrThrow
+   */
+  export type flashcard_reviewsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_reviews to fetch.
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_reviews to fetch.
+     */
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for flashcard_reviews.
+     */
+    cursor?: flashcard_reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_reviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of flashcard_reviews.
+     */
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_reviews findMany
+   */
+  export type flashcard_reviewsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter, which flashcard_reviews to fetch.
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of flashcard_reviews to fetch.
+     */
+    orderBy?: flashcard_reviewsOrderByWithRelationInput | flashcard_reviewsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing flashcard_reviews.
+     */
+    cursor?: flashcard_reviewsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` flashcard_reviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` flashcard_reviews.
+     */
+    skip?: number
+    distinct?: Flashcard_reviewsScalarFieldEnum | Flashcard_reviewsScalarFieldEnum[]
+  }
+
+  /**
+   * flashcard_reviews create
+   */
+  export type flashcard_reviewsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a flashcard_reviews.
+     */
+    data: XOR<flashcard_reviewsCreateInput, flashcard_reviewsUncheckedCreateInput>
+  }
+
+  /**
+   * flashcard_reviews createMany
+   */
+  export type flashcard_reviewsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many flashcard_reviews.
+     */
+    data: flashcard_reviewsCreateManyInput | flashcard_reviewsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * flashcard_reviews createManyAndReturn
+   */
+  export type flashcard_reviewsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * The data used to create many flashcard_reviews.
+     */
+    data: flashcard_reviewsCreateManyInput | flashcard_reviewsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcard_reviews update
+   */
+  export type flashcard_reviewsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a flashcard_reviews.
+     */
+    data: XOR<flashcard_reviewsUpdateInput, flashcard_reviewsUncheckedUpdateInput>
+    /**
+     * Choose, which flashcard_reviews to update.
+     */
+    where: flashcard_reviewsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_reviews updateMany
+   */
+  export type flashcard_reviewsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update flashcard_reviews.
+     */
+    data: XOR<flashcard_reviewsUpdateManyMutationInput, flashcard_reviewsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcard_reviews to update
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * Limit how many flashcard_reviews to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcard_reviews updateManyAndReturn
+   */
+  export type flashcard_reviewsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * The data used to update flashcard_reviews.
+     */
+    data: XOR<flashcard_reviewsUpdateManyMutationInput, flashcard_reviewsUncheckedUpdateManyInput>
+    /**
+     * Filter which flashcard_reviews to update
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * Limit how many flashcard_reviews to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * flashcard_reviews upsert
+   */
+  export type flashcard_reviewsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the flashcard_reviews to update in case it exists.
+     */
+    where: flashcard_reviewsWhereUniqueInput
+    /**
+     * In case the flashcard_reviews found by the `where` argument doesn't exist, create a new flashcard_reviews with this data.
+     */
+    create: XOR<flashcard_reviewsCreateInput, flashcard_reviewsUncheckedCreateInput>
+    /**
+     * In case the flashcard_reviews was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<flashcard_reviewsUpdateInput, flashcard_reviewsUncheckedUpdateInput>
+  }
+
+  /**
+   * flashcard_reviews delete
+   */
+  export type flashcard_reviewsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
+    /**
+     * Filter which flashcard_reviews to delete.
+     */
+    where: flashcard_reviewsWhereUniqueInput
+  }
+
+  /**
+   * flashcard_reviews deleteMany
+   */
+  export type flashcard_reviewsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which flashcard_reviews to delete
+     */
+    where?: flashcard_reviewsWhereInput
+    /**
+     * Limit how many flashcard_reviews to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * flashcard_reviews.flashcard_sessions
+   */
+  export type flashcard_reviews$flashcard_sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_sessions
+     */
+    select?: flashcard_sessionsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_sessions
+     */
+    omit?: flashcard_sessionsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_sessionsInclude<ExtArgs> | null
+    where?: flashcard_sessionsWhereInput
+  }
+
+  /**
+   * flashcard_reviews without action
+   */
+  export type flashcard_reviewsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the flashcard_reviews
+     */
+    select?: flashcard_reviewsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the flashcard_reviews
+     */
+    omit?: flashcard_reviewsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: flashcard_reviewsInclude<ExtArgs> | null
   }
 
 
@@ -27071,6 +31208,53 @@ export namespace Prisma {
   };
 
   export type User_profilesScalarFieldEnum = (typeof User_profilesScalarFieldEnum)[keyof typeof User_profilesScalarFieldEnum]
+
+
+  export const FlashcardsScalarFieldEnum: {
+    id: 'id',
+    pdf_id: 'pdf_id',
+    user_id: 'user_id',
+    question: 'question',
+    answer: 'answer',
+    page_number: 'page_number',
+    difficulty: 'difficulty',
+    last_reviewed_at: 'last_reviewed_at',
+    next_review_at: 'next_review_at',
+    review_count: 'review_count',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type FlashcardsScalarFieldEnum = (typeof FlashcardsScalarFieldEnum)[keyof typeof FlashcardsScalarFieldEnum]
+
+
+  export const Flashcard_sessionsScalarFieldEnum: {
+    id: 'id',
+    pdf_id: 'pdf_id',
+    user_id: 'user_id',
+    cards_studied: 'cards_studied',
+    cards_easy: 'cards_easy',
+    cards_medium: 'cards_medium',
+    cards_hard: 'cards_hard',
+    start_time: 'start_time',
+    end_time: 'end_time',
+    created_at: 'created_at'
+  };
+
+  export type Flashcard_sessionsScalarFieldEnum = (typeof Flashcard_sessionsScalarFieldEnum)[keyof typeof Flashcard_sessionsScalarFieldEnum]
+
+
+  export const Flashcard_reviewsScalarFieldEnum: {
+    id: 'id',
+    flashcard_id: 'flashcard_id',
+    session_id: 'session_id',
+    user_id: 'user_id',
+    difficulty_rating: 'difficulty_rating',
+    response_time: 'response_time',
+    created_at: 'created_at'
+  };
+
+  export type Flashcard_reviewsScalarFieldEnum = (typeof Flashcard_reviewsScalarFieldEnum)[keyof typeof Flashcard_reviewsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -28615,6 +32799,8 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
+    flashcards?: FlashcardsListRelationFilter
+    flashcard_sessions?: Flashcard_sessionsListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }
 
@@ -28631,6 +32817,8 @@ export namespace Prisma {
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     chat_messages?: chat_messagesOrderByRelationAggregateInput
+    flashcards?: flashcardsOrderByRelationAggregateInput
+    flashcard_sessions?: flashcard_sessionsOrderByRelationAggregateInput
     users?: usersOrderByWithRelationInput
   }
 
@@ -28650,6 +32838,8 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"pdfs"> | Date | string | null
     chat_messages?: Chat_messagesListRelationFilter
+    flashcards?: FlashcardsListRelationFilter
+    flashcard_sessions?: Flashcard_sessionsListRelationFilter
     users?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
   }, "id">
 
@@ -28822,6 +33012,9 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"user_profiles"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"user_profiles"> | Date | string | null
     users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+    flashcards?: FlashcardsListRelationFilter
+    flashcard_sessions?: Flashcard_sessionsListRelationFilter
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
   }
 
   export type user_profilesOrderByWithRelationInput = {
@@ -28835,6 +33028,9 @@ export namespace Prisma {
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     users?: usersOrderByWithRelationInput
+    flashcards?: flashcardsOrderByRelationAggregateInput
+    flashcard_sessions?: flashcard_sessionsOrderByRelationAggregateInput
+    flashcard_reviews?: flashcard_reviewsOrderByRelationAggregateInput
   }
 
   export type user_profilesWhereUniqueInput = Prisma.AtLeast<{
@@ -28851,6 +33047,9 @@ export namespace Prisma {
     created_at?: DateTimeNullableFilter<"user_profiles"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"user_profiles"> | Date | string | null
     users?: XOR<UsersScalarRelationFilter, usersWhereInput>
+    flashcards?: FlashcardsListRelationFilter
+    flashcard_sessions?: Flashcard_sessionsListRelationFilter
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
   }, "id">
 
   export type user_profilesOrderByWithAggregationInput = {
@@ -28881,6 +33080,265 @@ export namespace Prisma {
     expire_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"user_profiles"> | Date | string | null
+  }
+
+  export type flashcardsWhereInput = {
+    AND?: flashcardsWhereInput | flashcardsWhereInput[]
+    OR?: flashcardsWhereInput[]
+    NOT?: flashcardsWhereInput | flashcardsWhereInput[]
+    id?: UuidFilter<"flashcards"> | string
+    pdf_id?: StringFilter<"flashcards"> | string
+    user_id?: UuidFilter<"flashcards"> | string
+    question?: StringFilter<"flashcards"> | string
+    answer?: StringFilter<"flashcards"> | string
+    page_number?: IntNullableFilter<"flashcards"> | number | null
+    difficulty?: IntFilter<"flashcards"> | number
+    last_reviewed_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    next_review_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    review_count?: IntFilter<"flashcards"> | number
+    created_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
+  }
+
+  export type flashcardsOrderByWithRelationInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    page_number?: SortOrderInput | SortOrder
+    difficulty?: SortOrder
+    last_reviewed_at?: SortOrderInput | SortOrder
+    next_review_at?: SortOrderInput | SortOrder
+    review_count?: SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    pdfs?: pdfsOrderByWithRelationInput
+    user_profiles?: user_profilesOrderByWithRelationInput
+    flashcard_reviews?: flashcard_reviewsOrderByRelationAggregateInput
+  }
+
+  export type flashcardsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: flashcardsWhereInput | flashcardsWhereInput[]
+    OR?: flashcardsWhereInput[]
+    NOT?: flashcardsWhereInput | flashcardsWhereInput[]
+    pdf_id?: StringFilter<"flashcards"> | string
+    user_id?: UuidFilter<"flashcards"> | string
+    question?: StringFilter<"flashcards"> | string
+    answer?: StringFilter<"flashcards"> | string
+    page_number?: IntNullableFilter<"flashcards"> | number | null
+    difficulty?: IntFilter<"flashcards"> | number
+    last_reviewed_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    next_review_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    review_count?: IntFilter<"flashcards"> | number
+    created_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
+  }, "id">
+
+  export type flashcardsOrderByWithAggregationInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    page_number?: SortOrderInput | SortOrder
+    difficulty?: SortOrder
+    last_reviewed_at?: SortOrderInput | SortOrder
+    next_review_at?: SortOrderInput | SortOrder
+    review_count?: SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    _count?: flashcardsCountOrderByAggregateInput
+    _avg?: flashcardsAvgOrderByAggregateInput
+    _max?: flashcardsMaxOrderByAggregateInput
+    _min?: flashcardsMinOrderByAggregateInput
+    _sum?: flashcardsSumOrderByAggregateInput
+  }
+
+  export type flashcardsScalarWhereWithAggregatesInput = {
+    AND?: flashcardsScalarWhereWithAggregatesInput | flashcardsScalarWhereWithAggregatesInput[]
+    OR?: flashcardsScalarWhereWithAggregatesInput[]
+    NOT?: flashcardsScalarWhereWithAggregatesInput | flashcardsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"flashcards"> | string
+    pdf_id?: StringWithAggregatesFilter<"flashcards"> | string
+    user_id?: UuidWithAggregatesFilter<"flashcards"> | string
+    question?: StringWithAggregatesFilter<"flashcards"> | string
+    answer?: StringWithAggregatesFilter<"flashcards"> | string
+    page_number?: IntNullableWithAggregatesFilter<"flashcards"> | number | null
+    difficulty?: IntWithAggregatesFilter<"flashcards"> | number
+    last_reviewed_at?: DateTimeNullableWithAggregatesFilter<"flashcards"> | Date | string | null
+    next_review_at?: DateTimeNullableWithAggregatesFilter<"flashcards"> | Date | string | null
+    review_count?: IntWithAggregatesFilter<"flashcards"> | number
+    created_at?: DateTimeNullableWithAggregatesFilter<"flashcards"> | Date | string | null
+    updated_at?: DateTimeNullableWithAggregatesFilter<"flashcards"> | Date | string | null
+  }
+
+  export type flashcard_sessionsWhereInput = {
+    AND?: flashcard_sessionsWhereInput | flashcard_sessionsWhereInput[]
+    OR?: flashcard_sessionsWhereInput[]
+    NOT?: flashcard_sessionsWhereInput | flashcard_sessionsWhereInput[]
+    id?: UuidFilter<"flashcard_sessions"> | string
+    pdf_id?: StringFilter<"flashcard_sessions"> | string
+    user_id?: UuidFilter<"flashcard_sessions"> | string
+    cards_studied?: IntFilter<"flashcard_sessions"> | number
+    cards_easy?: IntFilter<"flashcard_sessions"> | number
+    cards_medium?: IntFilter<"flashcard_sessions"> | number
+    cards_hard?: IntFilter<"flashcard_sessions"> | number
+    start_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    end_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
+  }
+
+  export type flashcard_sessionsOrderByWithRelationInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+    start_time?: SortOrderInput | SortOrder
+    end_time?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    pdfs?: pdfsOrderByWithRelationInput
+    user_profiles?: user_profilesOrderByWithRelationInput
+    flashcard_reviews?: flashcard_reviewsOrderByRelationAggregateInput
+  }
+
+  export type flashcard_sessionsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: flashcard_sessionsWhereInput | flashcard_sessionsWhereInput[]
+    OR?: flashcard_sessionsWhereInput[]
+    NOT?: flashcard_sessionsWhereInput | flashcard_sessionsWhereInput[]
+    pdf_id?: StringFilter<"flashcard_sessions"> | string
+    user_id?: UuidFilter<"flashcard_sessions"> | string
+    cards_studied?: IntFilter<"flashcard_sessions"> | number
+    cards_easy?: IntFilter<"flashcard_sessions"> | number
+    cards_medium?: IntFilter<"flashcard_sessions"> | number
+    cards_hard?: IntFilter<"flashcard_sessions"> | number
+    start_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    end_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    pdfs?: XOR<PdfsScalarRelationFilter, pdfsWhereInput>
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+    flashcard_reviews?: Flashcard_reviewsListRelationFilter
+  }, "id">
+
+  export type flashcard_sessionsOrderByWithAggregationInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+    start_time?: SortOrderInput | SortOrder
+    end_time?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    _count?: flashcard_sessionsCountOrderByAggregateInput
+    _avg?: flashcard_sessionsAvgOrderByAggregateInput
+    _max?: flashcard_sessionsMaxOrderByAggregateInput
+    _min?: flashcard_sessionsMinOrderByAggregateInput
+    _sum?: flashcard_sessionsSumOrderByAggregateInput
+  }
+
+  export type flashcard_sessionsScalarWhereWithAggregatesInput = {
+    AND?: flashcard_sessionsScalarWhereWithAggregatesInput | flashcard_sessionsScalarWhereWithAggregatesInput[]
+    OR?: flashcard_sessionsScalarWhereWithAggregatesInput[]
+    NOT?: flashcard_sessionsScalarWhereWithAggregatesInput | flashcard_sessionsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"flashcard_sessions"> | string
+    pdf_id?: StringWithAggregatesFilter<"flashcard_sessions"> | string
+    user_id?: UuidWithAggregatesFilter<"flashcard_sessions"> | string
+    cards_studied?: IntWithAggregatesFilter<"flashcard_sessions"> | number
+    cards_easy?: IntWithAggregatesFilter<"flashcard_sessions"> | number
+    cards_medium?: IntWithAggregatesFilter<"flashcard_sessions"> | number
+    cards_hard?: IntWithAggregatesFilter<"flashcard_sessions"> | number
+    start_time?: DateTimeNullableWithAggregatesFilter<"flashcard_sessions"> | Date | string | null
+    end_time?: DateTimeNullableWithAggregatesFilter<"flashcard_sessions"> | Date | string | null
+    created_at?: DateTimeNullableWithAggregatesFilter<"flashcard_sessions"> | Date | string | null
+  }
+
+  export type flashcard_reviewsWhereInput = {
+    AND?: flashcard_reviewsWhereInput | flashcard_reviewsWhereInput[]
+    OR?: flashcard_reviewsWhereInput[]
+    NOT?: flashcard_reviewsWhereInput | flashcard_reviewsWhereInput[]
+    id?: UuidFilter<"flashcard_reviews"> | string
+    flashcard_id?: UuidFilter<"flashcard_reviews"> | string
+    session_id?: UuidNullableFilter<"flashcard_reviews"> | string | null
+    user_id?: UuidFilter<"flashcard_reviews"> | string
+    difficulty_rating?: IntFilter<"flashcard_reviews"> | number
+    response_time?: IntNullableFilter<"flashcard_reviews"> | number | null
+    created_at?: DateTimeNullableFilter<"flashcard_reviews"> | Date | string | null
+    flashcards?: XOR<FlashcardsScalarRelationFilter, flashcardsWhereInput>
+    flashcard_sessions?: XOR<Flashcard_sessionsNullableScalarRelationFilter, flashcard_sessionsWhereInput> | null
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+  }
+
+  export type flashcard_reviewsOrderByWithRelationInput = {
+    id?: SortOrder
+    flashcard_id?: SortOrder
+    session_id?: SortOrderInput | SortOrder
+    user_id?: SortOrder
+    difficulty_rating?: SortOrder
+    response_time?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    flashcards?: flashcardsOrderByWithRelationInput
+    flashcard_sessions?: flashcard_sessionsOrderByWithRelationInput
+    user_profiles?: user_profilesOrderByWithRelationInput
+  }
+
+  export type flashcard_reviewsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: flashcard_reviewsWhereInput | flashcard_reviewsWhereInput[]
+    OR?: flashcard_reviewsWhereInput[]
+    NOT?: flashcard_reviewsWhereInput | flashcard_reviewsWhereInput[]
+    flashcard_id?: UuidFilter<"flashcard_reviews"> | string
+    session_id?: UuidNullableFilter<"flashcard_reviews"> | string | null
+    user_id?: UuidFilter<"flashcard_reviews"> | string
+    difficulty_rating?: IntFilter<"flashcard_reviews"> | number
+    response_time?: IntNullableFilter<"flashcard_reviews"> | number | null
+    created_at?: DateTimeNullableFilter<"flashcard_reviews"> | Date | string | null
+    flashcards?: XOR<FlashcardsScalarRelationFilter, flashcardsWhereInput>
+    flashcard_sessions?: XOR<Flashcard_sessionsNullableScalarRelationFilter, flashcard_sessionsWhereInput> | null
+    user_profiles?: XOR<User_profilesScalarRelationFilter, user_profilesWhereInput>
+  }, "id">
+
+  export type flashcard_reviewsOrderByWithAggregationInput = {
+    id?: SortOrder
+    flashcard_id?: SortOrder
+    session_id?: SortOrderInput | SortOrder
+    user_id?: SortOrder
+    difficulty_rating?: SortOrder
+    response_time?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    _count?: flashcard_reviewsCountOrderByAggregateInput
+    _avg?: flashcard_reviewsAvgOrderByAggregateInput
+    _max?: flashcard_reviewsMaxOrderByAggregateInput
+    _min?: flashcard_reviewsMinOrderByAggregateInput
+    _sum?: flashcard_reviewsSumOrderByAggregateInput
+  }
+
+  export type flashcard_reviewsScalarWhereWithAggregatesInput = {
+    AND?: flashcard_reviewsScalarWhereWithAggregatesInput | flashcard_reviewsScalarWhereWithAggregatesInput[]
+    OR?: flashcard_reviewsScalarWhereWithAggregatesInput[]
+    NOT?: flashcard_reviewsScalarWhereWithAggregatesInput | flashcard_reviewsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"flashcard_reviews"> | string
+    flashcard_id?: UuidWithAggregatesFilter<"flashcard_reviews"> | string
+    session_id?: UuidNullableWithAggregatesFilter<"flashcard_reviews"> | string | null
+    user_id?: UuidWithAggregatesFilter<"flashcard_reviews"> | string
+    difficulty_rating?: IntWithAggregatesFilter<"flashcard_reviews"> | number
+    response_time?: IntNullableWithAggregatesFilter<"flashcard_reviews"> | number | null
+    created_at?: DateTimeNullableWithAggregatesFilter<"flashcard_reviews"> | Date | string | null
   }
 
   export type audit_log_entriesCreateInput = {
@@ -30360,6 +34818,8 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -30376,6 +34836,8 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUpdateInput = {
@@ -30390,6 +34852,8 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -30406,6 +34870,8 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsCreateManyInput = {
@@ -30576,6 +35042,9 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     users: usersCreateNestedOneWithoutUser_profilesInput
+    flashcards?: flashcardsCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutUser_profilesInput
   }
 
   export type user_profilesUncheckedCreateInput = {
@@ -30588,6 +35057,9 @@ export namespace Prisma {
     expire_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutUser_profilesInput
   }
 
   export type user_profilesUpdateInput = {
@@ -30600,6 +35072,9 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     users?: usersUpdateOneRequiredWithoutUser_profilesNestedInput
+    flashcards?: flashcardsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutUser_profilesNestedInput
   }
 
   export type user_profilesUncheckedUpdateInput = {
@@ -30612,6 +35087,9 @@ export namespace Prisma {
     expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesNestedInput
   }
 
   export type user_profilesCreateManyInput = {
@@ -30647,6 +35125,273 @@ export namespace Prisma {
     expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcardsCreateInput = {
+    id?: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcardsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcardsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsUncheckedCreateInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcardsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcardsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsCreateManyInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type flashcardsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcardsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_sessionsCreateInput = {
+    id?: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcard_sessionsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_sessionsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsUncheckedCreateInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsCreateManyInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_sessionsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_sessionsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsCreateInput = {
+    id?: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+    flashcards: flashcardsCreateNestedOneWithoutFlashcard_reviewsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedOneWithoutFlashcard_reviewsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_reviewsInput
+  }
+
+  export type flashcard_reviewsUncheckedCreateInput = {
+    id?: string
+    flashcard_id: string
+    session_id?: string | null
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateOneWithoutFlashcard_reviewsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+  }
+
+  export type flashcard_reviewsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsCreateManyInput = {
+    id?: string
+    flashcard_id: string
+    session_id?: string | null
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type UuidNullableFilter<$PrismaModel = never> = {
@@ -31901,6 +36646,26 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type FlashcardsListRelationFilter = {
+    every?: flashcardsWhereInput
+    some?: flashcardsWhereInput
+    none?: flashcardsWhereInput
+  }
+
+  export type Flashcard_sessionsListRelationFilter = {
+    every?: flashcard_sessionsWhereInput
+    some?: flashcard_sessionsWhereInput
+    none?: flashcard_sessionsWhereInput
+  }
+
+  export type flashcardsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type flashcard_sessionsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type pdfsCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -32038,6 +36803,16 @@ export namespace Prisma {
     chat_count?: SortOrder
   }
 
+  export type Flashcard_reviewsListRelationFilter = {
+    every?: flashcard_reviewsWhereInput
+    some?: flashcard_reviewsWhereInput
+    none?: flashcard_reviewsWhereInput
+  }
+
+  export type flashcard_reviewsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type user_profilesCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
@@ -32072,6 +36847,176 @@ export namespace Prisma {
     expire_at?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
+  }
+
+  export type PdfsScalarRelationFilter = {
+    is?: pdfsWhereInput
+    isNot?: pdfsWhereInput
+  }
+
+  export type User_profilesScalarRelationFilter = {
+    is?: user_profilesWhereInput
+    isNot?: user_profilesWhereInput
+  }
+
+  export type flashcardsCountOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    page_number?: SortOrder
+    difficulty?: SortOrder
+    last_reviewed_at?: SortOrder
+    next_review_at?: SortOrder
+    review_count?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type flashcardsAvgOrderByAggregateInput = {
+    page_number?: SortOrder
+    difficulty?: SortOrder
+    review_count?: SortOrder
+  }
+
+  export type flashcardsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    page_number?: SortOrder
+    difficulty?: SortOrder
+    last_reviewed_at?: SortOrder
+    next_review_at?: SortOrder
+    review_count?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type flashcardsMinOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    page_number?: SortOrder
+    difficulty?: SortOrder
+    last_reviewed_at?: SortOrder
+    next_review_at?: SortOrder
+    review_count?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type flashcardsSumOrderByAggregateInput = {
+    page_number?: SortOrder
+    difficulty?: SortOrder
+    review_count?: SortOrder
+  }
+
+  export type flashcard_sessionsCountOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+    start_time?: SortOrder
+    end_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_sessionsAvgOrderByAggregateInput = {
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+  }
+
+  export type flashcard_sessionsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+    start_time?: SortOrder
+    end_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_sessionsMinOrderByAggregateInput = {
+    id?: SortOrder
+    pdf_id?: SortOrder
+    user_id?: SortOrder
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+    start_time?: SortOrder
+    end_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_sessionsSumOrderByAggregateInput = {
+    cards_studied?: SortOrder
+    cards_easy?: SortOrder
+    cards_medium?: SortOrder
+    cards_hard?: SortOrder
+  }
+
+  export type FlashcardsScalarRelationFilter = {
+    is?: flashcardsWhereInput
+    isNot?: flashcardsWhereInput
+  }
+
+  export type Flashcard_sessionsNullableScalarRelationFilter = {
+    is?: flashcard_sessionsWhereInput | null
+    isNot?: flashcard_sessionsWhereInput | null
+  }
+
+  export type flashcard_reviewsCountOrderByAggregateInput = {
+    id?: SortOrder
+    flashcard_id?: SortOrder
+    session_id?: SortOrder
+    user_id?: SortOrder
+    difficulty_rating?: SortOrder
+    response_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_reviewsAvgOrderByAggregateInput = {
+    difficulty_rating?: SortOrder
+    response_time?: SortOrder
+  }
+
+  export type flashcard_reviewsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    flashcard_id?: SortOrder
+    session_id?: SortOrder
+    user_id?: SortOrder
+    difficulty_rating?: SortOrder
+    response_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_reviewsMinOrderByAggregateInput = {
+    id?: SortOrder
+    flashcard_id?: SortOrder
+    session_id?: SortOrder
+    user_id?: SortOrder
+    difficulty_rating?: SortOrder
+    response_time?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type flashcard_reviewsSumOrderByAggregateInput = {
+    difficulty_rating?: SortOrder
+    response_time?: SortOrder
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -32973,6 +37918,20 @@ export namespace Prisma {
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
   }
 
+  export type flashcardsCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput> | flashcardsCreateWithoutPdfsInput[] | flashcardsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutPdfsInput | flashcardsCreateOrConnectWithoutPdfsInput[]
+    createMany?: flashcardsCreateManyPdfsInputEnvelope
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+  }
+
+  export type flashcard_sessionsCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput> | flashcard_sessionsCreateWithoutPdfsInput[] | flashcard_sessionsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutPdfsInput | flashcard_sessionsCreateOrConnectWithoutPdfsInput[]
+    createMany?: flashcard_sessionsCreateManyPdfsInputEnvelope
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+  }
+
   export type usersCreateNestedOneWithoutPdfsInput = {
     create?: XOR<usersCreateWithoutPdfsInput, usersUncheckedCreateWithoutPdfsInput>
     connectOrCreate?: usersCreateOrConnectWithoutPdfsInput
@@ -32984,6 +37943,20 @@ export namespace Prisma {
     connectOrCreate?: chat_messagesCreateOrConnectWithoutPdfsInput | chat_messagesCreateOrConnectWithoutPdfsInput[]
     createMany?: chat_messagesCreateManyPdfsInputEnvelope
     connect?: chat_messagesWhereUniqueInput | chat_messagesWhereUniqueInput[]
+  }
+
+  export type flashcardsUncheckedCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput> | flashcardsCreateWithoutPdfsInput[] | flashcardsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutPdfsInput | flashcardsCreateOrConnectWithoutPdfsInput[]
+    createMany?: flashcardsCreateManyPdfsInputEnvelope
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+  }
+
+  export type flashcard_sessionsUncheckedCreateNestedManyWithoutPdfsInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput> | flashcard_sessionsCreateWithoutPdfsInput[] | flashcard_sessionsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutPdfsInput | flashcard_sessionsCreateOrConnectWithoutPdfsInput[]
+    createMany?: flashcard_sessionsCreateManyPdfsInputEnvelope
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -33008,6 +37981,34 @@ export namespace Prisma {
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
   }
 
+  export type flashcardsUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput> | flashcardsCreateWithoutPdfsInput[] | flashcardsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutPdfsInput | flashcardsCreateOrConnectWithoutPdfsInput[]
+    upsert?: flashcardsUpsertWithWhereUniqueWithoutPdfsInput | flashcardsUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: flashcardsCreateManyPdfsInputEnvelope
+    set?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    disconnect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    delete?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    update?: flashcardsUpdateWithWhereUniqueWithoutPdfsInput | flashcardsUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: flashcardsUpdateManyWithWhereWithoutPdfsInput | flashcardsUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+  }
+
+  export type flashcard_sessionsUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput> | flashcard_sessionsCreateWithoutPdfsInput[] | flashcard_sessionsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutPdfsInput | flashcard_sessionsCreateOrConnectWithoutPdfsInput[]
+    upsert?: flashcard_sessionsUpsertWithWhereUniqueWithoutPdfsInput | flashcard_sessionsUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: flashcard_sessionsCreateManyPdfsInputEnvelope
+    set?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    disconnect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    delete?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    update?: flashcard_sessionsUpdateWithWhereUniqueWithoutPdfsInput | flashcard_sessionsUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: flashcard_sessionsUpdateManyWithWhereWithoutPdfsInput | flashcard_sessionsUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
+  }
+
   export type usersUpdateOneWithoutPdfsNestedInput = {
     create?: XOR<usersCreateWithoutPdfsInput, usersUncheckedCreateWithoutPdfsInput>
     connectOrCreate?: usersCreateOrConnectWithoutPdfsInput
@@ -33030,6 +38031,34 @@ export namespace Prisma {
     update?: chat_messagesUpdateWithWhereUniqueWithoutPdfsInput | chat_messagesUpdateWithWhereUniqueWithoutPdfsInput[]
     updateMany?: chat_messagesUpdateManyWithWhereWithoutPdfsInput | chat_messagesUpdateManyWithWhereWithoutPdfsInput[]
     deleteMany?: chat_messagesScalarWhereInput | chat_messagesScalarWhereInput[]
+  }
+
+  export type flashcardsUncheckedUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput> | flashcardsCreateWithoutPdfsInput[] | flashcardsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutPdfsInput | flashcardsCreateOrConnectWithoutPdfsInput[]
+    upsert?: flashcardsUpsertWithWhereUniqueWithoutPdfsInput | flashcardsUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: flashcardsCreateManyPdfsInputEnvelope
+    set?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    disconnect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    delete?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    update?: flashcardsUpdateWithWhereUniqueWithoutPdfsInput | flashcardsUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: flashcardsUpdateManyWithWhereWithoutPdfsInput | flashcardsUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+  }
+
+  export type flashcard_sessionsUncheckedUpdateManyWithoutPdfsNestedInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput> | flashcard_sessionsCreateWithoutPdfsInput[] | flashcard_sessionsUncheckedCreateWithoutPdfsInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutPdfsInput | flashcard_sessionsCreateOrConnectWithoutPdfsInput[]
+    upsert?: flashcard_sessionsUpsertWithWhereUniqueWithoutPdfsInput | flashcard_sessionsUpsertWithWhereUniqueWithoutPdfsInput[]
+    createMany?: flashcard_sessionsCreateManyPdfsInputEnvelope
+    set?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    disconnect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    delete?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    update?: flashcard_sessionsUpdateWithWhereUniqueWithoutPdfsInput | flashcard_sessionsUpdateWithWhereUniqueWithoutPdfsInput[]
+    updateMany?: flashcard_sessionsUpdateManyWithWhereWithoutPdfsInput | flashcard_sessionsUpdateManyWithWhereWithoutPdfsInput[]
+    deleteMany?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
   }
 
   export type usersCreateNestedOneWithoutPlusInput = {
@@ -33066,12 +38095,322 @@ export namespace Prisma {
     connect?: usersWhereUniqueInput
   }
 
+  export type flashcardsCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput> | flashcardsCreateWithoutUser_profilesInput[] | flashcardsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutUser_profilesInput | flashcardsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcardsCreateManyUser_profilesInputEnvelope
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+  }
+
+  export type flashcard_sessionsCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput> | flashcard_sessionsCreateWithoutUser_profilesInput[] | flashcard_sessionsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutUser_profilesInput | flashcard_sessionsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcard_sessionsCreateManyUser_profilesInputEnvelope
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+  }
+
+  export type flashcard_reviewsCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput> | flashcard_reviewsCreateWithoutUser_profilesInput[] | flashcard_reviewsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutUser_profilesInput | flashcard_reviewsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcard_reviewsCreateManyUser_profilesInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
+  export type flashcardsUncheckedCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput> | flashcardsCreateWithoutUser_profilesInput[] | flashcardsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutUser_profilesInput | flashcardsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcardsCreateManyUser_profilesInputEnvelope
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+  }
+
+  export type flashcard_sessionsUncheckedCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput> | flashcard_sessionsCreateWithoutUser_profilesInput[] | flashcard_sessionsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutUser_profilesInput | flashcard_sessionsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcard_sessionsCreateManyUser_profilesInputEnvelope
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+  }
+
+  export type flashcard_reviewsUncheckedCreateNestedManyWithoutUser_profilesInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput> | flashcard_reviewsCreateWithoutUser_profilesInput[] | flashcard_reviewsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutUser_profilesInput | flashcard_reviewsCreateOrConnectWithoutUser_profilesInput[]
+    createMany?: flashcard_reviewsCreateManyUser_profilesInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
   export type usersUpdateOneRequiredWithoutUser_profilesNestedInput = {
     create?: XOR<usersCreateWithoutUser_profilesInput, usersUncheckedCreateWithoutUser_profilesInput>
     connectOrCreate?: usersCreateOrConnectWithoutUser_profilesInput
     upsert?: usersUpsertWithoutUser_profilesInput
     connect?: usersWhereUniqueInput
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutUser_profilesInput, usersUpdateWithoutUser_profilesInput>, usersUncheckedUpdateWithoutUser_profilesInput>
+  }
+
+  export type flashcardsUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput> | flashcardsCreateWithoutUser_profilesInput[] | flashcardsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutUser_profilesInput | flashcardsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcardsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcardsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcardsCreateManyUser_profilesInputEnvelope
+    set?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    disconnect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    delete?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    update?: flashcardsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcardsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcardsUpdateManyWithWhereWithoutUser_profilesInput | flashcardsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+  }
+
+  export type flashcard_sessionsUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput> | flashcard_sessionsCreateWithoutUser_profilesInput[] | flashcard_sessionsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutUser_profilesInput | flashcard_sessionsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcard_sessionsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcard_sessionsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcard_sessionsCreateManyUser_profilesInputEnvelope
+    set?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    disconnect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    delete?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    update?: flashcard_sessionsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcard_sessionsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcard_sessionsUpdateManyWithWhereWithoutUser_profilesInput | flashcard_sessionsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
+  }
+
+  export type flashcard_reviewsUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput> | flashcard_reviewsCreateWithoutUser_profilesInput[] | flashcard_reviewsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutUser_profilesInput | flashcard_reviewsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcard_reviewsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcard_reviewsCreateManyUser_profilesInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcard_reviewsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutUser_profilesInput | flashcard_reviewsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type flashcardsUncheckedUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput> | flashcardsCreateWithoutUser_profilesInput[] | flashcardsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcardsCreateOrConnectWithoutUser_profilesInput | flashcardsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcardsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcardsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcardsCreateManyUser_profilesInputEnvelope
+    set?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    disconnect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    delete?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    connect?: flashcardsWhereUniqueInput | flashcardsWhereUniqueInput[]
+    update?: flashcardsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcardsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcardsUpdateManyWithWhereWithoutUser_profilesInput | flashcardsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+  }
+
+  export type flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput> | flashcard_sessionsCreateWithoutUser_profilesInput[] | flashcard_sessionsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutUser_profilesInput | flashcard_sessionsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcard_sessionsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcard_sessionsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcard_sessionsCreateManyUser_profilesInputEnvelope
+    set?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    disconnect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    delete?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    connect?: flashcard_sessionsWhereUniqueInput | flashcard_sessionsWhereUniqueInput[]
+    update?: flashcard_sessionsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcard_sessionsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcard_sessionsUpdateManyWithWhereWithoutUser_profilesInput | flashcard_sessionsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput> | flashcard_reviewsCreateWithoutUser_profilesInput[] | flashcard_reviewsUncheckedCreateWithoutUser_profilesInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutUser_profilesInput | flashcard_reviewsCreateOrConnectWithoutUser_profilesInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutUser_profilesInput | flashcard_reviewsUpsertWithWhereUniqueWithoutUser_profilesInput[]
+    createMany?: flashcard_reviewsCreateManyUser_profilesInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutUser_profilesInput | flashcard_reviewsUpdateWithWhereUniqueWithoutUser_profilesInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutUser_profilesInput | flashcard_reviewsUpdateManyWithWhereWithoutUser_profilesInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type pdfsCreateNestedOneWithoutFlashcardsInput = {
+    create?: XOR<pdfsCreateWithoutFlashcardsInput, pdfsUncheckedCreateWithoutFlashcardsInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutFlashcardsInput
+    connect?: pdfsWhereUniqueInput
+  }
+
+  export type user_profilesCreateNestedOneWithoutFlashcardsInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcardsInput, user_profilesUncheckedCreateWithoutFlashcardsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcardsInput
+    connect?: user_profilesWhereUniqueInput
+  }
+
+  export type flashcard_reviewsCreateNestedManyWithoutFlashcardsInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput> | flashcard_reviewsCreateWithoutFlashcardsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcardsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcardsInput | flashcard_reviewsCreateOrConnectWithoutFlashcardsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcardsInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
+  export type flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcardsInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput> | flashcard_reviewsCreateWithoutFlashcardsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcardsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcardsInput | flashcard_reviewsCreateOrConnectWithoutFlashcardsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcardsInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
+  export type pdfsUpdateOneRequiredWithoutFlashcardsNestedInput = {
+    create?: XOR<pdfsCreateWithoutFlashcardsInput, pdfsUncheckedCreateWithoutFlashcardsInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutFlashcardsInput
+    upsert?: pdfsUpsertWithoutFlashcardsInput
+    connect?: pdfsWhereUniqueInput
+    update?: XOR<XOR<pdfsUpdateToOneWithWhereWithoutFlashcardsInput, pdfsUpdateWithoutFlashcardsInput>, pdfsUncheckedUpdateWithoutFlashcardsInput>
+  }
+
+  export type user_profilesUpdateOneRequiredWithoutFlashcardsNestedInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcardsInput, user_profilesUncheckedCreateWithoutFlashcardsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcardsInput
+    upsert?: user_profilesUpsertWithoutFlashcardsInput
+    connect?: user_profilesWhereUniqueInput
+    update?: XOR<XOR<user_profilesUpdateToOneWithWhereWithoutFlashcardsInput, user_profilesUpdateWithoutFlashcardsInput>, user_profilesUncheckedUpdateWithoutFlashcardsInput>
+  }
+
+  export type flashcard_reviewsUpdateManyWithoutFlashcardsNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput> | flashcard_reviewsCreateWithoutFlashcardsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcardsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcardsInput | flashcard_reviewsCreateOrConnectWithoutFlashcardsInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcardsInput | flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcardsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcardsInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcardsInput | flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcardsInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutFlashcardsInput | flashcard_reviewsUpdateManyWithWhereWithoutFlashcardsInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput> | flashcard_reviewsCreateWithoutFlashcardsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcardsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcardsInput | flashcard_reviewsCreateOrConnectWithoutFlashcardsInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcardsInput | flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcardsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcardsInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcardsInput | flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcardsInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutFlashcardsInput | flashcard_reviewsUpdateManyWithWhereWithoutFlashcardsInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type pdfsCreateNestedOneWithoutFlashcard_sessionsInput = {
+    create?: XOR<pdfsCreateWithoutFlashcard_sessionsInput, pdfsUncheckedCreateWithoutFlashcard_sessionsInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutFlashcard_sessionsInput
+    connect?: pdfsWhereUniqueInput
+  }
+
+  export type user_profilesCreateNestedOneWithoutFlashcard_sessionsInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcard_sessionsInput, user_profilesUncheckedCreateWithoutFlashcard_sessionsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcard_sessionsInput
+    connect?: user_profilesWhereUniqueInput
+  }
+
+  export type flashcard_reviewsCreateNestedManyWithoutFlashcard_sessionsInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput> | flashcard_reviewsCreateWithoutFlashcard_sessionsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput | flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcard_sessionsInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
+  export type flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcard_sessionsInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput> | flashcard_reviewsCreateWithoutFlashcard_sessionsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput | flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcard_sessionsInputEnvelope
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+  }
+
+  export type pdfsUpdateOneRequiredWithoutFlashcard_sessionsNestedInput = {
+    create?: XOR<pdfsCreateWithoutFlashcard_sessionsInput, pdfsUncheckedCreateWithoutFlashcard_sessionsInput>
+    connectOrCreate?: pdfsCreateOrConnectWithoutFlashcard_sessionsInput
+    upsert?: pdfsUpsertWithoutFlashcard_sessionsInput
+    connect?: pdfsWhereUniqueInput
+    update?: XOR<XOR<pdfsUpdateToOneWithWhereWithoutFlashcard_sessionsInput, pdfsUpdateWithoutFlashcard_sessionsInput>, pdfsUncheckedUpdateWithoutFlashcard_sessionsInput>
+  }
+
+  export type user_profilesUpdateOneRequiredWithoutFlashcard_sessionsNestedInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcard_sessionsInput, user_profilesUncheckedCreateWithoutFlashcard_sessionsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcard_sessionsInput
+    upsert?: user_profilesUpsertWithoutFlashcard_sessionsInput
+    connect?: user_profilesWhereUniqueInput
+    update?: XOR<XOR<user_profilesUpdateToOneWithWhereWithoutFlashcard_sessionsInput, user_profilesUpdateWithoutFlashcard_sessionsInput>, user_profilesUncheckedUpdateWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcard_reviewsUpdateManyWithoutFlashcard_sessionsNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput> | flashcard_reviewsCreateWithoutFlashcard_sessionsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput | flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcard_sessionsInput | flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcard_sessionsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcard_sessionsInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcard_sessionsInput | flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcard_sessionsInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutFlashcard_sessionsInput | flashcard_reviewsUpdateManyWithWhereWithoutFlashcard_sessionsInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsNestedInput = {
+    create?: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput> | flashcard_reviewsCreateWithoutFlashcard_sessionsInput[] | flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput[]
+    connectOrCreate?: flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput | flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput[]
+    upsert?: flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcard_sessionsInput | flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcard_sessionsInput[]
+    createMany?: flashcard_reviewsCreateManyFlashcard_sessionsInputEnvelope
+    set?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    disconnect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    delete?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    connect?: flashcard_reviewsWhereUniqueInput | flashcard_reviewsWhereUniqueInput[]
+    update?: flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcard_sessionsInput | flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcard_sessionsInput[]
+    updateMany?: flashcard_reviewsUpdateManyWithWhereWithoutFlashcard_sessionsInput | flashcard_reviewsUpdateManyWithWhereWithoutFlashcard_sessionsInput[]
+    deleteMany?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+  }
+
+  export type flashcardsCreateNestedOneWithoutFlashcard_reviewsInput = {
+    create?: XOR<flashcardsCreateWithoutFlashcard_reviewsInput, flashcardsUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: flashcardsCreateOrConnectWithoutFlashcard_reviewsInput
+    connect?: flashcardsWhereUniqueInput
+  }
+
+  export type flashcard_sessionsCreateNestedOneWithoutFlashcard_reviewsInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutFlashcard_reviewsInput
+    connect?: flashcard_sessionsWhereUniqueInput
+  }
+
+  export type user_profilesCreateNestedOneWithoutFlashcard_reviewsInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcard_reviewsInput, user_profilesUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcard_reviewsInput
+    connect?: user_profilesWhereUniqueInput
+  }
+
+  export type flashcardsUpdateOneRequiredWithoutFlashcard_reviewsNestedInput = {
+    create?: XOR<flashcardsCreateWithoutFlashcard_reviewsInput, flashcardsUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: flashcardsCreateOrConnectWithoutFlashcard_reviewsInput
+    upsert?: flashcardsUpsertWithoutFlashcard_reviewsInput
+    connect?: flashcardsWhereUniqueInput
+    update?: XOR<XOR<flashcardsUpdateToOneWithWhereWithoutFlashcard_reviewsInput, flashcardsUpdateWithoutFlashcard_reviewsInput>, flashcardsUncheckedUpdateWithoutFlashcard_reviewsInput>
+  }
+
+  export type flashcard_sessionsUpdateOneWithoutFlashcard_reviewsNestedInput = {
+    create?: XOR<flashcard_sessionsCreateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: flashcard_sessionsCreateOrConnectWithoutFlashcard_reviewsInput
+    upsert?: flashcard_sessionsUpsertWithoutFlashcard_reviewsInput
+    disconnect?: flashcard_sessionsWhereInput | boolean
+    delete?: flashcard_sessionsWhereInput | boolean
+    connect?: flashcard_sessionsWhereUniqueInput
+    update?: XOR<XOR<flashcard_sessionsUpdateToOneWithWhereWithoutFlashcard_reviewsInput, flashcard_sessionsUpdateWithoutFlashcard_reviewsInput>, flashcard_sessionsUncheckedUpdateWithoutFlashcard_reviewsInput>
+  }
+
+  export type user_profilesUpdateOneRequiredWithoutFlashcard_reviewsNestedInput = {
+    create?: XOR<user_profilesCreateWithoutFlashcard_reviewsInput, user_profilesUncheckedCreateWithoutFlashcard_reviewsInput>
+    connectOrCreate?: user_profilesCreateOrConnectWithoutFlashcard_reviewsInput
+    upsert?: user_profilesUpsertWithoutFlashcard_reviewsInput
+    connect?: user_profilesWhereUniqueInput
+    update?: XOR<XOR<user_profilesUpdateToOneWithWhereWithoutFlashcard_reviewsInput, user_profilesUpdateWithoutFlashcard_reviewsInput>, user_profilesUncheckedUpdateWithoutFlashcard_reviewsInput>
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -35327,6 +40666,8 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsUncheckedCreateWithoutUsersInput = {
@@ -35341,6 +40682,8 @@ export namespace Prisma {
     created_at?: Date | string | null
     updated_at?: Date | string | null
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutUsersInput = {
@@ -35402,6 +40745,9 @@ export namespace Prisma {
     expire_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    flashcards?: flashcardsCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutUser_profilesInput
   }
 
   export type user_profilesUncheckedCreateWithoutUsersInput = {
@@ -35413,6 +40759,9 @@ export namespace Prisma {
     expire_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutUser_profilesInput
   }
 
   export type user_profilesCreateOrConnectWithoutUsersInput = {
@@ -35681,6 +41030,9 @@ export namespace Prisma {
     expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutUser_profilesNestedInput
   }
 
   export type user_profilesUncheckedUpdateWithoutUsersInput = {
@@ -35692,6 +41044,9 @@ export namespace Prisma {
     expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesNestedInput
   }
 
   export type pdfsCreateWithoutChat_messagesInput = {
@@ -35705,6 +41060,8 @@ export namespace Prisma {
     summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    flashcards?: flashcardsCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutPdfsInput
     users?: usersCreateNestedOneWithoutPdfsInput
   }
 
@@ -35720,6 +41077,8 @@ export namespace Prisma {
     summary?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutPdfsInput
   }
 
   export type pdfsCreateOrConnectWithoutChat_messagesInput = {
@@ -35846,6 +41205,8 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutPdfsNestedInput
     users?: usersUpdateOneWithoutPdfsNestedInput
   }
 
@@ -35861,6 +41222,8 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type usersUpsertWithoutChat_messagesInput = {
@@ -35994,6 +41357,82 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type flashcardsCreateWithoutPdfsInput = {
+    id?: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcardsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsUncheckedCreateWithoutPdfsInput = {
+    id?: string
+    user_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsCreateOrConnectWithoutPdfsInput = {
+    where: flashcardsWhereUniqueInput
+    create: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type flashcardsCreateManyPdfsInputEnvelope = {
+    data: flashcardsCreateManyPdfsInput | flashcardsCreateManyPdfsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type flashcard_sessionsCreateWithoutPdfsInput = {
+    id?: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_sessionsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsUncheckedCreateWithoutPdfsInput = {
+    id?: string
+    user_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsCreateOrConnectWithoutPdfsInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    create: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type flashcard_sessionsCreateManyPdfsInputEnvelope = {
+    data: flashcard_sessionsCreateManyPdfsInput | flashcard_sessionsCreateManyPdfsInput[]
+    skipDuplicates?: boolean
+  }
+
   export type usersCreateWithoutPdfsInput = {
     instance_id?: string | null
     id: string
@@ -36105,6 +41544,72 @@ export namespace Prisma {
   export type chat_messagesUpdateManyWithWhereWithoutPdfsInput = {
     where: chat_messagesScalarWhereInput
     data: XOR<chat_messagesUpdateManyMutationInput, chat_messagesUncheckedUpdateManyWithoutPdfsInput>
+  }
+
+  export type flashcardsUpsertWithWhereUniqueWithoutPdfsInput = {
+    where: flashcardsWhereUniqueInput
+    update: XOR<flashcardsUpdateWithoutPdfsInput, flashcardsUncheckedUpdateWithoutPdfsInput>
+    create: XOR<flashcardsCreateWithoutPdfsInput, flashcardsUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type flashcardsUpdateWithWhereUniqueWithoutPdfsInput = {
+    where: flashcardsWhereUniqueInput
+    data: XOR<flashcardsUpdateWithoutPdfsInput, flashcardsUncheckedUpdateWithoutPdfsInput>
+  }
+
+  export type flashcardsUpdateManyWithWhereWithoutPdfsInput = {
+    where: flashcardsScalarWhereInput
+    data: XOR<flashcardsUpdateManyMutationInput, flashcardsUncheckedUpdateManyWithoutPdfsInput>
+  }
+
+  export type flashcardsScalarWhereInput = {
+    AND?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+    OR?: flashcardsScalarWhereInput[]
+    NOT?: flashcardsScalarWhereInput | flashcardsScalarWhereInput[]
+    id?: UuidFilter<"flashcards"> | string
+    pdf_id?: StringFilter<"flashcards"> | string
+    user_id?: UuidFilter<"flashcards"> | string
+    question?: StringFilter<"flashcards"> | string
+    answer?: StringFilter<"flashcards"> | string
+    page_number?: IntNullableFilter<"flashcards"> | number | null
+    difficulty?: IntFilter<"flashcards"> | number
+    last_reviewed_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    next_review_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    review_count?: IntFilter<"flashcards"> | number
+    created_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"flashcards"> | Date | string | null
+  }
+
+  export type flashcard_sessionsUpsertWithWhereUniqueWithoutPdfsInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    update: XOR<flashcard_sessionsUpdateWithoutPdfsInput, flashcard_sessionsUncheckedUpdateWithoutPdfsInput>
+    create: XOR<flashcard_sessionsCreateWithoutPdfsInput, flashcard_sessionsUncheckedCreateWithoutPdfsInput>
+  }
+
+  export type flashcard_sessionsUpdateWithWhereUniqueWithoutPdfsInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    data: XOR<flashcard_sessionsUpdateWithoutPdfsInput, flashcard_sessionsUncheckedUpdateWithoutPdfsInput>
+  }
+
+  export type flashcard_sessionsUpdateManyWithWhereWithoutPdfsInput = {
+    where: flashcard_sessionsScalarWhereInput
+    data: XOR<flashcard_sessionsUpdateManyMutationInput, flashcard_sessionsUncheckedUpdateManyWithoutPdfsInput>
+  }
+
+  export type flashcard_sessionsScalarWhereInput = {
+    AND?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
+    OR?: flashcard_sessionsScalarWhereInput[]
+    NOT?: flashcard_sessionsScalarWhereInput | flashcard_sessionsScalarWhereInput[]
+    id?: UuidFilter<"flashcard_sessions"> | string
+    pdf_id?: StringFilter<"flashcard_sessions"> | string
+    user_id?: UuidFilter<"flashcard_sessions"> | string
+    cards_studied?: IntFilter<"flashcard_sessions"> | number
+    cards_easy?: IntFilter<"flashcard_sessions"> | number
+    cards_medium?: IntFilter<"flashcard_sessions"> | number
+    cards_hard?: IntFilter<"flashcard_sessions"> | number
+    start_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    end_time?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"flashcard_sessions"> | Date | string | null
   }
 
   export type usersUpsertWithoutPdfsInput = {
@@ -36707,6 +42212,110 @@ export namespace Prisma {
     create: XOR<usersCreateWithoutUser_profilesInput, usersUncheckedCreateWithoutUser_profilesInput>
   }
 
+  export type flashcardsCreateWithoutUser_profilesInput = {
+    id?: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcardsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsUncheckedCreateWithoutUser_profilesInput = {
+    id?: string
+    pdf_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcardsInput
+  }
+
+  export type flashcardsCreateOrConnectWithoutUser_profilesInput = {
+    where: flashcardsWhereUniqueInput
+    create: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcardsCreateManyUser_profilesInputEnvelope = {
+    data: flashcardsCreateManyUser_profilesInput | flashcardsCreateManyUser_profilesInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type flashcard_sessionsCreateWithoutUser_profilesInput = {
+    id?: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcard_sessionsInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsUncheckedCreateWithoutUser_profilesInput = {
+    id?: string
+    pdf_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsCreateOrConnectWithoutUser_profilesInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    create: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_sessionsCreateManyUser_profilesInputEnvelope = {
+    data: flashcard_sessionsCreateManyUser_profilesInput | flashcard_sessionsCreateManyUser_profilesInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type flashcard_reviewsCreateWithoutUser_profilesInput = {
+    id?: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+    flashcards: flashcardsCreateNestedOneWithoutFlashcard_reviewsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedOneWithoutFlashcard_reviewsInput
+  }
+
+  export type flashcard_reviewsUncheckedCreateWithoutUser_profilesInput = {
+    id?: string
+    flashcard_id: string
+    session_id?: string | null
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsCreateOrConnectWithoutUser_profilesInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    create: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_reviewsCreateManyUser_profilesInputEnvelope = {
+    data: flashcard_reviewsCreateManyUser_profilesInput | flashcard_reviewsCreateManyUser_profilesInput[]
+    skipDuplicates?: boolean
+  }
+
   export type usersUpsertWithoutUser_profilesInput = {
     update: XOR<usersUpdateWithoutUser_profilesInput, usersUncheckedUpdateWithoutUser_profilesInput>
     create: XOR<usersCreateWithoutUser_profilesInput, usersUncheckedCreateWithoutUser_profilesInput>
@@ -36808,6 +42417,675 @@ export namespace Prisma {
     pdfs?: pdfsUncheckedUpdateManyWithoutUsersNestedInput
     plus?: plusUncheckedUpdateOneWithoutUsersNestedInput
     user_daily_quota?: user_daily_quotaUncheckedUpdateOneWithoutUsersNestedInput
+  }
+
+  export type flashcardsUpsertWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcardsWhereUniqueInput
+    update: XOR<flashcardsUpdateWithoutUser_profilesInput, flashcardsUncheckedUpdateWithoutUser_profilesInput>
+    create: XOR<flashcardsCreateWithoutUser_profilesInput, flashcardsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcardsUpdateWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcardsWhereUniqueInput
+    data: XOR<flashcardsUpdateWithoutUser_profilesInput, flashcardsUncheckedUpdateWithoutUser_profilesInput>
+  }
+
+  export type flashcardsUpdateManyWithWhereWithoutUser_profilesInput = {
+    where: flashcardsScalarWhereInput
+    data: XOR<flashcardsUpdateManyMutationInput, flashcardsUncheckedUpdateManyWithoutUser_profilesInput>
+  }
+
+  export type flashcard_sessionsUpsertWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    update: XOR<flashcard_sessionsUpdateWithoutUser_profilesInput, flashcard_sessionsUncheckedUpdateWithoutUser_profilesInput>
+    create: XOR<flashcard_sessionsCreateWithoutUser_profilesInput, flashcard_sessionsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_sessionsUpdateWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    data: XOR<flashcard_sessionsUpdateWithoutUser_profilesInput, flashcard_sessionsUncheckedUpdateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_sessionsUpdateManyWithWhereWithoutUser_profilesInput = {
+    where: flashcard_sessionsScalarWhereInput
+    data: XOR<flashcard_sessionsUpdateManyMutationInput, flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesInput>
+  }
+
+  export type flashcard_reviewsUpsertWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    update: XOR<flashcard_reviewsUpdateWithoutUser_profilesInput, flashcard_reviewsUncheckedUpdateWithoutUser_profilesInput>
+    create: XOR<flashcard_reviewsCreateWithoutUser_profilesInput, flashcard_reviewsUncheckedCreateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_reviewsUpdateWithWhereUniqueWithoutUser_profilesInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    data: XOR<flashcard_reviewsUpdateWithoutUser_profilesInput, flashcard_reviewsUncheckedUpdateWithoutUser_profilesInput>
+  }
+
+  export type flashcard_reviewsUpdateManyWithWhereWithoutUser_profilesInput = {
+    where: flashcard_reviewsScalarWhereInput
+    data: XOR<flashcard_reviewsUpdateManyMutationInput, flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesInput>
+  }
+
+  export type flashcard_reviewsScalarWhereInput = {
+    AND?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+    OR?: flashcard_reviewsScalarWhereInput[]
+    NOT?: flashcard_reviewsScalarWhereInput | flashcard_reviewsScalarWhereInput[]
+    id?: UuidFilter<"flashcard_reviews"> | string
+    flashcard_id?: UuidFilter<"flashcard_reviews"> | string
+    session_id?: UuidNullableFilter<"flashcard_reviews"> | string | null
+    user_id?: UuidFilter<"flashcard_reviews"> | string
+    difficulty_rating?: IntFilter<"flashcard_reviews"> | number
+    response_time?: IntNullableFilter<"flashcard_reviews"> | number | null
+    created_at?: DateTimeNullableFilter<"flashcard_reviews"> | Date | string | null
+  }
+
+  export type pdfsCreateWithoutFlashcardsInput = {
+    id?: string
+    name: string
+    url: string
+    size: number
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    content_type?: string | null
+    summary?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutPdfsInput
+    users?: usersCreateNestedOneWithoutPdfsInput
+  }
+
+  export type pdfsUncheckedCreateWithoutFlashcardsInput = {
+    id?: string
+    name: string
+    url: string
+    size: number
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    user_id?: string | null
+    content_type?: string | null
+    summary?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutPdfsInput
+  }
+
+  export type pdfsCreateOrConnectWithoutFlashcardsInput = {
+    where: pdfsWhereUniqueInput
+    create: XOR<pdfsCreateWithoutFlashcardsInput, pdfsUncheckedCreateWithoutFlashcardsInput>
+  }
+
+  export type user_profilesCreateWithoutFlashcardsInput = {
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    users: usersCreateNestedOneWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesUncheckedCreateWithoutFlashcardsInput = {
+    id: string
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesCreateOrConnectWithoutFlashcardsInput = {
+    where: user_profilesWhereUniqueInput
+    create: XOR<user_profilesCreateWithoutFlashcardsInput, user_profilesUncheckedCreateWithoutFlashcardsInput>
+  }
+
+  export type flashcard_reviewsCreateWithoutFlashcardsInput = {
+    id?: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+    flashcard_sessions?: flashcard_sessionsCreateNestedOneWithoutFlashcard_reviewsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_reviewsInput
+  }
+
+  export type flashcard_reviewsUncheckedCreateWithoutFlashcardsInput = {
+    id?: string
+    session_id?: string | null
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsCreateOrConnectWithoutFlashcardsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    create: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput>
+  }
+
+  export type flashcard_reviewsCreateManyFlashcardsInputEnvelope = {
+    data: flashcard_reviewsCreateManyFlashcardsInput | flashcard_reviewsCreateManyFlashcardsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type pdfsUpsertWithoutFlashcardsInput = {
+    update: XOR<pdfsUpdateWithoutFlashcardsInput, pdfsUncheckedUpdateWithoutFlashcardsInput>
+    create: XOR<pdfsCreateWithoutFlashcardsInput, pdfsUncheckedCreateWithoutFlashcardsInput>
+    where?: pdfsWhereInput
+  }
+
+  export type pdfsUpdateToOneWithWhereWithoutFlashcardsInput = {
+    where?: pdfsWhereInput
+    data: XOR<pdfsUpdateWithoutFlashcardsInput, pdfsUncheckedUpdateWithoutFlashcardsInput>
+  }
+
+  export type pdfsUpdateWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutPdfsNestedInput
+    users?: usersUpdateOneWithoutPdfsNestedInput
+  }
+
+  export type pdfsUncheckedUpdateWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutPdfsNestedInput
+  }
+
+  export type user_profilesUpsertWithoutFlashcardsInput = {
+    update: XOR<user_profilesUpdateWithoutFlashcardsInput, user_profilesUncheckedUpdateWithoutFlashcardsInput>
+    create: XOR<user_profilesCreateWithoutFlashcardsInput, user_profilesUncheckedCreateWithoutFlashcardsInput>
+    where?: user_profilesWhereInput
+  }
+
+  export type user_profilesUpdateToOneWithWhereWithoutFlashcardsInput = {
+    where?: user_profilesWhereInput
+    data: XOR<user_profilesUpdateWithoutFlashcardsInput, user_profilesUncheckedUpdateWithoutFlashcardsInput>
+  }
+
+  export type user_profilesUpdateWithoutFlashcardsInput = {
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    users?: usersUpdateOneRequiredWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutUser_profilesNestedInput
+  }
+
+  export type user_profilesUncheckedUpdateWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesNestedInput
+  }
+
+  export type flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcardsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    update: XOR<flashcard_reviewsUpdateWithoutFlashcardsInput, flashcard_reviewsUncheckedUpdateWithoutFlashcardsInput>
+    create: XOR<flashcard_reviewsCreateWithoutFlashcardsInput, flashcard_reviewsUncheckedCreateWithoutFlashcardsInput>
+  }
+
+  export type flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcardsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    data: XOR<flashcard_reviewsUpdateWithoutFlashcardsInput, flashcard_reviewsUncheckedUpdateWithoutFlashcardsInput>
+  }
+
+  export type flashcard_reviewsUpdateManyWithWhereWithoutFlashcardsInput = {
+    where: flashcard_reviewsScalarWhereInput
+    data: XOR<flashcard_reviewsUpdateManyMutationInput, flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsInput>
+  }
+
+  export type pdfsCreateWithoutFlashcard_sessionsInput = {
+    id?: string
+    name: string
+    url: string
+    size: number
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    content_type?: string | null
+    summary?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsCreateNestedManyWithoutPdfsInput
+    users?: usersCreateNestedOneWithoutPdfsInput
+  }
+
+  export type pdfsUncheckedCreateWithoutFlashcard_sessionsInput = {
+    id?: string
+    name: string
+    url: string
+    size: number
+    upload_date?: Date | string | null
+    last_viewed?: Date | string | null
+    user_id?: string | null
+    content_type?: string | null
+    summary?: string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutPdfsInput
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutPdfsInput
+  }
+
+  export type pdfsCreateOrConnectWithoutFlashcard_sessionsInput = {
+    where: pdfsWhereUniqueInput
+    create: XOR<pdfsCreateWithoutFlashcard_sessionsInput, pdfsUncheckedCreateWithoutFlashcard_sessionsInput>
+  }
+
+  export type user_profilesCreateWithoutFlashcard_sessionsInput = {
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    users: usersCreateNestedOneWithoutUser_profilesInput
+    flashcards?: flashcardsCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesUncheckedCreateWithoutFlashcard_sessionsInput = {
+    id: string
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_reviews?: flashcard_reviewsUncheckedCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesCreateOrConnectWithoutFlashcard_sessionsInput = {
+    where: user_profilesWhereUniqueInput
+    create: XOR<user_profilesCreateWithoutFlashcard_sessionsInput, user_profilesUncheckedCreateWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcard_reviewsCreateWithoutFlashcard_sessionsInput = {
+    id?: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+    flashcards: flashcardsCreateNestedOneWithoutFlashcard_reviewsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_reviewsInput
+  }
+
+  export type flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput = {
+    id?: string
+    flashcard_id: string
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsCreateOrConnectWithoutFlashcard_sessionsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    create: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcard_reviewsCreateManyFlashcard_sessionsInputEnvelope = {
+    data: flashcard_reviewsCreateManyFlashcard_sessionsInput | flashcard_reviewsCreateManyFlashcard_sessionsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type pdfsUpsertWithoutFlashcard_sessionsInput = {
+    update: XOR<pdfsUpdateWithoutFlashcard_sessionsInput, pdfsUncheckedUpdateWithoutFlashcard_sessionsInput>
+    create: XOR<pdfsCreateWithoutFlashcard_sessionsInput, pdfsUncheckedCreateWithoutFlashcard_sessionsInput>
+    where?: pdfsWhereInput
+  }
+
+  export type pdfsUpdateToOneWithWhereWithoutFlashcard_sessionsInput = {
+    where?: pdfsWhereInput
+    data: XOR<pdfsUpdateWithoutFlashcard_sessionsInput, pdfsUncheckedUpdateWithoutFlashcard_sessionsInput>
+  }
+
+  export type pdfsUpdateWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUpdateManyWithoutPdfsNestedInput
+    users?: usersUpdateOneWithoutPdfsNestedInput
+  }
+
+  export type pdfsUncheckedUpdateWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    size?: IntFieldUpdateOperationsInput | number
+    upload_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    last_viewed?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    content_type?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUncheckedUpdateManyWithoutPdfsNestedInput
+  }
+
+  export type user_profilesUpsertWithoutFlashcard_sessionsInput = {
+    update: XOR<user_profilesUpdateWithoutFlashcard_sessionsInput, user_profilesUncheckedUpdateWithoutFlashcard_sessionsInput>
+    create: XOR<user_profilesCreateWithoutFlashcard_sessionsInput, user_profilesUncheckedCreateWithoutFlashcard_sessionsInput>
+    where?: user_profilesWhereInput
+  }
+
+  export type user_profilesUpdateToOneWithWhereWithoutFlashcard_sessionsInput = {
+    where?: user_profilesWhereInput
+    data: XOR<user_profilesUpdateWithoutFlashcard_sessionsInput, user_profilesUncheckedUpdateWithoutFlashcard_sessionsInput>
+  }
+
+  export type user_profilesUpdateWithoutFlashcard_sessionsInput = {
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    users?: usersUpdateOneRequiredWithoutUser_profilesNestedInput
+    flashcards?: flashcardsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutUser_profilesNestedInput
+  }
+
+  export type user_profilesUncheckedUpdateWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesNestedInput
+  }
+
+  export type flashcard_reviewsUpsertWithWhereUniqueWithoutFlashcard_sessionsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    update: XOR<flashcard_reviewsUpdateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedUpdateWithoutFlashcard_sessionsInput>
+    create: XOR<flashcard_reviewsCreateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedCreateWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcard_reviewsUpdateWithWhereUniqueWithoutFlashcard_sessionsInput = {
+    where: flashcard_reviewsWhereUniqueInput
+    data: XOR<flashcard_reviewsUpdateWithoutFlashcard_sessionsInput, flashcard_reviewsUncheckedUpdateWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcard_reviewsUpdateManyWithWhereWithoutFlashcard_sessionsInput = {
+    where: flashcard_reviewsScalarWhereInput
+    data: XOR<flashcard_reviewsUpdateManyMutationInput, flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsInput>
+  }
+
+  export type flashcardsCreateWithoutFlashcard_reviewsInput = {
+    id?: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcardsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcardsInput
+  }
+
+  export type flashcardsUncheckedCreateWithoutFlashcard_reviewsInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type flashcardsCreateOrConnectWithoutFlashcard_reviewsInput = {
+    where: flashcardsWhereUniqueInput
+    create: XOR<flashcardsCreateWithoutFlashcard_reviewsInput, flashcardsUncheckedCreateWithoutFlashcard_reviewsInput>
+  }
+
+  export type flashcard_sessionsCreateWithoutFlashcard_reviewsInput = {
+    id?: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+    pdfs: pdfsCreateNestedOneWithoutFlashcard_sessionsInput
+    user_profiles: user_profilesCreateNestedOneWithoutFlashcard_sessionsInput
+  }
+
+  export type flashcard_sessionsUncheckedCreateWithoutFlashcard_reviewsInput = {
+    id?: string
+    pdf_id: string
+    user_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_sessionsCreateOrConnectWithoutFlashcard_reviewsInput = {
+    where: flashcard_sessionsWhereUniqueInput
+    create: XOR<flashcard_sessionsCreateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedCreateWithoutFlashcard_reviewsInput>
+  }
+
+  export type user_profilesCreateWithoutFlashcard_reviewsInput = {
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    users: usersCreateNestedOneWithoutUser_profilesInput
+    flashcards?: flashcardsCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesUncheckedCreateWithoutFlashcard_reviewsInput = {
+    id: string
+    email?: string | null
+    name?: string | null
+    avatar_url?: string | null
+    plus?: boolean | null
+    is_active?: boolean | null
+    expire_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    flashcards?: flashcardsUncheckedCreateNestedManyWithoutUser_profilesInput
+    flashcard_sessions?: flashcard_sessionsUncheckedCreateNestedManyWithoutUser_profilesInput
+  }
+
+  export type user_profilesCreateOrConnectWithoutFlashcard_reviewsInput = {
+    where: user_profilesWhereUniqueInput
+    create: XOR<user_profilesCreateWithoutFlashcard_reviewsInput, user_profilesUncheckedCreateWithoutFlashcard_reviewsInput>
+  }
+
+  export type flashcardsUpsertWithoutFlashcard_reviewsInput = {
+    update: XOR<flashcardsUpdateWithoutFlashcard_reviewsInput, flashcardsUncheckedUpdateWithoutFlashcard_reviewsInput>
+    create: XOR<flashcardsCreateWithoutFlashcard_reviewsInput, flashcardsUncheckedCreateWithoutFlashcard_reviewsInput>
+    where?: flashcardsWhereInput
+  }
+
+  export type flashcardsUpdateToOneWithWhereWithoutFlashcard_reviewsInput = {
+    where?: flashcardsWhereInput
+    data: XOR<flashcardsUpdateWithoutFlashcard_reviewsInput, flashcardsUncheckedUpdateWithoutFlashcard_reviewsInput>
+  }
+
+  export type flashcardsUpdateWithoutFlashcard_reviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcardsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateWithoutFlashcard_reviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_sessionsUpsertWithoutFlashcard_reviewsInput = {
+    update: XOR<flashcard_sessionsUpdateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedUpdateWithoutFlashcard_reviewsInput>
+    create: XOR<flashcard_sessionsCreateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedCreateWithoutFlashcard_reviewsInput>
+    where?: flashcard_sessionsWhereInput
+  }
+
+  export type flashcard_sessionsUpdateToOneWithWhereWithoutFlashcard_reviewsInput = {
+    where?: flashcard_sessionsWhereInput
+    data: XOR<flashcard_sessionsUpdateWithoutFlashcard_reviewsInput, flashcard_sessionsUncheckedUpdateWithoutFlashcard_reviewsInput>
+  }
+
+  export type flashcard_sessionsUpdateWithoutFlashcard_reviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateWithoutFlashcard_reviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type user_profilesUpsertWithoutFlashcard_reviewsInput = {
+    update: XOR<user_profilesUpdateWithoutFlashcard_reviewsInput, user_profilesUncheckedUpdateWithoutFlashcard_reviewsInput>
+    create: XOR<user_profilesCreateWithoutFlashcard_reviewsInput, user_profilesUncheckedCreateWithoutFlashcard_reviewsInput>
+    where?: user_profilesWhereInput
+  }
+
+  export type user_profilesUpdateToOneWithWhereWithoutFlashcard_reviewsInput = {
+    where?: user_profilesWhereInput
+    data: XOR<user_profilesUpdateWithoutFlashcard_reviewsInput, user_profilesUncheckedUpdateWithoutFlashcard_reviewsInput>
+  }
+
+  export type user_profilesUpdateWithoutFlashcard_reviewsInput = {
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    users?: usersUpdateOneRequiredWithoutUser_profilesNestedInput
+    flashcards?: flashcardsUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutUser_profilesNestedInput
+  }
+
+  export type user_profilesUncheckedUpdateWithoutFlashcard_reviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar_url?: NullableStringFieldUpdateOperationsInput | string | null
+    plus?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    is_active?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    expire_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUncheckedUpdateManyWithoutUser_profilesNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesNestedInput
   }
 
   export type saml_relay_statesCreateManyFlow_stateInput = {
@@ -37325,6 +43603,8 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateWithoutUsersInput = {
@@ -37339,6 +43619,8 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcards?: flashcardsUncheckedUpdateManyWithoutPdfsNestedInput
+    flashcard_sessions?: flashcard_sessionsUncheckedUpdateManyWithoutPdfsNestedInput
   }
 
   export type pdfsUncheckedUpdateManyWithoutUsersInput = {
@@ -37360,6 +43642,32 @@ export namespace Prisma {
     content: string
     is_user?: boolean | null
     timestamp?: Date | string | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcardsCreateManyPdfsInput = {
+    id?: string
+    user_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type flashcard_sessionsCreateManyPdfsInput = {
+    id?: string
+    user_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
     created_at?: Date | string | null
   }
 
@@ -37387,6 +43695,304 @@ export namespace Prisma {
     content?: StringFieldUpdateOperationsInput | string
     is_user?: NullableBoolFieldUpdateOperationsInput | boolean | null
     timestamp?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcardsUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcardsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateManyWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_sessionsUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateManyWithoutPdfsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcardsCreateManyUser_profilesInput = {
+    id?: string
+    pdf_id: string
+    question: string
+    answer: string
+    page_number?: number | null
+    difficulty?: number
+    last_reviewed_at?: Date | string | null
+    next_review_at?: Date | string | null
+    review_count?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type flashcard_sessionsCreateManyUser_profilesInput = {
+    id?: string
+    pdf_id: string
+    cards_studied?: number
+    cards_easy?: number
+    cards_medium?: number
+    cards_hard?: number
+    start_time?: Date | string | null
+    end_time?: Date | string | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsCreateManyUser_profilesInput = {
+    id?: string
+    flashcard_id: string
+    session_id?: string | null
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcardsUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcardsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsNestedInput
+  }
+
+  export type flashcardsUncheckedUpdateManyWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    page_number?: NullableIntFieldUpdateOperationsInput | number | null
+    difficulty?: IntFieldUpdateOperationsInput | number
+    last_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    next_review_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    review_count?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_sessionsUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pdfs?: pdfsUpdateOneRequiredWithoutFlashcard_sessionsNestedInput
+    flashcard_reviews?: flashcard_reviewsUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_reviews?: flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsNestedInput
+  }
+
+  export type flashcard_sessionsUncheckedUpdateManyWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pdf_id?: StringFieldUpdateOperationsInput | string
+    cards_studied?: IntFieldUpdateOperationsInput | number
+    cards_easy?: IntFieldUpdateOperationsInput | number
+    cards_medium?: IntFieldUpdateOperationsInput | number
+    cards_hard?: IntFieldUpdateOperationsInput | number
+    start_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    end_time?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+    flashcard_sessions?: flashcard_sessionsUpdateOneWithoutFlashcard_reviewsNestedInput
+  }
+
+  export type flashcard_reviewsUncheckedUpdateWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutUser_profilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsCreateManyFlashcardsInput = {
+    id?: string
+    session_id?: string | null
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsUpdateWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcard_sessions?: flashcard_sessionsUpdateOneWithoutFlashcard_reviewsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+  }
+
+  export type flashcard_reviewsUncheckedUpdateWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutFlashcardsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    session_id?: NullableStringFieldUpdateOperationsInput | string | null
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsCreateManyFlashcard_sessionsInput = {
+    id?: string
+    flashcard_id: string
+    user_id: string
+    difficulty_rating: number
+    response_time?: number | null
+    created_at?: Date | string | null
+  }
+
+  export type flashcard_reviewsUpdateWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    flashcards?: flashcardsUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+    user_profiles?: user_profilesUpdateOneRequiredWithoutFlashcard_reviewsNestedInput
+  }
+
+  export type flashcard_reviewsUncheckedUpdateWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type flashcard_reviewsUncheckedUpdateManyWithoutFlashcard_sessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    flashcard_id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    difficulty_rating?: IntFieldUpdateOperationsInput | number
+    response_time?: NullableIntFieldUpdateOperationsInput | number | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 

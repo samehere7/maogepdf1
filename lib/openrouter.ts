@@ -8,8 +8,8 @@ interface AnalysisResult {
   conclusions: string
 }
 
-// 使用新的API密钥
-const OPENROUTER_API_KEY = "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"
+// 使用环境变量中的API密钥
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async function callOpenRouter(messages: any[]) {
@@ -23,7 +23,7 @@ async function callOpenRouter(messages: any[]) {
         "X-Title": "Maoge PDF",
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
+        model: "deepseek/deepseek-chat-v3-0324:free",
         messages,
         temperature: 0.7,
         max_tokens: 2048,

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { useUser } from './UserProvider'
 
 export default function AuthButton() {
@@ -25,8 +25,7 @@ export default function AuthButton() {
   const handleLogout = async () => {
     setIsLoading(true)
     try {
-      const supabase = createClient()
-    await supabase.auth.signOut()
+      await supabase.auth.signOut()
       router.refresh()
     } catch (error) {
       console.error('登出失败:', error)

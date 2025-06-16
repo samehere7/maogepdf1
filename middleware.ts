@@ -54,15 +54,26 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // 尝试获取会话
   const { data: { session } } = await supabase.auth.getSession()
   
-  console.log(`[Middleware] 路径: ${request.nextUrl.pathname}, 会话状态: ${session ? '已登录' : '未登录'}`)
+  // 如果没有会话，检查自定义cookies
+  let hasValidSession = !!session
+  if (!session) {
+    const accessToken = request.cookies.get('sb-access-token')?.value
+    if (accessToken) {
+      console.log(`[Middleware] 找到自定义访问令牌`)
+      hasValidSession = true
+    }
+  }
+  
+  console.log(`[Middleware] 路径: ${request.nextUrl.pathname}, 会话状态: ${hasValidSession ? '已登录' : '未登录'}`)
   
   const protectedPaths = ['/analysis', '/account']
   const path = request.nextUrl.pathname
   
   const isProtectedPath = protectedPaths.some(prefix => path.startsWith(prefix))
-  if (isProtectedPath && !session) {
+  if (isProtectedPath && !hasValidSession) {
     console.log(`[Middleware] 重定向未授权访问: ${path} -> /auth/login`)
     const redirectUrl = new URL('/auth/login', request.url)
     redirectUrl.searchParams.set('redirectedFrom', path)

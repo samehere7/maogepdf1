@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, FolderIcon } from "lucide-react"
+import { Pencil, Trash2, FolderIcon, Share, Brain } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,10 +10,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input"
 import SidebarSignIn from "@/components/SidebarSignIn"
 import { LanguageSelector } from "@/components/language-selector"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import SidebarUserInfo from "@/components/SidebarUserInfo"
+import ShareChatModal from "@/components/share-chat-modal"
+import { useUser } from "@/components/UserProvider"
 
-export function Sidebar({ className }: { className?: string }) {
+interface SidebarProps {
+  className?: string
+  pdfFlashcardCounts?: {[pdfId: string]: number}
+}
+
+export function Sidebar({ className, pdfFlashcardCounts = {} }: SidebarProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showFolderModal, setShowFolderModal] = useState(false)
@@ -25,7 +32,6 @@ export function Sidebar({ className }: { className?: string }) {
   const [draggedPdfId, setDraggedPdfId] = useState<string | null>(null)
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null)
   const [folderStructure, setFolderStructure] = useState<{[key: string]: string[]}>({})
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deletingPdf, setDeletingPdf] = useState<{id: string, name: string} | null>(null)
@@ -34,17 +40,17 @@ export function Sidebar({ className }: { className?: string }) {
   const [isDragging, setIsDragging] = useState(false)
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
   const dragElementRef = useRef<HTMLDivElement | null>(null)
-  const supabase = createClient()
-
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [sharePdfId, setSharePdfId] = useState<string>('')
+  const [sharePdfName, setSharePdfName] = useState<string>('')
+  const [pdfFlashcards, setPdfFlashcards] = useState<{[pdfId: string]: number}>({}) // 存储每个PDF的闪卡数量
+  
+  // 更新PDF闪卡计数
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(!!user)
-    })
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session?.user)
-    })
-    return () => listener.subscription.unsubscribe()
-  }, [supabase])
+    setPdfFlashcards(pdfFlashcardCounts)
+  }, [pdfFlashcardCounts])
+  const { profile } = useUser()
+  const isLoggedIn = !!profile
 
   useEffect(() => {
     // 如果用户已登录，从API获取PDF列表
@@ -75,6 +81,7 @@ export function Sidebar({ className }: { className?: string }) {
   const loadPDFsFromAPI = async () => {
     try {
       console.log('[Sidebar] 从API加载PDF列表...')
+      
       const response = await fetch('/api/pdfs')
       
       if (response.ok) {
@@ -399,6 +406,14 @@ export function Sidebar({ className }: { className?: string }) {
     router.push(`/analysis/${pdfId}`)
   }
 
+  // 处理分享按钮点击
+  const handleSharePdf = (e: React.MouseEvent, pdfId: string, pdfName: string) => {
+    e.stopPropagation()
+    setSharePdfId(pdfId)
+    setSharePdfName(pdfName)
+    setShowShareModal(true)
+  }
+
   // Get PDFs that are not in any folder
   const getRootPdfs = () => {
     const allFolderPdfs = new Set(
@@ -522,11 +537,13 @@ export function Sidebar({ className }: { className?: string }) {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-1">
-                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                  </div>
+                  <button 
+                    onClick={(e) => handleSharePdf(e, pdf.id, pdf.name)}
+                    className="p-1 hover:bg-gray-700 rounded flex items-center justify-center"
+                    title="分享PDF"
+                  >
+                    <Share size={14} className="text-gray-400 hover:text-gray-300" />
+                  </button>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
                     <button 
                       onClick={(e) => {
@@ -550,9 +567,17 @@ export function Sidebar({ className }: { className?: string }) {
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <span className="text-gray-300 truncate flex-1 min-w-0" title={pdf.name}>
-                    {pdf.name}
-                  </span>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-gray-300 truncate" title={pdf.name}>
+                      {pdf.name}
+                    </span>
+                    {pdfFlashcards[pdf.id] && (
+                      <div className="flex items-center gap-1 bg-purple-600 text-white px-2 py-1 rounded-full text-xs flex-shrink-0">
+                        <Brain size={12} />
+                        <span>{pdfFlashcards[pdf.id]}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -670,11 +695,13 @@ export function Sidebar({ className }: { className?: string }) {
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          <div className="flex flex-col gap-1">
-                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                            <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
-                          </div>
+                          <button 
+                            onClick={(e) => handleSharePdf(e, pdf.id, pdf.name)}
+                            className="p-1 hover:bg-gray-700 rounded flex items-center justify-center"
+                            title="分享PDF"
+                          >
+                            <Share size={14} className="text-gray-400 hover:text-gray-300" />
+                          </button>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
                             <button 
                               onClick={(e) => {
@@ -698,9 +725,17 @@ export function Sidebar({ className }: { className?: string }) {
                               <Trash2 size={14} />
                             </button>
                           </div>
-                          <span className="text-gray-300 truncate flex-1 min-w-0" title={pdf.name}>
-                    {pdf.name}
-                  </span>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-gray-300 truncate" title={pdf.name}>
+                              {pdf.name}
+                            </span>
+                            {pdfFlashcards[pdf.id] && (
+                              <div className="flex items-center gap-1 bg-purple-600 text-white px-2 py-1 rounded-full text-xs flex-shrink-0">
+                                <Brain size={12} />
+                                <span>{pdfFlashcards[pdf.id]}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))
@@ -715,7 +750,9 @@ export function Sidebar({ className }: { className?: string }) {
       {/* 创建文件夹模态框 */}
       <Dialog open={showFolderModal} onOpenChange={setShowFolderModal}>
         <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold mb-4">新建文件夹</h2>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold mb-4">新建文件夹</DialogTitle>
+          </DialogHeader>
           <Input
             placeholder="输入文件夹名称"
             value={folderName}
@@ -743,7 +780,9 @@ export function Sidebar({ className }: { className?: string }) {
       {/* 登录弹窗 */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
-          <h2 className="text-xl font-semibold mb-4">请先登录</h2>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold mb-4">请先登录</DialogTitle>
+          </DialogHeader>
           <p className="mb-4 text-gray-700">登录后才能新建文件夹和管理PDF。</p>
           <SidebarSignIn />
         </DialogContent>
@@ -789,6 +828,16 @@ export function Sidebar({ className }: { className?: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 分享PDF弹窗 */}
+      {showShareModal && (
+        <ShareChatModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          pdfId={sharePdfId}
+          pdfName={sharePdfName}
+        />
+      )}
 
       {/* 侧边栏最底部：登录+语言选择器 */}
       <div className="mt-auto">

@@ -1,10 +1,10 @@
 "use client"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import UpgradePlusModal from "@/components/UpgradePlusModal"
 import { useState, useEffect } from "react"
 import { useUser } from "@/components/UserProvider"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 
 interface AccountModalProps {
   open: boolean
@@ -24,7 +24,6 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
   const chatQuotaLimit = 20;
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const { profile, setProfile } = useUser();
-  const supabase = createClient();
   const [quota, setQuota] = useState<{pdf_count: number, chat_count: number, quota_date: string}>({pdf_count: 0, chat_count: 0, quota_date: ''});
 
   // 升级按钮逻辑
@@ -98,8 +97,9 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
           setQuota(data);
         }
       } catch (error) {
-        console.error('获取用户配额失败:', error);
-        // 如果表不存在，使用默认值
+        // 完全静默处理权限错误，使用默认值
+        console.debug('配额查询失败（已忽略）:', error.code);
+        // 如果表不存在或权限不足，使用默认值
         setQuota({ pdf_count: 0, chat_count: 0, quota_date: new Date().toISOString().slice(0, 10) });
       }
     };
@@ -109,10 +109,9 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[360px] bg-white rounded-2xl p-0 overflow-hidden">
-        {/* 头部 */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b">
-          <div className="text-lg font-semibold">我的账户</div>
-        </div>
+        <DialogHeader className="flex items-center justify-between px-6 pt-5 pb-3 border-b">
+          <DialogTitle className="text-lg font-semibold">我的账户</DialogTitle>
+        </DialogHeader>
         {/* 邮箱+退出 */}
         <div className="flex items-center px-6 py-4">
           <span className="text-gray-900 font-medium">{user?.email}</span>

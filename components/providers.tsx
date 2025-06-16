@@ -3,7 +3,7 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/components/UserProvider"
 import { LanguageProvider } from "@/components/language-provider"
-import { SessionProvider } from "next-auth/react"
+import AuthTokenHandler from "@/components/AuthTokenHandler"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,13 +13,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <SessionProvider>
-        <LanguageProvider>
-          <UserProvider>
-            {children}
-          </UserProvider>
-        </LanguageProvider>
-      </SessionProvider>
+      <LanguageProvider>
+        <UserProvider>
+          <AuthTokenHandler />
+          {children}
+        </UserProvider>
+      </LanguageProvider>
     </ThemeProvider>
   )
 } 

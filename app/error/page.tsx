@@ -1,12 +1,26 @@
 "use client"
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useUser } from '@/components/UserProvider'
+import { useEffect } from 'react'
 
 export default function ErrorPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { profile, loading } = useUser()
   const errorMessage = searchParams.get('message') || '发生了未知错误'
+
+  // 如果用户已经登录但在错误页面，自动重定向到首页
+  useEffect(() => {
+    if (!loading && profile && errorMessage.includes('授权失败')) {
+      console.log('用户已登录但在错误页面，自动重定向到首页')
+      setTimeout(() => {
+        router.push('/')
+      }, 2000)
+    }
+  }, [profile, loading, errorMessage, router])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
@@ -19,11 +33,23 @@ export default function ErrorPage() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          出错了
+          {!loading && profile && errorMessage.includes('授权失败') ? 
+            '登录成功' : 
+            '出错了'
+          }
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {errorMessage}
+          {!loading && profile && errorMessage.includes('授权失败') ? 
+            '登录成功！正在跳转到首页...' : 
+            errorMessage
+          }
         </p>
+        
+        {!loading && profile && errorMessage.includes('授权失败') && (
+          <div className="mt-4 text-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8b5cf6] mx-auto"></div>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

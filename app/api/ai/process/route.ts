@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// 使用OpenRouter的DeepSeek免费模型
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENROUTER_API_KEY_FREE || process.env.OPENAI_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1"
 });
 
 export async function POST(request: Request) {
@@ -45,7 +47,11 @@ export async function POST(request: Request) {
           content: prompt
         }
       ],
-      model: "gpt-3.5-turbo",
+      model: "deepseek/deepseek-chat-v3-0324:free",
+      extra_headers: {
+        "HTTP-Referer": "https://maoge.pdf",
+        "X-Title": "Maoge PDF"
+      }
     });
 
     const result = completion.choices[0].message.content;

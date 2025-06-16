@@ -1,6 +1,6 @@
 # Maoge PDF - AI-Powered PDF Analysis Platform
 
-一个基于Next.js和AI的智能PDF分析平台，支持闪卡学习、文档对话等功能。
+一个基于Next.js和AI的智能PDF分析平台，支持闪卡学习、文档对话等功能，并集成了Supabase数据库和Puppeteer网页自动化工具。
 
 ## 🚀 功能特性
 
@@ -10,6 +10,7 @@
 - 👤 **用户认证** - 集成Google OAuth登录
 - 📱 **响应式设计** - 适配移动端和桌面端
 - ☁️ **云存储支持** - 集成Supabase数据库和存储
+- 🌐 **网页抓取** - 使用Puppeteer进行网页自动化
 
 ## 📦 技术栈
 
@@ -18,6 +19,7 @@
 - **认证**: NextAuth.js with Google OAuth
 - **数据库**: Supabase (PostgreSQL)
 - **AI服务**: OpenRouter API
+- **网页抓取**: Puppeteer
 - **部署**: Vercel
 
 ## 🛠️ 本地开发
@@ -34,9 +36,23 @@ npm install --legacy-peer-deps
 ```
 
 ### 3. 环境变量配置
-复制 `.env.example` 到 `.env.local` 并填入相应的值：
-```bash
-cp .env.example .env.local
+创建 `.env.local` 文件并填入相应的值：
+```
+# Supabase配置
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-url.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+# OpenRouter配置
+OPENROUTER_API_KEY=your-openrouter-api-key
+
+# 其他环境变量...
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret
+
+# Puppeteer配置
+PUPPETEER_SKIP_DOWNLOAD=true
 ```
 
 ### 4. 启动开发服务器
@@ -65,18 +81,60 @@ npm run dev
 
 ## 📝 更新日志
 
-### 最新更新 (2025-06-11)
+### 最新更新 (2025-06-16)
+- ✅ 集成Supabase数据库用于存储用户数据和文档
+- ✅ 添加Puppeteer支持，用于网页抓取和自动化
 - ✅ 修复闪卡学习进度条更新问题
-- ✅ 禁用自动总结功能，避免干扰用户聊天
 - ✅ 优化聊天界面文本排版和格式化显示
 - ✅ 添加聊天等待状态的转动加载指示器
 - ✅ 完善闪卡编辑和管理功能
 - ✅ 清理代码库安全性问题
 
+## 示例脚本
+
+项目包含两个示例脚本，展示如何使用Supabase和Puppeteer：
+
+### Supabase示例
+
+```bash
+npx ts-node scripts/supabase-example.ts
+```
+
+这个脚本演示了：
+- 连接Supabase
+- 基础CRUD操作（创建、读取、更新、删除）
+- 高级查询
+
+### Puppeteer示例
+
+```bash
+npx ts-node scripts/puppeteer-example.ts
+```
+
+这个脚本演示了：
+- 启动浏览器
+- 网页导航
+- 截图
+- 内容提取
+
+## 注意事项
+
+- 确保`.env.local`文件不被提交到版本控制系统（已在`.gitignore`中配置）
+- 如遇到Puppeteer安装问题，可参考[Puppeteer文档](https://pptr.dev/troubleshooting)
+- Supabase客户端初始化位于`lib/supabase/client.ts`
+
+## 推送仓库
+
+使用项目根目录的`push-local.sh`脚本进行强制推送（以本地代码为准）：
+
+```bash
+./push-local.sh
+```
+
 ## 🤝 贡献
 
 欢迎提交 Issues 和 Pull Requests！
 
-## 📄 许可证
+## �� 许可证
 
 MIT License

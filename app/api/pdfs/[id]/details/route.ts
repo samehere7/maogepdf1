@@ -25,18 +25,31 @@ export async function GET(
     console.log('[PDF Details API] 获取PDF详情，ID:', pdfId, '用户:', user.id);
 
     // 从数据库获取PDF信息
-    const pdf = await getPDF(pdfId, user.id);
-    
-    if (!pdf) {
-      console.log('[PDF Details API] 未找到PDF或无权限访问');
-      return NextResponse.json({ error: 'PDF文件未找到或无权限访问' }, { status: 404 });
+    try {
+      const pdf = await getPDF(pdfId, user.id);
+      
+      if (!pdf) {
+        console.log('[PDF Details API] 未找到PDF或无权限访问');
+        return NextResponse.json({ error: 'PDF文件未找到或无权限访问' }, { status: 404 });
+      }
+      
+      console.log('[PDF Details API] 成功获取PDF信息:', pdf.name);
+
+      return NextResponse.json({ 
+        pdf 
+      });
+      
+    } catch (dbError) {
+      console.error('[PDF Details API] 数据库查询失败:', dbError);
+      // 如果是权限错误，返回更具体的错误信息
+      if (dbError.message?.includes('permission denied')) {
+        return NextResponse.json({ 
+          error: '数据库权限配置问题，请联系管理员',
+          details: 'RLS policy configuration error'
+        }, { status: 503 });
+      }
+      throw dbError;
     }
-
-    console.log('[PDF Details API] 成功获取PDF信息:', pdf.name);
-
-    return NextResponse.json({ 
-      pdf 
-    });
 
   } catch (error) {
     console.error('[PDF Details API] 获取PDF详情失败:', error);

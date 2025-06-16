@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { uploadPDF } from '@/lib/pdf-service';
 import { prisma } from '@/lib/prisma';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
@@ -23,19 +22,23 @@ async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: st
 
 export async function POST(req: Request) {
   try {
-    // 检查用户是否已登录 - 使用更安全的getUser方法
+    // 检查用户是否已登录
     const supabase = createClient();
+    
+    // 获取用户信息
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('[Upload API] 用户检查:', user ? `用户 ${user.id}` : '未找到用户', authError ? authError.message : '');
     
-    console.log('[Upload API] 会话状态:', user ? '已登录' : '未登录');
-    
-    if (authError || !user?.id || !user?.email) {
-      console.log('[Upload API] 用户未登录或认证失败，拒绝上传', authError);
-      return NextResponse.json({ error: '未登录或认证失败' }, { status: 401 });
+    if (!user?.id || !user?.email) {
+      console.log('[Upload API] 用户未登录或认证失败，拒绝上传');
+      return NextResponse.json({ 
+        error: '未登录或认证失败',
+        details: authError?.message || 'User not found'
+      }, { status: 401 });
     }
-
-    const userEmail = user.email;
+    
     const userId = user.id;
+    const userEmail = user.email;
     console.log('[Upload API] 用户已登录:', userEmail, '用户ID:', userId);
 
     // 确保用户在数据库中存在 - 使用user_profiles表
@@ -133,11 +136,8 @@ export async function POST(req: Request) {
 
     console.log(`[Upload API] 处理上传文件: ${fileName}, 大小: ${file.size}, 质量模式: ${quality}`);
 
-    // 尝试使用管理员客户端直接上传文件到存储桶（绕过RLS限制）
+    // 使用用户认证的客户端直接上传
     try {
-      // 创建管理员客户端
-      const adminClient = createAdminClient();
-      
       // 生成唯一文件名
       const timestamp = Date.now();
       const safeUserId = userEmail.split('@')[0];
@@ -147,10 +147,10 @@ export async function POST(req: Request) {
       // 将File/Blob转换为ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
       
-      console.log('[Upload API] 使用管理员客户端上传文件:', uniqueFileName);
+      console.log('[Upload API] 使用用户认证客户端上传文件:', uniqueFileName);
       
-      // 使用管理员客户端上传（绕过RLS限制）
-      const { data: uploadData, error: uploadError } = await adminClient.storage
+      // 使用用户认证的客户端上传
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('pdfs')
         .upload(uniqueFileName, arrayBuffer, {
           contentType: 'application/pdf',
@@ -158,22 +158,19 @@ export async function POST(req: Request) {
         });
         
       if (uploadError) {
-        console.error('[Upload API] 管理员上传失败:', uploadError);
+        console.error('[Upload API] 用户上传失败:', uploadError);
         throw new Error('文件上传失败: ' + uploadError.message);
       }
       
       // 获取文件URL
-      const { data: { publicUrl } } = adminClient.storage
+      const { data: { publicUrl } } = supabase.storage
         .from('pdfs')
         .getPublicUrl(uniqueFileName);
         
       console.log('[Upload API] 文件已上传，URL:', publicUrl);
       
-      // 使用Prisma创建PDF记录 - 使用pdfs表（小写）而不是PDF表
+      // 使用Prisma创建PDF记录
       console.log('[Upload API] 准备创建数据库记录');
-      
-      // 使用原始文件名，不生成智能总结
-      const summary = fileName;
       
       const pdf = await prisma.pdfs.create({
         data: {
@@ -181,8 +178,8 @@ export async function POST(req: Request) {
           url: publicUrl,
           size: file.size,
           user_id: userId,
-          summary: summary
-        } as any  // 临时解决类型问题
+          summary: fileName
+        } as any
       });
       
       console.log('[Upload API] 数据库记录创建成功，PDF ID:', pdf.id);
@@ -192,9 +189,6 @@ export async function POST(req: Request) {
         console.error('[Upload API] RAG系统处理失败:', error);
       });
       
-      // 确保数据库事务完成
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
       return NextResponse.json({
         message: '文件上传成功',
         pdf: pdf,
@@ -202,10 +196,10 @@ export async function POST(req: Request) {
       });
       
     } catch (directUploadError) {
-      console.error('[Upload API] 管理员上传失败，尝试使用pdf-service:', directUploadError);
+      console.error('[Upload API] 直接上传失败，尝试使用pdf-service:', directUploadError);
       
-      // 如果管理员上传失败，回退到使用pdf-service
-      const pdf = await uploadPDF(file, userId, fileName);  // 使用userId而不是email
+      // 如果直接上传失败，回退到使用pdf-service
+      const pdf = await uploadPDF(file, userId, fileName);
       console.log('[Upload API] 文件上传成功, ID:', pdf.id);
       
       // 后台处理PDF到RAG系统（不阻塞响应）
@@ -213,19 +207,11 @@ export async function POST(req: Request) {
         console.error('[Upload API] RAG系统处理失败:', error);
       });
       
-      return new NextResponse(
-        JSON.stringify({
-          message: '文件上传成功',
-          pdf: pdf,
-          url: pdf.url
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      return NextResponse.json({
+        message: '文件上传成功',
+        pdf: pdf,
+        url: pdf.url
+      });
     }
   } catch (error) {
     console.error('[Upload API] 上传处理失败:', error);

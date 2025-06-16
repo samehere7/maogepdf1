@@ -16,6 +16,9 @@ import { FooterModal } from "@/components/footer-modals"
 import { ModelQuality } from "@/types/api"
 import AuthButton from "@/components/AuthButton"
 import { useUser } from '@/components/UserProvider'
+import ShareReceiveModal from "@/components/share-receive-modal"
+import ShareDetector from "@/components/share-detector"
+import { Suspense } from 'react'
 
 export default function HomePage() {
   const [uploading, setUploading] = useState(false)
@@ -27,11 +30,79 @@ export default function HomePage() {
   const router = useRouter()
   const { t, language } = useLanguage()
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
-  const { profile } = useUser()
+  const { profile, loading: profileLoading } = useUser()
+  const [shareId, setShareId] = useState<string | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
+  
   // 默认非Plus会员
   const isPlus = profile?.plus && profile?.is_active
+  const isLoggedIn = !!profile
+
+  // 处理分享检测
+  const handleShareDetected = (detectedShareId: string) => {
+    setShareId(detectedShareId)
+    setShowShareModal(true)
+  }
+
+  // 检测登录状态变化，自动处理待处理的分享
+  useEffect(() => {
+    if (isLoggedIn) {
+      const pendingShareId = localStorage.getItem('pendingShareId')
+      if (pendingShareId) {
+        // 清除存储的分享ID
+        localStorage.removeItem('pendingShareId')
+        // 自动接收分享
+        handlePendingShare(pendingShareId)
+      }
+    }
+  }, [isLoggedIn])
+
+  // 处理待处理的分享
+  const handlePendingShare = async (shareId: string) => {
+    try {
+      const response = await fetch('/api/share/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shareId }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('自动接收分享失败:', errorData.error)
+        // 如果自动接收失败，重新显示分享弹窗
+        setShareId(shareId)
+        setShowShareModal(true)
+        return
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // 成功接收，直接跳转到PDF页面
+        router.push(`/analysis/${result.pdfId}`)
+      } else {
+        // 接收失败，重新显示分享弹窗
+        setShareId(shareId)
+        setShowShareModal(true)
+      }
+      
+    } catch (error) {
+      console.error('处理待处理分享失败:', error)
+      // 出错时重新显示分享弹窗
+      setShareId(shareId)
+      setShowShareModal(true)
+    }
+  }
 
   const handleFile = async (file: File, quality: ModelQuality) => {
+    // 检查用户是否已登录
+    if (!isLoggedIn) {
+      alert('请先登录后再上传文件。点击右上角登录按钮进行登录。');
+      return;
+    }
+    
     if (!file.type.includes("pdf")) {
       alert(t("onlyPdfAllowed"))
       return
@@ -50,7 +121,6 @@ export default function HomePage() {
       
       console.log("开始上传文件:", file.name, "质量模式:", quality);
       
-      // 直接使用相对路径
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         body: formData
@@ -68,6 +138,12 @@ export default function HomePage() {
           throw new Error('上传失败，服务器返回无效响应');
         }
         console.error("上传错误:", errorData);
+        
+        // 如果是认证错误，提示用户登录
+        if (uploadResponse.status === 401) {
+          throw new Error('请先登录后再上传文件');
+        }
+        
         throw new Error(errorData.error || '上传失败');
       }
       
@@ -121,6 +197,20 @@ export default function HomePage() {
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0], modelQuality)
     }
+  }
+
+  // 显示加载状态，避免页面一直刷新
+  // 只在真正需要时显示加载状态（比如初次加载）
+  if (profileLoading && typeof window !== 'undefined' && !sessionStorage.getItem('app_initialized')) {
+    sessionStorage.setItem('app_initialized', 'true');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
+          <p className="text-slate-600">正在初始化...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -444,6 +534,21 @@ export default function HomePage() {
         onClose={() => setModalType(null)}
         type={modalType || "terms"}
       />
+
+      {/* Share Detector */}
+      <Suspense fallback={null}>
+        <ShareDetector onShareDetected={handleShareDetected} />
+      </Suspense>
+
+      {/* Share Receive Modal */}
+      {shareId && (
+        <ShareReceiveModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          shareId={shareId}
+          isLoggedIn={isLoggedIn}
+        />
+      )}
       </div>
     </div>
   )

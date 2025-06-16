@@ -107,10 +107,19 @@ async function extractTextFromRenderedPDF(pdfUrl: string): Promise<PDFPageConten
   }
 }
 
-// 使用PDF.js提取文本的备选方法
+// 缓存提取结果
+const extractionCache = new Map<string, PDFPageContent[]>();
+
+// 使用PDF.js提取文本的备选方法 - 优化版本
 async function extractWithPDFJS(pdfUrl: string): Promise<PDFPageContent[]> {
   try {
     console.log('[PDF文本提取] 尝试使用PDF.js提取');
+    
+    // 检查缓存
+    if (extractionCache.has(pdfUrl)) {
+      console.log('[PDF文本提取] 使用缓存结果');
+      return extractionCache.get(pdfUrl)!;
+    }
     
     // 动态导入PDF.js以避免worker问题
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
@@ -138,40 +147,68 @@ async function extractWithPDFJS(pdfUrl: string): Promise<PDFPageContent[]> {
       useSystemFonts: true
     }).promise;
     
-    const pageContents: PDFPageContent[] = [];
+    console.log(`[PDF文本提取] 开始并行处理${pdf.numPages}页`);
     
-    // 提取每页文本
+    // 并行处理所有页面 - 性能优化
+    const pagePromises = [];
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      try {
-        const page = await pdf.getPage(pageNum);
-        const textContent = await page.getTextContent();
-        
-        // 将文本项组合成完整文本
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        
-        if (pageText) {
-          pageContents.push({
-            pageNumber: pageNum,
-            text: pageText
-          });
-        }
-        
-        console.log(`[PDF文本提取] PDF.js页面${pageNum}提取完成，长度: ${pageText.length}`);
-      } catch (pageError) {
-        console.error(`[PDF文本提取] PDF.js页面${pageNum}提取失败:`, pageError);
-      }
+      pagePromises.push(extractPageText(pdf, pageNum));
     }
     
-    console.log(`[PDF文本提取] PDF.js提取完成，总页数: ${pageContents.length}`);
+    // 等待所有页面处理完成
+    const pageResults = await Promise.allSettled(pagePromises);
+    
+    // 收集成功提取的页面
+    const pageContents: PDFPageContent[] = [];
+    pageResults.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value) {
+        pageContents.push(result.value);
+      } else {
+        console.error(`[PDF文本提取] 页面${index + 1}提取失败:`, result.status === 'rejected' ? result.reason : '未知错误');
+      }
+    });
+    
+    // 按页码排序
+    pageContents.sort((a, b) => a.pageNumber - b.pageNumber);
+    
+    console.log(`[PDF文本提取] 并行提取完成，成功页数: ${pageContents.length}/${pdf.numPages}`);
+    
+    // 缓存结果
+    extractionCache.set(pdfUrl, pageContents);
+    
     return pageContents;
     
   } catch (error) {
     console.error('[PDF文本提取] PDF.js提取失败:', error);
     return [];
+  }
+}
+
+// 提取单页文本的辅助函数
+async function extractPageText(pdf: any, pageNum: number): Promise<PDFPageContent | null> {
+  try {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    
+    // 将文本项组合成完整文本
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    if (pageText) {
+      console.log(`[PDF文本提取] 页面${pageNum}提取完成，长度: ${pageText.length}`);
+      return {
+        pageNumber: pageNum,
+        text: pageText
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`[PDF文本提取] 页面${pageNum}提取失败:`, error);
+    return null;
   }
 }
 

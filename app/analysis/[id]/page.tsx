@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
@@ -12,17 +12,20 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { Sidebar } from "@/components/sidebar"
 import * as pdfjsLib from 'pdfjs-dist'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import FlashcardList from "@/components/flashcard-list"
-import FlashcardStudy from "@/components/flashcard-study"
+import FlashcardCreateModal from "@/components/flashcard-create-modal"
+import FlashcardManager from "@/components/flashcard-manager"
+import FlashcardPractice from "@/components/flashcard-practice"
+import FlashcardResults from "@/components/flashcard-results"
 import { PDFViewerRef } from "@/components/interactive-pdf-viewer"
 import { PageAnchorText } from "@/components/page-anchor-button"
 import InteractivePDFViewer from "@/components/interactive-pdf-viewer"
 import { WelcomeQuestions, WelcomeQuestionsLoading } from "@/components/welcome-questions"
 import { generatePDFQuestions } from "@/lib/pdf-question-generator"
 import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
+import ShareChatModal from "@/components/share-chat-modal"
 
 interface AnalysisResult {
   theme: string
@@ -34,24 +37,13 @@ interface AnalysisResult {
   conclusions: string
 }
 
-// 定义模型配置
-const MODEL_CONFIGS = {
-  fast: {
-    model: "openai/gpt-4o-mini",
-    apiKey: "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"
-  },
-  highQuality: {
-    model: "openai/gpt-4o-2024-11-20",
-    apiKey: "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"
-  }
-};
+// 移除硬编码的API密钥配置，改为通过后端API调用
 
 export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
   const { t } = useLanguage()
   const [user, setUser] = useState<any>(null)
-  const supabase = createClient()
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [fileInfo, setFileInfo] = useState<any>(null)
@@ -90,6 +82,23 @@ export default function AnalysisPage() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeQuestions, setWelcomeQuestions] = useState<any[]>([]);
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+  
+  // 分享弹窗状态
+  const [showShareModal, setShowShareModal] = useState(false);
+  
+  // 闪卡功能状态
+  const [showFlashcardModal, setShowFlashcardModal] = useState(false);
+  const [flashcardView, setFlashcardView] = useState<'none' | 'create' | 'manage' | 'practice' | 'results'>('none');
+  const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [practiceResults, setPracticeResults] = useState<any>(null)
+  
+  // 计算PDF闪卡计数 - 使用useMemo避免无限循环
+  const pdfFlashcardCounts = useMemo(() => {
+    if (!fileInfo?.id || flashcards.length === 0) return {}
+    return {
+      [fileInfo.id]: flashcards.length
+    }
+  }, [fileInfo?.id, flashcards.length]);
 
   useEffect(() => {
     setIsClient(true);
@@ -281,6 +290,10 @@ export default function AnalysisPage() {
     setMessages(prev => [...prev, { role: "user", content: userQuestion }]);
     setQuestion("");
     setAnswering(true);
+    
+    // 立即显示"正在思考"状态
+    const thinkingMessage = { role: "assistant" as const, content: "🤔 正在分析PDF内容..." };
+    setMessages(prev => [...prev, thinkingMessage]);
 
     // 保存用户问题到数据库
     await saveChatMessage(fileInfo.id, userQuestion, true);
@@ -316,8 +329,14 @@ export default function AnalysisPage() {
       console.log("聊天API响应:", data);
       const assistantReply = data.content || "无法生成回答";
       
-      // 添加AI回答到消息列表
-      setMessages(prev => [...prev, { role: "assistant", content: assistantReply }]);
+      // 替换thinking消息为实际AI回答
+      setMessages(prev => {
+        const newMessages = [...prev];
+        // 移除最后的thinking消息，添加实际回答
+        newMessages.pop();
+        newMessages.push({ role: "assistant", content: assistantReply });
+        return newMessages;
+      });
       
       // 保存AI回答到数据库
       await saveChatMessage(fileInfo.id, assistantReply, false);
@@ -325,10 +344,15 @@ export default function AnalysisPage() {
     } catch (error) {
       console.error("聊天错误:", error);
       const errorMessage = "抱歉，处理您的问题时出错了。请稍后再试。";
-      setMessages(prev => [...prev, { 
-        role: "assistant", 
-        content: errorMessage 
-      }]);
+      
+      // 替换thinking消息为错误消息
+      setMessages(prev => {
+        const newMessages = [...prev];
+        // 移除最后的thinking消息，添加错误消息
+        newMessages.pop();
+        newMessages.push({ role: "assistant", content: errorMessage });
+        return newMessages;
+      });
       
       // 保存错误消息到数据库
       await saveChatMessage(fileInfo.id, errorMessage, false);
@@ -401,13 +425,13 @@ export default function AnalysisPage() {
     
     switch (action) {
       case 'explain':
-        prompt = `解释：${text}`;
+        prompt = `解释："${text}"。`;
         break;
       case 'summarize':
-        prompt = `总结：${text}`;
+        prompt = `总结："${text}"。`;
         break;
       case 'rewrite':
-        prompt = `改写：${text}`;
+        prompt = `改写："${text}"。`;
         break;
     }
     
@@ -446,14 +470,7 @@ export default function AnalysisPage() {
   const handleWelcomeQuestionClick = (questionText: string) => {
     console.log('[欢迎问题] 用户点击问题:', questionText);
     
-    // 添加用户问题到消息列表
-    const userMessage = {
-      role: "user" as const,
-      content: questionText
-    };
-    setMessages(prev => [...prev, userMessage]);
-    
-    // 自动发送问题
+    // 直接调用handleSendQuestion，它会处理消息添加
     handleSendQuestion(questionText);
     
     // 隐藏欢迎界面
@@ -715,7 +732,7 @@ export default function AnalysisPage() {
     <div className="flex h-screen overflow-hidden">
       {/* 左侧边栏 - 固定宽度与主页一致 */}
       <div className="w-80 min-w-[240px] max-w-[320px] flex-shrink-0 border-r border-gray-200 bg-white">
-        <Sidebar />
+        <Sidebar pdfFlashcardCounts={pdfFlashcardCounts} />
       </div>
 
       {/* 中间PDF展示区 - 占剩余空间的50% */}
@@ -839,19 +856,30 @@ export default function AnalysisPage() {
             )}
           </div>
           
-          {/* 闪卡按钮 */}
+          {/* 闪卡和分享按钮 */}
           <div className="p-3 border-t border-gray-200 bg-white flex-shrink-0">
-            <Button
-              variant="outline"
-              className="w-full flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
-              onClick={() => {
-                // TODO: 打开闪卡弹窗或页面
-                console.log('打开闪卡功能');
-              }}
-            >
-              <BookOpen className="h-4 w-4" />
-              闪卡
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 flex items-center justify-center gap-2 hover:bg-purple-50 hover:border-purple-300"
+                onClick={() => {
+                  setShowFlashcardModal(true);
+                }}
+              >
+                <BookOpen className="h-4 w-4" />
+                闪卡
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 flex items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+                onClick={() => {
+                  setShowShareModal(true);
+                }}
+              >
+                <Share2 className="h-4 w-4" />
+                分享PDF
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -1019,6 +1047,76 @@ export default function AnalysisPage() {
             </div>
           </div>
       </div>
+
+      {/* 分享聊天记录弹窗 */}
+      {fileInfo && (
+        <ShareChatModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          pdfId={fileInfo.id}
+          pdfName={fileInfo.name}
+        />
+      )}
+
+      {/* 闪卡创建弹窗 */}
+      {fileInfo && (
+        <FlashcardCreateModal
+          isOpen={showFlashcardModal}
+          onClose={() => setShowFlashcardModal(false)}
+          pdfId={fileInfo.id}
+          pdfName={fileInfo.name}
+          onSuccess={(flashcards) => {
+            setFlashcards(flashcards);
+            setFlashcardView('manage');
+          }}
+        />
+      )}
+
+      {/* 闪卡管理界面 - 覆盖整个页面 */}
+      {flashcardView === 'manage' && fileInfo && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <FlashcardManager
+            pdfId={fileInfo.id}
+            pdfName={fileInfo.name}
+            onBack={() => setFlashcardView('none')}
+            onStartPractice={(cards) => {
+              setFlashcards(cards);
+              setFlashcardView('practice');
+            }}
+            onAddFlashcard={() => {
+              setFlashcardView('none');
+              setShowFlashcardModal(true);
+            }}
+          />
+        </div>
+      )}
+
+      {/* 闪卡练习界面 - 右侧区域 */}
+      {flashcardView === 'practice' && fileInfo && (
+        <div className="flex-1 h-screen overflow-hidden">
+          <FlashcardPractice
+            flashcards={flashcards}
+            pdfId={fileInfo.id}
+            onBack={() => setFlashcardView('manage')}
+            onComplete={(results) => {
+              setPracticeResults(results);
+              setFlashcardView('results');
+            }}
+          />
+        </div>
+      )}
+
+      {/* 闪卡结果界面 - 覆盖整个页面 */}
+      {flashcardView === 'results' && fileInfo && practiceResults && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <FlashcardResults
+            results={practiceResults}
+            pdfName={fileInfo.name}
+            onBack={() => setFlashcardView('manage')}
+            onPracticeAgain={() => setFlashcardView('practice')}
+          />
+        </div>
+      )}
 
     </div>
   );

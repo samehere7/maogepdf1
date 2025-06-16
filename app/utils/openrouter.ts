@@ -2,11 +2,11 @@ export type ModelQuality = 'fast' | 'high';
 
 const MODEL_CONFIGS = {
   fast: {
-    model: 'openai/gpt-4o-mini',
+    model: 'deepseek/deepseek-chat-v3-0324:free',
     apiKey: process.env.OPENROUTER_API_KEY_FAST,
   },
   high: {
-    model: 'openai/gpt-4o-2024-11-20',
+    model: 'deepseek/deepseek-chat-v3-0324:free',
     apiKey: process.env.OPENROUTER_API_KEY_HIGH,
   }
 };
