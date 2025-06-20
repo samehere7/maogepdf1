@@ -7,10 +7,11 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { Upload, FileText, GraduationCap, Briefcase, Quote } from "lucide-react"
-import { useLanguage } from "../components/language-provider"
+import {useTranslations} from 'next-intl';
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
+import FileSizeUpgradeModal from "@/components/FileSizeUpgradeModal"
 import { Sidebar } from "@/components/sidebar"
 import { FooterModal } from "@/components/footer-modals"
 import { ModelQuality } from "@/types/api"
@@ -25,18 +26,54 @@ export default function HomePage() {
   const [dragActive, setDragActive] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [upgradeFile, setUpgradeFile] = useState<{name: string, size: number} | null>(null)
+  const [showFileSizeUpgrade, setShowFileSizeUpgrade] = useState(false)
+  const [oversizedFile, setOversizedFile] = useState<{name: string, size: number} | null>(null)
   const [modelQuality, setModelQuality] = useState<ModelQuality>('high')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const { t, language } = useLanguage()
+  const t = useTranslations();
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
   const { profile, loading: profileLoading } = useUser()
   const [shareId, setShareId] = useState<string | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [pdfFlashcardCounts, setPdfFlashcardCounts] = useState<{[pdfId: string]: number}>({})
   
   // 默认非Plus会员
   const isPlus = profile?.plus && profile?.is_active
   const isLoggedIn = !!profile
+
+  // 从本地存储计算闪卡数量
+  const loadFlashcardCounts = () => {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const counts: {[pdfId: string]: number} = {}
+      
+      // 遍历localStorage寻找闪卡数据
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key?.startsWith('flashcards_')) {
+          const pdfId = key.replace('flashcards_', '')
+          const data = localStorage.getItem(key)
+          if (data) {
+            try {
+              const flashcards = JSON.parse(data)
+              if (Array.isArray(flashcards)) {
+                counts[pdfId] = flashcards.length
+              }
+            } catch (e) {
+              console.warn('[主页] 解析闪卡数据失败:', key, e)
+            }
+          }
+        }
+      }
+      
+      setPdfFlashcardCounts(counts)
+      console.log('[主页] 闪卡计数加载完成:', counts)
+    } catch (error) {
+      console.error('[主页] 加载闪卡计数失败:', error)
+    }
+  }
 
   // 处理分享检测
   const handleShareDetected = (detectedShareId: string) => {
@@ -56,6 +93,21 @@ export default function HomePage() {
       }
     }
   }, [isLoggedIn])
+
+  // 组件加载时计算闪卡数量
+  useEffect(() => {
+    loadFlashcardCounts()
+    
+    // 监听storage事件，当其他标签页更新闪卡时同步
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key?.startsWith('flashcards_')) {
+        loadFlashcardCounts()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [])
 
   // 处理待处理的分享
   const handlePendingShare = async (shareId: string) => {
@@ -104,13 +156,16 @@ export default function HomePage() {
     }
     
     if (!file.type.includes("pdf")) {
-      alert(t("onlyPdfAllowed"))
+      alert(t("upload.onlyPdfAllowed"))
       return
     }
     const maxSize = isPlus ? Infinity : 10 * 1024 * 1024
     if (file.size > maxSize) {
-      alert(isPlus ? "Plus会员文件大小无限制，可上传任意大小PDF" : t("fileSizeLimit"))
-      return
+      if (!isPlus) {
+        setOversizedFile({name: file.name, size: file.size})
+        setShowFileSizeUpgrade(true)
+        return
+      }
     }
     setUploading(true)
     try {
@@ -217,7 +272,14 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* 固定侧边栏 */}
       <div className="fixed top-0 left-0 h-screen w-80 min-w-[240px] max-w-[320px] z-30 bg-[#18181b]">
-        <Sidebar />
+        <Sidebar 
+          pdfFlashcardCounts={pdfFlashcardCounts}
+          onFlashcardClick={(pdfId, pdfName) => {
+            console.log('[主页] 闪卡点击事件触发:', pdfId, pdfName);
+            // 跳转到PDF页面并直接打开闪卡管理
+            router.push(`/analysis/${pdfId}?flashcard=true`);
+          }}
+        />
       </div>
       {/* 主内容区，留出侧边栏宽度 */}
       <div className="ml-80 flex-1 bg-white shadow-lg p-8 sm:p-12 md:p-16 lg:p-20 xl:p-24" style={{boxShadow: 'rgba(0,0,0,0.06) -4px 0 16px'}}>
@@ -226,6 +288,12 @@ export default function HomePage() {
           onOpenChange={setShowUpgrade}
           fileName={upgradeFile?.name || ''}
           fileSizeMB={upgradeFile ? Math.round(upgradeFile.size / 1024 / 1024) : 0}
+        />
+        <FileSizeUpgradeModal
+          open={showFileSizeUpgrade}
+          onOpenChange={setShowFileSizeUpgrade}
+          fileName={oversizedFile?.name || ''}
+          fileSizeMB={oversizedFile ? Math.round(oversizedFile.size / 1024 / 1024) : 0}
         />
       {/* Header */}
       <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-slate-200 px-6 sm:px-10 py-4 bg-white shadow-sm">
@@ -320,7 +388,6 @@ export default function HomePage() {
                 <p className="mb-2 text-lg text-slate-700">
                   <span className="font-semibold">{t("clickToUpload")}</span> {t("orDragAndDrop")}
                 </p>
-                <p className="text-sm text-slate-500">{t("pdfMaxSize")}</p>
               </div>
               <input
                 ref={fileInputRef}
@@ -332,30 +399,6 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Model Quality Selection */}
-            <div className="flex justify-center gap-4 mt-6">
-              <Button
-                className="min-w-[120px] px-6 py-2 bg-[#38bdf8] hover:bg-[#0ea5e9] text-white font-medium flex items-center gap-2"
-                onClick={() => handleUploadWithQuality('fast')}
-                disabled={uploading}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-                快速
-              </Button>
-              <Button
-                className="min-w-[120px] px-6 py-2 bg-[#a259ff] hover:bg-[#9333ea] text-white font-medium flex items-center gap-2"
-                onClick={() => handleUploadWithQuality('high')}
-                disabled={uploading}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                </svg>
-                高质量
-              </Button>
-            </div>
 
             <Button
               className="mt-8 min-w-[160px] h-14 px-8 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"

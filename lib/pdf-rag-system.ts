@@ -667,15 +667,27 @@ export class PDFRAGSystem {
       // 1. 检索相关内容
       const relevantChunks = await this.searchRelevantChunks(query, 3);
       
-      if (relevantChunks.length === 0) {
-        return this.generateFallbackAnswer(query);
+      // 2. 评估检索质量
+      const contentQuality = this.evaluateContentQuality(query, relevantChunks);
+      console.log(`[RAG] 内容质量评估: ${contentQuality.quality}, 置信度: ${contentQuality.confidence}`);
+      
+      let answer: string;
+      
+      // 3. 根据质量选择回答模式
+      if (contentQuality.quality === 'high') {
+        // 高质量匹配：基于PDF内容回答
+        const context = this.buildContext(query, relevantChunks, pdfTitle);
+        answer = this.generateContextualAnswer(context);
+        console.log('[RAG] 使用PDF内容生成回答');
+      } else if (contentQuality.quality === 'medium') {
+        // 中等质量：混合模式（PDF内容 + AI补充）
+        answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle);
+        console.log('[RAG] 使用混合模式生成回答');
+      } else {
+        // 低质量：使用AI通用知识回答
+        answer = await this.generateAIAnswer(query, pdfTitle);
+        console.log('[RAG] 使用AI通用知识生成回答');
       }
-      
-      // 2. 构建上下文
-      const context = this.buildContext(query, relevantChunks, pdfTitle);
-      
-      // 3. 生成回答
-      const answer = this.generateContextualAnswer(context);
       
       // 4. 添加到对话历史
       this.conversationHistory.push(
@@ -882,13 +894,157 @@ ${chunks[0].chunk.text}`;
   }
   
   /**
+   * 评估检索内容质量
+   */
+  private evaluateContentQuality(query: string, chunks: SearchResult[]): {quality: 'high' | 'medium' | 'low', confidence: number, reason: string} {
+    if (chunks.length === 0) {
+      return { quality: 'low', confidence: 0, reason: '未找到相关内容' };
+    }
+
+    const bestChunk = chunks[0];
+    const similarity = bestChunk.similarity;
+    
+    // 计算内容质量指标
+    const queryTerms = this.tokenize(query.toLowerCase());
+    const contentTerms = this.tokenize(bestChunk.chunk.text.toLowerCase());
+    const matchedTerms = queryTerms.filter(term => contentTerms.includes(term));
+    const termMatchRatio = matchedTerms.length / queryTerms.length;
+    
+    // 检查内容长度和完整性
+    const contentLength = bestChunk.chunk.text.length;
+    const hasCompleteInfo = contentLength > 50 && (
+      bestChunk.chunk.text.includes('。') || 
+      bestChunk.chunk.text.includes('.') ||
+      bestChunk.chunk.text.includes(':') ||
+      bestChunk.chunk.text.includes('：')
+    );
+    
+    // 特殊查询类型检测
+    const isSpecificTechnicalQuery = /命令|代码|如何|怎么|步骤|方法|操作/.test(query);
+    const hasRelevantKeywords = isSpecificTechnicalQuery && matchedTerms.some(term => 
+      /git|head|branch|commit|checkout|reset|log/.test(term)
+    );
+    
+    let confidence = similarity;
+    let quality: 'high' | 'medium' | 'low';
+    let reason: string;
+    
+    if (similarity >= 0.7 && termMatchRatio >= 0.6 && hasCompleteInfo) {
+      quality = 'high';
+      confidence = Math.min(0.95, confidence + 0.2);
+      reason = '高度匹配：相似度高且内容完整';
+    } else if (similarity >= 0.4 && termMatchRatio >= 0.3) {
+      quality = 'medium';
+      reason = '中度匹配：部分相关但需要补充';
+    } else if (isSpecificTechnicalQuery && !hasRelevantKeywords) {
+      quality = 'low';
+      confidence = 0.1;
+      reason = '技术问题但PDF中缺少相关信息';
+    } else if (similarity < 0.3) {
+      quality = 'low';
+      reason = '低度匹配：相关性不足';
+    } else {
+      quality = 'medium';
+      reason = '中度匹配：有一定相关性';
+    }
+    
+    return { quality, confidence, reason };
+  }
+
+  /**
+   * 生成混合回答（PDF内容 + AI补充）
+   */
+  private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string): Promise<string> {
+    const pdfContent = chunks.map(chunk => 
+      `【${pdfTitle}第${chunk.chunk.pageNumber}页】${chunk.chunk.text}`
+    ).join('\n\n');
+    
+    const prompt = `基于PDF内容回答用户问题，如内容不足可补充相关知识。
+
+PDF内容：
+${pdfContent}
+
+用户问题：${query}
+
+回答要求：
+- 简洁准确，避免冗长解释
+- 优先使用PDF内容，不足时补充通用知识
+- 如有页码引用请保留【页码】格式`;
+
+    return await this.callAIService(prompt);
+  }
+
+  /**
+   * 生成AI通用知识回答
+   */
+  private async generateAIAnswer(query: string, pdfTitle: string): Promise<string> {
+    const prompt = `用户询问：${query}
+
+当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。
+
+回答要求：
+- 简洁准确，直接回答要点
+- 可适当使用代码示例
+- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`;
+
+    return await this.callAIService(prompt);
+  }
+
+  /**
+   * 调用AI服务
+   */
+  private async callAIService(prompt: string): Promise<string> {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+          'X-Title': 'Maoge PDF Chat'
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-chat-v3-0324:free",
+          messages: [
+            { role: 'system', content: '你是一个专业的技术助手，擅长解答各种技术问题。' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 1500
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[RAG] AI服务HTTP错误: ${response.status} - ${errorText}`);
+        throw new Error(`AI服务错误: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('[RAG] AI服务响应:', JSON.stringify(data, null, 2));
+      
+      const aiResponse = data.choices[0]?.message?.content;
+      
+      if (!aiResponse) {
+        console.error('[RAG] AI响应格式异常:', data);
+        throw new Error('AI未返回有效响应');
+      }
+
+      return aiResponse;
+    } catch (error) {
+      console.error('[RAG] AI服务调用失败:', error);
+      return this.generateFallbackAnswer(query);
+    }
+  }
+
+  /**
    * 生成后备回答
    */
   private generateFallbackAnswer(query: string): string {
     const fallbacks = [
-      '抱歉，我没有找到直接相关的信息。请尝试用不同的关键词提问，比如："Git是什么"、"如何使用分支"等。',
-      '这个问题可能超出了当前文档的范围。您可以尝试更具体的问题，或者查看文档的其他部分。',
-      '让我帮您换个角度思考。您可以问一些具体的概念定义，或者询问文档中提到的操作步骤。'
+      '抱歉，我暂时无法回答这个问题。请尝试用不同的关键词提问，或者检查网络连接。',
+      '系统暂时遇到问题，请稍后重试或尝试更具体的问题。',
+      '抱歉，无法处理您的问题。您可以尝试重新表述问题或联系技术支持。'
     ];
     
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];

@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Play, Plus, Edit, Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 interface Flashcard {
   id: string
@@ -25,6 +28,7 @@ interface FlashcardStats {
 interface FlashcardManagerProps {
   pdfId: string
   pdfName: string
+  initialFlashcards?: Flashcard[]
   onBack: () => void
   onStartPractice: (flashcards: Flashcard[]) => void
   onAddFlashcard: () => void
@@ -32,7 +36,8 @@ interface FlashcardManagerProps {
 
 export default function FlashcardManager({ 
   pdfId, 
-  pdfName, 
+  pdfName,
+  initialFlashcards = [],
   onBack, 
   onStartPractice,
   onAddFlashcard 
@@ -46,11 +51,47 @@ export default function FlashcardManager({
     hard: 0
   })
   const [loading, setLoading] = useState(true)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingCard, setEditingCard] = useState<Flashcard | null>(null)
+  const [editingQuestion, setEditingQuestion] = useState('')
+  const [editingAnswer, setEditingAnswer] = useState('')
 
-  // 加载闪卡数据
+  // 从本地存储加载闪卡数据
+  const loadFlashcardsLocal = () => {
+    try {
+      const storageKey = `flashcards_${pdfId}`
+      const localData = localStorage.getItem(storageKey)
+      
+      if (localData) {
+        const localFlashcards = JSON.parse(localData)
+        console.log('[闪卡管理] 从本地存储加载闪卡:', localFlashcards.length)
+        setFlashcards(localFlashcards)
+        calculateStats(localFlashcards)
+        return localFlashcards
+      }
+      
+      return []
+    } catch (error) {
+      console.error('[闪卡管理] 本地存储加载失败:', error)
+      return []
+    }
+  }
+
+  // 加载闪卡数据（优先本地存储，后备API）
   const loadFlashcards = async () => {
     try {
       setLoading(true)
+      
+      // 首先尝试从本地存储加载
+      const localFlashcards = loadFlashcardsLocal()
+      
+      if (localFlashcards.length > 0) {
+        setLoading(false)
+        return
+      }
+      
+      // 本地没有数据，从API加载
+      console.log('[闪卡管理] 本地无数据，从API加载')
       const response = await fetch(`/api/flashcards/${pdfId}`)
       
       if (!response.ok) {
@@ -58,29 +99,16 @@ export default function FlashcardManager({
       }
       
       const data = await response.json()
-      setFlashcards(data.flashcards || [])
+      const apiFlashcards = data.flashcards || []
+      setFlashcards(apiFlashcards)
+      calculateStats(apiFlashcards)
       
-      // 计算统计信息
-      const newStats = data.flashcards.reduce((acc: FlashcardStats, card: Flashcard) => {
-        acc.total++
-        switch (card.difficulty) {
-          case 0:
-            acc.new++
-            break
-          case 1:
-            acc.easy++
-            break
-          case 2:
-            acc.medium++
-            break
-          case 3:
-            acc.hard++
-            break
-        }
-        return acc
-      }, { total: 0, new: 0, easy: 0, medium: 0, hard: 0 })
-      
-      setStats(newStats)
+      // 保存到本地存储
+      if (apiFlashcards.length > 0) {
+        const storageKey = `flashcards_${pdfId}`
+        localStorage.setItem(storageKey, JSON.stringify(apiFlashcards))
+        console.log('[闪卡管理] API数据已保存到本地存储')
+      }
       
     } catch (error) {
       console.error('加载闪卡失败:', error)
@@ -90,8 +118,27 @@ export default function FlashcardManager({
   }
 
   useEffect(() => {
-    loadFlashcards()
-  }, [pdfId])
+    if (initialFlashcards.length > 0) {
+      // 如果有传入的闪卡数据，直接使用
+      setFlashcards(initialFlashcards)
+      calculateStats(initialFlashcards)
+      setLoading(false)
+    } else {
+      // 否则从API加载
+      loadFlashcards()
+    }
+  }, [pdfId, initialFlashcards])
+
+  const calculateStats = (cards: Flashcard[]) => {
+    const newStats = {
+      total: cards.length,
+      new: cards.filter(c => c.difficulty === 0).length,
+      easy: cards.filter(c => c.difficulty === 1).length,
+      medium: cards.filter(c => c.difficulty === 2).length,
+      hard: cards.filter(c => c.difficulty === 3).length
+    }
+    setStats(newStats)
+  }
 
   const handleStartPractice = () => {
     if (flashcards.length > 0) {
@@ -116,6 +163,61 @@ export default function FlashcardManager({
       case 2: return 'bg-yellow-100 text-yellow-700'
       case 3: return 'bg-red-100 text-red-700'
       default: return 'bg-gray-100 text-gray-700'
+    }
+  }
+
+  const handleEditStart = (card: Flashcard) => {
+    setEditingCard(card)
+    setEditingQuestion(card.question)
+    setEditingAnswer(card.answer)
+    setShowEditModal(true)
+  }
+
+  const handleEditCancel = () => {
+    setShowEditModal(false)
+    setEditingCard(null)
+    setEditingQuestion('')
+    setEditingAnswer('')
+  }
+
+  const handleEditSave = async () => {
+    if (!editingCard || !editingQuestion.trim() || !editingAnswer.trim()) return
+    
+    // 更新本地状态
+    const updatedFlashcards = flashcards.map(card => 
+      card.id === editingCard.id 
+        ? { ...card, question: editingQuestion.trim(), answer: editingAnswer.trim() }
+        : card
+    )
+    setFlashcards(updatedFlashcards)
+    calculateStats(updatedFlashcards)
+    
+    // 保存到本地存储
+    try {
+      const storageKey = `flashcards_${pdfId}`
+      localStorage.setItem(storageKey, JSON.stringify(updatedFlashcards))
+      console.log('[闪卡管理] 编辑保存到本地存储成功')
+    } catch (error) {
+      console.error('[闪卡管理] 编辑保存到本地存储失败:', error)
+    }
+    
+    handleEditCancel()
+  }
+
+  const handleDelete = async (cardId: string) => {
+    if (confirm('确定要删除这张闪卡吗？')) {
+      const updatedFlashcards = flashcards.filter(card => card.id !== cardId)
+      setFlashcards(updatedFlashcards)
+      calculateStats(updatedFlashcards)
+      
+      // 保存到本地存储
+      try {
+        const storageKey = `flashcards_${pdfId}`
+        localStorage.setItem(storageKey, JSON.stringify(updatedFlashcards))
+        console.log('[闪卡管理] 删除后保存到本地存储成功')
+      } catch (error) {
+        console.error('[闪卡管理] 删除后保存到本地存储失败:', error)
+      }
     }
   }
 
@@ -223,9 +325,9 @@ export default function FlashcardManager({
           <Button
             onClick={onAddFlashcard}
             variant="outline"
-            className="px-4 py-3"
+            className="flex-1 py-3"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             添加闪卡
           </Button>
         </div>
@@ -241,38 +343,53 @@ export default function FlashcardManager({
               暂无闪卡，点击"添加闪卡"开始创建
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
               {flashcards.map((card) => (
                 <div
                   key={card.id}
                   className="border rounded-lg p-3 hover:bg-gray-50"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 mb-1">
+                      <div className="font-medium text-gray-900 mb-1 text-sm">
                         正面
                       </div>
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-xs text-gray-600 mb-2 break-words line-clamp-2">
                         {card.question}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getDifficultyColor(card.difficulty)}`}>
-                          {getDifficultyText(card.difficulty)}
-                        </span>
-                        {card.page_number && (
-                          <span className="text-xs text-gray-500">
-                            页面 {card.page_number}
-                          </span>
-                        )}
-                      </div>
                     </div>
-                    <div className="flex gap-1 ml-2">
-                      <button className="p-1 hover:bg-gray-200 rounded">
-                        <Edit className="h-4 w-4 text-gray-500" />
+                    <div className="flex gap-1 ml-1 flex-shrink-0">
+                      <button 
+                        onClick={() => handleEditStart(card)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <Edit className="h-3 w-3 text-gray-500" />
                       </button>
-                      <button className="p-1 hover:bg-gray-200 rounded">
-                        <Trash2 className="h-4 w-4 text-gray-500" />
+                      <button 
+                        onClick={() => handleDelete(card.id)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <Trash2 className="h-3 w-3 text-gray-500" />
                       </button>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-2">
+                    <div className="font-medium text-gray-900 mb-1 text-sm">
+                      背面
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2 break-words line-clamp-2">
+                      {card.answer}
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className={`px-2 py-1 text-xs rounded-full ${getDifficultyColor(card.difficulty)}`}>
+                        {getDifficultyText(card.difficulty)}
+                      </span>
+                      {card.page_number && (
+                        <span className="text-xs text-gray-500">
+                          页面 {card.page_number}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -281,6 +398,61 @@ export default function FlashcardManager({
           )}
         </div>
       </div>
+
+      {/* 编辑闪卡弹窗 */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              编辑闪卡
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                正面
+              </label>
+              <Textarea
+                value={editingQuestion}
+                onChange={(e) => setEditingQuestion(e.target.value)}
+                className="w-full resize-none"
+                rows={3}
+                placeholder="输入问题..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                背面
+              </label>
+              <Textarea
+                value={editingAnswer}
+                onChange={(e) => setEditingAnswer(e.target.value)}
+                className="w-full resize-none"
+                rows={4}
+                placeholder="输入答案..."
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-2 justify-end">
+            <Button
+              onClick={handleEditCancel}
+              variant="outline"
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleEditSave}
+              className="bg-purple-600 hover:bg-purple-700"
+              disabled={!editingQuestion.trim() || !editingAnswer.trim()}
+            >
+              保存
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

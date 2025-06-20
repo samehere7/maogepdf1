@@ -1,0 +1,75 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "close": "关闭"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "signup": "注册",
+    "pleaseLogin": "请先登录"
+  },
+  "upload": {
+    "uploadPdf": "上传PDF",
+    "clickToUpload": "点击上传",
+    "orDragAndDrop": "或拖放文件",
+    "onlyPdfAllowed": "只允许上传PDF文件",
+    "fileSizeLimit": "文件大小必须小于10MB",
+    "uploadError": "上传失败",
+    "uploading": "上传中...",
+    "analyzing": "正在分析"
+  },
+  "upgrade": {
+    "upgradeToPlus": "升级到 Plus",
+    "unlimitedPdfs": "无限",
+    "pdfs": "个PDF",
+    "unlimitedQuestions": "无限",
+    "questions": "个问题",
+    "pagesPerPdf": "2,000",
+    "pages": "页/PDF",
+    "pdfsPerFolder": "50",
+    "pdfsFolder": "个PDF/文件夹",
+    "highQualityModel": "高质量",
+    "model": "模型",
+    "unlimitedFileSize": "无限制",
+    "fileSize": "文件大小",
+    "monthlyPlan": "按月",
+    "yearlyPlan": "按年",
+    "save40Percent": "立省40%",
+    "month": "/ 月",
+    "upgradeSuccess": "升级成功！",
+    "fileTooLarge": "太大了",
+    "upgradeToAccessLargeFiles": "，升级到 Plus 以继续使用。"
+  },
+  "user": {
+    "plusMember": "Plus 会员",
+    "freeUser": "免费用户",
+    "account": "账户",
+    "profile": "个人资料"
+  },
+  "hero": {
+    "title": "与您的PDF对话",
+    "description": "为学生、研究者和专业人士提供的最佳PDF对话方式"
+  },
+  "features": {
+    "forStudents": "适合学生",
+    "studentsDescription": "将学习材料转化为互动学习体验。",
+    "forResearchers": "适合研究者",
+    "researchersDescription": "高效分析研究论文并提取关键见解。",
+    "forProfessionals": "适合专业人士",
+    "professionalsDescription": "通过AI辅助处理商业文档和报告。",
+    "citationSources": "引用来源",
+    "citationDescription": "为您的问题获取精确的引用和来源参考。"
+  },
+  "footer": {
+    "termsOfService": "服务条款",
+    "privacyPolicy": "隐私政策",
+    "contactUs": "联系我们",
+    "allRightsReserved": "版权所有。"
+  }
+}

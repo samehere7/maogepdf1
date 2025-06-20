@@ -18,9 +18,10 @@ import { useUser } from "@/components/UserProvider"
 interface SidebarProps {
   className?: string
   pdfFlashcardCounts?: {[pdfId: string]: number}
+  onFlashcardClick?: (pdfId: string, pdfName: string) => void
 }
 
-export function Sidebar({ className, pdfFlashcardCounts = {} }: SidebarProps) {
+export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }: SidebarProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showFolderModal, setShowFolderModal] = useState(false)
@@ -45,10 +46,17 @@ export function Sidebar({ className, pdfFlashcardCounts = {} }: SidebarProps) {
   const [sharePdfName, setSharePdfName] = useState<string>('')
   const [pdfFlashcards, setPdfFlashcards] = useState<{[pdfId: string]: number}>({}) // 存储每个PDF的闪卡数量
   
-  // 更新PDF闪卡计数
+  // 更新PDF闪卡计数 - 避免无限循环
   useEffect(() => {
-    setPdfFlashcards(pdfFlashcardCounts)
-  }, [pdfFlashcardCounts])
+    // 只有当计数真正发生变化时才更新
+    const hasChanged = Object.keys(pdfFlashcardCounts).some(
+      key => pdfFlashcards[key] !== pdfFlashcardCounts[key]
+    ) || Object.keys(pdfFlashcards).length !== Object.keys(pdfFlashcardCounts).length;
+    
+    if (hasChanged) {
+      setPdfFlashcards(pdfFlashcardCounts);
+    }
+  }, [pdfFlashcardCounts, pdfFlashcards])
   const { profile } = useUser()
   const isLoggedIn = !!profile
 
@@ -581,6 +589,34 @@ export function Sidebar({ className, pdfFlashcardCounts = {} }: SidebarProps) {
                 </div>
               </div>
             ))}
+
+            {/* 闪卡分组 */}
+            {pdfs.some(pdf => pdfFlashcards[pdf.id] > 0) && (
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">
+                  闪卡集合
+                </h3>
+                {pdfs
+                  .filter(pdf => pdfFlashcards[pdf.id] > 0)
+                  .map((pdf) => (
+                    <div
+                      key={`flashcard-${pdf.id}`}
+                      className="group flex items-center justify-between p-2 rounded-md hover:bg-[#2a2a2a] cursor-pointer transition-all duration-200"
+                      onClick={() => onFlashcardClick?.(pdf.id, pdf.name)}
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Brain size={16} className="text-purple-400 flex-shrink-0" />
+                        <span className="text-gray-300 truncate" title={`${pdf.name} 闪卡`}>
+                          {pdf.name}
+                        </span>
+                        <div className="flex items-center gap-1 bg-purple-600 text-white px-2 py-1 rounded-full text-xs flex-shrink-0">
+                          <span>{pdfFlashcards[pdf.id]}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
 
             {/* 文件夹列表 */}
             {folders.map((folder) => (

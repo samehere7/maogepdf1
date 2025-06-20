@@ -18,7 +18,7 @@ interface FlashcardPracticeProps {
   flashcards: Flashcard[]
   pdfId: string
   onBack: () => void
-  onComplete: (results: PracticeResults) => void
+  onComplete: (results: PracticeResults, updatedFlashcards: Flashcard[]) => void
 }
 
 interface PracticeResults {
@@ -52,6 +52,35 @@ export default function FlashcardPractice({
   const currentCard = flashcards[currentIndex]
   const isLastCard = currentIndex === flashcards.length - 1
 
+  // 保存练习结果到本地存储
+  const savePracticeResultsLocal = (results: PracticeResults, updatedFlashcards: Flashcard[]) => {
+    try {
+      // 保存更新后的闪卡数据
+      const storageKey = `flashcards_${pdfId}`
+      localStorage.setItem(storageKey, JSON.stringify(updatedFlashcards))
+      
+      // 保存练习会话历史
+      const sessionKey = `flashcard_sessions_${pdfId}`
+      const existingSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+      const newSession = {
+        ...results,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleDateString()
+      }
+      existingSessions.push(newSession)
+      
+      // 保留最近10次练习记录
+      if (existingSessions.length > 10) {
+        existingSessions.splice(0, existingSessions.length - 10)
+      }
+      
+      localStorage.setItem(sessionKey, JSON.stringify(existingSessions))
+      console.log('[闪卡练习] 本地存储保存成功')
+    } catch (error) {
+      console.error('[闪卡练习] 本地存储保存失败:', error)
+    }
+  }
+
   // 键盘事件监听
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -79,7 +108,11 @@ export default function FlashcardPractice({
   }
 
   const handleDifficultyRating = (rating: DifficultyRating) => {
-    // 移除数据库操作，仅更新本地状态
+    // 更新当前卡片的难度
+    const currentCard = flashcards[currentIndex]
+    currentCard.difficulty = rating
+    currentCard.review_count = (currentCard.review_count || 0) + 1
+    currentCard.last_reviewed_at = new Date().toISOString()
     
     // 更新结果统计
     const newResults = { ...practiceResults }
@@ -103,8 +136,9 @@ export default function FlashcardPractice({
         sessionTime: Math.floor((Date.now() - startTime) / 1000)
       }
       
-      // 移除数据库会话更新，直接完成练习
-      onComplete(finalResults)
+      // 保存练习结果到本地存储
+      savePracticeResultsLocal(finalResults, flashcards)
+      onComplete(finalResults, flashcards)
     } else {
       setCurrentIndex(currentIndex + 1)
       setShowAnswer(false)

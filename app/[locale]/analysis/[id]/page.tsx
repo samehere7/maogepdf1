@@ -91,18 +91,44 @@ export default function AnalysisPage() {
   const [flashcardView, setFlashcardView] = useState<'none' | 'create' | 'manage' | 'practice' | 'results'>('none');
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [practiceResults, setPracticeResults] = useState<any>(null)
+  const [shouldOpenFlashcard, setShouldOpenFlashcard] = useState(false) // 记录是否需要打开闪卡
   
   // 计算PDF闪卡计数 - 使用useMemo避免无限循环
   const pdfFlashcardCounts = useMemo(() => {
-    if (!fileInfo?.id || flashcards.length === 0) return {}
-    return {
-      [fileInfo.id]: flashcards.length
+    if (!fileInfo?.id) return {}
+    
+    // 尝试从本地存储获取闪卡数量
+    try {
+      const storageKey = `flashcards_${fileInfo.id}`
+      const localData = localStorage.getItem(storageKey)
+      if (localData) {
+        const localFlashcards = JSON.parse(localData)
+        if (Array.isArray(localFlashcards)) {
+          return { [fileInfo.id]: localFlashcards.length }
+        }
+      }
+    } catch (error) {
+      console.error('[分析页] 获取本地闪卡数量失败:', error)
     }
+    
+    // 降级使用状态中的flashcards
+    return flashcards.length > 0 ? { [fileInfo.id]: flashcards.length } : {}
   }, [fileInfo?.id, flashcards.length]);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    // 早期检查URL参数
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('flashcard') === 'true') {
+        console.log('[分析页] 早期检测到flashcard参数，标记需要打开闪卡');
+        setShouldOpenFlashcard(true);
+        // 清除URL参数
+        window.history.replaceState({}, '', `/analysis/${params.id}`);
+      }
+    }
+  }, [params.id]);
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -110,6 +136,7 @@ export default function AnalysisPage() {
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (error || !user) {
+        setLoading(false);
         router.push('/auth/login');
         return;
       }
@@ -128,6 +155,7 @@ export default function AnalysisPage() {
         if (!response.ok) {
           console.log('[Analysis] API请求失败:', response.status);
           setPdfError('无法获取PDF信息，请检查网络连接');
+          setLoading(false);
           setTimeout(() => router.push('/'), 3000);
           return;
         }
@@ -138,6 +166,7 @@ export default function AnalysisPage() {
         if (!pdf) {
           console.log('[Analysis] 数据库中未找到PDF');
           setPdfError('PDF文件未找到，可能已被删除或您没有访问权限');
+          setLoading(false);
           setTimeout(() => router.push('/'), 3000);
           return;
         }
@@ -214,6 +243,15 @@ export default function AnalysisPage() {
       window.removeEventListener('pdf-deleted', handlePdfDeleted as EventListener);
     };
   }, [params.id, router]);
+
+  // 当PDF加载完成且需要打开闪卡时，自动切换到闪卡界面
+  useEffect(() => {
+    if (fileInfo && shouldOpenFlashcard) {
+      console.log('[分析页] PDF加载完成，自动打开闪卡管理界面');
+      setFlashcardView('manage');
+      setShouldOpenFlashcard(false); // 清除标记
+    }
+  }, [fileInfo, shouldOpenFlashcard]);
 
   useEffect(() => {
     // 当fileInfo更新时，设置初始modelQuality
@@ -732,11 +770,23 @@ export default function AnalysisPage() {
     <div className="flex h-screen overflow-hidden">
       {/* 左侧边栏 - 固定宽度与主页一致 */}
       <div className="w-80 min-w-[240px] max-w-[320px] flex-shrink-0 border-r border-gray-200 bg-white">
-        <Sidebar pdfFlashcardCounts={pdfFlashcardCounts} />
+        <Sidebar 
+          pdfFlashcardCounts={pdfFlashcardCounts} 
+          onFlashcardClick={(pdfId, pdfName) => {
+            if (pdfId === fileInfo?.id) {
+              // 如果是当前PDF的闪卡，直接打开管理界面
+              setFlashcardView('manage');
+            } else {
+              // 如果是其他PDF的闪卡，跳转到对应页面并打开闪卡
+              router.push(`/analysis/${pdfId}?flashcard=true`);
+            }
+          }}
+        />
       </div>
 
-      {/* 中间PDF展示区 - 占剩余空间的50% */}
-      <div className="flex-1 flex flex-col min-w-[400px] border-r border-gray-200 bg-gray-50">
+      {/* 中间PDF展示区 - 在闪卡模式下隐藏 */}
+      {flashcardView === 'none' && (
+        <div className="flex-1 flex flex-col min-w-[400px] border-r border-gray-200 bg-gray-50">
         {/* PDF文件信息 */}
         <div className="p-3 border-b border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -883,19 +933,65 @@ export default function AnalysisPage() {
           </div>
         </div>
       </div>
+      )}
 
-      {/* 右侧聊天区 - 占剩余空间的50% */}
-      <div className="flex-1 flex-shrink-0 h-full flex flex-col bg-white" onClick={(e) => e.stopPropagation()}>
-          {/* 聊天标题 */}
-          <div className="p-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Send className="h-5 w-5 text-[#8b5cf6]" />
-              对话
-            </h3>
-            <div className="text-sm text-gray-500 mt-1">
-              当前模式: {modelQuality === 'fast' ? '快速模式' : '高质量模式'}
+      {/* 右侧聊天区/闪卡区 - 在闪卡模式下占据更多空间 */}
+      <div className={`${flashcardView === 'none' ? 'flex-1' : 'flex-[2]'} flex-shrink-0 h-full flex flex-col bg-white`} onClick={(e) => e.stopPropagation()}>
+        {flashcardView === 'manage' ? (
+          /* 闪卡管理界面 */
+          fileInfo && (
+            <FlashcardManager
+              pdfId={fileInfo.id}
+              pdfName={fileInfo.name}
+              initialFlashcards={flashcards}
+              onBack={() => setFlashcardView('none')}
+              onStartPractice={(cards) => {
+                setFlashcards(cards);
+                setFlashcardView('practice');
+              }}
+              onAddFlashcard={() => {
+                setFlashcardView('none');
+                setShowFlashcardModal(true);
+              }}
+            />
+          )
+        ) : flashcardView === 'practice' ? (
+          /* 闪卡练习界面 */
+          fileInfo && (
+            <FlashcardPractice
+              flashcards={flashcards}
+              pdfId={fileInfo.id}
+              onBack={() => setFlashcardView('manage')}
+              onComplete={(results, updatedFlashcards) => {
+                setPracticeResults(results);
+                setFlashcards(updatedFlashcards); // 更新闪卡数据
+                setFlashcardView('results');
+              }}
+            />
+          )
+        ) : flashcardView === 'results' ? (
+          /* 闪卡结果界面 */
+          fileInfo && practiceResults && (
+            <FlashcardResults
+              results={practiceResults}
+              pdfName={fileInfo.name}
+              onBack={() => setFlashcardView('manage')}
+              onPracticeAgain={() => setFlashcardView('practice')}
+            />
+          )
+        ) : (
+          /* 默认聊天界面 */
+          <>
+            {/* 聊天标题 */}
+            <div className="p-3 border-b border-gray-200 bg-white">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Send className="h-5 w-5 text-[#8b5cf6]" />
+                对话
+              </h3>
+              <div className="text-sm text-gray-500 mt-1">
+                当前模式: {modelQuality === 'fast' ? '快速模式' : '高质量模式'}
+              </div>
             </div>
-          </div>
 
           {/* 消息区域 */}
           <TooltipProvider>
@@ -1046,6 +1142,8 @@ export default function AnalysisPage() {
               </Button>
             </div>
           </div>
+          </>
+        )}
       </div>
 
       {/* 分享聊天记录弹窗 */}
@@ -1068,55 +1166,26 @@ export default function AnalysisPage() {
           onSuccess={(flashcards) => {
             setFlashcards(flashcards);
             setFlashcardView('manage');
+            
+            // 保存新创建的闪卡到本地存储
+            try {
+              const storageKey = `flashcards_${fileInfo.id}`;
+              localStorage.setItem(storageKey, JSON.stringify(flashcards));
+              console.log('[闪卡创建] 新闪卡已保存到本地存储:', flashcards.length);
+              
+              // 触发存储事件，通知其他页面更新闪卡计数
+              window.dispatchEvent(new StorageEvent('storage', {
+                key: storageKey,
+                newValue: JSON.stringify(flashcards),
+                storageArea: localStorage
+              }));
+            } catch (error) {
+              console.error('[闪卡创建] 保存到本地存储失败:', error);
+            }
           }}
         />
       )}
 
-      {/* 闪卡管理界面 - 覆盖整个页面 */}
-      {flashcardView === 'manage' && fileInfo && (
-        <div className="fixed inset-0 z-50 bg-white">
-          <FlashcardManager
-            pdfId={fileInfo.id}
-            pdfName={fileInfo.name}
-            onBack={() => setFlashcardView('none')}
-            onStartPractice={(cards) => {
-              setFlashcards(cards);
-              setFlashcardView('practice');
-            }}
-            onAddFlashcard={() => {
-              setFlashcardView('none');
-              setShowFlashcardModal(true);
-            }}
-          />
-        </div>
-      )}
-
-      {/* 闪卡练习界面 - 右侧区域 */}
-      {flashcardView === 'practice' && fileInfo && (
-        <div className="flex-1 h-screen overflow-hidden">
-          <FlashcardPractice
-            flashcards={flashcards}
-            pdfId={fileInfo.id}
-            onBack={() => setFlashcardView('manage')}
-            onComplete={(results) => {
-              setPracticeResults(results);
-              setFlashcardView('results');
-            }}
-          />
-        </div>
-      )}
-
-      {/* 闪卡结果界面 - 覆盖整个页面 */}
-      {flashcardView === 'results' && fileInfo && practiceResults && (
-        <div className="fixed inset-0 z-50 bg-white">
-          <FlashcardResults
-            results={practiceResults}
-            pdfName={fileInfo.name}
-            onBack={() => setFlashcardView('manage')}
-            onPracticeAgain={() => setFlashcardView('practice')}
-          />
-        </div>
-      )}
 
     </div>
   );

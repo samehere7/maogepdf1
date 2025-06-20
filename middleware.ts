@@ -1,7 +1,21 @@
 import { type CookieOptions, createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware';
+import {locales} from './i18n';
+
+// Create the internationalization middleware
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale: 'en',
+  localePrefix: 'always'
+});
 
 export async function middleware(request: NextRequest) {
+  // First handle internationalization
+  const intlResponse = intlMiddleware(request);
+  if (intlResponse) {
+    return intlResponse;
+  }
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -85,13 +99,15 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    // Enable a redirect to a matching locale at the root
+    '/',
+    
+    // Set a cookie to remember the previous locale for
+    // all requests that have a locale prefix
+    '/(de|en|es|fr|it|ja|ko|pt-BR|ru|zh|zh-TW|nl|sv|da|no|fi|pl|tr|hi|bn|pa|kn|th|vi|id|ms)/:path*',
+    
+    // Enable redirects that add missing locales
+    // (e.g. `/pathnames` -> `/en/pathnames`)
+    '/((?!_next|_vercel|.*\\..*).*)'
   ],
 } 

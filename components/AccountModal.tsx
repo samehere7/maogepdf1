@@ -20,7 +20,7 @@ function formatDate(dateStr?: string) {
 }
 
 export default function AccountModal({ open, onOpenChange, user, onSignOut }: AccountModalProps) {
-  const pdfQuotaLimit = 2;
+  const pdfQuotaLimit = 3;
   const chatQuotaLimit = 20;
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const { profile, setProfile } = useUser();
@@ -75,13 +75,40 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
     if (!user?.id || isPlus) return;
     const fetchQuota = async () => {
       try {
+        // 先检查用户是否已认证
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (!authUser) {
+          console.log('用户未认证，跳过配额查询');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('user_daily_quota')
           .select('pdf_count, chat_count, quota_date')
           .eq('id', user.id)
-          .single();
+          .maybeSingle(); // 使用maybeSingle避免PGRST116错误
           
-        if (error) throw error;
+        if (error) {
+          // 如果是权限错误或记录不存在，创建新记录
+          if (error.code === 'PGRST116' || error.message.includes('403')) {
+            console.log('配额记录不存在或权限问题，创建新记录');
+            const today = new Date().toISOString().slice(0, 10);
+            const { error: insertError } = await supabase
+              .from('user_daily_quota')
+              .insert({ 
+                id: user.id, 
+                pdf_count: 0, 
+                chat_count: 0, 
+                quota_date: today 
+              });
+            
+            if (!insertError) {
+              setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
+            }
+            return;
+          }
+          throw error;
+        }
         
         if (!data) return;
         

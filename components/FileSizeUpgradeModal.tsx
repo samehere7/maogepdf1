@@ -1,12 +1,13 @@
 "use client"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import { useState } from "react"
 
-interface UpgradePlusModalProps {
+interface FileSizeUpgradeModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  fileName: string
+  fileSizeMB: number
   onUpgrade?: () => void
 }
 
@@ -17,12 +18,29 @@ const GreenCheckIcon = (
   </svg>
 )
 
-export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: UpgradePlusModalProps) {
+export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fileSizeMB, onUpgrade }: FileSizeUpgradeModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] bg-white rounded-2xl p-0 overflow-hidden">
         <div className="px-8 pt-8 pb-6" style={{padding: '32px 32px 24px'}}>
+          {/* 文件信息提示 */}
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-xs">!</span>
+              </div>
+              <div className="flex-1">
+                <div className="text-orange-800 font-medium text-sm mb-1">
+                  {fileName} 太大了
+                </div>
+                <div className="text-orange-600 text-sm">
+                  {fileSizeMB}MB，升级到 Plus 以继续使用。
+                </div>
+              </div>
+            </div>
+          </div>
+
           <h2 className="text-2xl font-bold mb-6 text-center">升级到 Plus</h2>
           <div className="text-base">
             {[
@@ -30,7 +48,7 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
               { label: '无限', desc: '个问题' },
               { label: '2,000', desc: '页/PDF' },
               { label: '50', desc: '个PDF/文件夹' },
-              { label: '高质量', desc: '模型' },
+              { label: '无限制', desc: '文件大小' },
             ].map((item, idx) => (
               <div key={item.label+item.desc} className="flex gap-3 items-center" style={{marginTop: idx === 0 ? 0 : 18}}>
                 {GreenCheckIcon}
@@ -107,4 +125,4 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
       </DialogContent>
     </Dialog>
   )
-} 
+}

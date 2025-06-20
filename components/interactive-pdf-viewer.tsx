@@ -268,8 +268,8 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       // 渲染高亮层
       renderHighlights(pageContainer, pageNum, viewport);
       
-      // 标记为已渲染
-      setRenderedPages(prev => new Set([...prev, pageNum]));
+      // 标记为已渲染 - 这里不更新状态，由调用方统一处理
+      // setRenderedPages(prev => new Set([...prev, pageNum]));
       
     } catch (err) {
       console.error(`页面${pageNum}渲染错误:`, err);
@@ -571,7 +571,9 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       const currentVisiblePage = getCurrentVisiblePage();
       const previouslyRendered = new Set(renderedPages);
       
-      setRenderedPages(new Set()); // 重置已渲染页面
+      // 避免无限循环：使用ref来避免状态更新触发重新渲染
+      const newRenderedPages = new Set<number>();
+      
       renderAllPages().then(() => {
         // 优先渲染当前可见页面及其周围页面
         const pagesToRender = new Set<number>();
@@ -593,12 +595,16 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
           new Promise<void>(resolve => {
             setTimeout(() => {
               renderPage(pageNum, true); // 强制重新渲染
+              newRenderedPages.add(pageNum);
               resolve();
             }, pageNum * 50); // 错开渲染时间，避免卡顿
           })
         );
         
         Promise.all(renderPromises).then(() => {
+          // 只在渲染完成后一次性更新状态
+          setRenderedPages(newRenderedPages);
+          
           // 渲染完成后，滚动回到原来的可见页面
           // 增加延迟，确保DOM元素已正确挂载
           setTimeout(() => {
@@ -611,19 +617,20 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
   
   // 更新高亮
   useEffect(() => {
-    if (highlights.length > 0 && pdfDoc) {
-      // 重新渲染所有已渲染页面的高亮
-      renderedPages.forEach(pageNum => {
-        const pageContainer = containerRef.current?.querySelector(`.pdf-page[data-page-num="${pageNum}"]`) as HTMLElement;
-        if (pageContainer) {
-          const page = pdfDoc.getPage(pageNum).then(page => {
+    if (highlights.length > 0 && pdfDoc && containerRef.current) {
+      // 重新渲染所有页面的高亮（通过DOM查找而不是依赖状态）
+      const pageContainers = containerRef.current.querySelectorAll('.pdf-page');
+      pageContainers.forEach((pageContainer) => {
+        const pageNum = parseInt(pageContainer.getAttribute('data-page-num') || '0');
+        if (pageNum > 0) {
+          pdfDoc.getPage(pageNum).then(page => {
             const viewport = page.getViewport({ scale });
-            renderHighlights(pageContainer, pageNum, viewport);
+            renderHighlights(pageContainer as HTMLElement, pageNum, viewport);
           });
         }
       });
     }
-  }, [highlights, renderedPages, scale]);
+  }, [highlights, scale]);
 
   // 智能位置计算函数 - 优化为显示在选中区域上方
   const calculateOptimalPosition = useCallback((selectionRect: DOMRect, viewerRect: DOMRect) => {

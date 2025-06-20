@@ -1,0 +1,75 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "close": "閉じる"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "signup": "サインアップ",
+    "pleaseLogin": "まずログインしてください"
+  },
+  "upload": {
+    "uploadPdf": "PDFをアップロード",
+    "clickToUpload": "クリックしてアップロード",
+    "orDragAndDrop": "またはドラッグ＆ドロップ",
+    "onlyPdfAllowed": "PDFファイルのみアップロード可能です",
+    "fileSizeLimit": "ファイルサイズは10MB未満である必要があります",
+    "uploadError": "アップロードに失敗しました",
+    "uploading": "アップロード中...",
+    "analyzing": "分析中"
+  },
+  "upgrade": {
+    "upgradeToPlus": "Plusにアップグレード",
+    "unlimitedPdfs": "無制限",
+    "pdfs": "PDF",
+    "unlimitedQuestions": "無制限",
+    "questions": "質問",
+    "pagesPerPdf": "2,000",
+    "pages": "ページ/PDF",
+    "pdfsPerFolder": "50",
+    "pdfsFolder": "PDF/フォルダ",
+    "highQualityModel": "高品質",
+    "model": "モデル",
+    "unlimitedFileSize": "無制限",
+    "fileSize": "ファイルサイズ",
+    "monthlyPlan": "月額",
+    "yearlyPlan": "年額",
+    "save40Percent": "40%節約",
+    "month": "/ 月",
+    "upgradeSuccess": "アップグレード成功！",
+    "fileTooLarge": "が大きすぎます",
+    "upgradeToAccessLargeFiles": "。Plusにアップグレードして続行してください。"
+  },
+  "user": {
+    "plusMember": "Plusメンバー",
+    "freeUser": "無料ユーザー",
+    "account": "アカウント",
+    "profile": "プロフィール"
+  },
+  "hero": {
+    "title": "PDFとチャット",
+    "description": "学生、研究者、専門家のための最高のPDFチャット体験"
+  },
+  "features": {
+    "forStudents": "学生向け",
+    "studentsDescription": "学習教材をインタラクティブな学習体験に変換します。",
+    "forResearchers": "研究者向け",
+    "researchersDescription": "研究論文を効率的に分析し、重要な洞察を抽出します。",
+    "forProfessionals": "専門家向け",
+    "professionalsDescription": "AIアシスタンスでビジネス文書やレポートを処理します。",
+    "citationSources": "引用元",
+    "citationDescription": "質問に対する正確な引用と参考文献を取得します。"
+  },
+  "footer": {
+    "termsOfService": "利用規約",
+    "privacyPolicy": "プライバシーポリシー",
+    "contactUs": "お問い合わせ",
+    "allRightsReserved": "全著作権所有。"
+  }
+}

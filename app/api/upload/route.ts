@@ -4,6 +4,10 @@ import { uploadPDF } from '@/lib/pdf-service';
 import { prisma } from '@/lib/prisma';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 
+// 免费用户限制配置
+const FREE_USER_PDF_LIMIT = 3; // PDF总数限制
+const FREE_USER_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB文件大小限制
+
 
 // 异步处理PDF到RAG系统
 async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: string): Promise<void> {
@@ -93,9 +97,9 @@ export async function POST(req: Request) {
         .eq('user_id', userId);
         
       const count = pdfCount?.length || 0;
-      if (count >= 5) {  // 免费用户最多5个PDF
+      if (count >= FREE_USER_PDF_LIMIT) {  // 免费用户最多3个PDF
         return NextResponse.json({ 
-          error: '免费用户最多上传5个PDF文件，请升级到Plus会员解锁无限上传', 
+          error: '免费用户最多上传3个PDF文件，请升级到Plus会员解锁无限上传', 
           code: 'LIMIT_EXCEEDED' 
         }, { status: 403 });
       }
@@ -125,14 +129,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '只支持PDF文件' }, { status: 400 });
     }
     
-    // 检查文件大小（限制为50MB）
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ 
-        error: '文件大小超过限制，最大支持50MB', 
-        code: 'FILE_TOO_LARGE' 
-      }, { status: 400 });
+    // 检查文件大小（免费用户限制为10MB，Plus用户无限制）
+    if (!isPlus || !isActive) {
+      if (file.size > FREE_USER_MAX_FILE_SIZE) {
+        return NextResponse.json({ 
+          error: '免费用户文件大小限制为10MB，请升级到Plus会员解锁无限制上传', 
+          code: 'FILE_TOO_LARGE_FREE' 
+        }, { status: 400 });
+      }
     }
+    // Plus用户无文件大小限制
 
     console.log(`[Upload API] 处理上传文件: ${fileName}, 大小: ${file.size}, 质量模式: ${quality}`);
 

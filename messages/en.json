@@ -1,0 +1,75 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "signup": "Sign Up",
+    "pleaseLogin": "Please sign in first"
+  },
+  "upload": {
+    "uploadPdf": "Upload PDF",
+    "clickToUpload": "Click to upload",
+    "orDragAndDrop": "or drag and drop",
+    "onlyPdfAllowed": "Only PDF files are allowed",
+    "fileSizeLimit": "File size must be less than 10MB",
+    "uploadError": "Upload failed",
+    "uploading": "Uploading...",
+    "analyzing": "Analyzing"
+  },
+  "upgrade": {
+    "upgradeToPlus": "Upgrade to Plus",
+    "unlimitedPdfs": "Unlimited",
+    "pdfs": "PDFs",
+    "unlimitedQuestions": "Unlimited",
+    "questions": "questions",
+    "pagesPerPdf": "2,000",
+    "pages": "pages/PDF",
+    "pdfsPerFolder": "50",
+    "pdfsFolder": "PDFs/folder",
+    "highQualityModel": "High quality",
+    "model": "model",
+    "unlimitedFileSize": "Unlimited",
+    "fileSize": "file size",
+    "monthlyPlan": "Monthly",
+    "yearlyPlan": "Yearly",
+    "save40Percent": "Save 40%",
+    "month": "/ month",
+    "upgradeSuccess": "Upgrade successful!",
+    "fileTooLarge": "too large",
+    "upgradeToAccessLargeFiles": "Upgrade to Plus to continue using."
+  },
+  "user": {
+    "plusMember": "Plus Member",
+    "freeUser": "Free User",
+    "account": "Account",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Chat with your PDF",
+    "description": "The best way to chat with your PDF documents for students, researchers and professionals"
+  },
+  "features": {
+    "forStudents": "For Students",
+    "studentsDescription": "Transform your study materials into interactive learning experiences.",
+    "forResearchers": "For Researchers", 
+    "researchersDescription": "Analyze research papers and extract key insights efficiently.",
+    "forProfessionals": "For Professionals",
+    "professionalsDescription": "Process business documents and reports with AI assistance.",
+    "citationSources": "Citation Sources",
+    "citationDescription": "Get precise citations and source references for your questions."
+  },
+  "footer": {
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "contactUs": "Contact Us",
+    "allRightsReserved": "All rights reserved."
+  }
+}

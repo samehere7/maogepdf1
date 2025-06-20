@@ -218,9 +218,9 @@ export async function POST(req: Request) {
 用户请求：${lastUserMessage}`;
         
       } else {
-        // 复杂问题，使用RAG系统检索相关内容
+        // 使用智能RAG系统生成回答
         try {
-          console.log('[聊天API] 开始RAG检索相关内容');
+          console.log('[聊天API] 使用智能RAG系统生成回答');
           
           // 确保PDF已在RAG系统中处理
           const ragStats = pdfRAGSystem.getDocumentStats();
@@ -231,15 +231,19 @@ export async function POST(req: Request) {
             console.log('[聊天API] 已切换到目标PDF的RAG内容');
           }
           
-          // 检索最相关的内容片段（优化性能，减少数量）
-          const relevantChunks = await pdfRAGSystem.searchRelevantChunks(lastUserMessage, 10);
-          console.log(`[聊天API] RAG检索到${relevantChunks.length}个相关片段`);
+          // 使用智能RAG系统生成回答
+          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name);
+          console.log('[聊天API] RAG系统生成回答成功');
           
-          // 构建增强的系统提示词
-          enhancedSystemPrompt = buildEnhancedSystemPrompt(pdf, relevantChunks, lastUserMessage);
+          // 直接返回RAG系统的回答，不再调用OpenRouter
+          return NextResponse.json({
+            content: ragAnswer,
+            role: 'assistant'
+          });
           
         } catch (ragError) {
-          console.error('[聊天API] RAG检索失败，使用基础提示词:', ragError);
+          console.error('[聊天API] RAG系统失败，使用传统方式:', ragError);
+          // 降级到传统方式
           enhancedSystemPrompt = buildSystemPrompt(pdf);
           
           // 记录RAG失败的详细信息，用于后续优化
