@@ -58,7 +58,20 @@ const nextConfig = {
   },
   // 重定向配置
   async redirects() {
-    return [];
+    return [
+      // 如果访问非 www 域名，重定向到 www
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'maogepdf.com',
+          },
+        ],
+        destination: 'https://www.maogepdf.com/:path*',
+        permanent: true,
+      },
+    ];
   },
   // Headers配置
   async headers() {
