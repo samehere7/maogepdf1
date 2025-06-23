@@ -1,6 +1,6 @@
-import withNextIntl from 'next-intl/plugin';
-
-const createNextIntlPlugin = withNextIntl('./i18n.ts');
+// 暂时禁用国际化以解决重定向循环问题
+// import withNextIntl from 'next-intl/plugin';
+// const createNextIntlPlugin = withNextIntl('./i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -81,4 +81,6 @@ const nextConfig = {
   }
 }
 
-export default createNextIntlPlugin(nextConfig)
+// 暂时直接导出配置，不使用国际化插件
+export default nextConfig
+// export default createNextIntlPlugin(nextConfig)

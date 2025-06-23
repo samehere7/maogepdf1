@@ -338,3 +338,20 @@ Test mode enabled: simulating successful payment
  [32m[1m✓[22m[39m Compiled in 344ms (798 modules)
  [32m[1m✓[22m[39m Compiled in 43ms (64 modules)
  [32m[1m✓[22m[39m Compiled in 204ms (345 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/chenyuanqing/cursor/maoge-pdf/.next/cache/webpack/edge-server-development/1.pack.gz_' -> '/Users/chenyuanqing/cursor/maoge-pdf/.next/cache/webpack/edge-server-development/1.pack.gz'
+ [33m[1m⚠[22m[39m Found a change in next.config.mjs. Restarting the server to apply the changes...
+ [33m[1m⚠[22m[39m Port 3000 is in use, trying 3001 instead.
+file:///Users/chenyuanqing/cursor/maoge-pdf/next.config.mjs:6
+const nextConfig = {
+                   ^
+
+ReferenceError: createNextIntlPlugin is not defined
+    at [90mfile:///Users/chenyuanqing/cursor/maoge-pdf/[39mnext.config.mjs:6:20
+[90m    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)[39m
+[90m    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)[39m
+    at async loadConfig [90m(/Users/chenyuanqing/cursor/maoge-pdf/[39mnode_modules/[4mnext[24m/dist/server/config.js:706:36[90m)[39m
+    at async getStartServerInfo [90m(/Users/chenyuanqing/cursor/maoge-pdf/[39mnode_modules/[4mnext[24m/dist/server/lib/app-info-log.js:91:5[90m)[39m
+    at async Server.<anonymous> [90m(/Users/chenyuanqing/cursor/maoge-pdf/[39mnode_modules/[4mnext[24m/dist/server/lib/start-server.js:208:41[90m)[39m
+
+Node.js v22.16.0
+[?25h
