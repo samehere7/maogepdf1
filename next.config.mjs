@@ -31,7 +31,7 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // 处理 pdfjs-dist 依赖 canvas 的问题
     config.resolve.alias.canvas = false;
     
@@ -42,6 +42,12 @@ const nextConfig = {
       path: false,
       os: false,
     };
+    
+    // 在服务器端忽略 Supabase 客户端包
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push('@supabase/ssr', '@supabase/supabase-js');
+    }
     
     return config;
   },
