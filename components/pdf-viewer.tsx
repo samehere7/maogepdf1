@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from "lucide-react";
 import TextSelectionToolbar from './text-selection-toolbar';
 import AIResultDialog from './ai-result-dialog';
+import { useTranslations } from 'next-intl';
 
 // 设置 PDF.js worker
 if (typeof window !== 'undefined') {
   const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  console.log('设置PDF worker路径:', workerSrc);
+  console.log('Setting PDF worker path:', workerSrc);
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 }
 
@@ -22,6 +23,7 @@ interface PDFViewerProps {
 }
 
 export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
+  const t = useTranslations('pdfViewer');
   const containerRef = useRef<HTMLDivElement>(null);
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,7 +67,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         const fullUrl = file.startsWith('http') ? file : 
                       (typeof window !== 'undefined' ? `${window.location.origin}${file}` : file);
         
-        console.log('开始加载PDF文件:', fullUrl);
+        console.log('Loading PDF file:', fullUrl);
         
         // 添加重试逻辑
         let retries = 3;
@@ -78,7 +80,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
             retries--;
             if (retries > 0) await new Promise(resolve => setTimeout(resolve, 1000));
           } catch (err) {
-            console.error('PDF加载重试失败:', err);
+            console.error('PDF load retry failed:', err);
             retries--;
             if (retries === 0) throw err;
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -86,17 +88,17 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         }
 
         if (!response?.ok) {
-          throw new Error(`HTTP错误! 状态: ${response?.status}`);
+          throw new Error(`HTTP error! Status: ${response?.status}`);
         }
 
         const arrayBuffer = await response.arrayBuffer();
-        console.log('PDF文件加载成功，大小:', arrayBuffer.byteLength, '字节');
+        console.log('PDF file loaded successfully, size:', arrayBuffer.byteLength, 'bytes');
         
         // 直接加载PDF文档
         try {
-          console.log('开始加载PDF文档');
+          console.log('Loading PDF document');
           const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          console.log('PDF文档加载成功，页数:', doc.numPages);
+          console.log('PDF document loaded successfully, pages:', doc.numPages);
           setPdfDoc(doc);
           setNumPages(doc.numPages);
           setCurrentPage(1);
@@ -106,12 +108,12 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           setError(null);
           setInitialLoad(true);
         } catch (err) {
-          console.error('PDF文档处理错误:', err);
-          setError('无法处理PDF文档: ' + (err instanceof Error ? err.message : String(err)));
+          console.error('PDF document processing error:', err);
+          setError(t('cannotProcessPdf') + ': ' + (err instanceof Error ? err.message : String(err)));
         }
       } catch (err) {
-        console.error('PDF文件加载错误:', err);
-        setError('无法加载PDF文件: ' + (err instanceof Error ? err.message : String(err)));
+        console.error('PDF file loading error:', err);
+        setError(t('cannotLoadPdf') + ': ' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setIsLoading(false);
       }
@@ -198,7 +200,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           }
         }, 100);
       } catch (err) {
-        console.error('设置页面占位符失败:', err);
+        console.error('Failed to setup page placeholders:', err);
       }
     };
     
@@ -285,7 +287,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           return;
         }
         
-        console.log(`开始渲染页面: ${pagesToRender.join(', ')}`);
+        console.log(`Starting to render pages: ${pagesToRender.join(', ')}`);
         
         // 一次最多渲染3页，优先渲染当前页面
         const prioritizedPages = [...pagesToRender].sort((a, b) => {
@@ -315,7 +317,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
           
           const loadingText = document.createElement('div');
           loadingText.className = 'animate-pulse';
-          loadingText.textContent = `加载第 ${pageNum} 页...`;
+          loadingText.textContent = t('loadingPage', { pageNum });
           loadingDiv.appendChild(loadingText);
           
           // 清空页面容器并添加加载指示器
@@ -342,7 +344,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d', { alpha: false });
             if (!context) {
-              console.error('无法获取canvas上下文');
+              console.error('Cannot get canvas context');
               continue;
             }
             
@@ -370,11 +372,11 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
             // 标记页面已渲染
             setRenderedPages(prev => new Set([...prev, pageNum]));
             
-            console.log(`第${pageNum}页渲染完成`);
+            console.log(`Page ${pageNum} rendering completed`);
           } catch (err) {
-            console.error(`页面${pageNum}渲染错误:`, err);
+            console.error(`Page ${pageNum} rendering error:`, err);
             // 移除加载指示器，显示错误信息
-            pageContainer.innerHTML = `<div class="text-red-500 p-4">加载页面 ${pageNum} 失败</div>`;
+            pageContainer.innerHTML = `<div class="text-red-500 p-4">${t('loadPageFailed', { pageNum })}</div>`;
           }
         }
       } finally {
@@ -406,7 +408,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
     const pageNum = parseInt(pageInput, 10);
     
     if (isNaN(pageNum) || pageNum < 1 || pageNum > numPages) {
-      alert(`请输入有效页码 (1-${numPages})`);
+      alert(t('enterValidPageNumber', { numPages }));
       return;
     }
     
@@ -564,9 +566,9 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
     if (!selectedText) return;
 
     const operationTitles = {
-      explain: '解释文本',
-      rewrite: '改写文本',
-      summarize: '文本总结'
+      explain: t('explainText'),
+      rewrite: t('rewriteText'),
+      summarize: t('summarizeText')
     };
 
     setDialogState({
@@ -589,7 +591,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         }),
       });
 
-      if (!response.ok) throw new Error('处理请求失败');
+      if (!response.ok) throw new Error(t('processingRequestFailed'));
       
       const data = await response.json();
       
@@ -599,10 +601,10 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
         isLoading: false
       }));
     } catch (err) {
-      console.error('AI处理错误:', err);
+      console.error('AI processing error:', err);
       setDialogState(prev => ({
         ...prev,
-        content: '处理过程中出现错误，请重试。',
+        content: t('processingError'),
         isLoading: false
       }));
     }
@@ -698,7 +700,7 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
       {/* 底部控制栏 */}
       <div className="flex items-center justify-center gap-4 mt-4 w-full">
         <form onSubmit={handlePageJump} className="flex items-center gap-2">
-          <span>跳转到:</span>
+          <span>{t('jumpTo')}:</span>
           <Input
             type="number"
             min="1"
@@ -707,9 +709,9 @@ export default function PDFViewer({ file, onPageClick }: PDFViewerProps) {
             onChange={(e) => setPageInput(e.target.value)}
             className="w-16 h-8 text-center"
           />
-          <span>页</span>
+          <span>{t('page')}</span>
           <Button type="submit" size="sm" variant="outline">
-            确定
+            {t('confirm')}
           </Button>
         </form>
       </div>

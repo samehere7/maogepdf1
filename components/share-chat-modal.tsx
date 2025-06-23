@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Copy, X, Check } from "lucide-react"
 import { supabase } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 
 interface ShareChatModalProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
   const [shareUrl, setShareUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const t = useTranslations()
 
   // 生成分享链接
   const generateShareLink = async () => {
@@ -31,7 +33,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
       
       if (!user) {
         console.error('[分享] 用户未登录')
-        throw new Error('用户未登录')
+        throw new Error(t('share.userNotLoggedIn'))
       }
 
       // 创建分享记录
@@ -52,7 +54,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
       if (!response.ok) {
         const errorData = await response.text()
         console.error('[分享] API错误响应:', errorData)
-        throw new Error(`创建分享链接失败: ${response.status}`)
+        throw new Error(`${t('share.createShareLinkFailed')}: ${response.status}`)
       }
 
       const data = await response.json()
@@ -60,7 +62,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
       const shareId = data.shareId
       
       if (!shareId) {
-        throw new Error('未收到分享ID')
+        throw new Error(t('share.shareIdNotReceived'))
       }
       
       // 生成完整的分享URL
@@ -89,7 +91,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      console.error('复制失败:', error)
+      console.error(`${t('share.copyFailed')}:`, error)
       // 降级处理：选中文本
       const input = document.querySelector('input[value="' + shareUrl + '"]') as HTMLInputElement
       if (input) {
@@ -100,7 +102,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
           setCopied(true)
           setTimeout(() => setCopied(false), 2000)
         } catch (err) {
-          console.error('降级复制也失败:', err)
+          console.error(`${t('share.fallbackCopyFailed')}:`, err)
         }
       }
     }
@@ -125,23 +127,23 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
-            分享此PDF
+            {t('share.shareThisPdf')}
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           {/* 说明文字 */}
           <p className="text-sm text-gray-600 leading-relaxed">
-            任何拥有此链接的人都可以与此PDF文件聊天。
+            {t('share.shareDescription')}
           </p>
           
           {/* 分享链接输入框 */}
           <div className="flex items-center space-x-2">
             <Input
-              value={isGenerating ? '生成链接中...' : shareUrl}
+              value={isGenerating ? t('share.generatingLink') : shareUrl}
               readOnly
               className="flex-1 bg-gray-50 border-gray-200 text-sm font-mono text-gray-700 px-3 py-2"
-              placeholder={isGenerating ? '生成链接中...' : '分享链接将在这里显示'}
+              placeholder={isGenerating ? t('share.generatingLink') : t('share.shareLinkPlaceholder')}
             />
             <Button
               onClick={copyToClipboard}
@@ -157,12 +159,12 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
               {copied ? (
                 <>
                   <Check className="h-4 w-4 mr-1" />
-                  已复制
+                  {t('share.copied')}
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 mr-1" />
-                  复制链接
+                  {t('share.copyLink')}
                 </>
               )}
             </Button>
@@ -170,7 +172,7 @@ export default function ShareChatModal({ isOpen, onClose, pdfId, pdfName }: Shar
           
           {/* 底部提示 */}
           <p className="text-xs text-gray-500 leading-relaxed">
-            每个访问者都会开启一个新的对话，聊天记录不会共享。
+            {t('share.shareNote')}
           </p>
         </div>
       </DialogContent>

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sidebar } from "@/components/sidebar"
-import { useLanguage } from "@/components/language-provider"
+import { useLocale } from "next-intl"
 
 export default function AccountPage() {
-  const { t } = useLanguage()
+  const t = useTranslations()
   const router = useRouter()
   const [userPdfs, setUserPdfs] = useState<any[]>([])
   const [userInfo, setUserInfo] = useState({

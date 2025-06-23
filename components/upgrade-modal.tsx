@@ -4,14 +4,14 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Check } from "lucide-react"
-import { useLanguage } from "@/components/language-provider"
+import { useTranslations } from 'next-intl'
 
 interface UpgradeModalProps {
   children: React.ReactNode
 }
 
 export function UpgradeModal({ children }: UpgradeModalProps) {
-  const { t } = useLanguage()
+  const t = useTranslations('upgrade')
   const [openFaq, setOpenFaq] = useState(0)
 
   const plans = [

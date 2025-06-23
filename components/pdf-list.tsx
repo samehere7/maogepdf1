@@ -4,6 +4,7 @@ import { getUserPDFs, deletePDF } from '@/lib/pdf-service';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { FileText, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PDF {
   id: string;
@@ -18,6 +19,7 @@ export function PDFList() {
   const [isLoading, setIsLoading] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
+  const t = useTranslations();
 
   useEffect(() => {
     async function loadPDFs() {
@@ -28,7 +30,7 @@ export function PDFList() {
         const userPdfs = await getUserPDFs(session.user.email);
         setPdfs(userPdfs);
       } catch (error) {
-        console.error('加载PDF列表失败:', error);
+        console.error(t('pdf.loadPdfListFailed'), error);
       } finally {
         setIsLoading(false);
       }
@@ -40,13 +42,13 @@ export function PDFList() {
   const handleDelete = async (pdfId: string) => {
     if (!session?.user?.email) return;
     
-    if (confirm('确定要删除这个PDF吗？')) {
+    if (confirm(t('pdf.deleteConfirm'))) {
       try {
         await deletePDF(pdfId, session.user.email);
         setPdfs(pdfs.filter(pdf => pdf.id !== pdfId));
       } catch (error) {
-        console.error('删除PDF失败:', error);
-        alert('删除失败，请重试');
+        console.error(t('pdf.deleteError'), error);
+        alert(t('pdf.deleteFailed'));
       }
     }
   };
@@ -62,7 +64,7 @@ export function PDFList() {
   if (pdfs.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500">
-        还没有上传过PDF文件
+        {t('pdf.noUploaded')}
       </div>
     );
   }
@@ -82,7 +84,7 @@ export function PDFList() {
             <div>
               <h3 className="font-medium">{pdf.name}</h3>
               <p className="text-sm text-gray-500">
-                上传于 {new Date(pdf.uploadDate).toLocaleString()}
+                {t('pdf.uploadedOn')} {new Date(pdf.uploadDate).toLocaleString()}
               </p>
             </div>
           </div>

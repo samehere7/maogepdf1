@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useTranslations } from 'next-intl'
 
 interface FlashcardCreateModalProps {
   isOpen: boolean
@@ -25,25 +26,26 @@ export default function FlashcardCreateModal({
   const [contentAmount, setContentAmount] = useState<ContentAmount>('medium')
   const [pageRange, setPageRange] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const t = useTranslations('flashcard')
 
   const contentOptions = [
     {
       id: 'few' as const,
-      title: '少量',
-      description: '只包含关键概念',
+      title: t('few'),
+      description: t('fewDescription'),
       icon: '💎'
     },
     {
       id: 'medium' as const,
-      title: '适中',
-      description: '平衡的选择',
+      title: t('medium'),
+      description: t('mediumDescription'),
       icon: '⚖️',
       selected: true
     },
     {
       id: 'many' as const,
-      title: '较多',
-      description: '更详细的闪卡',
+      title: t('many'),
+      description: t('manyDescription'),
       icon: '📚'
     }
   ]
@@ -65,18 +67,18 @@ export default function FlashcardCreateModal({
       })
 
       if (!response.ok) {
-        throw new Error('创建闪卡失败')
+        throw new Error(t('createFlashcardFailed'))
       }
 
       const result = await response.json()
-      console.log('闪卡创建成功:', result)
+      console.log(t('createFlashcardSuccess') + ':', result)
       
       onSuccess(result.flashcards || [])
       onClose()
       
     } catch (error) {
-      console.error('创建闪卡失败:', error)
-      alert('创建闪卡失败，请稍后重试')
+      console.error(t('createFlashcardFailed') + ':', error)
+      alert(t('createFlashcardRetry'))
     } finally {
       setIsCreating(false)
     }
@@ -93,18 +95,18 @@ export default function FlashcardCreateModal({
       <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900 text-center">
-            创建闪卡
+            {t('createFlashcard')}
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
           <p className="text-sm text-gray-600 text-center">
-            从你的文档即刻生成闪卡一一马上开始学习吧！
+            {t('flashcardDescription')}
           </p>
           
           {/* 内容数量选择 */}
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-900">内容数量</h3>
+            <h3 className="text-sm font-medium text-gray-900">{t('flashcardAmount')}</h3>
             <div className="space-y-2">
               {contentOptions.map((option) => (
                 <div
@@ -136,16 +138,16 @@ export default function FlashcardCreateModal({
 
           {/* 页面范围 */}
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-900">页面（可选）</h3>
+            <h3 className="text-sm font-medium text-gray-900">{t('pageRange')}</h3>
             <Input
-              placeholder="例如：5-10, 1-3, 7"
+              placeholder={t('pageRangePlaceholder')}
               value={pageRange}
               onChange={(e) => setPageRange(e.target.value)}
               disabled={isCreating}
               className="w-full"
             />
             <p className="text-xs text-gray-500">
-              留空则创建含所有页面
+              {t('pageRangeDescription')}
             </p>
           </div>
 
@@ -158,10 +160,10 @@ export default function FlashcardCreateModal({
             {isCreating ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                创建中...
+                {t('creating')}
               </div>
             ) : (
-              '创建闪卡'
+              t('createFlashcard')
             )}
           </Button>
         </div>

@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send, MessageCircle } from "lucide-react"
-import { useLanguage } from "@/components/language-provider"
+import { useLocale, useTranslations } from 'next-intl'
 import { chatWithDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { PageAnchorText } from "@/components/page-anchor-button"
@@ -26,7 +26,8 @@ interface MaogeInterfaceProps {
 }
 
 export function MaogeInterface({ documentId, documentName, initialMessages, onPageJump }: MaogeInterfaceProps) {
-  const { t, language } = useLanguage()
+  const locale = useLocale()
+  const t = useTranslations()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -109,9 +110,9 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
         })
       });
       
-      console.log('[聊天记录] 成功保存到数据库');
+      console.log(t('chat.chatHistorySaved'));
     } catch (error) {
-      console.error('[聊天记录] 保存到数据库失败:', error);
+      console.error(t('chat.chatHistorySaveFailed'), error);
     }
   }
 
@@ -158,7 +159,7 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
       if (!response.ok) {
         const errorData = await response.json();
         console.error("聊天API错误:", errorData);
-        throw new Error(errorData.error || '聊天请求失败');
+        throw new Error(errorData.error || t('chat.chatRequestFailed'));
       }
       
       const data = await response.json();
@@ -181,10 +182,10 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
       // 保存对话到数据库
       await saveChatToDatabase(userMessage, aiMessage)
     } catch (error) {
-      console.error("问答失败:", error);
+      console.error(t('chat.chatError'), error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: error instanceof Error ? error.message : t("chatErrorMessage"),
+        content: error instanceof Error ? error.message : t("chat.chatError"),
         isUser: false,
         timestamp: new Date(),
       }
@@ -279,7 +280,7 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
               onClick={() => setModelType('fast')}
               disabled={isLoading}
             >
-              {language === 'zh' ? '快速' : language === 'ja' ? '高速' : 'Fast'}
+              {locale === 'zh' ? '快速' : locale === 'ja' ? '高速' : 'Fast'}
             </button>
             <button
               className={`px-4 py-1 rounded-r ${modelType === 'quality' ? 'bg-white font-bold text-[#8b5cf6]' : 'text-gray-500'}`}
@@ -292,7 +293,7 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
               }}
               disabled={isLoading}
             >
-              {language === 'zh' ? '高质量' : language === 'ja' ? '高品質' : 'High Quality'}
+              {locale === 'zh' ? '高质量' : locale === 'ja' ? '高品質' : 'High Quality'}
             </button>
           </div>
         </div>

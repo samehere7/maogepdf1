@@ -1,1 +1,0 @@
-import { useLanguage } from "@/components/language-provider" 

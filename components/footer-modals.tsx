@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { useLanguage } from "@/components/language-provider"
+import { useTranslations } from 'next-intl'
 
 interface FooterModalProps {
   isOpen: boolean
@@ -17,7 +17,7 @@ interface FooterModalProps {
 }
 
 export function FooterModal({ isOpen, onClose, type }: FooterModalProps) {
-  const { t } = useLanguage()
+  const t = useTranslations('footer')
   
   const getTitle = () => {
     switch (type) {
@@ -126,7 +126,7 @@ export function FooterModal({ isOpen, onClose, type }: FooterModalProps) {
             onClick={onClose}
             className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
           >
-            Close
+            {t('close')}
           </Button>
         </DialogFooter>
       </DialogContent>

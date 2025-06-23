@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface AIResultDialogProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export default function AIResultDialog({
   content,
   isLoading
 }: AIResultDialogProps) {
+  const t = useTranslations('aiResultDialog');
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -32,7 +34,7 @@ export default function AIResultDialog({
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-              <span className="ml-2 text-gray-600">正在处理...</span>
+              <span className="ml-2 text-gray-600">{t('processing')}</span>
             </div>
           ) : (
             <div className="prose dark:prose-invert max-w-none">
@@ -41,7 +43,7 @@ export default function AIResultDialog({
                   __html: content.replace(/\n/g, '<br />') 
                 }} />
               ) : (
-                <p className="text-red-500">处理过程中出现错误，请重试。</p>
+                <p className="text-red-500">{t('processingError')}</p>
               )}
             </div>
           )}

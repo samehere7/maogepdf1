@@ -3,14 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { useLanguage } from "@/components/language-provider"
+import { useTranslations } from 'next-intl'
 
 interface LoginModalProps {
   children: React.ReactNode
 }
 
 export function LoginModal({ children }: LoginModalProps) {
-  const { t } = useLanguage()
+  const t = useTranslations('auth')
+  const tf = useTranslations('footer')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGoogleLogin = async () => {
@@ -44,13 +45,13 @@ export function LoginModal({ children }: LoginModalProps) {
                 </clipPath>
               </defs>
             </svg>
-            {isLoading ? t("loggingIn") : "使用 Google 登录"}
+            {isLoading ? t("loggingIn") : t("signInWithGoogle")}
           </Button>
           <p className="text-xs text-slate-400 text-center">
             {t("termsAndConditionsPrompt")}
-            <a href="/terms" className="underline hover:text-slate-500">{t("termsOfService")}</a>
+            <a href="/terms" className="underline hover:text-slate-500">{tf("termsOfService")}</a>
             {t('and')}
-            <a href="/privacy" className="underline hover:text-slate-500">{t("privacyPolicy")}</a>
+            <a href="/privacy" className="underline hover:text-slate-500">{tf("privacyPolicy")}</a>
             .
           </p>
         </div>

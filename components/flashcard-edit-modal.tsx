@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { X } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 interface FlashcardEditModalProps {
   open: boolean
@@ -22,8 +23,10 @@ export default function FlashcardEditModal({
   onOpenChange, 
   onSave, 
   initialData,
-  title = "编辑闪卡"
+  title
 }: FlashcardEditModalProps) {
+  const t = useTranslations('flashcard');
+  const tc = useTranslations('common');
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
 
@@ -37,7 +40,7 @@ export default function FlashcardEditModal({
 
   const handleSave = () => {
     if (!question.trim() || !answer.trim()) {
-      alert('请填写正面和背面内容')
+      alert(t('editFillRequired'))
       return
     }
     onSave(question, answer)
@@ -56,7 +59,7 @@ export default function FlashcardEditModal({
       <DialogContent className="max-w-2xl bg-white">
         <DialogHeader>
           <DialogTitle>
-            {title}
+            {title || t('editFlashcard')}
           </DialogTitle>
         </DialogHeader>
 
@@ -64,12 +67,12 @@ export default function FlashcardEditModal({
           {/* 正面 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              正面
+              {t('frontSide')}
             </label>
             <Textarea
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="输入问题或概念..."
+              placeholder={t('questionPlaceholder')}
               className="min-h-[120px] resize-none border-2 border-purple-200 focus:border-purple-500 rounded-lg"
             />
           </div>
@@ -77,12 +80,12 @@ export default function FlashcardEditModal({
           {/* 背面 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              背面
+              {t('backSide')}
             </label>
             <Textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="输入答案或解释..."
+              placeholder={t('answerPlaceholder')}
               className="min-h-[120px] resize-none border-2 border-purple-200 focus:border-purple-500 rounded-lg"
             />
           </div>
@@ -94,13 +97,13 @@ export default function FlashcardEditModal({
               onClick={handleCancel}
               className="px-6"
             >
-              取消
+              {tc('cancel')}
             </Button>
             <Button
               onClick={handleSave}
               className="px-6 bg-purple-600 hover:bg-purple-700 text-white"
             >
-              保存
+              {tc('save')}
             </Button>
           </div>
         </div>

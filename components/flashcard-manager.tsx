@@ -6,6 +6,7 @@ import { ArrowLeft, Play, Plus, Edit, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useTranslations } from 'next-intl'
 
 interface Flashcard {
   id: string
@@ -42,6 +43,8 @@ export default function FlashcardManager({
   onStartPractice,
   onAddFlashcard 
 }: FlashcardManagerProps) {
+  const t = useTranslations('flashcard')
+  const tc = useTranslations('common')
   const [flashcards, setFlashcards] = useState<Flashcard[]>([])
   const [stats, setStats] = useState<FlashcardStats>({
     total: 0,
@@ -95,7 +98,7 @@ export default function FlashcardManager({
       const response = await fetch(`/api/flashcards/${pdfId}`)
       
       if (!response.ok) {
-        throw new Error('获取闪卡失败')
+        throw new Error(t('createFlashcardFailed'))
       }
       
       const data = await response.json()
@@ -111,7 +114,7 @@ export default function FlashcardManager({
       }
       
     } catch (error) {
-      console.error('加载闪卡失败:', error)
+      console.error(t('createFlashcardFailed') + ':', error)
     } finally {
       setLoading(false)
     }
@@ -148,11 +151,11 @@ export default function FlashcardManager({
 
   const getDifficultyText = (difficulty: number) => {
     switch (difficulty) {
-      case 0: return '新'
-      case 1: return '容易'
-      case 2: return '中等'
-      case 3: return '困难'
-      default: return '未知'
+      case 0: return t('new')
+      case 1: return t('easy')
+      case 2: return t('medium')
+      case 3: return t('hard')
+      default: return t('unknown')
     }
   }
 
@@ -205,7 +208,7 @@ export default function FlashcardManager({
   }
 
   const handleDelete = async (cardId: string) => {
-    if (confirm('确定要删除这张闪卡吗？')) {
+    if (confirm(t('deleteConfirm'))) {
       const updatedFlashcards = flashcards.filter(card => card.id !== cardId)
       setFlashcards(updatedFlashcards)
       calculateStats(updatedFlashcards)
@@ -243,19 +246,19 @@ export default function FlashcardManager({
           <h1 className="text-lg font-semibold">{pdfName}</h1>
         </div>
         <div className="text-sm text-gray-500">
-          {stats.total} 卡片总数
+          {stats.total} {t('totalCards')}
         </div>
       </div>
 
       {/* 学习进度 */}
       <div className="p-4 space-y-4">
-        <h2 className="font-medium text-gray-900">学习进度</h2>
+        <h2 className="font-medium text-gray-900">{t('studyProgress')}</h2>
         
         <div className="space-y-3">
           {/* 新卡片 */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">新 (100%)</span>
-            <span className="text-sm font-medium">{stats.new} 张卡片</span>
+            <span className="text-sm text-gray-600">{t('newCards')} (100%)</span>
+            <span className="text-sm font-medium">{stats.new} {t('cards')}</span>
           </div>
           {stats.new > 0 && (
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -265,9 +268,9 @@ export default function FlashcardManager({
 
           {/* 容易 */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">容易 ({stats.total > 0 ? Math.round((stats.easy / stats.total) * 100) : 0}%)</span>
+            <span className="text-sm text-gray-600">{t('easyCards')} ({stats.total > 0 ? Math.round((stats.easy / stats.total) * 100) : 0}%)</span>
             <span className="text-sm font-medium text-green-600">
-              {stats.easy} 张卡片
+              {stats.easy} {t('cards')}
               {stats.easy > 0 && <span className="text-green-500 ml-1">(+{stats.easy})</span>}
             </span>
           </div>
@@ -282,8 +285,8 @@ export default function FlashcardManager({
 
           {/* 中等 */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">中等 ({stats.total > 0 ? Math.round((stats.medium / stats.total) * 100) : 0}%)</span>
-            <span className="text-sm font-medium">{stats.medium} 张卡片</span>
+            <span className="text-sm text-gray-600">{t('mediumCards')} ({stats.total > 0 ? Math.round((stats.medium / stats.total) * 100) : 0}%)</span>
+            <span className="text-sm font-medium">{stats.medium} {t('cards')}</span>
           </div>
           {stats.medium > 0 && (
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -296,9 +299,9 @@ export default function FlashcardManager({
 
           {/* 困难 */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">困难 ({stats.total > 0 ? Math.round((stats.hard / stats.total) * 100) : 0}%)</span>
+            <span className="text-sm text-gray-600">{t('hardCards')} ({stats.total > 0 ? Math.round((stats.hard / stats.total) * 100) : 0}%)</span>
             <span className="text-sm font-medium text-red-600">
-              {stats.hard} 张卡片
+              {stats.hard} {t('cards')}
               {stats.hard > 0 && <span className="text-red-500 ml-1">(-{stats.hard})</span>}
             </span>
           </div>
@@ -320,7 +323,7 @@ export default function FlashcardManager({
             className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3"
           >
             <Play className="h-4 w-4 mr-2" />
-            开始练习
+            {t('startPractice')}
           </Button>
           <Button
             onClick={onAddFlashcard}
@@ -328,7 +331,7 @@ export default function FlashcardManager({
             className="flex-1 py-3"
           >
             <Plus className="h-4 w-4 mr-2" />
-            添加闪卡
+            {t('addFlashcard')}
           </Button>
         </div>
       </div>
@@ -336,11 +339,11 @@ export default function FlashcardManager({
       {/* 闪卡列表 */}
       <div className="flex-1 overflow-auto">
         <div className="p-4">
-          <h3 className="font-medium text-gray-900 mb-3">闪卡列表</h3>
+          <h3 className="font-medium text-gray-900 mb-3">{t('flashcardList')}</h3>
           
           {flashcards.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              暂无闪卡，点击"添加闪卡"开始创建
+              {t('noFlashcards')}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
@@ -352,7 +355,7 @@ export default function FlashcardManager({
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <div className="font-medium text-gray-900 mb-1 text-sm">
-                        正面
+                        {t('frontSide')}
                       </div>
                       <div className="text-xs text-gray-600 mb-2 break-words line-clamp-2">
                         {card.question}
@@ -376,7 +379,7 @@ export default function FlashcardManager({
                   
                   <div className="border-t pt-2">
                     <div className="font-medium text-gray-900 mb-1 text-sm">
-                      背面
+                      {t('backSide')}
                     </div>
                     <div className="text-xs text-gray-600 mb-2 break-words line-clamp-2">
                       {card.answer}
@@ -387,7 +390,7 @@ export default function FlashcardManager({
                       </span>
                       {card.page_number && (
                         <span className="text-xs text-gray-500">
-                          页面 {card.page_number}
+                          {t('page')} {card.page_number}
                         </span>
                       )}
                     </div>
@@ -404,34 +407,34 @@ export default function FlashcardManager({
         <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-gray-900">
-              编辑闪卡
+              {t('editFlashcard')}
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                正面
+                {t('frontSide')}
               </label>
               <Textarea
                 value={editingQuestion}
                 onChange={(e) => setEditingQuestion(e.target.value)}
                 className="w-full resize-none"
                 rows={3}
-                placeholder="输入问题..."
+                placeholder={t('questionPlaceholder')}
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                背面
+                {t('backSide')}
               </label>
               <Textarea
                 value={editingAnswer}
                 onChange={(e) => setEditingAnswer(e.target.value)}
                 className="w-full resize-none"
                 rows={4}
-                placeholder="输入答案..."
+                placeholder={t('answerPlaceholder')}
               />
             </div>
           </div>
@@ -441,14 +444,14 @@ export default function FlashcardManager({
               onClick={handleEditCancel}
               variant="outline"
             >
-              取消
+              {tc('cancel')}
             </Button>
             <Button
               onClick={handleEditSave}
               className="bg-purple-600 hover:bg-purple-700"
               disabled={!editingQuestion.trim() || !editingAnswer.trim()}
             >
-              保存
+              {tc('save')}
             </Button>
           </div>
         </DialogContent>

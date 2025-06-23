@@ -6,6 +6,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from 'next-intl'
 
 interface UpgradePlusModalProps {
   open: boolean
@@ -16,6 +17,7 @@ interface UpgradePlusModalProps {
 
 export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpenChange, fileName, fileSizeMB }) => {
   const [yearly, setYearly] = React.useState(true)
+  const t = useTranslations()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay />
@@ -36,18 +38,18 @@ export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpen
             <div className="bg-[#fff3e0] text-[#e57373] rounded-lg px-4 py-2 text-sm flex items-center mb-6">
               <span className="mr-2">🔴</span>
               <span>
-                <b>{fileName}</b> 大小为 <b>{fileSizeMB}MB</b>。升级到 Plus 以继续使用。
+                <b>{fileName}</b> {t('upgrade.fileTooLarge')} <b>{fileSizeMB}MB</b>。{t('upgrade.upgradeToAccessLargeFiles')}
               </span>
             </div>
             {/* 标题 */}
-            <div className="text-2xl font-bold mb-4">升级到 Plus</div>
+            <div className="text-2xl font-bold mb-4">{t('upgrade.upgradeToPlus')}</div>
             {/* 权益列表 */}
             <ul className="mb-6 space-y-2 text-base text-slate-700">
-              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 无限 个PDF</li>
-              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 无限 问题</li>
-              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 2,000 页/PDF</li>
-              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 50 个PDF/文件夹</li>
-              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> 高质量 模型</li>
+              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> {t('upgrade.unlimitedPdfs')} {t('upgrade.pdfs')}</li>
+              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> {t('upgrade.unlimitedQuestions')} {t('upgrade.questions')}</li>
+              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> {t('upgrade.pagesPerPdf')} {t('upgrade.pages')}</li>
+              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> {t('upgrade.pdfsPerFolder')} {t('upgrade.pdfsFolder')}</li>
+              <li className="flex items-center"><span className="text-green-500 mr-2">✔</span> {t('upgrade.highQualityModel')} {t('upgrade.model')}</li>
             </ul>
             {/* 价格切换 */}
             <div className="flex items-center mb-6 gap-0.5 w-full max-w-[340px] mx-auto">
@@ -56,8 +58,8 @@ export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpen
                 onClick={() => setYearly(false)}
               >
                 <div className="flex flex-col items-center justify-center leading-tight">
-                  <span>按月</span>
-                  <span>$13.99/月</span>
+                  <span>{t('upgrade.monthlyPlan')}</span>
+                  <span>$13.99{t('upgrade.month')}</span>
                 </div>
               </button>
               <button
@@ -65,16 +67,16 @@ export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpen
                 onClick={() => setYearly(true)}
               >
                 <div className="flex flex-col items-center justify-center leading-tight">
-                  <span>按年 <span className="text-green-200 font-bold ml-1">立省40%</span></span>
-                  <span>$8.25/月</span>
+                  <span>{t('upgrade.yearlyPlan')} <span className="text-green-200 font-bold ml-1">{t('upgrade.save40Percent')}</span></span>
+                  <span>$8.25{t('upgrade.month')}</span>
                 </div>
               </button>
             </div>
             {/* 升级按钮 */}
-            <Button className="w-full h-12 text-lg bg-[#8b5cf6] hover:bg-[#7c3aed]">升级到 Plus</Button>
+            <Button className="w-full h-12 text-lg bg-[#8b5cf6] hover:bg-[#7c3aed]">{t('upgrade.upgradeToPlus')}</Button>
             {/* 登录提示 */}
             <div className="text-center text-sm text-slate-500 mt-4">
-              已有账号？<a href="/" className="text-[#8b5cf6] ml-1">登录</a>
+              {t('auth.alreadyHaveAccount')}<a href="/" className="text-[#8b5cf6] ml-1">{t('auth.login')}</a>
             </div>
           </div>
           {/* 用户背书 */}
@@ -85,7 +87,7 @@ export const UpgradePlusModal: React.FC<UpgradePlusModalProps> = ({ open, onOpen
               <img src="https://randomuser.me/api/portraits/men/65.jpg" className="w-8 h-8 rounded-full border-2 border-white" />
               <img src="https://randomuser.me/api/portraits/women/12.jpg" className="w-8 h-8 rounded-full border-2 border-white" />
             </div>
-            <span className="ml-3 text-slate-500 text-xs">深受喜爱 超过1000万研究人员</span>
+            <span className="ml-3 text-slate-500 text-xs">{t('upgrade.trustedByResearchers')}</span>
           </div>
         </div>
       </DialogContent>

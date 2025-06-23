@@ -5,6 +5,7 @@ import UpgradePlusModal from "@/components/UpgradePlusModal"
 import { useState, useEffect } from "react"
 import { useUser } from "@/components/UserProvider"
 import { supabase } from "@/lib/supabase/client"
+import { useTranslations } from 'next-intl'
 
 interface AccountModalProps {
   open: boolean
@@ -25,6 +26,7 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const { profile, setProfile } = useUser();
   const [quota, setQuota] = useState<{pdf_count: number, chat_count: number, quota_date: string}>({pdf_count: 0, chat_count: 0, quota_date: ''});
+  const t = useTranslations();
 
   // 升级按钮逻辑
   const handleUpgrade = async () => {
@@ -62,7 +64,7 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
     }
     
     setUpgradeOpen(false);
-    alert("升级成功！");
+    alert(t('user.upgradeSuccess'));
   }
 
   // 会员身份与有效期判断
@@ -89,25 +91,15 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
           .maybeSingle(); // 使用maybeSingle避免PGRST116错误
           
         if (error) {
-          // 如果是权限错误或记录不存在，创建新记录
-          if (error.code === 'PGRST116' || error.message.includes('403')) {
-            console.log('配额记录不存在或权限问题，创建新记录');
+          // 如果是权限错误或记录不存在，使用默认配额值
+          if (error.code === 'PGRST116' || error.message.includes('403') || error.code === '42501') {
+            console.log('配额查询权限问题，使用默认配额值');
             const today = new Date().toISOString().slice(0, 10);
-            const { error: insertError } = await supabase
-              .from('user_daily_quota')
-              .insert({ 
-                id: user.id, 
-                pdf_count: 0, 
-                chat_count: 0, 
-                quota_date: today 
-              });
-            
-            if (!insertError) {
-              setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
-            }
+            setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
             return;
           }
-          throw error;
+          console.warn('配额查询错误:', error);
+          return;
         }
         
         if (!data) return;
@@ -125,7 +117,6 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
         }
       } catch (error) {
         // 完全静默处理权限错误，使用默认值
-        console.debug('配额查询失败（已忽略）:', error.code);
         // 如果表不存在或权限不足，使用默认值
         setQuota({ pdf_count: 0, chat_count: 0, quota_date: new Date().toISOString().slice(0, 10) });
       }
@@ -137,7 +128,7 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[360px] bg-white rounded-2xl p-0 overflow-hidden">
         <DialogHeader className="flex items-center justify-between px-6 pt-5 pb-3 border-b">
-          <DialogTitle className="text-lg font-semibold">我的账户</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">{t('user.myAccount')}</DialogTitle>
         </DialogHeader>
         {/* 邮箱+退出 */}
         <div className="flex items-center px-6 py-4">
@@ -147,15 +138,15 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
             className="ml-auto"
             onClick={onSignOut}
           >
-            退 出
+{t('user.signOut')}
           </Button>
         </div>
         {/* 今日免费用量（非plus用户显示） */}
         {!isPlus && (
         <div className="bg-gray-50 px-6 py-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-700 text-sm">今日免费使用量</span>
-            <span className="text-xs text-gray-400">将在 8:00 AM 重置</span>
+            <span className="text-gray-700 text-sm">{t('user.todayFreeUsage')}</span>
+            <span className="text-xs text-gray-400">{t('user.resetAt')}</span>
           </div>
           {/* 进度条 */}
           <div className="flex gap-4 items-end">
@@ -168,8 +159,8 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
                 </div>
               </div>
               <div className="flex flex-col text-xs text-gray-700 whitespace-nowrap ml-2">
-                <span>{quota.pdf_count}/{pdfQuotaLimit} 个PDF</span>
-                <span>{quota.chat_count}/{chatQuotaLimit} 条消息</span>
+                <span>{quota.pdf_count}/{pdfQuotaLimit} {t('user.pdfs')}</span>
+                <span>{quota.chat_count}/{chatQuotaLimit} {t('user.messages')}</span>
               </div>
             </div>
           </div>
@@ -179,13 +170,13 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
           <div className="flex flex-col px-6 py-4 border-t border-gray-100">
             <div className="flex items-center">
               <span className="text-gray-700 text-sm font-medium">
-                {isPlus ? (isActive ? "Plus 会员（有效）" : "Plus 会员（已过期）") : "免费方案"}
+{isPlus ? (isActive ? t('user.plusMemberActive') : t('user.plusMemberExpired')) : t('user.freePlan')}
               </span>
               {!isPlus && (
             <Button className="ml-auto bg-[#a026ff] text-white rounded-lg px-6 h-9 text-base font-semibold shadow-none hover:bg-[#7c1fd1] transition-all"
               onClick={() => setUpgradeOpen(true)}
             >
-              升 级
+{t('user.upgrade')}
             </Button>
               )}
               {isPlus && (
@@ -194,21 +185,21 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
             </div>
             {/* 会员到期时间展示和权益说明 */}
             {isPlus && expireAt && (
-              <div className="mt-2 text-xs text-gray-500">到期时间：{formatDate(expireAt)}</div>
+              <div className="mt-2 text-xs text-gray-500">{t('user.expiresAt')}：{formatDate(expireAt)}</div>
             )}
             {isPlus && !isActive && (
-              <div className="mt-1 text-xs text-red-500">会员已过期</div>
+              <div className="mt-1 text-xs text-red-500">{t('user.membershipExpired')}</div>
             )}
             {/* plus会员权益说明 */}
             {isPlus && isActive && (
               <div className="mt-4 p-3 bg-purple-50 rounded text-xs text-purple-800 border border-purple-200">
-                <div className="font-bold mb-1">Plus会员专属权益：</div>
+                <div className="font-bold mb-1">{t('user.plusBenefits')}</div>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>无限上传PDF文件，无数量限制</li>
-                  <li>无限次AI对话，无次数限制</li>
-                  <li>单个PDF支持最大2000页，文件大小无限制</li>
-                  <li>每个文件夹最多可存放50个PDF</li>
-                  <li>支持高质量模型对话</li>
+                  <li>{t('user.unlimitedPdfs')}</li>
+                  <li>{t('user.unlimitedChats')}</li>
+                  <li>{t('user.maxPages')}</li>
+                  <li>{t('user.maxPdfsPerFolder')}</li>
+                  <li>{t('user.highQualityModel')}</li>
                 </ul>
               </div>
             )}

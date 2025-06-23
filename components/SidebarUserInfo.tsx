@@ -5,16 +5,18 @@ import AccountModal from "@/components/AccountModal"
 import UpgradePlusModal from "@/components/UpgradePlusModal"
 import { useUser } from "@/components/UserProvider"
 import { Crown } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 export default function SidebarUserInfo() {
   const [open, setOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const { user, profile, setProfile } = useUser();
+  const t = useTranslations();
 
   if (!user) return null;
 
   const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
-  const displayName = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || "未命名";
+  const displayName = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || t('user.unnamed');
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -56,7 +58,7 @@ export default function SidebarUserInfo() {
     }
     
     setUpgradeOpen(false);
-    alert("升级成功！");
+    alert(t('upgrade.upgradeSuccess'));
   }
 
   const isPlus = profile?.plus === true;
@@ -96,7 +98,7 @@ export default function SidebarUserInfo() {
               {displayName}
             </div>
             <div className="text-xs text-gray-400 truncate">
-              {isPlus && isActive ? "Plus 会员" : "免费用户"}
+              {isPlus && isActive ? t('user.plusMember') : t('user.freeUser')}
             </div>
           </div>
         </div>
@@ -108,7 +110,7 @@ export default function SidebarUserInfo() {
           onClick={() => setUpgradeOpen(true)}
         >
             <Crown className="w-4 h-4" />
-          升级到 Plus
+          {t('upgrade.upgradeToPlus')}
         </button>
         )}
       </div>

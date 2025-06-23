@@ -2,7 +2,6 @@
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/components/UserProvider"
-import { LanguageProvider } from "@/components/language-provider"
 import AuthTokenHandler from "@/components/AuthTokenHandler"
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -13,12 +12,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <LanguageProvider>
-        <UserProvider>
-          <AuthTokenHandler />
-          {children}
-        </UserProvider>
-      </LanguageProvider>
+      <UserProvider>
+        <AuthTokenHandler />
+        {children}
+      </UserProvider>
     </ThemeProvider>
   )
 } 

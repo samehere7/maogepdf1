@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { useTranslations } from 'next-intl';
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +24,8 @@ export default function TextSelectionToolbar({
   onSummarize,
   isLoading = false
 }: TextSelectionToolbarProps) {
+  const t = useTranslations('textSelectionToolbar');
+  
   if (!position) return null;
 
   return (
@@ -45,11 +48,11 @@ export default function TextSelectionToolbar({
               className="hover:bg-blue-50 dark:hover:bg-blue-900"
             >
               <Wand2 className="h-4 w-4 mr-1" />
-              解释
+              {t('explain')}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>对选中文本进行解释</p>
+            <p>{t('explainTooltip')}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -63,11 +66,11 @@ export default function TextSelectionToolbar({
               className="hover:bg-green-50 dark:hover:bg-green-900"
             >
               <RefreshCw className="h-4 w-4 mr-1" />
-              改写
+              {t('rewrite')}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>用不同方式改写选中文本</p>
+            <p>{t('rewriteTooltip')}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -81,11 +84,11 @@ export default function TextSelectionToolbar({
               className="hover:bg-purple-50 dark:hover:bg-purple-900"
             >
               <FileText className="h-4 w-4 mr-1" />
-              总结
+              {t('summarize')}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>总结选中文本的要点</p>
+            <p>{t('summarizeTooltip')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

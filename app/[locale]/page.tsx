@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { Upload, FileText, GraduationCap, Briefcase, Quote } from "lucide-react"
-import {useTranslations} from 'next-intl';
+import {useTranslations, useLocale} from 'next-intl';
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
@@ -31,7 +31,9 @@ export default function HomePage() {
   const [modelQuality, setModelQuality] = useState<ModelQuality>('high')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const pathname = usePathname()
   const t = useTranslations();
+  const locale = useLocale();
   const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
   const { profile, loading: profileLoading } = useUser()
   const [shareId, setShareId] = useState<string | null>(null)
@@ -69,9 +71,9 @@ export default function HomePage() {
       }
       
       setPdfFlashcardCounts(counts)
-      console.log('[主页] 闪卡计数加载完成:', counts)
+      console.log('[Homepage] Flashcard counts loaded:', counts)
     } catch (error) {
-      console.error('[主页] 加载闪卡计数失败:', error)
+      console.error('[Homepage] Failed to load flashcard counts:', error)
     }
   }
 
@@ -151,7 +153,7 @@ export default function HomePage() {
   const handleFile = async (file: File, quality: ModelQuality) => {
     // 检查用户是否已登录
     if (!isLoggedIn) {
-      alert('请先登录后再上传文件。点击右上角登录按钮进行登录。');
+      alert(t('auth.pleaseLoginToUpload'));
       return;
     }
     
@@ -254,15 +256,25 @@ export default function HomePage() {
     }
   }
 
-  // 显示加载状态，避免页面一直刷新
-  // 只在真正需要时显示加载状态（比如初次加载）
-  if (profileLoading && typeof window !== 'undefined' && !sessionStorage.getItem('app_initialized')) {
-    sessionStorage.setItem('app_initialized', 'true');
+  // 简化加载逻辑 - 只在初次加载的短时间内显示加载状态
+  const [showLoading, setShowLoading] = useState(true)
+  
+  useEffect(() => {
+    // 设置一个较短的超时时间来隐藏加载状态
+    const timer = setTimeout(() => {
+      setShowLoading(false)
+    }, 500) // 0.5秒后强制隐藏加载状态
+    
+    return () => clearTimeout(timer)
+  }, [])
+  
+  // 只在短时间内且确实在加载时显示加载状态
+  if (profileLoading && showLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-          <p className="text-slate-600">正在初始化...</p>
+          <p className="text-slate-600">{t('common.initializing')}</p>
         </div>
       </div>
     )
@@ -270,12 +282,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      
       {/* 固定侧边栏 */}
       <div className="fixed top-0 left-0 h-screen w-80 min-w-[240px] max-w-[320px] z-30 bg-[#18181b]">
         <Sidebar 
           pdfFlashcardCounts={pdfFlashcardCounts}
           onFlashcardClick={(pdfId, pdfName) => {
-            console.log('[主页] 闪卡点击事件触发:', pdfId, pdfName);
+            console.log('[Homepage] Flashcard click event triggered:', pdfId, pdfName);
             // 跳转到PDF页面并直接打开闪卡管理
             router.push(`/analysis/${pdfId}?flashcard=true`);
           }}
@@ -342,28 +355,11 @@ export default function HomePage() {
           {/* Hero Upload Area */}
             <div className="text-center mb-10">
               <h1 className="text-4xl sm:text-6xl font-bold text-slate-800 mb-4 flex flex-wrap items-center justify-center gap-2">
-                {language === 'zh'
-                  ? (<>
-                      {t('heroTitleV2').replace('PDF', '')}
-                      <span className="inline-block bg-[#a259ff] text-white rounded-lg px-4 py-1 ml-2 text-4xl sm:text-6xl font-bold align-middle" style={{lineHeight:'1.1'}}>PDF</span>
-                    </>)
-                  : (<>
-                      {t('heroTitleV2').split('PDF')[0]}
-                      <span className="inline-block bg-[#a259ff] text-white rounded-lg px-4 py-1 ml-2 text-4xl sm:text-6xl font-bold align-middle" style={{lineHeight:'1.1'}}>PDF</span>
-                    </>)}
+                {t('hero.title').split('PDF')[0]}
+                <span className="inline-block bg-[#a259ff] text-white rounded-lg px-4 py-1 ml-2 text-4xl sm:text-6xl font-bold align-middle" style={{lineHeight:'1.1'}}>PDF</span>
             </h1>
               <p className="text-slate-600 text-lg sm:text-xl mb-8 max-w-3xl mx-auto">
-                {language === 'zh'
-                  ? (<>
-                      {t('heroDescriptionV2').split('，')[0]}，
-                      <span className="text-[#ff9100] underline underline-offset-4 decoration-[#ff9100] mx-1">学生、研究者和专业人士</span>
-                      {t('heroDescriptionV2').split('，')[1]}
-                    </>)
-                  : (<>
-                      {t('heroDescriptionV2').split('students, researchers and professionals')[0]}
-                      <span className="text-[#ff9100] underline underline-offset-4 decoration-[#ff9100] mx-1">students, researchers and professionals</span>
-                      {t('heroDescriptionV2').split('students, researchers and professionals')[1]}
-                    </>)}
+                {t('hero.description')}
               </p>
 
             {/* Upload Area */}
@@ -386,7 +382,7 @@ export default function HomePage() {
                   <Upload className="text-[#8b5cf6] h-16 w-16 mb-4" />
                 )}
                 <p className="mb-2 text-lg text-slate-700">
-                  <span className="font-semibold">{t("clickToUpload")}</span> {t("orDragAndDrop")}
+                  <span className="font-semibold">{t("upload.clickToUpload")}</span> {t("upload.orDragAndDrop")}
                 </p>
               </div>
               <input
@@ -405,7 +401,7 @@ export default function HomePage() {
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
             >
-              {uploading ? t("uploading") : t("uploadPdf")}
+              {uploading ? t("upload.uploading") : t("upload.uploadPdf")}
             </Button>
           </div>
 
@@ -417,24 +413,24 @@ export default function HomePage() {
                 <div className="p-3 bg-purple-100 rounded-xl">
                   <FileText className="h-8 w-8 text-[#8b5cf6]" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800">{t("forResearchers")}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{t("features.forResearchers")}</h3>
               </div>
-              <p className="text-slate-600 mb-6">{t("researchersDescription")}</p>
+              <p className="text-slate-600 mb-6">{t("features.researchersDescription")}</p>
 
               {/* Demo Interface for Researchers */}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div className="bg-white rounded-lg p-4 mb-3 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-3 h-3 bg-[#8b5cf6] rounded-full"></div>
-                    <span className="text-sm font-medium text-slate-700">Academic Paper Analysis</span>
+                    <span className="text-sm font-medium text-slate-700">{t('demo.academicPaperAnalysis')}</span>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-3">
                     <div className="w-16 h-12 bg-[#8b5cf6] rounded-md mb-2"></div>
-                    <div className="text-xs text-slate-500">Research Document</div>
+                    <div className="text-xs text-slate-500">{t('demo.researchDocument')}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 bg-white rounded-lg p-3 shadow-sm">
-                  <span className="text-sm text-slate-600 flex-1">Ask any question...</span>
+                  <span className="text-sm text-slate-600 flex-1">{t('demo.askAnyQuestion')}</span>
                   <div className="w-8 h-8 bg-[#8b5cf6] rounded-full flex items-center justify-center">
                     <span className="text-white text-sm">▶</span>
                   </div>
@@ -448,30 +444,30 @@ export default function HomePage() {
                 <div className="p-3 bg-green-100 rounded-xl">
                   <GraduationCap className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800">{t("forStudents")}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{t("features.forStudents")}</h3>
               </div>
-              <p className="text-slate-600 mb-6">{t("studentsDescription")}</p>
+              <p className="text-slate-600 mb-6">{t("features.studentsDescription")}</p>
 
               {/* Demo Interface for Students */}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div className="bg-white rounded-lg p-4 mb-3 shadow-sm">
-                  <div className="text-sm font-medium text-slate-700 mb-3">What is the capital of France?</div>
+                  <div className="text-sm font-medium text-slate-700 mb-3">{t('demo.capitalOfFrance')}</div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-md">
                       <div className="w-3 h-3 rounded-full border-2 border-slate-400"></div>
-                      <span className="text-sm text-slate-600">Berlin</span>
+                      <span className="text-sm text-slate-600">{t('demo.berlin')}</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-slate-100 rounded-md">
                       <div className="w-3 h-3 rounded-full border-2 border-slate-400"></div>
-                      <span className="text-sm text-slate-600">Madrid</span>
+                      <span className="text-sm text-slate-600">{t('demo.madrid')}</span>
                     </div>
                     <div className="flex items-center gap-2 p-2 bg-purple-100 rounded-md">
                       <div className="w-3 h-3 bg-[#8b5cf6] rounded-full"></div>
-                      <span className="text-sm text-slate-700 font-medium">Paris</span>
+                      <span className="text-sm text-slate-700 font-medium">{t('demo.paris')}</span>
                     </div>
                   </div>
                   <Button className="w-full mt-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-sm">
-                    Submit Answer
+                    {t('demo.submitAnswer')}
                   </Button>
                 </div>
               </div>
@@ -483,14 +479,14 @@ export default function HomePage() {
                 <div className="p-3 bg-blue-100 rounded-xl">
                   <Briefcase className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800">{t("forProfessionals")}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{t("features.forProfessionals")}</h3>
               </div>
-              <p className="text-slate-600 mb-6">{t("professionalsDescription")}</p>
+              <p className="text-slate-600 mb-6">{t("features.professionalsDescription")}</p>
 
               {/* Demo Interface for Professionals */}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <div className="text-xs text-slate-500 mb-2">Financial_report.pdf</div>
+                  <div className="text-xs text-slate-500 mb-2">{t('demo.financialReport')}</div>
                   <div className="flex items-center gap-4 mb-3">
                     <div className="text-lg font-bold text-slate-800">78.15%</div>
                     <div className="w-12 h-2 bg-green-200 rounded-full">
@@ -504,7 +500,7 @@ export default function HomePage() {
                     <div className="w-4 h-4 bg-blue-300 rounded"></div>
                   </div>
                   <Button className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-sm">
-                    What's the net profit for Q2 in the financial report?
+                    {t('demo.netProfitQuestion')}
                   </Button>
                 </div>
               </div>
@@ -516,14 +512,14 @@ export default function HomePage() {
                 <div className="p-3 bg-yellow-100 rounded-xl">
                   <Quote className="h-8 w-8 text-yellow-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800">{t("citationSources")}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{t("features.citationSources")}</h3>
               </div>
-              <p className="text-slate-600 mb-6">{t("citationDescription")}</p>
+              <p className="text-slate-600 mb-6">{t("features.citationDescription")}</p>
 
               {/* Demo Interface for Citations */}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <div className="text-sm font-medium text-slate-700 mb-3">Who is the author of this article?</div>
+                  <div className="text-sm font-medium text-slate-700 mb-3">{t('demo.authorQuestion')}</div>
                   <div className="bg-[#8b5cf6] text-white rounded-lg p-3 mb-3">
                     <div className="text-sm">
                       The author of the article "Moderated and Unmoderated Card Sorting in UX Design" is Marcin Majka
@@ -531,7 +527,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <Button className="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm">
-                    Scroll to Page 1
+                    {t('demo.scrollToPage')}
                   </Button>
                 </div>
               </div>
@@ -549,23 +545,23 @@ export default function HomePage() {
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
                 onClick={() => setModalType("terms")}
               >
-                {t("termsOfService")}
+                {t("footer.termsOfService")}
               </button>
               <button
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
                 onClick={() => setModalType("privacy")}
               >
-                {t("privacyPolicy")}
+                {t("footer.privacyPolicy")}
               </button>
               <button
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
                 onClick={() => setModalType("contact")}
               >
-                {t("contactUs")}
+                {t("footer.contactUs")}
               </button>
             </div>
             <p className="text-slate-500 text-sm font-normal leading-normal">
-              © 2024 Maoge PDF. {t("allRightsReserved")}
+              © 2024 Maoge PDF. {t("footer.allRightsReserved")}
             </p>
           </div>
         </div>

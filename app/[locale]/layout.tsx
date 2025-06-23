@@ -3,14 +3,22 @@ import { Inter } from "next/font/google"
 import "../globals.css"
 import { Providers } from "@/components/providers"
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {getMessages, getTranslations} from 'next-intl/server';
 import {locales} from '@/i18n';
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "Maoge PDF - AI PDF Chat & Analysis",
-  description: "Upload PDF documents for intelligent analysis and Q&A",
+export async function generateMetadata({
+  params: {locale}
+}: {
+  params: {locale: string};
+}): Promise<Metadata> {
+  const t = await getTranslations({locale, namespace: 'metadata'});
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
 }
 
 export function generateStaticParams() {
@@ -24,9 +32,14 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: {locale: string};
 }) {
+  console.log('🔍 LocaleLayout - Received locale:', locale);
+  console.log('🔍 LocaleLayout - Available locales:', locales);
+  
   // Providing all messages to the client
   // side is the easiest way to get started
-  const messages = await getMessages();
+  const messages = await getMessages({locale});
+  
+  console.log('🔍 LocaleLayout - Messages loaded for:', locale, 'Keys:', Object.keys(messages).length);
 
   return (
     <html lang={locale} suppressHydrationWarning>

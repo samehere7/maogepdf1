@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase/client"
 import { LoginModal } from "@/components/login-modal"
+import { useTranslations } from 'next-intl'
 
 export default function SidebarSignIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const t = useTranslations('auth')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -49,7 +51,7 @@ export default function SidebarSignIn() {
           color: "#fff",
         }}
       >
-        登录免费保存你的聊天记录
+        {t('loginFreeDescription')}
       </span>
       <LoginModal>
         <Button
@@ -69,7 +71,7 @@ export default function SidebarSignIn() {
             display: "inline-block",
           }}
         >
-          登录
+          {t('login')}
         </Button>
       </LoginModal>
     </div>

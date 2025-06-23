@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase/client"
 import SidebarUserInfo from "@/components/SidebarUserInfo"
 import ShareChatModal from "@/components/share-chat-modal"
 import { useUser } from "@/components/UserProvider"
+import { useTranslations } from 'next-intl'
 
 interface SidebarProps {
   className?: string
@@ -24,8 +25,16 @@ interface SidebarProps {
 export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }: SidebarProps) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations('pdf')
+  const tc = useTranslations('common')
+  const tu = useTranslations('upload')
   const [showFolderModal, setShowFolderModal] = useState(false)
-  const [folderName, setFolderName] = useState("我的文件夹")
+  const [folderName, setFolderName] = useState("")
+  
+  // 初始化文件夹名称
+  useEffect(() => {
+    setFolderName(t('myFolder'))
+  }, [t])
   const [folders, setFolders] = useState<any[]>([])
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null)
   const [editFolderName, setEditFolderName] = useState("")
@@ -88,19 +97,19 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
   // 从API加载PDF列表
   const loadPDFsFromAPI = async () => {
     try {
-      console.log('[Sidebar] 从API加载PDF列表...')
+      console.log('[Sidebar] Loading PDF list from API...')
       
       const response = await fetch('/api/pdfs')
       
       if (response.ok) {
         const data = await response.json()
-        console.log('[Sidebar] 加载到PDF数量:', data.pdfs.length)
+        console.log('[Sidebar] Loaded PDFs count:', data.pdfs.length)
         setPdfs(data.pdfs || [])
       } else {
-        console.error('[Sidebar] 加载PDF列表失败:', response.status)
+        console.error('[Sidebar] ' + t('loadPdfListFailed') + ':', response.status)
       }
     } catch (error) {
-      console.error('[Sidebar] 加载PDF列表出错:', error)
+      console.error('[Sidebar] Error loading PDF list:', error)
     }
   }
 
@@ -110,7 +119,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       if (!file.type.includes("pdf")) {
-        alert("只允许上传PDF文件")
+        alert(t('onlyPdfAllowed'))
         return
       }
 
@@ -127,7 +136,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
 
         if (response.ok) {
           const result = await response.json()
-          console.log('[Sidebar] 上传成功:', result)
+          console.log('[Sidebar] Upload successful:', result)
           
           // 重新加载PDF列表
           await loadPDFsFromAPI()
@@ -136,11 +145,11 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           router.push(`/analysis/${result.pdf.id}`)
         } else {
           const error = await response.json()
-          alert(`上传失败: ${error.error || '未知错误'}`)
+          alert(`${t('uploadError')}: ${error.error || tc('error')}`)
         }
       } catch (error) {
-        console.error('[Sidebar] 上传失败:', error)
-        alert('上传失败，请重试')
+        console.error('[Sidebar] Upload failed:', error)
+        alert(t('uploadFailedRetry'))
       }
     }
   }
@@ -158,7 +167,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     localStorage.setItem("folderStructure", JSON.stringify(newStructure))
     
     setShowFolderModal(false)
-    setFolderName("我的文件夹")
+    setFolderName(t('myFolder'))
   }
 
   const handleRenameFolder = (id: string) => {
@@ -184,7 +193,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
   const handleDeletePdf = (id: string) => {
     // 找到PDF名称用于更友好的确认提示
     const pdfToDelete = pdfs.find(pdf => pdf.id === id);
-    const pdfName = pdfToDelete?.name || 'PDF文件';
+    const pdfName = pdfToDelete?.name || t('pdfFile');
     
     setDeletingPdf({ id, name: pdfName });
     setShowDeleteModal(true);
@@ -202,7 +211,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
 
       if (response.ok) {
         const deleteResult = await response.json();
-        console.log('[Sidebar] PDF删除成功，结果:', deleteResult)
+        console.log('[Sidebar] PDF deleted successfully, result:', deleteResult)
         
         // 发送删除事件，通知父组件处理页面跳转
         window.dispatchEvent(new CustomEvent('pdf-deleted', { 
@@ -224,11 +233,11 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
         localStorage.setItem("folderStructure", JSON.stringify(newStructure))
       } else {
         const error = await response.json()
-        alert(`删除失败: ${error.error || '未知错误'}`)
+        alert(`${t('deleteFailed')}: ${error.error || tc('error')}`)
       }
     } catch (error) {
-      console.error('[Sidebar] 删除PDF失败:', error)
-      alert('删除失败，请重试')
+      console.error('[Sidebar] Delete PDF failed:', error)
+      alert(t('deleteFailed'))
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false)
@@ -362,11 +371,11 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     
     const pdfId = e.dataTransfer.getData('text/plain')
     if (!pdfId) {
-      console.log('没有找到PDF ID')
+      console.log('PDF ID not found')
       return
     }
 
-    console.log(`移动PDF ${pdfId} 到文件夹 ${folderId}`)
+    console.log(`Moving PDF ${pdfId} to folder ${folderId}`)
 
     // 从之前的文件夹中移除PDF
     const newStructure = { ...folderStructure }
@@ -391,7 +400,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     setIsDragging(false)
     setMousePosition(null)
     
-    console.log('新的文件夹结构:', newStructure)
+    console.log('New folder structure:', newStructure)
   }
 
   const handlePdfClick = (e: React.MouseEvent, pdfId: string) => {
@@ -455,7 +464,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           onClick={handleUploadClick}
           className="w-full py-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-md text-center transition"
         >
-          上传 PDF
+          {tu('uploadPdf')}
         </button>
         <input 
           type="file" 
@@ -474,14 +483,14 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           }}
           className="w-full py-2 bg-[#1e1e1e] hover:bg-[#2a2a2a] rounded-md text-center transition"
         >
-          新建文件夹
+          {t('createFolder')}
         </button>
       </div>
 
       {/* 拖拽提示 */}
       {draggedPdfId && !isDragging && (
         <div className="mx-3 mb-2 p-2 bg-purple-900/50 border border-purple-400 rounded-md text-sm text-purple-200 text-center">
-          📁 拖拽到文件夹进行整理
+          📁 {t('dragToFolderToOrganize')}
         </div>
       )}
 
@@ -491,7 +500,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           {/* 当没有PDF和文件夹时显示拖拽提示 */}
           {pdfs.length === 0 && folders.length === 0 && (
             <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center text-gray-500 text-sm">
-              将 PDF 文件拖放到这里
+              {t('dragDropPdfHere')}
             </div>
           )}
 
@@ -548,7 +557,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                   <button 
                     onClick={(e) => handleSharePdf(e, pdf.id, pdf.name)}
                     className="p-1 hover:bg-gray-700 rounded flex items-center justify-center"
-                    title="分享PDF"
+                    title={t('sharePdf')}
                   >
                     <Share size={14} className="text-gray-400 hover:text-gray-300" />
                   </button>
@@ -560,7 +569,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                         console.log('Rename PDF:', pdf.id);
                       }}
                       className="p-1 hover:bg-gray-700 rounded"
-                      title="重命名"
+                      title={t('renamePdf')}
                     >
                       <Pencil size={14} />
                     </button>
@@ -570,7 +579,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                         handleDeletePdf(pdf.id);
                       }}
                       className="p-1 hover:bg-gray-700 rounded"
-                      title="删除"
+                      title={tc('delete')}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -594,7 +603,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
             {pdfs.some(pdf => pdfFlashcards[pdf.id] > 0) && (
               <div className="mb-4">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">
-                  闪卡集合
+                  {t('flashcardCollection')}
                 </h3>
                 {pdfs
                   .filter(pdf => pdfFlashcards[pdf.id] > 0)
@@ -606,7 +615,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Brain size={16} className="text-purple-400 flex-shrink-0" />
-                        <span className="text-gray-300 truncate" title={`${pdf.name} 闪卡`}>
+                        <span className="text-gray-300 truncate" title={`${pdf.name} ${t('flashcardCollection')}`}>
                           {pdf.name}
                         </span>
                         <div className="flex items-center gap-1 bg-purple-600 text-white px-2 py-1 rounded-full text-xs flex-shrink-0">
@@ -665,7 +674,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                           {folder.name}
                         </span>
                         {dragOverFolderId === folder.id && draggedPdfId && (
-                          <span className="text-xs text-gray-400 ml-auto">放置到这里</span>
+                          <span className="text-xs text-gray-400 ml-auto">{t('dropHere')}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
@@ -702,9 +711,9 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                       !draggedPdfId && "text-gray-500"
                     )}>
                       {draggedPdfId ? (
-                        <span className="text-gray-400">将 PDF 文件拖放到这里</span>
+                        <span className="text-gray-400">{t('dragDropPdfHere')}</span>
                       ) : (
-                        <span>将 PDF 文件拖放到这里</span>
+                        <span>{t('dragDropPdfHere')}</span>
                       )}
                     </div>
                   ) : (
@@ -734,7 +743,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                           <button 
                             onClick={(e) => handleSharePdf(e, pdf.id, pdf.name)}
                             className="p-1 hover:bg-gray-700 rounded flex items-center justify-center"
-                            title="分享PDF"
+                            title={t('sharePdf')}
                           >
                             <Share size={14} className="text-gray-400 hover:text-gray-300" />
                           </button>
@@ -746,7 +755,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                                 console.log('Rename PDF:', pdf.id);
                               }}
                               className="p-1 hover:bg-gray-700 rounded"
-                              title="重命名"
+                              title={t('renamePdf')}
                             >
                               <Pencil size={14} />
                             </button>
@@ -756,7 +765,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                                 handleDeletePdf(pdf.id);
                               }}
                               className="p-1 hover:bg-gray-700 rounded"
-                              title="删除"
+                              title={tc('delete')}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -787,10 +796,10 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
       <Dialog open={showFolderModal} onOpenChange={setShowFolderModal}>
         <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold mb-4">新建文件夹</DialogTitle>
+            <DialogTitle className="text-xl font-semibold mb-4">{t('createFolder')}</DialogTitle>
           </DialogHeader>
           <Input
-            placeholder="输入文件夹名称"
+            placeholder={t('enterFolderName')}
             value={folderName}
             onChange={e => setFolderName(e.target.value)}
             className="bg-gray-100 border-gray-300 text-gray-900 mb-4 focus:ring-2 focus:ring-purple-200"
@@ -801,13 +810,13 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
               onClick={() => setShowFolderModal(false)}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
             >
-              取消
+              {tc('cancel')}
             </Button>
             <Button 
               onClick={handleCreateFolder}
               className="bg-purple-500 hover:bg-purple-600 text-white shadow"
             >
-              创建
+              {tc('create')}
             </Button>
           </div>
         </DialogContent>
@@ -817,9 +826,9 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold mb-4">请先登录</DialogTitle>
+            <DialogTitle className="text-xl font-semibold mb-4">{t('pleaseLogin')}</DialogTitle>
           </DialogHeader>
-          <p className="mb-4 text-gray-700">登录后才能新建文件夹和管理PDF。</p>
+          <p className="mb-4 text-gray-700">{t('loginToManageFolders')}</p>
           <SidebarSignIn />
         </DialogContent>
       </Dialog>
@@ -828,14 +837,14 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent className="sm:max-w-md bg-white text-gray-900 border border-gray-200 rounded-2xl shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-red-600">删除PDF文件</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-red-600">{tc('delete')} PDF</DialogTitle>
             <DialogDescription className="text-gray-700 mt-2">
-              确定要删除「{deletingPdf?.name}」吗？
+              {t('deletePdfConfirm', { name: deletingPdf?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-700">
-              ⚠️ 删除后将无法恢复该PDF文件及其相关的聊天记录。
+              ⚠️ {tc('deleteWarning')}
             </p>
           </div>
           <DialogFooter className="gap-2">
@@ -845,7 +854,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
               disabled={isDeleting}
             >
-              取消
+              {tc('cancel')}
             </Button>
             <Button 
               onClick={confirmDeletePdf}
@@ -855,10 +864,10 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
               {isDeleting ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  删除中...
+                  {tc('loading')}
                 </div>
               ) : (
-                '删除'
+                tc('delete')
               )}
             </Button>
           </DialogFooter>

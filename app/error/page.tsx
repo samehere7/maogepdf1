@@ -5,22 +5,24 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useUser } from '@/components/UserProvider'
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function ErrorPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { profile, loading } = useUser()
-  const errorMessage = searchParams.get('message') || '发生了未知错误'
+  const t = useTranslations('error')
+  const errorMessage = searchParams.get('message') || t('unknownError')
 
   // 如果用户已经登录但在错误页面，自动重定向到首页
   useEffect(() => {
-    if (!loading && profile && errorMessage.includes('授权失败')) {
+    if (!loading && profile && errorMessage.includes(t('authorizationFailed'))) {
       console.log('用户已登录但在错误页面，自动重定向到首页')
       setTimeout(() => {
         router.push('/')
       }, 2000)
     }
-  }, [profile, loading, errorMessage, router])
+  }, [profile, loading, errorMessage, router, t])
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
@@ -33,19 +35,19 @@ export default function ErrorPage() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          {!loading && profile && errorMessage.includes('授权失败') ? 
-            '登录成功' : 
-            '出错了'
+          {!loading && profile && errorMessage.includes(t('authorizationFailed')) ? 
+            t('loginSuccess') : 
+            t('errorOccurred')
           }
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {!loading && profile && errorMessage.includes('授权失败') ? 
-            '登录成功！正在跳转到首页...' : 
+          {!loading && profile && errorMessage.includes(t('authorizationFailed')) ? 
+            t('loginSuccessRedirecting') : 
             errorMessage
           }
         </p>
         
-        {!loading && profile && errorMessage.includes('授权失败') && (
+        {!loading && profile && errorMessage.includes(t('authorizationFailed')) && (
           <div className="mt-4 text-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8b5cf6] mx-auto"></div>
           </div>
@@ -57,7 +59,7 @@ export default function ErrorPage() {
           <div className="flex justify-center">
             <Link href="/">
               <Button>
-                返回首页
+                {t('returnHome')}
               </Button>
             </Link>
           </div>

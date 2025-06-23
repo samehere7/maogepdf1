@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Volume2 } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 interface Flashcard {
   id: string
@@ -37,6 +38,7 @@ export default function FlashcardPractice({
   onBack, 
   onComplete 
 }: FlashcardPracticeProps) {
+  const t = useTranslations('flashcard');
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [isFlipping, setIsFlipping] = useState(false)
@@ -168,11 +170,11 @@ export default function FlashcardPractice({
   const getDifficultyText = (rating: DifficultyRating) => {
     switch (rating) {
       case 1:
-        return '容易'
+        return t('easy')
       case 2:
-        return '中等'
+        return t('medium')
       case 3:
-        return '困难'
+        return t('hard')
     }
   }
 
@@ -187,7 +189,7 @@ export default function FlashcardPractice({
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="text-sm font-medium">
-            卡片 {currentIndex + 1} / {flashcards.length}
+            {t('practiceCard')} {currentIndex + 1} / {flashcards.length}
           </div>
         </div>
 
@@ -220,19 +222,19 @@ export default function FlashcardPractice({
                   className="absolute inset-0 bg-gray-50 rounded-lg p-8 flex flex-col justify-center items-center text-center"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <h3 className="text-lg font-medium text-gray-900 mb-6">问题</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-6">{t('practiceQuestion')}</h3>
                   <div className="text-xl text-gray-800 leading-relaxed mb-8">
                     {currentCard.question}
                   </div>
                   <p className="text-sm text-gray-500 mb-6">
-                    (点击查看答案或按空格键)
+                    {t('practiceClickHint')}
                   </p>
                   <Button
                     onClick={handleAnswer}
                     disabled={isFlipping}
                     className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
                   >
-                    {isFlipping ? '翻转中...' : '查看答案'}
+                    {isFlipping ? t('practiceFlipping') : t('practiceShowAnswer')}
                   </Button>
                 </div>
 
@@ -244,14 +246,14 @@ export default function FlashcardPractice({
                     transform: 'rotateY(180deg)'
                   }}
                 >
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">答案</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">{t('practiceAnswer')}</h3>
                   <div className="text-xl text-gray-800 leading-relaxed mb-8">
                     {currentCard.answer}
                   </div>
                   <button
                     onClick={() => speakText(currentCard.answer)}
                     className="mb-6 p-2 hover:bg-gray-200 rounded-full"
-                    title="朗读答案"
+                    title={t('practiceReadAnswer')}
                   >
                     <Volume2 className="h-5 w-5 text-gray-600" />
                   </button>
@@ -266,29 +268,29 @@ export default function FlashcardPractice({
         <div className="p-6 border-t bg-gray-50">
           <div className="max-w-2xl mx-auto">
             <p className="text-center text-sm text-gray-600 mb-4">
-              这个问题对你来说有多难？
+              {t('practiceDifficultyQuestion')}
             </p>
             <div className="flex gap-4 justify-center">
               <Button
                 onClick={() => handleDifficultyRating(3)}
                 className={`px-8 py-3 ${getDifficultyButtonStyle(3)}`}
               >
-                困难
-                <div className="text-xs opacity-80 ml-2">按 3</div>
+                {t('hard')}
+                <div className="text-xs opacity-80 ml-2">{t('practiceKey')} 3</div>
               </Button>
               <Button
                 onClick={() => handleDifficultyRating(2)}
                 className={`px-8 py-3 ${getDifficultyButtonStyle(2)}`}
               >
-                中等
-                <div className="text-xs opacity-80 ml-2">按 2</div>
+                {t('medium')}
+                <div className="text-xs opacity-80 ml-2">{t('practiceKey')} 2</div>
               </Button>
               <Button
                 onClick={() => handleDifficultyRating(1)}
                 className={`px-8 py-3 ${getDifficultyButtonStyle(1)}`}
               >
-                容易
-                <div className="text-xs opacity-80 ml-2">按 1</div>
+                {t('easy')}
+                <div className="text-xs opacity-80 ml-2">{t('practiceKey')} 1</div>
               </Button>
             </div>
           </div>

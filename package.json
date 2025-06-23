@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/server-puppeteer": "^2025.5.12",
-    "@supabase/mcp-server-supabase": "^0.4.4",
+    "@supabase/mcp-server-supabase": "^0.4.5",
     "@types/pdf-parse": "^1.1.5",
     "@upstash/context7-mcp": "^1.0.14",
     "eslint": "^8",

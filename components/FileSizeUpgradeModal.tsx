@@ -2,6 +2,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { useTranslations } from 'next-intl'
 
 interface FileSizeUpgradeModalProps {
   open: boolean
@@ -20,6 +21,7 @@ const GreenCheckIcon = (
 
 export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fileSizeMB, onUpgrade }: FileSizeUpgradeModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
+  const t = useTranslations()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] bg-white rounded-2xl p-0 overflow-hidden">
@@ -32,23 +34,23 @@ export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fil
               </div>
               <div className="flex-1">
                 <div className="text-orange-800 font-medium text-sm mb-1">
-                  {fileName} 太大了
+                  {fileName} {t('upgrade.fileTooLarge')}
                 </div>
                 <div className="text-orange-600 text-sm">
-                  {fileSizeMB}MB，升级到 Plus 以继续使用。
+                  {fileSizeMB}MB{t('upgrade.upgradeToAccessLargeFiles')}
                 </div>
               </div>
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold mb-6 text-center">升级到 Plus</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">{t('upgrade.upgradeToPlus')}</h2>
           <div className="text-base">
             {[
-              { label: '无限', desc: '个PDF' },
-              { label: '无限', desc: '个问题' },
-              { label: '2,000', desc: '页/PDF' },
-              { label: '50', desc: '个PDF/文件夹' },
-              { label: '无限制', desc: '文件大小' },
+              { label: t('upgrade.unlimitedPdfs'), desc: t('upgrade.pdfs') },
+              { label: t('upgrade.unlimitedQuestions'), desc: t('upgrade.questions') },
+              { label: t('upgrade.pagesPerPdf'), desc: t('upgrade.pages') },
+              { label: t('upgrade.pdfsPerFolder'), desc: t('upgrade.pdfsFolder') },
+              { label: t('upgrade.unlimitedFileSize'), desc: t('upgrade.fileSize') },
             ].map((item, idx) => (
               <div key={item.label+item.desc} className="flex gap-3 items-center" style={{marginTop: idx === 0 ? 0 : 18}}>
                 {GreenCheckIcon}
@@ -70,10 +72,10 @@ export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fil
                 }`}
               >
                 <div>
-                  <div>按月</div>
+                  <div>{t('upgrade.monthlyPlan')}</div>
                   <div className="flex flex-row mt-1 items-end">
                     <div className="font-bold text-[22px] leading-[25px] text-[#404040]">$11.99</div>
-                    <div className="ml-1 text-[14px] text-gray-400 pb-0.5">/ 月</div>
+                    <div className="ml-1 text-[14px] text-gray-400 pb-0.5">{t('upgrade.month')}</div>
                   </div>
                 </div>
                 {selectedPlan === 'monthly' && <div className="absolute right-4 top-4">{GreenCheckIcon}</div>}
@@ -89,16 +91,16 @@ export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fil
                 }`}
               >
                 <div>
-                  <div>按年 <span className="bg-[#2bb86a] text-white px-2 py-[2px] rounded-2xl text-[11px] font-semibold ml-1">立省40%</span></div>
+                  <div>{t('upgrade.yearlyPlan')} <span className="bg-[#2bb86a] text-white px-2 py-[2px] rounded-2xl text-[11px] font-semibold ml-1">{t('upgrade.save40Percent')}</span></div>
                   <div className="flex flex-row mt-1 items-end">
                     <div className="font-bold text-[22px] leading-[25px] text-[#404040]">$7.2</div>
-                    <div className="ml-1 text-[14px] text-gray-400 pb-0.5">/ 月</div>
+                    <div className="ml-1 text-[14px] text-gray-400 pb-0.5">{t('upgrade.month')}</div>
                   </div>
                 </div>
                 {selectedPlan === 'yearly' && <span className="absolute right-4 top-4">{GreenCheckIcon}</span>}
               </button>
             </div>
-            <Button className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1]" onClick={onUpgrade}>升级到 Plus</Button>
+            <Button className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1]" onClick={onUpgrade}>{t('upgrade.upgradeToPlus')}</Button>
           </div>
         </div>
         {/* 底部用户头像和宣传语 */}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { RotateCcw, CheckCircle, AlertCircle, Clock, Brain } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 interface Flashcard {
   id: string
@@ -26,6 +27,8 @@ interface FlashcardStudyProps {
 }
 
 export default function FlashcardStudy({ pdfId, onComplete, className }: FlashcardStudyProps) {
+  const t = useTranslations('flashcard');
+  const tc = useTranslations('common');
   const [flashcards, setFlashcards] = useState<Flashcard[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
@@ -56,7 +59,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
         }
       }
     } catch (error) {
-      console.error('加载闪卡失败:', error)
+      console.error(t('studyLoadFailed') + ':', error)
     } finally {
       setLoading(false)
     }
@@ -93,8 +96,8 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
         }
       }
     } catch (error) {
-      console.error('复习失败:', error)
-      alert('复习失败，请重试')
+      console.error(t('studyReviewFailed') + ':', error)
+      alert(t('studyReviewFailedAlert'))
     }
   }
 
@@ -122,14 +125,14 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
         <Card>
           <CardContent className="p-8 text-center">
             <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">太棒了！</h3>
-            <p className="text-gray-600 mb-4">暂时没有需要复习的闪卡。</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('studyGreat')}</h3>
+            <p className="text-gray-600 mb-4">{t('studyNoCards')}</p>
             <Button
               onClick={loadDueFlashcards}
               variant="outline"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              刷新
+              {t('studyRefresh')}
             </Button>
           </CardContent>
         </Card>
@@ -143,9 +146,9 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
         <Card>
           <CardContent className="p-8 text-center">
             <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">学习完成！</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('studyCompleted')}</h3>
             <p className="text-gray-600 mb-4">
-              你已经完成了 {completed} 张闪卡的复习。
+              {t('studyCompletedCount', { count: completed })}
             </p>
             <div className="flex justify-center gap-4">
               <Button
@@ -153,13 +156,13 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                 variant="outline"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                重新开始
+                {t('studyRestart')}
               </Button>
               <Button
                 onClick={onComplete}
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >
-                返回列表
+                {t('studyBackToList')}
               </Button>
             </div>
           </CardContent>
@@ -178,7 +181,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Brain className="h-5 w-5" />
-            闪卡学习
+            {t('studyTitle')}
           </h2>
           <span className="text-sm text-gray-600">
             {currentIndex + 1} / {flashcards.length}
@@ -191,7 +194,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-center">
-            {showAnswer ? "答案" : "问题"}
+            {showAnswer ? t('practiceAnswer') : t('practiceQuestion')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8">
@@ -206,12 +209,12 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                 className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
                 size="lg"
               >
-                显示答案
+                {t('practiceShowAnswer')}
               </Button>
             ) : (
               <div className="space-y-4">
                 <p className="text-gray-600 mb-6">
-                  请根据你的掌握程度选择：
+                  {t('studySelectDifficulty')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <Button
@@ -220,7 +223,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                     className="border-red-300 text-red-700 hover:bg-red-50 py-3"
                   >
                     <AlertCircle className="h-4 w-4 mr-2" />
-                    再次
+                    {t('studyAgain')}
                   </Button>
                   <Button
                     onClick={() => handleReview('HARD')}
@@ -228,7 +231,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                     className="border-orange-300 text-orange-700 hover:bg-orange-50 py-3"
                   >
                     <Clock className="h-4 w-4 mr-2" />
-                    困难
+                    {t('hard')}
                   </Button>
                   <Button
                     onClick={() => handleReview('MEDIUM')}
@@ -236,7 +239,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                     className="border-blue-300 text-blue-700 hover:bg-blue-50 py-3"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    一般
+                    {t('studyMedium')}
                   </Button>
                   <Button
                     onClick={() => handleReview('EASY')}
@@ -244,11 +247,11 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
                     className="border-green-300 text-green-700 hover:bg-green-50 py-3"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    简单
+                    {t('easy')}
                   </Button>
                 </div>
                 <div className="text-sm text-gray-500 mt-4">
-                  • 再次：1天后复习 • 困难：3天后复习 • 一般：7天后复习 • 简单：14天后复习
+                  {t('studyReviewSchedule')}
                 </div>
               </div>
             )}
@@ -262,7 +265,7 @@ export default function FlashcardStudy({ pdfId, onComplete, className }: Flashca
           onClick={() => setStudying(false)}
           variant="outline"
         >
-          结束学习
+          {t('studyEnd')}
         </Button>
       </div>
     </div>

@@ -60,10 +60,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      console.log("当前会话状态:", session ? "已登录" : "未登录");
+      console.log("Current session status:", session ? "Logged in" : "Not logged in");
       
       if (!session?.user) {
-        console.log("没有用户会话，设置为未登录状态");
+        console.log("No user session, setting to logged out state");
         setProfile(null);
         setUser(null);
         setLoading(false);
@@ -83,8 +83,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         is_active: true
       };
       
-      console.log("用户配置文件:", userProfile);
-      console.log("设置loading为false");
+      console.log("User profile:", userProfile);
+      console.log("Setting loading to false");
       
       // 如果需要，可以从数据库获取额外的用户信息
       // 例如Plus会员状态等
@@ -107,23 +107,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     
     // 设置认证状态变化监听器
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("认证状态变化:", event, session ? "有会话" : "无会话");
+      console.log("Auth state change:", event, session ? "Has session" : "No session");
       
       if (!mounted) return;
       
       // 初始会话事件，直接处理不重复调用
       if (event === 'INITIAL_SESSION') {
-        console.log("处理初始会话");
+        console.log("Processing initial session");
         isInitializing = false;
         await refreshProfile();
       }
       // 只在非初始化阶段处理真实的状态变化
       else if (!isInitializing && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
-        console.log("因认证状态变化，刷新用户配置文件");
+        console.log("Refreshing user profile due to auth state change");
         await refreshProfile();
       } else if (event === 'TOKEN_REFRESHED') {
         // 对于令牌刷新，直接更新session，不重新设置loading
-        console.log("令牌已刷新，更新会话信息");
+        console.log("Token refreshed, updating session info");
         if (session?.user) {
           setUser(session.user);
           const userProfile: Profile = {

@@ -76,55 +76,55 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [textLayers, setTextLayers] = useState<Map<number, TextItem[]>>(new Map());
 
-  // 滚动到指定页面 - 增强容错和重试机制
+  // Scroll to specified page with enhanced error tolerance and retry mechanism
   const scrollToPage = useCallback((pageNum: number, retryCount = 0) => {
-    console.log(`[PDF查看器] scrollToPage被调用，目标页码: ${pageNum}, 重试次数: ${retryCount}`);
+    console.log(`[PDF Viewer] scrollToPage called, target page: ${pageNum}, retry count: ${retryCount}`);
     
-    // 检查基本条件
+    // Check basic conditions
     if (!containerRef.current || !viewerRef.current) {
-      console.log(`[PDF查看器] 容器未准备好 - containerRef: ${!!containerRef.current}, viewerRef: ${!!viewerRef.current}`);
+      console.log(`[PDF Viewer] Container not ready - containerRef: ${!!containerRef.current}, viewerRef: ${!!viewerRef.current}`);
       
-      // 如果重试次数少于3次，则延迟重试
+      // Retry if less than 3 attempts
       if (retryCount < 3) {
         setTimeout(() => {
           scrollToPage(pageNum, retryCount + 1);
-        }, 200 * (retryCount + 1)); // 递增延迟时间
+        }, 200 * (retryCount + 1)); // Incremental delay
         return;
       } else {
-        console.warn(`[PDF查看器] 重试${retryCount}次后仍无法找到容器，放弃滚动`);
+        console.warn(`[PDF Viewer] Failed to find container after ${retryCount} retries, abandoning scroll`);
         return;
       }
     }
     
     const pageElement = containerRef.current.querySelector(`.pdf-page[data-page-num="${pageNum}"]`);
-    console.log(`[PDF查看器] 找到的页面元素:`, pageElement);
+    console.log(`[PDF Viewer] Found page element:`, pageElement);
     
     if (pageElement) {
-      console.log(`[PDF查看器] 开始滚动到页面 ${pageNum}`);
+      console.log(`[PDF Viewer] Starting scroll to page ${pageNum}`);
       pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      console.log(`[PDF查看器] 页面元素未找到，当前DOM中的页面:`, 
+      console.log(`[PDF Viewer] Page element not found, current pages in DOM:`, 
         Array.from(containerRef.current.querySelectorAll('.pdf-page')).map(el => el.getAttribute('data-page-num')));
       
-      // 如果页面元素未找到且重试次数少于5次，延迟重试
+      // Retry if page element not found and less than 5 attempts
       if (retryCount < 5) {
         setTimeout(() => {
           scrollToPage(pageNum, retryCount + 1);
         }, 300 * (retryCount + 1));
       } else {
-        console.warn(`[PDF查看器] 重试${retryCount}次后仍无法找到页面${pageNum}，放弃滚动`);
+        console.warn(`[PDF Viewer] Failed to find page ${pageNum} after ${retryCount} retries, abandoning scroll`);
       }
     }
   }, []);
 
-  // 暴露给父组件的方法
+  // Methods exposed to parent component
   useImperativeHandle(ref, () => ({
     jumpToPage: (pageNumber: number) => {
-      console.log(`PDF查看器跳转到第${pageNumber}页，当前总页数: ${numPages}`);
+      console.log(`PDF Viewer jumping to page ${pageNumber}, total pages: ${numPages}`);
       
-      // 如果页数还没有加载完成，延迟执行
+      // If pages not loaded yet, delay execution
       if (numPages === 0) {
-        console.log(`PDF还在加载中，延迟执行跳转`);
+        console.log(`PDF still loading, delaying jump execution`);
         setTimeout(() => {
           if (pageNumber >= 1 && (numPages === 0 || pageNumber <= numPages)) {
             scrollToPage(pageNumber);
@@ -144,7 +144,7 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
     getCurrentPage: () => currentVisiblePage
   }), [numPages, currentVisiblePage, scrollToPage]);
 
-  // 自适应缩放到容器宽度
+  // Auto-fit zoom to container width
   const fitToWidth = useCallback(async () => {
     if (!pdfDoc || !viewerRef.current) return;
     
@@ -159,13 +159,13 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       setScale(clampedScale);
       setIsUserScale(false); // 标记为自动缩放
       
-      console.log(`[PDF自适应] 容器宽度: ${containerWidth}, PDF原始宽度: ${viewport.width}, 计算缩放: ${optimalScale}, 实际缩放: ${clampedScale}`);
+      console.log(`[PDF Auto-fit] Container width: ${containerWidth}, PDF original width: ${viewport.width}, calculated scale: ${optimalScale}, actual scale: ${clampedScale}`);
     } catch (error) {
-      console.error('自适应缩放失败:', error);
+      console.error('Auto-fit zoom failed:', error);
     }
   }, [pdfDoc]);
 
-  // 加载PDF文件
+  // Load PDF file
   useEffect(() => {
     if (!file) return;
     
@@ -177,30 +177,30 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         const fullUrl = file.startsWith('http') ? file : 
                       (typeof window !== 'undefined' ? `${window.location.origin}${file}` : file);
         
-        console.log('开始加载PDF文件:', fullUrl);
+        console.log('Starting to load PDF file:', fullUrl);
         
         const response = await fetch(fullUrl);
         if (!response.ok) {
-          throw new Error(`HTTP错误! 状态: ${response.status}`);
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const arrayBuffer = await response.arrayBuffer();
-        console.log('PDF文件加载成功，大小:', arrayBuffer.byteLength, '字节');
+        console.log('PDF file loaded successfully, size:', arrayBuffer.byteLength, 'bytes');
         
         const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        console.log('PDF文档加载成功，页数:', doc.numPages);
+        console.log('PDF document loaded successfully, pages:', doc.numPages);
         
         setPdfDoc(doc);
         setNumPages(doc.numPages);
         setError(null);
         
-        // 延迟调用自适应缩放，确保容器已渲染
+        // Delay auto-fit zoom to ensure container is rendered
         setTimeout(() => {
           fitToWidth();
         }, 100);
       } catch (err) {
-        console.error('PDF文件加载错误:', err);
-        setError('无法加载PDF文件: ' + (err instanceof Error ? err.message : String(err)));
+        console.error('PDF file loading error:', err);
+        setError('Unable to load PDF file: ' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setIsLoading(false);
       }
@@ -209,7 +209,7 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
     loadPDF();
   }, [file]);
 
-  // 渲染单个PDF页面
+  // Render individual PDF page
   const renderPage = async (pageNum: number, forceRender: boolean = false) => {
     if (!pdfDoc || !containerRef.current) return;
     if (!forceRender && renderedPages.has(pageNum)) return;
@@ -222,12 +222,12 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       const page = await pdfDoc.getPage(pageNum);
       const viewport = page.getViewport({ scale });
       
-      // 如果是强制渲染，先清理容器内容
+      // If forced rendering, clear container content first
       if (forceRender) {
         pageContainer.innerHTML = '';
       }
       
-      // 设置页面容器样式 - 更简洁的排版
+      // Set page container styles - cleaner layout
       pageContainer.style.position = 'relative';
       pageContainer.style.width = `${viewport.width}px`;
       pageContainer.style.height = `${viewport.height}px`;
@@ -254,7 +254,7 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       
       context.scale(devicePixelRatio, devicePixelRatio);
       
-      // 渲染PDF页面到canvas
+      // Render PDF page to canvas
       await page.render({
         canvasContext: context,
         viewport: viewport
@@ -262,18 +262,18 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       
       pageContainer.appendChild(canvas);
       
-      // 渲染文本层
+      // Render text layer
       await renderTextLayer(page, viewport, pageContainer, pageNum);
       
-      // 渲染高亮层
+      // Render highlight layer
       renderHighlights(pageContainer, pageNum, viewport);
       
-      // 标记为已渲染 - 这里不更新状态，由调用方统一处理
+      // Mark as rendered - status not updated here, handled by caller
       // setRenderedPages(prev => new Set([...prev, pageNum]));
       
     } catch (err) {
-      console.error(`页面${pageNum}渲染错误:`, err);
-      pageContainer.innerHTML = `<div class="text-red-500 p-4 text-center">加载页面 ${pageNum} 失败</div>`;
+      console.error(`Page ${pageNum} rendering error:`, err);
+      pageContainer.innerHTML = `<div class="text-red-500 p-4 text-center">Failed to load page ${pageNum}</div>`;
     }
   };
   

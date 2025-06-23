@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Gift, Download, User, Clock } from "lucide-react"
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface ShareReceiveModalProps {
   isOpen: boolean
@@ -22,6 +23,7 @@ interface SharedPDFInfo {
 }
 
 export default function ShareReceiveModal({ isOpen, onClose, shareId, isLoggedIn }: ShareReceiveModalProps) {
+  const t = useTranslations('shareReceiveModal');
   const router = useRouter()
   const [pdfInfo, setPdfInfo] = useState<SharedPDFInfo | null>(null)
   const [loading, setLoading] = useState(false)

@@ -5,18 +5,21 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { useUser } from './UserProvider'
+import { useTranslations } from 'next-intl'
 
 export default function AuthButton() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const { profile, loading } = useUser()
+  const t = useTranslations('auth')
+  const tc = useTranslations('common')
   
   const handleLogin = async () => {
     setIsLoading(true)
     try {
       router.push('/auth/login')
     } catch (error) {
-      console.error('登录失败:', error)
+      console.error(t('loginFailed') + ':', error)
     } finally {
       setIsLoading(false)
     }
@@ -28,7 +31,7 @@ export default function AuthButton() {
       await supabase.auth.signOut()
       router.refresh()
     } catch (error) {
-      console.error('登出失败:', error)
+      console.error(t('logoutFailed') + ':', error)
     } finally {
       setIsLoading(false)
     }
@@ -38,7 +41,7 @@ export default function AuthButton() {
     return (
       <Button variant="outline" size="sm" disabled>
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600 mr-2"></span>
-        加载中...
+        {tc('loading')}
       </Button>
     )
   }
@@ -51,7 +54,7 @@ export default function AuthButton() {
         onClick={handleLogout}
         disabled={isLoading}
       >
-        {isLoading ? '处理中...' : '退出登录'}
+        {isLoading ? tc('loading') : t('logout')}
       </Button>
     )
   }
@@ -63,7 +66,7 @@ export default function AuthButton() {
       onClick={handleLogin}
       disabled={isLoading}
     >
-      {isLoading ? '处理中...' : '登录/注册'}
+      {isLoading ? tc('loading') : t('login') + '/' + t('signup')}
     </Button>
   )
 } 

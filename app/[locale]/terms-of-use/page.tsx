@@ -1,9 +1,9 @@
 "use client"
 
-import { useLanguage } from "@/components/language-provider"
+import { useLocale } from "next-intl"
 
 export default function TermsOfUsePage() {
-  const { t } = useLanguage()
+  const t = useTranslations()
   
   return (
     <div className="container mx-auto px-4 py-8">

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles, MessageCircle, Lightbulb, Settings, Rocket, Scale, FileText } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface GeneratedQuestion {
   id: string;
@@ -25,6 +26,7 @@ export function WelcomeQuestions({
   onQuestionClick, 
   onClose 
 }: WelcomeQuestionsProps) {
+  const t = useTranslations('welcome');
   const [isVisible, setIsVisible] = useState(true);
   const [animateIn, setAnimateIn] = useState(false);
 
@@ -89,11 +91,10 @@ export function WelcomeQuestions({
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Hey，欢迎使用！ 👋
+              {t('welcomeTitle')}
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              已为你分析 <span className="font-medium text-purple-600">"{pdfName}"</span>，
-              现在可以开始提问了。下面是一些推荐问题，点击即可快速开始对话：
+              {t('welcomeAnalyzed', { fileName: pdfName })}
             </p>
           </div>
         </div>
@@ -103,7 +104,7 @@ export function WelcomeQuestions({
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-gray-500" />
-          智能推荐问题
+          {t('smartRecommendations')}
         </h4>
         
         <TooltipProvider>
@@ -141,7 +142,7 @@ export function WelcomeQuestions({
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-xs">
                   <p className="text-xs">
-                    点击发送这个问题，AI将基于PDF内容为你详细解答
+                    {t('clickToAsk')}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -153,7 +154,7 @@ export function WelcomeQuestions({
       {/* 提示信息 */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <p className="text-xs text-gray-600 text-center">
-          💡 你也可以在下方输入框自由提问，AI会基于PDF内容为你解答
+          {t('freeAskTip')}
         </p>
       </div>
 
@@ -179,6 +180,7 @@ export function WelcomeQuestions({
 
 // 简化版欢迎组件，用于加载状态
 export function WelcomeQuestionsLoading({ pdfName }: { pdfName: string }) {
+  const t = useTranslations('welcome');
   return (
     <div className="welcome-questions-loading">
       {/* 欢迎消息 */}
@@ -189,11 +191,10 @@ export function WelcomeQuestionsLoading({ pdfName }: { pdfName: string }) {
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Hey，欢迎使用！ 👋
+              {t('welcomeTitle')}
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              正在分析 <span className="font-medium text-purple-600">"{pdfName}"</span>，
-              马上为你生成智能推荐问题...
+              {t('analyzingPdf', { fileName: pdfName })}
             </p>
           </div>
         </div>
@@ -203,7 +204,7 @@ export function WelcomeQuestionsLoading({ pdfName }: { pdfName: string }) {
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-gray-500" />
-          正在生成推荐问题...
+          {t('generatingQuestions')}
         </h4>
         
         <div className="grid gap-3">
@@ -229,7 +230,7 @@ export function WelcomeQuestionsLoading({ pdfName }: { pdfName: string }) {
       {/* 提示信息 */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <p className="text-xs text-gray-600 text-center">
-          💡 生成完成后，你可以点击问题快速开始对话
+          {t('afterGenerationTip')}
         </p>
       </div>
     </div>
