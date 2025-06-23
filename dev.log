@@ -317,3 +317,11 @@ Test mode enabled: simulating successful payment
 (node:41885) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
 (Use `node --trace-warnings ...` to show where the warning was created)
  [32m[1m✓[22m[39m Ready in 2.6s
+ [33m[1m⚠[22m[39m Found a change in next.config.mjs. Restarting the server to apply the changes...
+  [1m[38;2;173;127;168m ▲ Next.js 14.1.0[39m[22m
+   - Local:        http://localhost:3000
+   - Environments: .env.local, .env
+
+(node:42271) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m[1m✓[22m[39m Ready in 2.5s

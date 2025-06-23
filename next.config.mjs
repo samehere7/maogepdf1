@@ -56,22 +56,9 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // 重定向配置
+  // 重定向配置 - 暂时禁用以避免循环
   async redirects() {
-    return [
-      // 如果访问非 www 域名，重定向到 www
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'maogepdf.com',
-          },
-        ],
-        destination: 'https://www.maogepdf.com/:path*',
-        permanent: true,
-      },
-    ];
+    return [];
   },
   // Headers配置
   async headers() {
