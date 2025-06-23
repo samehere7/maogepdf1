@@ -4,10 +4,10 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useUser } from '@/components/UserProvider'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useTranslations } from 'next-intl'
 
-export default function ErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { profile, loading } = useUser()
@@ -66,5 +66,17 @@ export default function ErrorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+      </div>
+    }>
+      <ErrorContent />
+    </Suspense>
   )
 } 
