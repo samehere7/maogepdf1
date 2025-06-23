@@ -46,7 +46,13 @@ export function LanguageSelector() {
     const pathSegments = pathname.split('/').filter(Boolean)
     const firstSegment = pathSegments[0]
     const isValidLocale = languages.some(lang => lang.code === firstSegment)
-    return isValidLocale ? firstSegment : locale
+    
+    if (isValidLocale) {
+      return firstSegment
+    } else {
+      // For localePrefix: 'as-needed', root path means default locale (en)
+      return pathSegments.length === 0 || pathname === '/' ? 'en' : locale
+    }
   })()
 
   const currentLanguage = languages.find((lang) => lang.code === actualLocale) || languages[0]
@@ -81,7 +87,15 @@ export function LanguageSelector() {
     }
     
     // Navigate to the new locale
-    const newPath = `/${newLocale}${pathWithoutLocale ? `/${pathWithoutLocale}` : ''}`
+    // Handle localePrefix: 'as-needed' - default locale (en) uses root path
+    let newPath
+    if (newLocale === 'en') {
+      // For English, use root path due to localePrefix: 'as-needed'
+      newPath = `/${pathWithoutLocale || ''}`
+    } else {
+      // For other languages, use explicit locale prefix
+      newPath = `/${newLocale}${pathWithoutLocale ? `/${pathWithoutLocale}` : ''}`
+    }
     
     // Force immediate navigation with page reload to ensure locale change
     setTimeout(() => {
