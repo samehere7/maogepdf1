@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { MaogeInterface } from "@/components/chat-interface"
 import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain, Share2 } from "lucide-react"
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
@@ -42,7 +42,7 @@ interface AnalysisResult {
 export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
-  const { t } = useLanguage()
+  const t = useTranslations()
   const [user, setUser] = useState<any>(null)
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)

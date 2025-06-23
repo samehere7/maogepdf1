@@ -28,19 +28,42 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
   const [quota, setQuota] = useState<{pdf_count: number, chat_count: number, quota_date: string}>({pdf_count: 0, chat_count: 0, quota_date: ''});
   const t = useTranslations();
 
-  // 升级按钮逻辑
-  const handleUpgrade = async () => {
+  // 刷新用户Plus状态的函数
+  const refreshPlusStatus = async () => {
+    if (!user?.id) return;
+    
     try {
-      // 尝试从user_with_plus视图获取数据
+      console.log('Refreshing Plus status for user:', user.id);
+      
+      // 优先尝试从user_with_plus视图获取数据
       const { data, error } = await supabase
         .from("user_with_plus")
-        .select("plus, expire_at, is_active")
+        .select("plus, expire_at, is_active, plan, is_expired, days_remaining")
         .eq("id", user.id)
         .single();
         
-      if (error) throw error;
-      
-      if (data) {
+      if (error) {
+        console.error('无法从user_with_plus获取数据:', error);
+        // 如果视图查询失败，尝试直接查询user_profiles
+        const { data: profileData, error: profileError } = await supabase
+          .from("user_profiles")
+          .select("plus, expire_at, is_active")
+          .eq("id", user.id)
+          .single();
+          
+        if (profileError) {
+          console.error('用户资料查询也失败:', profileError);
+          throw new Error('无法获取用户Plus状态');
+        }
+        
+        setProfile({
+          ...profile,
+          ...profileData,
+          id: profile?.id || user.id,
+          email: profile?.email || user.email
+        });
+      } else {
+        console.log('Plus状态刷新成功:', data);
         setProfile({
           ...profile,
           ...data,
@@ -49,28 +72,42 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
         });
       }
     } catch (error) {
-      console.error('无法从user_with_plus获取数据:', error);
-      
-      // 如果视图不可用，直接更新profile
-      const oneYearLater = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-      setProfile({
-        ...profile,
-        plus: true,
-        is_active: true,
-        expire_at: oneYearLater.toISOString(),
-        id: profile?.id || user.id,
-        email: profile?.email || user.email
-      });
+      console.error('获取Plus状态失败:', error);
+      throw error;
     }
-    
-    setUpgradeOpen(false);
-    alert(t('user.upgradeSuccess'));
-  }
+  };
+
+  // 升级按钮逻辑
+  const handleUpgrade = async () => {
+    try {
+      await refreshPlusStatus();
+      setUpgradeOpen(false);
+      alert(t('user.upgradeSuccess'));
+    } catch (error) {
+      console.error('升级处理失败:', error);
+      alert('无法获取会员状态，请稍后重试或联系客服');
+    }
+  };
 
   // 会员身份与有效期判断
   const isPlus = profile?.plus === true;
   const isActive = profile?.is_active === true;
   const expireAt = profile?.expire_at;
+
+  // 自动刷新Plus状态（每次打开模态框时）
+  useEffect(() => {
+    if (!open || !user?.id) return;
+    
+    const autoRefreshStatus = async () => {
+      try {
+        await refreshPlusStatus();
+      } catch (error) {
+        console.warn('自动刷新Plus状态失败:', error);
+      }
+    };
+    
+    autoRefreshStatus();
+  }, [open, user?.id]);
 
   // 拉取并刷新非plus用户每日额度
   useEffect(() => {
@@ -116,8 +153,9 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
           setQuota(data);
         }
       } catch (error) {
-        // 完全静默处理权限错误，使用默认值
-        // 如果表不存在或权限不足，使用默认值
+        // 记录错误但不影响用户体验
+        console.warn('配额查询失败，使用默认值:', error);
+        // 使用默认值确保组件正常工作
         setQuota({ pdf_count: 0, chat_count: 0, quota_date: new Date().toISOString().slice(0, 10) });
       }
     };

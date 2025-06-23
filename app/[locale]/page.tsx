@@ -13,7 +13,6 @@ import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
 import FileSizeUpgradeModal from "@/components/FileSizeUpgradeModal"
 import { Sidebar } from "@/components/sidebar"
-import { FooterModal } from "@/components/footer-modals"
 import { ModelQuality } from "@/types/api"
 import AuthButton from "@/components/AuthButton"
 import { useUser } from '@/components/UserProvider'
@@ -34,7 +33,6 @@ export default function HomePage() {
   const pathname = usePathname()
   const t = useTranslations();
   const locale = useLocale();
-  const [modalType, setModalType] = useState<"terms" | "privacy" | "contact" | null>(null)
   const { profile, loading: profileLoading } = useUser()
   const [shareId, setShareId] = useState<string | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
@@ -541,24 +539,30 @@ export default function HomePage() {
         <div className="flex max-w-6xl flex-1 flex-col">
           <div className="flex flex-col gap-6 px-5 py-8 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <button
+              <a
+                href="/terms"
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                onClick={() => setModalType("terms")}
               >
                 {t("footer.termsOfService")}
-              </button>
-              <button
+              </a>
+              <a
+                href="/privacy"
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                onClick={() => setModalType("privacy")}
               >
                 {t("footer.privacyPolicy")}
-              </button>
-              <button
+              </a>
+              <a
+                href="/refund"
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
-                onClick={() => setModalType("contact")}
+              >
+                退款政策
+              </a>
+              <a
+                href="/contact"
+                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
               >
                 {t("footer.contactUs")}
-              </button>
+              </a>
             </div>
             <p className="text-slate-500 text-sm font-normal leading-normal">
               © 2024 Maoge PDF. {t("footer.allRightsReserved")}
@@ -566,13 +570,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-      
-      {/* Footer Modals */}
-      <FooterModal
-        isOpen={modalType !== null}
-        onClose={() => setModalType(null)}
-        type={modalType || "terms"}
-      />
 
       {/* Share Detector */}
       <Suspense fallback={null}>

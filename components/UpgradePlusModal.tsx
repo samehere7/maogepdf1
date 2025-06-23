@@ -25,6 +25,13 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
   const t = useTranslations()
   const { profile } = useUser()
 
+  // 价格常量（与config/paddle.ts保持一致）
+  const PRICES = {
+    monthly: 11.99,
+    yearly: 86.40,
+    yearlyMonthly: 7.20 // 年付换算成月付价格 (86.40 / 12)
+  }
+
   const handleUpgradeClick = async () => {
     if (!profile?.id) {
       console.error('User not logged in')
@@ -54,23 +61,48 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
       // 检查是否为测试模式
       if (data.mockPayment) {
         // 模拟成功支付
-        alert(`测试模式: ${data.plan} 计划支付模拟成功!`)
+        console.log('测试模式支付模拟:', { plan: data.plan, userId: profile.id });
         
-        // 模拟调用webhook
-        await fetch('/api/webhook/paddle', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            alert_name: 'subscription_payment_succeeded',
-            event_time: new Date().toISOString(),
-            passthrough: JSON.stringify({ userId: profile.id, plan: selectedPlan })
-          })
-        })
-        
-        alert('模拟支付完成！请刷新页面查看Plus状态')
+        try {
+          // 模拟调用webhook
+          const webhookResponse = await fetch('/api/webhook/paddle', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-Test-Mode': 'true'  // 标识这是测试模式调用
+            },
+            body: JSON.stringify({
+              alert_name: 'subscription_payment_succeeded',
+              event_time: new Date().toISOString(),
+              custom_data: { 
+                userId: profile.id, 
+                plan: selectedPlan,
+                source: 'test_mode'
+              }
+            })
+          });
+          
+          if (webhookResponse.ok) {
+            const webhookResult = await webhookResponse.json();
+            console.log('✅ Webhook处理成功:', webhookResult);
+            alert(`🎉 测试模式: ${selectedPlan} 计划支付模拟成功！Plus会员已激活！`);
+          } else {
+            const errorText = await webhookResponse.text();
+            console.error('❌ Webhook模拟失败:', errorText);
+            alert('⚠️ 模拟支付成功，但Plus状态更新失败。请检查控制台或联系客服。');
+          }
+        } catch (webhookError) {
+          console.error('Webhook调用错误:', webhookError);
+          alert('模拟支付失败，请检查网络连接');
+        }
       } else {
         // 打开Paddle结账页面
-        window.open(data.checkoutUrl, '_blank')
+        console.log('打开Paddle结账页面:', data.checkoutUrl);
+        const checkout = window.open(data.checkoutUrl, '_blank');
+        
+        if (!checkout) {
+          alert('无法打开支付页面，请检查浏览器弹窗拦截设置');
+        }
       }
       
       // 调用原始的onUpgrade回调（如果存在）
@@ -83,7 +115,24 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
       
     } catch (error) {
       console.error('Payment error:', error)
-      alert('支付处理失败，请稍后重试')
+      
+      let errorMessage = '支付处理失败，请稍后重试'
+      if (error instanceof Error) {
+        if (error.message.includes('网络')) {
+          errorMessage = '网络连接失败，请检查网络后重试'
+        } else if (error.message.includes('unauthorized')) {
+          errorMessage = '授权失败，请重新登录后重试'
+        }
+      }
+      
+      // 使用更友好的错误提示
+      const shouldRetry = confirm(`${errorMessage}\n\n点击"确定"重试，或"取消"关闭`)
+      if (shouldRetry) {
+        // 延迟重试
+        setTimeout(() => {
+          handleUpgradeClick()
+        }, 1000)
+      }
     } finally {
       setLoading(false)
     }
@@ -127,7 +176,7 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
                 <div>
                   <div>{t('upgrade.monthlyPlan')}</div>
                   <div className="flex flex-row mt-1 items-end">
-                    <div className="font-bold text-[22px] leading-[25px] text-[#404040]">$11.99</div>
+                    <div className="font-bold text-[22px] leading-[25px] text-[#404040]">${PRICES.monthly}</div>
                     <div className="ml-1 text-[14px] text-gray-400 pb-0.5">{t('upgrade.month')}</div>
                   </div>
                 </div>
@@ -146,7 +195,7 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
                 <div>
                   <div>{t('upgrade.yearlyPlan')} <span className="bg-[#2bb86a] text-white px-2 py-[2px] rounded-2xl text-[11px] font-semibold ml-1">{t('upgrade.save40Percent')}</span></div>
                   <div className="flex flex-row mt-1 items-end">
-                    <div className="font-bold text-[22px] leading-[25px] text-[#404040]">$7.2</div>
+                    <div className="font-bold text-[22px] leading-[25px] text-[#404040]">${PRICES.yearlyMonthly}</div>
                     <div className="ml-1 text-[14px] text-gray-400 pb-0.5">{t('upgrade.month')}</div>
                   </div>
                 </div>
@@ -158,7 +207,7 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
               onClick={handleUpgradeClick}
               disabled={loading || !profile?.id}
             >
-              {loading ? '处理中...' : t('upgrade.upgradeToPlus')}
+{loading ? '处理中...' : `升级到 ${selectedPlan === 'yearly' ? '年付' : '月付'} Plus`}
             </Button>
           </div>
         </div>

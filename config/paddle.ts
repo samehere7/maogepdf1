@@ -1,6 +1,28 @@
 // Paddle配置文件 - 生产环境配置
+
+// 验证必需的环境变量
+function validateEnvironment() {
+  const required = ['PADDLE_API_KEY', 'PADDLE_WEBHOOK_SECRET'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required Paddle environment variables: ${missing.join(', ')}`);
+  }
+}
+
+// 在非测试环境中验证配置
+if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV === 'production') {
+  validateEnvironment();
+}
+
 export const paddleConfig = {
-  // 生产环境结账链接
+  // 价格ID配置 - 用于API创建transaction
+  priceIds: {
+    monthly: 'pri_01jy6547gd84apzec3g66ysbb5',
+    yearly: 'pri_01jy654mn4mr07eqd3x59ya42p'
+  },
+  
+  // 生产环境结账链接（备用）
   checkoutUrls: {
     monthly: 'https://pay.paddle.io/hsc_01jy65wha6jh3m5rv9jpxv4ts2_b4jjcafd454938bcvgxhevbtwfv6szc8',
     yearly: 'https://pay.paddle.io/hsc_01jy65xjejc153p9nkbwzpmkmr_w18j5n4t3yx7snzgb9agnbahhr8e1rnx'
@@ -18,9 +40,9 @@ export const paddleConfig = {
     }
   },
   
-  // API配置
-  apiKey: process.env.PADDLE_API_KEY || 'pdl_live_apikey_01jydzcrb3a3vq5nf07d4ewtem_b4wmr7rFJd9JbwxVaHmaJQ_AV4',
-  webhookSecret: process.env.PADDLE_WEBHOOK_SECRET || 'pdl_ntfset_01jydz6s6h8rjsh41fe514n1cx_DVGUHwqX9KMi055o49BN8IIt7027tIJP',
+  // API配置 - 必须通过环境变量提供
+  apiKey: process.env.PADDLE_API_KEY,
+  webhookSecret: process.env.PADDLE_WEBHOOK_SECRET,
   
   // 环境配置
   environment: process.env.PADDLE_ENVIRONMENT || 'production',
