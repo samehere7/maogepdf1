@@ -336,3 +336,5 @@ Test mode enabled: simulating successful payment
 🔍 i18n getRequestConfig - Messages loaded successfully for: en
  [32m[1m✓[22m[39m Compiled in 223ms (345 modules)
  [32m[1m✓[22m[39m Compiled in 344ms (798 modules)
+ [32m[1m✓[22m[39m Compiled in 43ms (64 modules)
+ [32m[1m✓[22m[39m Compiled in 204ms (345 modules)
