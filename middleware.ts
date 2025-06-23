@@ -1,10 +1,13 @@
-// 完全禁用中间件
-import { NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from './i18n';
 
-export default function middleware(request: NextRequest) {
-  return NextResponse.next();
-}
+export default createMiddleware({
+  locales,
+  defaultLocale,
+  localeDetection: true,
+  localePrefix: 'always'
+});
 
 export const config = {
-  matcher: [],
+  matcher: ['/((?!api|_next|.*\\..*).*)']
 }
