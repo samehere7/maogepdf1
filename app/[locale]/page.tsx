@@ -133,7 +133,7 @@ export default function HomePage() {
       
       if (result.success) {
         // 成功接收，直接跳转到PDF页面
-        router.push(`/analysis/${result.pdfId}`)
+        router.push(`/${locale}/analysis/${result.pdfId}`)
       } else {
         // 接收失败，重新显示分享弹窗
         setShareId(shareId)
@@ -217,8 +217,8 @@ export default function HomePage() {
       
       console.log("上传成功，跳转到分析页面:", pdfId);
       
-      // 直接跳转到分析页面，不再使用localStorage
-      window.location.href = `/analysis/${pdfId}`
+      // 使用语言感知的路由跳转
+      router.push(`/${locale}/analysis/${pdfId}`)
     } catch (error) {
       console.error("上传处理失败:", error);
       alert(error instanceof Error ? error.message : t("uploadError"))
@@ -288,7 +288,7 @@ export default function HomePage() {
           onFlashcardClick={(pdfId, pdfName) => {
             console.log('[Homepage] Flashcard click event triggered:', pdfId, pdfName);
             // 跳转到PDF页面并直接打开闪卡管理
-            router.push(`/analysis/${pdfId}?flashcard=true`);
+            router.push(`/${locale}/analysis/${pdfId}?flashcard=true`);
           }}
         />
       </div>
@@ -540,25 +540,25 @@ export default function HomePage() {
           <div className="flex flex-col gap-6 px-5 py-8 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
               <a
-                href="/terms"
+                href={`/${locale}/terms`}
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
               >
                 {t("footer.termsOfService")}
               </a>
               <a
-                href="/privacy"
+                href={`/${locale}/privacy`}
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
               >
                 {t("footer.privacyPolicy")}
               </a>
               <a
-                href="/refund"
+                href={`/${locale}/refund`}
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
               >
                 退款政策
               </a>
               <a
-                href="/contact"
+                href={`/${locale}/contact`}
                 className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
               >
                 {t("footer.contactUs")}
