@@ -54,7 +54,13 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   experimental: {
-    serverComponentsExternalPackages: ['pdf-parse', '@supabase/supabase-js', '@supabase/ssr'],
+    serverComponentsExternalPackages: [
+      'pdf-parse', 
+      '@supabase/supabase-js', 
+      '@supabase/ssr',
+      '@formatjs/intl-localematcher',
+      '@formatjs/ecma402-abstract'
+    ],
     optimizePackageImports: ['lucide-react'],
   },
   // 生产环境优化
