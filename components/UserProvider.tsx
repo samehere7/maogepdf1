@@ -73,23 +73,44 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       setUser(session.user);
       
-      // 从用户元数据构建基本配置文件
-      const userProfile: Profile = {
-        id: session.user.id,
-        email: session.user.email || '',
-        name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-        avatar_url: session.user.user_metadata?.avatar_url,
-        plus: false,
-        is_active: true
-      };
+      // 查询用户的Plus会员状态
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, email, name, avatar_url, plus, is_active, expire_at')
+        .eq('id', session.user.id)
+        .single()
       
-      console.log("User profile:", userProfile);
+      let finalProfile: Profile
+      
+      if (profileError || !userProfile) {
+        // 如果数据库中没有用户配置文件，创建基本配置文件
+        finalProfile = {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+          avatar_url: session.user.user_metadata?.avatar_url,
+          plus: false,
+          is_active: true
+        }
+      } else {
+        // 检查Plus会员是否过期
+        const isExpired = userProfile.expire_at && new Date(userProfile.expire_at) < new Date()
+        
+        finalProfile = {
+          id: userProfile.id,
+          email: userProfile.email || session.user.email || '',
+          name: userProfile.name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+          avatar_url: userProfile.avatar_url || session.user.user_metadata?.avatar_url,
+          plus: userProfile.plus && !isExpired,
+          is_active: userProfile.is_active && !isExpired,
+          expire_at: userProfile.expire_at
+        }
+      }
+      
+      console.log("User profile:", finalProfile);
       console.log("Setting loading to false");
       
-      // 如果需要，可以从数据库获取额外的用户信息
-      // 例如Plus会员状态等
-      
-      setProfile(userProfile);
+      setProfile(finalProfile);
       setLoading(false);
       setInitialized(true);
     } catch (err) {
@@ -126,13 +147,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         console.log("Token refreshed, updating session info");
         if (session?.user) {
           setUser(session.user);
+          // 对于令牌刷新，直接使用基本配置文件，避免频繁查询数据库
           const userProfile: Profile = {
             id: session.user.id,
             email: session.user.email || '',
             name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
             avatar_url: session.user.user_metadata?.avatar_url,
-            plus: false,
-            is_active: true
+            plus: profile?.plus || false,
+            is_active: profile?.is_active || true,
+            expire_at: profile?.expire_at
           };
           setProfile(userProfile);
         }

@@ -1,8 +1,9 @@
 "use client"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useTranslations } from 'next-intl'
+import { useUser } from '@/components/UserProvider'
 
 interface FileSizeUpgradeModalProps {
   open: boolean
@@ -21,10 +22,56 @@ const GreenCheckIcon = (
 
 export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fileSizeMB, onUpgrade }: FileSizeUpgradeModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
+  const [loading, setLoading] = useState(false)
   const t = useTranslations()
+  const { profile } = useUser()
+
+  const handleUpgradeClick = async () => {
+    if (!profile?.id) {
+      console.error('User not logged in')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/payment/paddle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          userId: profile.id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout')
+      }
+
+      const { checkoutUrl } = await response.json()
+      window.open(checkoutUrl, '_blank')
+      
+      if (onUpgrade) {
+        onUpgrade()
+      }
+      
+      onOpenChange(false)
+      
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert('支付处理失败，请稍后重试')
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] bg-white rounded-2xl p-0 overflow-hidden">
+        <DialogTitle className="sr-only">{t('upgrade.upgradeToPlus')}</DialogTitle>
+        <DialogDescription className="sr-only">
+          File too large, need to upgrade to Plus member
+        </DialogDescription>
         <div className="px-8 pt-8 pb-6" style={{padding: '32px 32px 24px'}}>
           {/* 文件信息提示 */}
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
@@ -100,7 +147,13 @@ export default function FileSizeUpgradeModal({ open, onOpenChange, fileName, fil
                 {selectedPlan === 'yearly' && <span className="absolute right-4 top-4">{GreenCheckIcon}</span>}
               </button>
             </div>
-            <Button className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1]" onClick={onUpgrade}>{t('upgrade.upgradeToPlus')}</Button>
+            <Button 
+              className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1] disabled:opacity-50 disabled:cursor-not-allowed" 
+              onClick={handleUpgradeClick}
+              disabled={loading || !profile?.id}
+            >
+              {loading ? '处理中...' : t('upgrade.upgradeToPlus')}
+            </Button>
           </div>
         </div>
         {/* 底部用户头像和宣传语 */}

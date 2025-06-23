@@ -162,7 +162,9 @@
     "upgradeSuccess": "Upgrade successful!",
     "fileTooLarge": "too large",
     "upgradeToAccessLargeFiles": "Upgrade to Plus to continue using.",
-    "trustedByResearchers": "Trusted by over 10 million researchers"
+    "trustedByResearchers": "Trusted by over 10 million researchers",
+    "upgradeDescription": "Upgrade to Plus to unlock more features",
+    "fileSizeUpgradeDescription": "File too large, need to upgrade to Plus member"
   },
   "user": {
     "unnamed": "Unnamed",

@@ -1,9 +1,10 @@
 "use client"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useState } from "react"
 import { useTranslations } from 'next-intl'
+import { useUser } from '@/components/UserProvider'
 
 interface UpgradePlusModalProps {
   open: boolean
@@ -20,10 +21,80 @@ const GreenCheckIcon = (
 
 export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: UpgradePlusModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
+  const [loading, setLoading] = useState(false)
   const t = useTranslations()
+  const { profile } = useUser()
+
+  const handleUpgradeClick = async () => {
+    if (!profile?.id) {
+      console.error('User not logged in')
+      return
+    }
+
+    setLoading(true)
+    try {
+      // 调用支付API获取结账链接
+      const response = await fetch('/api/payment/paddle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          userId: profile.id
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout')
+      }
+
+      const data = await response.json()
+      
+      // 检查是否为测试模式
+      if (data.mockPayment) {
+        // 模拟成功支付
+        alert(`测试模式: ${data.plan} 计划支付模拟成功!`)
+        
+        // 模拟调用webhook
+        await fetch('/api/webhook/paddle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            alert_name: 'subscription_payment_succeeded',
+            event_time: new Date().toISOString(),
+            passthrough: JSON.stringify({ userId: profile.id, plan: selectedPlan })
+          })
+        })
+        
+        alert('模拟支付完成！请刷新页面查看Plus状态')
+      } else {
+        // 打开Paddle结账页面
+        window.open(data.checkoutUrl, '_blank')
+      }
+      
+      // 调用原始的onUpgrade回调（如果存在）
+      if (onUpgrade) {
+        onUpgrade()
+      }
+      
+      // 关闭模态框
+      onOpenChange(false)
+      
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert('支付处理失败，请稍后重试')
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] bg-white rounded-2xl p-0 overflow-hidden">
+        <DialogTitle className="sr-only">{t('upgrade.upgradeToPlus')}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Upgrade to Plus to unlock more features
+        </DialogDescription>
         <div className="px-8 pt-8 pb-6" style={{padding: '32px 32px 24px'}}>
           <h2 className="text-2xl font-bold mb-6 text-center">{t('upgrade.upgradeToPlus')}</h2>
           <div className="text-base">
@@ -82,7 +153,13 @@ export default function UpgradePlusModal({ open, onOpenChange, onUpgrade }: Upgr
                 {selectedPlan === 'yearly' && <span className="absolute right-4 top-4">{GreenCheckIcon}</span>}
               </button>
             </div>
-            <Button className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1]" onClick={onUpgrade}>{t('upgrade.upgradeToPlus')}</Button>
+            <Button 
+              className="w-full h-[48px] mt-5 bg-[#a026ff] text-white text-lg font-bold rounded-xl shadow-lg transition-all hover:bg-[#7c1fd1] disabled:opacity-50 disabled:cursor-not-allowed" 
+              onClick={handleUpgradeClick}
+              disabled={loading || !profile?.id}
+            >
+              {loading ? '处理中...' : t('upgrade.upgradeToPlus')}
+            </Button>
           </div>
         </div>
         {/* 底部用户头像和宣传语 */}
