@@ -153,6 +153,28 @@ export default function SimpleAuthTestPage() {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+      addLog(`🔑 检查 JWT Token 格式...`)
+      try {
+        // 检查 JWT token 的格式
+        const parts = supabaseKey!.split('.')
+        addLog(`🔍 JWT 部分数量: ${parts.length} (正常应该是3部分)`)
+        
+        if (parts.length >= 2) {
+          // 解码 JWT payload (第二部分)
+          const payload = JSON.parse(atob(parts[1]))
+          addLog(`📋 JWT Payload: ${JSON.stringify(payload, null, 2)}`)
+          
+          // 检查关键字段
+          addLog(`🆔 iss (发行方): ${payload.iss || '缺失'}`)
+          addLog(`🎯 aud (受众): ${payload.aud || '缺失'}`)
+          addLog(`👤 sub (主体): ${payload.sub || '❌ 缺失!'}`)
+          addLog(`🎭 role (角色): ${payload.role || '缺失'}`)
+          addLog(`⏰ exp (过期时间): ${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : '缺失'}`)
+        }
+      } catch (jwtError: any) {
+        addLog(`❌ JWT 解析错误: ${jwtError.message}`)
+      }
+
       // 直接测试 Auth API
       addLog('📡 直接调用 Auth API...')
       const authApiTest = await fetch(`${supabaseUrl}/auth/v1/user`, {
@@ -174,8 +196,69 @@ export default function SimpleAuthTestPage() {
         addLog(`❌ Auth API 错误: ${errorText}`)
       }
 
+      // 尝试使用正确的匿名访问方式
+      addLog('🔐 尝试匿名访问方式...')
+      const anonTest = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseKey!,
+          'Content-Type': 'application/json'
+          // 不使用 Authorization header，只使用 apikey
+        }
+      })
+
+      addLog(`🔐 匿名访问响应: ${anonTest.status} ${anonTest.statusText}`)
+      if (!anonTest.ok) {
+        const anonErrorText = await anonTest.text()
+        addLog(`❌ 匿名访问错误: ${anonErrorText}`)
+      }
+
     } catch (error: any) {
       addLog(`💥 Auth API 测试失败: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const testEnvironmentConfig = async () => {
+    addLog('🔧 检查环境配置...')
+    setLoading(true)
+
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      addLog(`🌐 当前域名: ${window.location.origin}`)
+      addLog(`🔗 Supabase URL: ${supabaseUrl}`)
+      addLog(`🔑 Anon Key 长度: ${supabaseKey?.length || 0} 字符`)
+      
+      // 检查 URL 格式
+      if (supabaseUrl && !supabaseUrl.startsWith('https://')) {
+        addLog(`⚠️ Supabase URL 应该以 https:// 开头`)
+      }
+
+      // 检查 Key 格式
+      if (supabaseKey) {
+        const keyParts = supabaseKey.split('.')
+        if (keyParts.length === 3) {
+          addLog(`✅ Anon Key 格式正确 (3个JWT部分)`)
+        } else {
+          addLog(`❌ Anon Key 格式错误 (${keyParts.length}个部分，应该是3个)`)
+        }
+      }
+
+      // 测试 Supabase 项目是否可访问
+      addLog('🏠 测试 Supabase 项目首页...')
+      const homeTest = await fetch(supabaseUrl!)
+      addLog(`🏠 项目首页响应: ${homeTest.status} ${homeTest.statusText}`)
+
+      // 测试健康检查端点
+      addLog('❤️ 测试健康检查端点...')
+      const healthTest = await fetch(`${supabaseUrl}/rest/v1/`)
+      addLog(`❤️ 健康检查响应: ${healthTest.status} ${healthTest.statusText}`)
+
+    } catch (error: any) {
+      addLog(`💥 环境配置检查失败: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -185,11 +268,19 @@ export default function SimpleAuthTestPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">🧪 简单认证测试</h1>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <button 
+          onClick={testEnvironmentConfig}
+          disabled={loading}
+          className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 disabled:bg-gray-400 text-sm"
+        >
+          检查环境配置
+        </button>
+
         <button 
           onClick={testBasicSupabase}
           disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 text-sm"
         >
           {loading ? '测试中...' : '测试基础连接'}
         </button>
@@ -197,7 +288,7 @@ export default function SimpleAuthTestPage() {
         <button 
           onClick={testAuthAPI}
           disabled={loading}
-          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:bg-gray-400"
+          className="bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 disabled:bg-gray-400 text-sm"
         >
           测试 Auth API
         </button>
@@ -205,14 +296,14 @@ export default function SimpleAuthTestPage() {
         <button 
           onClick={testDirectLogin}
           disabled={loading}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400"
+          className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 text-sm"
         >
           测试直接登录
         </button>
         
         <button 
           onClick={() => setLogs([])}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          className="bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 text-sm"
         >
           清空日志
         </button>
