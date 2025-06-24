@@ -18,35 +18,74 @@ function AuthCallbackContent() {
         console.log('处理认证回调...')
         
         // 从 URL 获取参数
-        const code = searchParams.get('code')
         const redirectedFrom = searchParams.get('redirectedFrom') || `/${locale}`
         
-        console.log('回调参数:', { code: !!code, redirectedFrom })
+        console.log('回调参数:', { redirectedFrom })
 
-        if (!code) {
-          throw new Error('没有收到认证代码')
-        }
-
-        // 让 Supabase 自动处理代码交换
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        // 检查当前会话状态
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('认证失败:', error)
+          console.error('会话检查失败:', error)
           throw error
         }
 
-        console.log('认证成功:', { user: data.user?.email })
-        setStatus('success')
+        if (session) {
+          console.log('认证成功:', { user: session.user?.email })
+          setStatus('success')
 
-        // 短暂延迟后重定向
-        setTimeout(() => {
-          const finalRedirect = redirectedFrom.startsWith('/') 
-            ? redirectedFrom 
-            : `/${locale}`
+          // 短暂延迟后重定向
+          setTimeout(() => {
+            const finalRedirect = redirectedFrom.startsWith('/') 
+              ? redirectedFrom 
+              : `/${locale}`
+            
+            console.log('重定向到:', finalRedirect)
+            router.push(finalRedirect)
+          }, 1000)
+        } else {
+          // 等待 Supabase 自动处理认证
+          console.log('等待认证处理...')
           
-          console.log('重定向到:', finalRedirect)
-          router.push(finalRedirect)
-        }, 1000)
+          // 监听认证状态变化
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('认证状态变化:', event, session?.user?.email)
+            
+            if (event === 'SIGNED_IN' && session) {
+              setStatus('success')
+              subscription.unsubscribe()
+              
+              setTimeout(() => {
+                const finalRedirect = redirectedFrom.startsWith('/') 
+                  ? redirectedFrom 
+                  : `/${locale}`
+                
+                console.log('重定向到:', finalRedirect)
+                router.push(finalRedirect)
+              }, 1000)
+            } else if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+              setError('认证失败')
+              setStatus('error')
+              subscription.unsubscribe()
+              
+              setTimeout(() => {
+                router.push(`/${locale}/auth/login?error=auth_failed`)
+              }, 3000)
+            }
+          })
+          
+          // 5秒后如果还没有认证成功，视为失败
+          setTimeout(() => {
+            subscription.unsubscribe()
+            if (status === 'loading') {
+              setError('认证超时')
+              setStatus('error')
+              setTimeout(() => {
+                router.push(`/${locale}/auth/login?error=auth_timeout`)
+              }, 3000)
+            }
+          }, 5000)
+        }
 
       } catch (err: any) {
         console.error('认证回调失败:', err)
@@ -61,7 +100,7 @@ function AuthCallbackContent() {
     }
 
     handleAuthCallback()
-  }, [searchParams, router, locale])
+  }, [searchParams, router, locale, status])
 
   if (status === 'loading') {
     return (
