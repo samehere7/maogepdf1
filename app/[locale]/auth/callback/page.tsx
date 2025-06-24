@@ -13,6 +13,9 @@ function AuthCallbackContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    let subscription: any
+
     const handleAuthCallback = async () => {
       try {
         console.log('处理认证回调...')
@@ -20,21 +23,25 @@ function AuthCallbackContent() {
         // 从 URL 获取参数
         const redirectedFrom = searchParams.get('redirectedFrom') || `/${locale}`
         
-        console.log('回调参数:', { redirectedFrom })
+        console.log('回调参数:', { redirectedFrom, fullUrl: window.location.href })
+
+        // 简单延迟，让 Supabase 有时间处理认证
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
         // 检查当前会话状态
         const { data: { session }, error } = await supabase.auth.getSession()
         
+        console.log('会话检查结果:', { session: !!session, user: session?.user?.email, error })
+
         if (error) {
           console.error('会话检查失败:', error)
           throw error
         }
 
-        if (session) {
-          console.log('认证成功:', { user: session.user?.email })
+        if (session?.user) {
+          console.log('认证成功，准备重定向...')
           setStatus('success')
 
-          // 短暂延迟后重定向
           setTimeout(() => {
             const finalRedirect = redirectedFrom.startsWith('/') 
               ? redirectedFrom 
@@ -44,47 +51,41 @@ function AuthCallbackContent() {
             router.push(finalRedirect)
           }, 1000)
         } else {
-          // 等待 Supabase 自动处理认证
-          console.log('等待认证处理...')
+          console.log('会话为空，设置监听器...')
           
           // 监听认证状态变化
-          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log('认证状态变化:', event, session?.user?.email)
+          const { data: authData } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('认证状态变化:', { event, hasSession: !!session, user: session?.user?.email })
             
-            if (event === 'SIGNED_IN' && session) {
+            if (event === 'SIGNED_IN' && session?.user) {
+              console.log('监听到登录成功')
               setStatus('success')
-              subscription.unsubscribe()
+              if (subscription) subscription.unsubscribe()
               
               setTimeout(() => {
                 const finalRedirect = redirectedFrom.startsWith('/') 
                   ? redirectedFrom 
                   : `/${locale}`
                 
-                console.log('重定向到:', finalRedirect)
+                console.log('从监听器重定向到:', finalRedirect)
                 router.push(finalRedirect)
               }, 1000)
-            } else if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-              setError('认证失败')
-              setStatus('error')
-              subscription.unsubscribe()
-              
-              setTimeout(() => {
-                router.push(`/${locale}/auth/login?error=auth_failed`)
-              }, 3000)
             }
           })
           
-          // 5秒后如果还没有认证成功，视为失败
-          setTimeout(() => {
-            subscription.unsubscribe()
-            if (status === 'loading') {
-              setError('认证超时')
-              setStatus('error')
-              setTimeout(() => {
-                router.push(`/${locale}/auth/login?error=auth_timeout`)
-              }, 3000)
-            }
-          }, 5000)
+          subscription = authData.subscription
+          
+          // 10秒后认证超时
+          timeoutId = setTimeout(() => {
+            console.log('认证超时')
+            if (subscription) subscription.unsubscribe()
+            setError('认证超时，请重试')
+            setStatus('error')
+            
+            setTimeout(() => {
+              router.push(`/${locale}/auth/login?error=auth_timeout`)
+            }, 3000)
+          }, 10000)
         }
 
       } catch (err: any) {
@@ -92,7 +93,6 @@ function AuthCallbackContent() {
         setError(err.message || '认证失败')
         setStatus('error')
         
-        // 3秒后重定向到登录页面
         setTimeout(() => {
           router.push(`/${locale}/auth/login?error=callback_failed`)
         }, 3000)
@@ -100,7 +100,13 @@ function AuthCallbackContent() {
     }
 
     handleAuthCallback()
-  }, [searchParams, router, locale, status])
+
+    // 清理函数
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      if (subscription) subscription.unsubscribe()
+    }
+  }, [searchParams, router, locale])
 
   if (status === 'loading') {
     return (
