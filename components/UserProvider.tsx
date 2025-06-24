@@ -89,44 +89,45 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       setUser(session.user);
       
-      // 查询用户的Plus会员状态
-      const { data: userProfile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('id, email, name, avatar_url, plus, is_active, expire_at')
-        .eq('id', session.user.id)
-        .single()
-      
-      let finalProfile: Profile
-      
-      if (profileError || !userProfile) {
-        // 如果数据库中没有用户配置文件，创建基本配置文件
-        finalProfile = {
+      // 通过API端点获取用户配置文件，绕过JWT问题
+      try {
+        const response = await fetch('/api/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+        
+        if (response.ok) {
+          const { profile: userProfile } = await response.json();
+          setProfile(userProfile);
+        } else {
+          // API请求失败，使用基本配置文件
+          const basicProfile: Profile = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            avatar_url: session.user.user_metadata?.avatar_url,
+            plus: false,
+            is_active: true
+          };
+          setProfile(basicProfile);
+        }
+      } catch (apiError) {
+        console.error('API请求失败，使用基本配置文件:', apiError);
+        // API请求失败，使用基本配置文件
+        const basicProfile: Profile = {
           id: session.user.id,
           email: session.user.email || '',
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
           avatar_url: session.user.user_metadata?.avatar_url,
           plus: false,
           is_active: true
-        }
-      } else {
-        // 检查Plus会员是否过期
-        const isExpired = userProfile.expire_at && new Date(userProfile.expire_at) < new Date()
-        
-        finalProfile = {
-          id: userProfile.id,
-          email: userProfile.email || session.user.email || '',
-          name: userProfile.name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-          avatar_url: userProfile.avatar_url || session.user.user_metadata?.avatar_url,
-          plus: userProfile.plus && !isExpired,
-          is_active: userProfile.is_active && !isExpired,
-          expire_at: userProfile.expire_at
-        }
+        };
+        setProfile(basicProfile);
       }
       
-      console.log("User profile:", finalProfile);
       console.log("Setting loading to false");
       
-      setProfile(finalProfile);
       setLoading(false);
       setInitialized(true);
     } catch (err) {

@@ -167,26 +167,21 @@ export async function POST(req: Request) {
     // 检查用户Plus状态并选择合适的模型
     let isPlus = false;
     try {
-      const supabaseForPlus = createClient();
-      const { data: userData } = await supabaseForPlus
-        .from('user_with_plus')
-        .select('plus, is_active')
+      // 使用 service role 客户端查询用户Plus状态，绕过JWT问题
+      const { supabaseService } = await import('@/lib/supabase/service-client');
+      const { data: userData } = await supabaseService
+        .from('user_profiles')
+        .select('plus, is_active, expire_at')
         .eq('id', user.id)
         .single();
         
-      isPlus = userData?.plus && userData?.is_active;
-    } catch (error) {
-      // 降级检查user_profiles表
-      try {
-        const { data: profiles } = await supabase
-          .from('user_profiles')
-          .select('plus, is_active')
-          .eq('id', user.id)
-          .single();
-        isPlus = profiles?.plus && profiles?.is_active;
-      } catch (profileError) {
-        console.log('[聊天API] 无法获取用户Plus状态，使用默认模型');
+      if (userData) {
+        // 检查Plus会员是否过期
+        const isExpired = userData.expire_at && new Date(userData.expire_at) < new Date();
+        isPlus = userData.plus && userData.is_active && !isExpired;
       }
+    } catch (error) {
+      console.log('[聊天API] 无法获取用户Plus状态，使用默认模型:', error);
     }
 
     // 使用AI模型进行智能对话

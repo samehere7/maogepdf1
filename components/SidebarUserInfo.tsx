@@ -64,27 +64,30 @@ export default function SidebarUserInfo() {
 
   const handleUpgrade = async () => {
     try {
-      // 尝试从user_with_plus视图获取数据
-      const { data, error } = await supabase
-        .from("user_with_plus")
-        .select("plus, expire_at, is_active")
-        .eq("id", user.id)
-        .single();
-        
-      if (error) throw error;
+      // 获取用户session以获取access_token
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (data) {
-        setProfile({
-          ...profile,
-          ...data,
-          id: profile?.id || user.id,
-          email: profile?.email || user.email
+      if (session?.access_token) {
+        // 通过API端点获取最新用户数据
+        const response = await fetch('/api/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
         });
+        
+        if (response.ok) {
+          const { profile: updatedProfile } = await response.json();
+          setProfile(updatedProfile);
+        } else {
+          throw new Error('Failed to fetch updated profile');
+        }
+      } else {
+        throw new Error('No access token available');
       }
     } catch (error) {
-      console.error('无法从user_with_plus获取数据:', error);
+      console.error('无法获取更新的用户数据:', error);
       
-      // 如果视图不可用，直接更新profile
+      // 如果API请求失败，直接更新profile
       const oneYearLater = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
       setProfile({
         ...profile,

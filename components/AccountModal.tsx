@@ -35,41 +35,26 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
     try {
       console.log('Refreshing Plus status for user:', user.id);
       
-      // 优先尝试从user_with_plus视图获取数据
-      const { data, error } = await supabase
-        .from("user_with_plus")
-        .select("plus, expire_at, is_active, plan, is_expired, days_remaining")
-        .eq("id", user.id)
-        .single();
+      // 获取用户session以获取access_token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        // 通过API端点获取最新用户数据
+        const response = await fetch('/api/user/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
         
-      if (error) {
-        console.error('无法从user_with_plus获取数据:', error);
-        // 如果视图查询失败，尝试直接查询user_profiles
-        const { data: profileData, error: profileError } = await supabase
-          .from("user_profiles")
-          .select("plus, expire_at, is_active")
-          .eq("id", user.id)
-          .single();
-          
-        if (profileError) {
-          console.error('用户资料查询也失败:', profileError);
-          throw new Error('无法获取用户Plus状态');
+        if (response.ok) {
+          const { profile: updatedProfile } = await response.json();
+          console.log('Plus状态刷新成功:', updatedProfile);
+          setProfile(updatedProfile);
+        } else {
+          throw new Error('Failed to fetch updated profile');
         }
-        
-        setProfile({
-          ...profile,
-          ...profileData,
-          id: profile?.id || user.id,
-          email: profile?.email || user.email
-        });
       } else {
-        console.log('Plus状态刷新成功:', data);
-        setProfile({
-          ...profile,
-          ...data,
-          id: profile?.id || user.id,
-          email: profile?.email || user.email
-        });
+        throw new Error('No access token available');
       }
     } catch (error) {
       console.error('获取Plus状态失败:', error);
@@ -114,43 +99,25 @@ export default function AccountModal({ open, onOpenChange, user, onSignOut }: Ac
     if (!user?.id || isPlus) return;
     const fetchQuota = async () => {
       try {
-        // 先检查用户是否已认证
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (!authUser) {
-          console.log('用户未认证，跳过配额查询');
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from('user_daily_quota')
-          .select('pdf_count, chat_count, quota_date')
-          .eq('id', user.id)
-          .maybeSingle(); // 使用maybeSingle避免PGRST116错误
+        // 获取用户session以获取access_token
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.access_token) {
+          // 通过API端点获取配额数据
+          const response = await fetch('/api/user/quota', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          });
           
-        if (error) {
-          // 如果是权限错误或记录不存在，使用默认配额值
-          if (error.code === 'PGRST116' || error.message.includes('403') || error.code === '42501') {
-            console.log('配额查询权限问题，使用默认配额值');
-            const today = new Date().toISOString().slice(0, 10);
-            setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
-            return;
+          if (response.ok) {
+            const { quota: quotaData } = await response.json();
+            setQuota(quotaData);
+          } else {
+            throw new Error('Failed to fetch quota data');
           }
-          console.warn('配额查询错误:', error);
-          return;
-        }
-        
-        if (!data) return;
-        
-        const today = new Date().toISOString().slice(0, 10);
-        if (data.quota_date !== today) {
-          // 新的一天，重置额度
-          await supabase
-            .from('user_daily_quota')
-            .update({ pdf_count: 0, chat_count: 0, quota_date: today })
-            .eq('id', user.id);
-          setQuota({ pdf_count: 0, chat_count: 0, quota_date: today });
         } else {
-          setQuota(data);
+          throw new Error('No access token available');
         }
       } catch (error) {
         // 记录错误但不影响用户体验
