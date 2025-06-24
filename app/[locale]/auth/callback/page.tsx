@@ -53,9 +53,26 @@ function AuthCallbackContent() {
 
         // 检查当前会话状态
         addDebugLog('🔍 检查当前会话状态...')
-        const { data: { session }, error } = await supabase.auth.getSession()
         
-        addDebugLog(`📊 会话检查结果: session=${!!session}, user=${session?.user?.email || '无'}, error=${error?.message || '无'}`)
+        let session: any = null
+        let error: any = null
+        
+        try {
+          // 添加超时机制
+          const sessionPromise = supabase.auth.getSession()
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('会话检查超时')), 5000)
+          )
+          
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any
+          session = result.data?.session
+          error = result.error
+          
+          addDebugLog(`📊 会话检查完成: session=${!!session}, user=${session?.user?.email || '无'}, error=${error?.message || '无'}`)
+        } catch (sessionError: any) {
+          addDebugLog(`❌ 会话检查异常: ${sessionError.message}`)
+          error = sessionError
+        }
 
         if (error) {
           addDebugLog(`❌ 会话检查失败: ${error.message}`)
@@ -76,11 +93,24 @@ function AuthCallbackContent() {
             router.push(finalRedirect)
           }, 1000)
         } else {
-          addDebugLog('⚠️ 会话为空，设置认证状态监听器...')
+          addDebugLog('⚠️ 会话为空，尝试手动处理URL hash...')
+          
+          // 检查 URL hash 中是否有认证信息
+          const hash = window.location.hash
+          addDebugLog(`🔗 URL hash: ${hash}`)
+          
+          if (hash) {
+            addDebugLog('🔄 尝试使用 hash 认证...')
+            // 触发 Supabase 处理 hash
+            window.location.href = window.location.href
+            return
+          }
+          
+          addDebugLog('🔔 设置认证状态监听器...')
           
           // 监听认证状态变化
           const { data: authData } = supabase.auth.onAuthStateChange((event, session) => {
-            addDebugLog(`🔔 认证状态变化: ${event}, session=${!!session}, user=${session?.user?.email || '无'}`)
+            addDebugLog(`📡 认证状态变化: ${event}, session=${!!session}, user=${session?.user?.email || '无'}`)
             
             if (event === 'SIGNED_IN' && session?.user) {
               addDebugLog(`🎉 监听到登录成功! 用户: ${session.user.email}`)
@@ -95,23 +125,52 @@ function AuthCallbackContent() {
                 addDebugLog(`🚀 从监听器重定向到: ${finalRedirect}`)
                 router.push(finalRedirect)
               }, 1000)
+            } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+              addDebugLog(`🔄 Token刷新成功! 用户: ${session.user.email}`)
+              setStatus('success')
+              if (subscription) subscription.unsubscribe()
+              
+              setTimeout(() => {
+                const finalRedirect = redirectedFrom.startsWith('/') 
+                  ? redirectedFrom 
+                  : `/${locale}`
+                
+                addDebugLog(`🚀 Token刷新后重定向到: ${finalRedirect}`)
+                router.push(finalRedirect)
+              }, 1000)
             }
           })
           
           subscription = authData.subscription
           
-          // 10秒后认证超时
+          // 增加超时到15秒
           timeoutId = setTimeout(() => {
-            addDebugLog('⏰ 认证超时 (10秒)')
+            addDebugLog('⏰ 认证超时 (15秒)')
             if (subscription) subscription.unsubscribe()
-            setError('认证超时，请重试')
-            setStatus('error')
             
-            setTimeout(() => {
-              addDebugLog('🔄 超时重定向到登录页面')
-              router.push(`/${locale}/auth/login?error=auth_timeout`)
-            }, 3000)
-          }, 10000)
+            // 最后一次尝试检查会话
+            addDebugLog('🔄 超时前最后检查会话...')
+            supabase.auth.getSession().then(({ data: { session: finalSession } }) => {
+              if (finalSession?.user) {
+                addDebugLog(`✅ 最后检查发现会话! 用户: ${finalSession.user.email}`)
+                setStatus('success')
+                setTimeout(() => {
+                  const finalRedirect = redirectedFrom.startsWith('/') 
+                    ? redirectedFrom 
+                    : `/${locale}`
+                  router.push(finalRedirect)
+                }, 1000)
+              } else {
+                addDebugLog('❌ 最后检查仍无会话，认证失败')
+                setError('认证超时，请重试')
+                setStatus('error')
+                setTimeout(() => {
+                  addDebugLog('🔄 超时重定向到登录页面')
+                  router.push(`/${locale}/auth/login?error=auth_timeout`)
+                }, 3000)
+              }
+            })
+          }, 15000)
         }
 
       } catch (err: any) {
