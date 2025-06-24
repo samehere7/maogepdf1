@@ -11,16 +11,45 @@ export default function AuthDebugPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [testResults, setTestResults] = useState<any>({})
 
+  // 持久化日志到 localStorage
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString()
     const logMessage = `[${timestamp}] ${message}`
     console.log(logMessage)
-    setLogs(prev => [...prev, logMessage])
+    
+    // 更新状态
+    setLogs(prev => {
+      const newLogs = [...prev, logMessage]
+      // 同时保存到 localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth-debug-logs', JSON.stringify(newLogs))
+      }
+      return newLogs
+    })
   }
+
+  // 从 localStorage 恢复日志
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLogs = localStorage.getItem('auth-debug-logs')
+      if (savedLogs) {
+        try {
+          const parsedLogs = JSON.parse(savedLogs)
+          setLogs(parsedLogs)
+          addLog('🔄 已恢复之前的调试日志')
+        } catch (e) {
+          addLog('⚠️ 日志恢复失败，重新开始')
+        }
+      }
+    }
+  }, [])
 
   const clearLogs = () => {
     setLogs([])
     setTestResults({})
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth-debug-logs')
+    }
   }
 
   useEffect(() => {
