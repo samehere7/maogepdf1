@@ -41,17 +41,34 @@ export function LanguageSelector() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   
-  // URGENT FIX: Extract actual locale from pathname when useLocale() is wrong
+  // 工具函数：规范化路径
+  const normalizePath = (path: string): string => {
+    // 移除多余的斜杠并确保路径格式正确
+    return path.replace(/\/+/g, '/').replace(/\/$/, '') || '/'
+  }
+
+  // FIXED: 改进的 locale 检测逻辑
   const actualLocale = (() => {
     const pathSegments = pathname.split('/').filter(Boolean)
     const firstSegment = pathSegments[0]
     const isValidLocale = languages.some(lang => lang.code === firstSegment)
     
+    // Debug logs (will be removed in production by Next.js)
+    console.log('🔍 Language Selector - Current pathname:', pathname)
+    console.log('🔍 Language Selector - Path segments:', pathSegments)
+    console.log('🔍 Language Selector - First segment:', firstSegment)
+    console.log('🔍 Language Selector - Is valid locale:', isValidLocale)
+    console.log('🔍 Language Selector - useLocale() returns:', locale)
+    
     if (isValidLocale) {
+      console.log('🔍 Language Selector - Detected locale from path:', firstSegment)
       return firstSegment
     } else {
-      // For localePrefix: 'as-needed', root path means default locale (en)
-      return pathSegments.length === 0 || pathname === '/' ? 'en' : locale
+      // For localePrefix: 'as-needed', root path without locale prefix means default locale (en)
+      // Only trust useLocale() if the path structure makes sense
+      const detectedLocale = (pathSegments.length === 0 || pathname === '/') ? 'en' : 'en'
+      console.log('🔍 Language Selector - Fallback locale:', detectedLocale)
+      return detectedLocale
     }
   })()
 
@@ -61,46 +78,98 @@ export function LanguageSelector() {
     // Always close the dropdown first for immediate UI feedback
     setOpen(false)
     
-    if (newLocale === actualLocale) {
-      // Even if the locale is the same, force a refresh to ensure the page is in the correct language
-      // This handles cases where the URL shows the correct locale but content might not have loaded properly
-      setTimeout(() => {
-        window.location.reload()
-      }, 100)
-      return
+    // 持久化日志
+    const logData = {
+      from: actualLocale,
+      to: newLocale,
+      currentPath: pathname,
+      useLocaleValue: locale,
+      timestamp: new Date().toISOString()
     }
     
-    // Extract the path without the current locale
-    const segments = pathname.split('/').filter(Boolean)
+    console.log('🚀 Language change initiated:', logData)
     
-    // Check if first segment is a valid locale
+    // Debug logging (removed in production)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      const existingLogs = JSON.parse(localStorage.getItem('language-debug-logs') || '[]')
+      const newLog = `[${new Date().toLocaleTimeString()}] 🚀 语言选择器: ${actualLocale} → ${newLocale}`
+      const updatedLogs = [...existingLogs, newLog].slice(-50)
+      localStorage.setItem('language-debug-logs', JSON.stringify(updatedLogs))
+    }
+    
+    if (newLocale === actualLocale) {
+      // Even if the locale is the same, force navigation to ensure correct URL structure
+      console.log('🔄 Same locale selected, ensuring correct URL structure')
+      // Don't return early - continue with path construction to ensure correct URL
+    }
+    
+    // FIXED: 改进的路径处理逻辑
+    const segments = pathname.split('/').filter(Boolean)
     const firstSegment = segments[0]
     const isValidLocale = languages.some(lang => lang.code === firstSegment)
     
+    console.log('🔍 Path analysis:', {
+      segments,
+      firstSegment,
+      isValidLocale
+    })
+    
+    // 提取不含 locale 的路径部分
     let pathWithoutLocale = ''
     if (isValidLocale) {
-      // Remove the current locale from the path
+      // 当前路径包含 locale，移除它
       pathWithoutLocale = segments.slice(1).join('/')
     } else {
-      // No locale in path, keep all segments
+      // 当前路径不包含 locale（说明是英文默认路径），保留所有段
       pathWithoutLocale = segments.join('/')
     }
     
-    // Navigate to the new locale
-    // Handle localePrefix: 'as-needed' - default locale (en) uses root path
+    console.log('🔍 Path without locale:', pathWithoutLocale)
+    
+    // FIXED: 构建新路径的逻辑
     let newPath
     if (newLocale === 'en') {
-      // For English, use root path due to localePrefix: 'as-needed'
-      newPath = `/${pathWithoutLocale || ''}`
+      // 英文使用根路径（localePrefix: 'as-needed'）
+      if (pathWithoutLocale) {
+        newPath = `/${pathWithoutLocale}`
+      } else {
+        newPath = '/'
+      }
     } else {
-      // For other languages, use explicit locale prefix
-      newPath = `/${newLocale}${pathWithoutLocale ? `/${pathWithoutLocale}` : ''}`
+      // 其他语言使用显式的 locale 前缀
+      if (pathWithoutLocale) {
+        newPath = `/${newLocale}/${pathWithoutLocale}`
+      } else {
+        newPath = `/${newLocale}`
+      }
     }
     
-    // Force immediate navigation with page reload to ensure locale change
+    // 规范化路径，移除多余的斜杠
+    newPath = normalizePath(newPath)
+    
+    console.log('🚀 Navigating to new path:', newPath)
+    console.log('🔍 Navigation details:', {
+      currentURL: window.location.href,
+      targetPath: newPath,
+      willChange: window.location.pathname !== newPath,
+      method: 'window.location.href'
+    })
+    
+    // 执行语言切换导航
     setTimeout(() => {
+      console.log('🎯 Executing navigation to:', newPath)
+      
+      // Debug navigation logging (removed in production)
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        const existingLogs = JSON.parse(localStorage.getItem('language-debug-logs') || '[]')
+        const newLog = `[${new Date().toLocaleTimeString()}] 🎯 执行导航: ${newPath}`
+        const updatedLogs = [...existingLogs, newLog].slice(-50)
+        localStorage.setItem('language-debug-logs', JSON.stringify(updatedLogs))
+      }
+      
+      // 使用 window.location.href 确保完整的页面刷新和语言切换
       window.location.href = newPath
-    }, 100)
+    }, 50) // 减少延迟以提升用户体验
   }
 
   return (
