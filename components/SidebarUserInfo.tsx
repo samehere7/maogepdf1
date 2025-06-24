@@ -19,8 +19,51 @@ export default function SidebarUserInfo() {
   const displayName = profile?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || t('user.unnamed');
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setOpen(false)
+    try {
+      console.log('🚪 侧边栏退出登录...')
+      
+      // 设置超时机制，避免 signOut API 卡住
+      const signOutPromise = supabase.auth.signOut()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('signOut() 超时')), 3000)
+      )
+      
+      try {
+        await Promise.race([signOutPromise, timeoutPromise])
+        console.log('✅ 侧边栏 signOut 成功')
+      } catch (signOutError: any) {
+        console.log(`⚠️ 侧边栏 signOut 失败或超时: ${signOutError.message}`)
+      }
+      
+      // 手动清理本地状态
+      if (typeof window !== 'undefined') {
+        try {
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sb-') || key.includes('supabase')) {
+              localStorage.removeItem(key)
+            }
+          })
+          console.log('✅ 侧边栏本地存储清理完成')
+        } catch (storageError) {
+          console.log('⚠️ 侧边栏清理本地存储时出错:', storageError)
+        }
+      }
+      
+      setOpen(false)
+      
+      // 强制刷新页面
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
+      
+    } catch (error) {
+      console.error('侧边栏退出登录失败:', error)
+      setOpen(false)
+      // 即使出错也刷新页面
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
+    }
   }
 
   const handleUpgrade = async () => {
