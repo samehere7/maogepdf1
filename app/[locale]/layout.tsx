@@ -6,7 +6,6 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {locales} from '@/i18n';
 import { DebugLanguageTool } from "@/components/debug-language-tool";
-import { ProductionDebugPanel } from "@/components/production-debug-panel";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -50,7 +49,6 @@ export default async function LocaleLayout({
           <Providers>
             {children}
             {process.env.NODE_ENV === 'development' && <DebugLanguageTool />}
-            <ProductionDebugPanel />
           </Providers>
         </NextIntlClientProvider>
       </body>
