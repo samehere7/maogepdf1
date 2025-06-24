@@ -64,9 +64,9 @@ export function LanguageSelector() {
       console.log('🔍 Language Selector - Detected locale from path:', firstSegment)
       return firstSegment
     } else {
-      // For localePrefix: 'as-needed', root path without locale prefix means default locale (en)
-      // Only trust useLocale() if the path structure makes sense
-      const detectedLocale = (pathSegments.length === 0 || pathname === '/') ? 'en' : 'en'
+      // For localePrefix: 'always', all paths should have locale prefix
+      // If no valid locale in path, default to 'en'
+      const detectedLocale = 'en'
       console.log('🔍 Language Selector - Fallback locale:', detectedLocale)
       return detectedLocale
     }
@@ -126,22 +126,13 @@ export function LanguageSelector() {
     
     console.log('🔍 Path without locale:', pathWithoutLocale)
     
-    // FIXED: 构建新路径的逻辑
+    // FIXED: 构建新路径的逻辑 (localePrefix: 'always')
     let newPath
-    if (newLocale === 'en') {
-      // 英文使用根路径（localePrefix: 'as-needed'）
-      if (pathWithoutLocale) {
-        newPath = `/${pathWithoutLocale}`
-      } else {
-        newPath = '/'
-      }
+    // 所有语言都使用显式的 locale 前缀
+    if (pathWithoutLocale) {
+      newPath = `/${newLocale}/${pathWithoutLocale}`
     } else {
-      // 其他语言使用显式的 locale 前缀
-      if (pathWithoutLocale) {
-        newPath = `/${newLocale}/${pathWithoutLocale}`
-      } else {
-        newPath = `/${newLocale}`
-      }
+      newPath = `/${newLocale}`
     }
     
     // 规范化路径，移除多余的斜杠

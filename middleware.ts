@@ -4,8 +4,9 @@ import { locales, defaultLocale } from './i18n';
 export default createMiddleware({
   locales,
   defaultLocale,
-  localeDetection: false, // 禁用自动语言检测，避免重定向循环
-  localePrefix: 'as-needed'
+  localeDetection: false,
+  // 改为始终显示前缀，避免 'as-needed' 的复杂逻辑
+  localePrefix: 'always'
 });
 
 export const config = {
