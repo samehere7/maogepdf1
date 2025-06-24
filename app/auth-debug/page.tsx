@@ -74,8 +74,32 @@ export default function AuthDebugPage() {
 
   const testSupabaseConnection = async () => {
     addLog('🔍 测试 Supabase 连接...')
+    
+    // 首先检查环境变量
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    addLog(`🔗 Supabase URL: ${supabaseUrl ? '已设置' : '❌ 未设置'}`)
+    addLog(`🔑 Supabase Key: ${supabaseKey ? '已设置' : '❌ 未设置'}`)
+    
+    if (!supabaseUrl || !supabaseKey) {
+      addLog('❌ Supabase 环境变量未正确设置')
+      setTestResults(prev => ({ ...prev, connection: { success: false, error: '环境变量未设置' } }))
+      return
+    }
+    
     try {
-      const { data, error } = await supabase.auth.getSession()
+      // 添加5秒超时
+      addLog('⏳ 尝试连接 Supabase (5秒超时)...')
+      
+      const sessionPromise = supabase.auth.getSession()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('连接超时')), 5000)
+      )
+      
+      const result = await Promise.race([sessionPromise, timeoutPromise]) as any
+      const { data, error } = result
+      
       if (error) {
         addLog(`❌ Supabase 连接错误: ${error.message}`)
         setTestResults(prev => ({ ...prev, connection: { success: false, error: error.message } }))
