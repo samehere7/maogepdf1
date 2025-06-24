@@ -34,24 +34,16 @@ function AuthCallbackContent() {
         const urlParams = new URLSearchParams(window.location.search)
         const isDebugMode = urlParams.get('debug') === 'persistent'
         
-        if (isDebugMode) {
-          // 保存到持久化调试日志
-          const existingLogs = JSON.parse(localStorage.getItem('auth-debug-logs-persistent') || '[]')
-          const logEntry = {
-            timestamp,
-            message,
-            type: message.includes('❌') ? 'error' : 
-                  message.includes('⚠️') ? 'warning' : 
-                  message.includes('✅') ? 'success' : 'info'
+        // 可选的调试日志存储（仅在开发环境）
+        if (process.env.NODE_ENV === 'development') {
+          try {
+            const existingLogs = JSON.parse(localStorage.getItem('auth-debug-logs') || '[]')
+            const allLogs = [...existingLogs, logMessage]
+            localStorage.setItem('auth-debug-logs', JSON.stringify(allLogs))
+          } catch (e) {
+            // 静默处理存储错误
           }
-          const allLogs = [...existingLogs, logEntry]
-          localStorage.setItem('auth-debug-logs-persistent', JSON.stringify(allLogs))
         }
-        
-        // 也保存到原来的格式用于兼容
-        const existingLogs = JSON.parse(localStorage.getItem('auth-debug-logs') || '[]')
-        const allLogs = [...existingLogs, logMessage]
-        localStorage.setItem('auth-debug-logs', JSON.stringify(allLogs))
       }
       return newLogs
     })
@@ -267,22 +259,24 @@ function AuthCallbackContent() {
           <h2 className="text-xl font-semibold mb-2">正在完成登录...</h2>
           <p className="text-gray-600 mb-6">请稍候，我们正在验证您的身份</p>
           
-          {/* 显示调试日志 */}
-          <div className="bg-white rounded-lg p-4 shadow-lg">
-            <h3 className="font-bold mb-2 text-left">🔧 实时调试日志:</h3>
-            <div className="bg-black text-green-400 p-3 rounded text-xs font-mono text-left h-64 overflow-y-auto">
-              {debugLogs.length === 0 ? (
-                <div className="text-gray-500">等待日志...</div>
-              ) : (
-                debugLogs.map((log, index) => (
-                  <div key={index} className="mb-1">{log}</div>
-                ))
-              )}
+          {/* 仅在开发环境显示调试日志 */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="bg-white rounded-lg p-4 shadow-lg">
+              <h3 className="font-bold mb-2 text-left">🔧 实时调试日志:</h3>
+              <div className="bg-black text-green-400 p-3 rounded text-xs font-mono text-left h-64 overflow-y-auto">
+                {debugLogs.length === 0 ? (
+                  <div className="text-gray-500">等待日志...</div>
+                ) : (
+                  debugLogs.map((log, index) => (
+                    <div key={index} className="mb-1">{log}</div>
+                  ))
+                )}
+              </div>
+              <div className="mt-2 text-xs text-gray-500 text-left">
+                💡 提示: 认证过程正在进行中，请稍候
+              </div>
             </div>
-            <div className="mt-2 text-xs text-gray-500 text-left">
-              💡 提示: 如果认证卡住，可以返回 <a href="/auth-debug" className="text-blue-500 underline">/auth-debug</a> 查看完整日志
-            </div>
-          </div>
+          )}
         </div>
       </div>
     )
