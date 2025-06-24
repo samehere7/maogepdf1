@@ -16,7 +16,19 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+  },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // 如果URL是相对路径，或者以baseUrl开头，允许重定向
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // 如果URL以baseUrl开头，允许重定向
+      else if (new URL(url).origin === baseUrl) return url
+      // 否则重定向到首页
+      return baseUrl
+    },
     async jwt({ token, account, profile }) {
       if (account && profile) {
         token.email = profile.email
