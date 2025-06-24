@@ -53,7 +53,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       
       // 只有在没有传入会话时才尝试获取会话（避免 JWT 问题）
       if (!session) {
-        console.log("⚠️ 尝试获取会话，但可能因JWT问题超时");
         try {
           // 设置短超时，避免长时间卡住
           const sessionPromise = supabase.auth.getSession();
@@ -68,8 +67,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             console.error('获取会话失败:', result.error);
           }
         } catch (sessionError: any) {
-          console.log(`⏰ getSession() 超时或失败: ${sessionError.message}，将等待认证状态变化`);
-          // 不设置为错误状态，继续等待认证状态变化
+          // 静默处理超时，继续等待认证状态变化
           if (!initialized) {
             setLoading(false);
             setInitialized(true);

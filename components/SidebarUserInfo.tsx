@@ -20,8 +20,6 @@ export default function SidebarUserInfo() {
 
   const handleSignOut = async () => {
     try {
-      console.log('🚪 侧边栏退出登录...')
-      
       // 设置超时机制，避免 signOut API 卡住
       const signOutPromise = supabase.auth.signOut()
       const timeoutPromise = new Promise((_, reject) => 
@@ -30,9 +28,8 @@ export default function SidebarUserInfo() {
       
       try {
         await Promise.race([signOutPromise, timeoutPromise])
-        console.log('✅ 侧边栏 signOut 成功')
       } catch (signOutError: any) {
-        console.log(`⚠️ 侧边栏 signOut 失败或超时: ${signOutError.message}`)
+        // 静默处理
       }
       
       // 手动清理本地状态
@@ -43,9 +40,8 @@ export default function SidebarUserInfo() {
               localStorage.removeItem(key)
             }
           })
-          console.log('✅ 侧边栏本地存储清理完成')
         } catch (storageError) {
-          console.log('⚠️ 侧边栏清理本地存储时出错:', storageError)
+          // 静默处理
         }
       }
       
@@ -57,7 +53,7 @@ export default function SidebarUserInfo() {
       }, 100)
       
     } catch (error) {
-      console.error('侧边栏退出登录失败:', error)
+      console.error('退出登录失败:', error)
       setOpen(false)
       // 即使出错也刷新页面
       setTimeout(() => {

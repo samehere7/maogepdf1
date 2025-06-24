@@ -30,8 +30,6 @@ export default function AuthButton() {
   const handleLogout = async () => {
     setIsLoading(true)
     try {
-      console.log('🚪 开始退出登录...')
-      
       // 设置超时机制，避免 signOut API 卡住
       const signOutPromise = supabase.auth.signOut()
       const timeoutPromise = new Promise((_, reject) => 
@@ -40,16 +38,11 @@ export default function AuthButton() {
       
       try {
         await Promise.race([signOutPromise, timeoutPromise])
-        console.log('✅ Supabase signOut 成功')
       } catch (signOutError: any) {
-        console.log(`⚠️ Supabase signOut 失败或超时: ${signOutError.message}`)
-        // 继续执行本地清理，不因为 API 失败而阻止退出
+        // 静默处理，继续执行本地清理
       }
       
       // 手动清理本地状态
-      console.log('🧹 清理本地存储...')
-      
-      // 清理所有认证相关的本地存储
       if (typeof window !== 'undefined') {
         try {
           // 清理 Supabase 相关的存储
@@ -59,18 +52,15 @@ export default function AuthButton() {
             }
           })
           
-          // 清理我们自己的调试日志（可选）
+          // 清理调试日志
           localStorage.removeItem('auth-debug-logs')
           localStorage.removeItem('auth-debug-logs-persistent')
-          
-          console.log('✅ 本地存储清理完成')
         } catch (storageError) {
-          console.log('⚠️ 清理本地存储时出错:', storageError)
+          // 静默处理存储错误
         }
       }
       
       // 强制刷新页面以确保状态重置
-      console.log('🔄 刷新页面...')
       window.location.href = `/${locale}`
       
     } catch (error) {
