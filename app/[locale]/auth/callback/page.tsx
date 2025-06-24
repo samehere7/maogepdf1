@@ -15,14 +15,40 @@ function AuthCallbackContent() {
 
   // 添加调试日志
   const addDebugLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString()
+    const timestamp = new Date().toLocaleTimeString('zh-CN', { 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      fractionalSecondDigits: 3
+    })
     const logMessage = `[${timestamp}] ${message}`
     console.log(logMessage)
     
     setDebugLogs(prev => {
       const newLogs = [...prev, logMessage]
+      
       // 保存到 localStorage 以便调试页面查看
       if (typeof window !== 'undefined') {
+        // 检查是否是调试模式，如果是则保存到持久化存储
+        const urlParams = new URLSearchParams(window.location.search)
+        const isDebugMode = urlParams.get('debug') === 'persistent'
+        
+        if (isDebugMode) {
+          // 保存到持久化调试日志
+          const existingLogs = JSON.parse(localStorage.getItem('auth-debug-logs-persistent') || '[]')
+          const logEntry = {
+            timestamp,
+            message,
+            type: message.includes('❌') ? 'error' : 
+                  message.includes('⚠️') ? 'warning' : 
+                  message.includes('✅') ? 'success' : 'info'
+          }
+          const allLogs = [...existingLogs, logEntry]
+          localStorage.setItem('auth-debug-logs-persistent', JSON.stringify(allLogs))
+        }
+        
+        // 也保存到原来的格式用于兼容
         const existingLogs = JSON.parse(localStorage.getItem('auth-debug-logs') || '[]')
         const allLogs = [...existingLogs, logMessage]
         localStorage.setItem('auth-debug-logs', JSON.stringify(allLogs))
@@ -41,11 +67,17 @@ function AuthCallbackContent() {
         
         // 从 URL 获取参数
         const redirectedFrom = searchParams.get('redirectedFrom') || `/${locale}`
+        const returnTo = searchParams.get('returnTo') // 新增：支持返回到特定页面
+        const isDebugMode = searchParams.get('debug') === 'persistent'
         const code = searchParams.get('code')
         const error_param = searchParams.get('error')
         
-        addDebugLog(`📄 URL参数: redirectedFrom=${redirectedFrom}, code=${code ? '存在' : '无'}, error=${error_param || '无'}`)
+        addDebugLog(`📄 URL参数: redirectedFrom=${redirectedFrom}, returnTo=${returnTo || '无'}, debug=${isDebugMode}, code=${code ? '存在' : '无'}, error=${error_param || '无'}`)
         addDebugLog(`🌐 完整URL: ${window.location.href}`)
+        
+        if (isDebugMode) {
+          addDebugLog('🔧 调试模式激活 - 日志将保存到持久化存储')
+        }
 
         // 简单延迟，让 Supabase 有时间处理认证
         addDebugLog('⏳ 等待2秒让Supabase处理认证...')
@@ -107,11 +139,23 @@ function AuthCallbackContent() {
           setStatus('success')
 
           setTimeout(() => {
-            const finalRedirect = redirectedFrom.startsWith('/') 
-              ? redirectedFrom 
-              : `/${locale}`
+            let finalRedirect: string
             
-            addDebugLog(`🚀 重定向到: ${finalRedirect}`)
+            if (returnTo) {
+              // 如果指定了 returnTo 参数，优先使用
+              finalRedirect = `/${returnTo}`
+              addDebugLog(`🚀 返回到指定页面: ${finalRedirect}`)
+            } else {
+              finalRedirect = redirectedFrom.startsWith('/') 
+                ? redirectedFrom 
+                : `/${locale}`
+              addDebugLog(`🚀 重定向到: ${finalRedirect}`)
+            }
+            
+            if (isDebugMode) {
+              addDebugLog('💾 调试模式：认证日志已保存到持久化存储')
+            }
+            
             router.push(finalRedirect)
           }, 1000)
         } else {
@@ -140,11 +184,18 @@ function AuthCallbackContent() {
               if (subscription) subscription.unsubscribe()
               
               setTimeout(() => {
-                const finalRedirect = redirectedFrom.startsWith('/') 
-                  ? redirectedFrom 
-                  : `/${locale}`
+                let finalRedirect: string
                 
-                addDebugLog(`🚀 从监听器重定向到: ${finalRedirect}`)
+                if (returnTo) {
+                  finalRedirect = `/${returnTo}`
+                  addDebugLog(`🚀 从监听器返回到指定页面: ${finalRedirect}`)
+                } else {
+                  finalRedirect = redirectedFrom.startsWith('/') 
+                    ? redirectedFrom 
+                    : `/${locale}`
+                  addDebugLog(`🚀 从监听器重定向到: ${finalRedirect}`)
+                }
+                
                 router.push(finalRedirect)
               }, 1000)
             } else if (event === 'TOKEN_REFRESHED' && session?.user) {
@@ -153,11 +204,18 @@ function AuthCallbackContent() {
               if (subscription) subscription.unsubscribe()
               
               setTimeout(() => {
-                const finalRedirect = redirectedFrom.startsWith('/') 
-                  ? redirectedFrom 
-                  : `/${locale}`
+                let finalRedirect: string
                 
-                addDebugLog(`🚀 Token刷新后重定向到: ${finalRedirect}`)
+                if (returnTo) {
+                  finalRedirect = `/${returnTo}`
+                  addDebugLog(`🚀 Token刷新后返回到指定页面: ${finalRedirect}`)
+                } else {
+                  finalRedirect = redirectedFrom.startsWith('/') 
+                    ? redirectedFrom 
+                    : `/${locale}`
+                  addDebugLog(`🚀 Token刷新后重定向到: ${finalRedirect}`)
+                }
+                
                 router.push(finalRedirect)
               }, 1000)
             }
