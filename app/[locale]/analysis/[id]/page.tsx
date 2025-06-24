@@ -137,7 +137,7 @@ export default function AnalysisPage() {
       
       if (error || !user) {
         setLoading(false);
-        router.push('/auth/login');
+        router.push(`/${locale}/auth/login`);
         return;
       }
       

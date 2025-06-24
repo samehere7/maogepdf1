@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabase/client'
 import { useUser } from './UserProvider'
 import { useTranslations } from 'next-intl'
@@ -11,13 +12,14 @@ export default function AuthButton() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const { profile, loading } = useUser()
+  const locale = useLocale()
   const t = useTranslations('auth')
   const tc = useTranslations('common')
   
   const handleLogin = async () => {
     setIsLoading(true)
     try {
-      router.push('/auth/login')
+      router.push(`/${locale}/auth/login`)
     } catch (error) {
       console.error(t('loginFailed') + ':', error)
     } finally {

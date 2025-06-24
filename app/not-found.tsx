@@ -24,7 +24,7 @@ export default function NotFound() {
             variant="outline" 
             className="w-full"
           >
-            <Link href="/auth/login">{t('loginAccount')}</Link>
+            <Link href="/en/auth/login">{t('loginAccount')}</Link>
           </Button>
         </div>
         

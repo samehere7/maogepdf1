@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Gift, Download, User, Clock } from "lucide-react"
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface ShareReceiveModalProps {
   isOpen: boolean
@@ -23,6 +23,7 @@ interface SharedPDFInfo {
 }
 
 export default function ShareReceiveModal({ isOpen, onClose, shareId, isLoggedIn }: ShareReceiveModalProps) {
+  const locale = useLocale()
   const t = useTranslations('shareReceiveModal');
   const router = useRouter()
   const [pdfInfo, setPdfInfo] = useState<SharedPDFInfo | null>(null)
@@ -77,7 +78,7 @@ export default function ShareReceiveModal({ isOpen, onClose, shareId, isLoggedIn
     localStorage.setItem('pendingShareId', shareId)
     onClose()
     // 跳转到登录页面
-    router.push('/auth/login')
+    router.push(`/${locale}/auth/login`)
   }
 
   const handleAcceptShare = async () => {

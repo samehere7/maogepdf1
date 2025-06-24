@@ -3,20 +3,21 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface LoginModalProps {
   children: React.ReactNode
 }
 
 export function LoginModal({ children }: LoginModalProps) {
+  const locale = useLocale()
   const t = useTranslations('auth')
   const tf = useTranslations('footer')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    window.location.href = '/auth/login';
+    window.location.href = `/${locale}/auth/login`;
   }
 
   return (
