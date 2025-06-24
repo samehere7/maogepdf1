@@ -20,14 +20,34 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
     error: '/auth/error',
   },
+  // 强制使用生产域名，忽略错误的环境变量
+  url: process.env.NODE_ENV === 'production' ? 'https://www.maogepdf.com' : process.env.NEXTAUTH_URL,
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // 如果URL是相对路径，或者以baseUrl开头，允许重定向
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // 如果URL以baseUrl开头，允许重定向
-      else if (new URL(url).origin === baseUrl) return url
-      // 否则重定向到首页
-      return baseUrl
+      // 在生产环境强制使用正确的 baseUrl
+      const productionBaseUrl = process.env.NODE_ENV === 'production' ? 'https://www.maogepdf.com' : baseUrl;
+      
+      console.log('NextAuth redirect:', { url, baseUrl, productionBaseUrl, env: process.env.NODE_ENV });
+      
+      // 如果URL包含localhost，强制重定向到生产域名
+      if (url.includes('localhost')) {
+        console.log('Detected localhost redirect, forcing to production domain');
+        return `${productionBaseUrl}/en`;
+      }
+      
+      // 如果URL是相对路径，使用生产baseUrl
+      if (url.startsWith("/")) return `${productionBaseUrl}${url}`;
+      
+      // 如果URL是完整URL且是我们的域名，允许重定向
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.origin === productionBaseUrl) return url;
+      } catch (e) {
+        console.error('Invalid URL in redirect:', url, e);
+      }
+      
+      // 默认重定向到首页
+      return `${productionBaseUrl}/en`;
     },
     async jwt({ token, account, profile }) {
       if (account && profile) {
