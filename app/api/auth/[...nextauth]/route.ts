@@ -17,8 +17,8 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: '/auth/login',
-    error: '/auth/error',
+    signIn: '/en/auth/login',
+    error: '/en/auth/error',
   },
   // 强制使用生产域名，忽略错误的环境变量
   url: process.env.NODE_ENV === 'production' ? 'https://www.maogepdf.com' : process.env.NEXTAUTH_URL,

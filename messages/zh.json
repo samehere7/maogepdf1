@@ -33,7 +33,12 @@
     "signInWithGoogle": "使用 Google 登录",
     "termsAndConditionsPrompt": "登录即表示您同意我们的",
     "and": "和",
-    "alreadyHaveAccount": "已有账号？"
+    "alreadyHaveAccount": "已有账号？",
+    "loginTitle": "登录到 Maoge PDF",
+    "loginSubtitle": "使用您的账号访问全部功能",
+    "socialLogin": "使用社交账号登录",
+    "googleLogin": "使用Google登录",
+    "processing": "处理中..."
   },
   "upload": {
     "uploadPdf": "上传PDF",

@@ -33,7 +33,12 @@
     "signInWithGoogle": "Sign in with Google",
     "termsAndConditionsPrompt": "By signing in, you agree to our ",
     "and": " and ",
-    "alreadyHaveAccount": "Already have an account?"
+    "alreadyHaveAccount": "Already have an account?",
+    "loginTitle": "Sign in to Maoge PDF",
+    "loginSubtitle": "Use your account to access all features",
+    "socialLogin": "Sign in with social account",
+    "googleLogin": "Sign in with Google",
+    "processing": "Processing..."
   },
   "upload": {
     "uploadPdf": "Upload PDF",
