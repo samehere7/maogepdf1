@@ -4,14 +4,23 @@ import { getUserPDFs } from '@/lib/pdf-service';
 
 export async function GET(request: Request) {
   try {
-    // 检查用户是否已登录
-    const supabase = createClient();
+    // 使用更可靠的认证方式
+    const authHeader = request.headers.get('authorization');
     
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (!user?.id) {
-      console.log('[PDFs API] 无法获取用户ID，认证错误:', authError?.message);
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('[PDFs API] 缺少认证头');
       return NextResponse.json({ error: '未登录' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    
+    // 使用普通客户端验证 token
+    const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user?.id) {
+      console.log('[PDFs API] 认证失败:', authError?.message);
+      return NextResponse.json({ error: '认证失败' }, { status: 401 });
     }
     
     const userId = user.id;

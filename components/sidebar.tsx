@@ -99,7 +99,19 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     try {
       console.log('[Sidebar] Loading PDF list from API...')
       
-      const response = await fetch('/api/pdfs')
+      // 获取用户 session 以获取 access token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        console.log('[Sidebar] No access token available');
+        return;
+      }
+      
+      const response = await fetch('/api/pdfs', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
       
       if (response.ok) {
         const data = await response.json()
