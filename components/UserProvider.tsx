@@ -42,22 +42,40 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false);
 
   // 获取用户配置文件
-  const refreshProfile = async () => {
+  const refreshProfile = async (sessionFromEvent?: any) => {
     try {
       setError(null);
       if (!initialized) {
         setLoading(true);
       }
       
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      let session = sessionFromEvent;
       
-      if (sessionError) {
-        console.error('获取会话失败:', sessionError);
-        setProfile(null);
-        setUser(null);
-        setLoading(false);
-        setInitialized(true);
-        return;
+      // 只有在没有传入会话时才尝试获取会话（避免 JWT 问题）
+      if (!session) {
+        console.log("⚠️ 尝试获取会话，但可能因JWT问题超时");
+        try {
+          // 设置短超时，避免长时间卡住
+          const sessionPromise = supabase.auth.getSession();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('getSession() 超时')), 2000)
+          );
+          
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          session = result.data?.session;
+          
+          if (result.error) {
+            console.error('获取会话失败:', result.error);
+          }
+        } catch (sessionError: any) {
+          console.log(`⏰ getSession() 超时或失败: ${sessionError.message}，将等待认证状态变化`);
+          // 不设置为错误状态，继续等待认证状态变化
+          if (!initialized) {
+            setLoading(false);
+            setInitialized(true);
+          }
+          return;
+        }
       }
       
       console.log("Current session status:", session ? "Logged in" : "Not logged in");
@@ -136,12 +154,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (event === 'INITIAL_SESSION') {
         console.log("Processing initial session");
         isInitializing = false;
-        await refreshProfile();
+        await refreshProfile(session); // 传入会话信息
       }
       // 只在非初始化阶段处理真实的状态变化
       else if (!isInitializing && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
         console.log("Refreshing user profile due to auth state change");
-        await refreshProfile();
+        await refreshProfile(session); // 传入会话信息
       } else if (event === 'TOKEN_REFRESHED') {
         // 对于令牌刷新，直接更新session，不重新设置loading
         console.log("Token refreshed, updating session info");
@@ -167,7 +185,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (mounted && isInitializing) {
         console.log("Fallback: 初始化超时，手动获取会话");
         isInitializing = false;
-        refreshProfile();
+        refreshProfile(); // 这里不传入session，会尝试获取（可能超时但不会报错）
       }
     }, 1000); // 1秒后触发fallback
     

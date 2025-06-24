@@ -13,33 +13,49 @@ export default function AuthTokenHandler() {
         console.log('[AuthTokenHandler] 检测到URL中的access_token')
         
         try {
-          // 让Supabase自动处理URL中的session
-          const { data, error } = await supabase.auth.getSession()
+          // 解析URL中的token信息，避免调用有问题的getSession()
+          const hashParams = new URLSearchParams(hash.substring(1))
+          const accessToken = hashParams.get('access_token')
+          const refreshToken = hashParams.get('refresh_token')
+          const expiresAt = hashParams.get('expires_at')
           
-          if (data.session) {
-            console.log('[AuthTokenHandler] 会话已建立:', data.session.user.id)
+          if (accessToken) {
+            console.log('[AuthTokenHandler] 从URL解析到access_token')
             
-            // 手动发送session到服务端
+            // 解析access_token获取用户信息
             try {
-              const setSessionResponse = await fetch('/api/auth/set-session', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  access_token: data.session.access_token,
-                  refresh_token: data.session.refresh_token,
-                  expires_at: data.session.expires_at
-                })
-              });
-              
-              if (setSessionResponse.ok) {
-                console.log('[AuthTokenHandler] 服务端session设置成功');
+              const tokenParts = accessToken.split('.')
+              if (tokenParts.length >= 2) {
+                const payload = JSON.parse(atob(tokenParts[1]))
+                console.log('[AuthTokenHandler] Token有效，用户ID:', payload.sub)
+            
+                // 手动发送session到服务端
+                try {
+                  const setSessionResponse = await fetch('/api/auth/set-session', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      access_token: accessToken,
+                      refresh_token: refreshToken || '',
+                      expires_at: expiresAt ? parseInt(expiresAt) : Math.floor(Date.now() / 1000) + 3600
+                    })
+                  });
+                  
+                  if (setSessionResponse.ok) {
+                    console.log('[AuthTokenHandler] 服务端session设置成功');
+                  } else {
+                    console.log('[AuthTokenHandler] 服务端session设置失败:', setSessionResponse.status);
+                  }
+                } catch (err) {
+                  console.log('[AuthTokenHandler] 设置服务端session失败:', err);
+                }
               } else {
-                console.log('[AuthTokenHandler] 服务端session设置失败:', setSessionResponse.status);
+                console.log('[AuthTokenHandler] 无效的access_token格式')
               }
-            } catch (err) {
-              console.log('[AuthTokenHandler] 设置服务端session失败:', err);
+            } catch (tokenError) {
+              console.log('[AuthTokenHandler] 解析access_token失败:', tokenError)
             }
             
             // 清理URL
@@ -55,8 +71,8 @@ export default function AuthTokenHandler() {
             setTimeout(() => {
               window.location.reload()
             }, 500)
-          } else if (error) {
-            console.error('[AuthTokenHandler] 会话建立失败:', error)
+          } else {
+            console.log('[AuthTokenHandler] 未找到access_token')
           }
         } catch (err) {
           console.error('[AuthTokenHandler] 处理token失败:', err)
