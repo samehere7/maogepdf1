@@ -12,12 +12,42 @@ export async function GET(request: NextRequest) {
 
     // 检查环境变量
     debugInfo.environmentVariables = {
+      DATABASE_URL: process.env.DATABASE_URL ? '已配置（长度:' + process.env.DATABASE_URL.length + ')' : '❌ 未配置',
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? '已配置' : '未配置',
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '已配置（长度:' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length + ')' : '未配置',
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? '已配置（长度:' + process.env.SUPABASE_SERVICE_ROLE_KEY.length + ')' : '未配置',
       PADDLE_API_KEY: process.env.PADDLE_API_KEY ? '已配置' : '未配置',
       PADDLE_TEST_MODE: process.env.PADDLE_TEST_MODE || '未设置',
       NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || '未配置'
+    }
+
+    // 尝试测试 Prisma 连接
+    try {
+      const { PrismaClient } = await import('@prisma/client')
+      const prisma = new PrismaClient()
+      
+      await prisma.$connect()
+      debugInfo.prismaConnection = {
+        status: 'success',
+        canConnect: true
+      }
+      
+      // 测试简单查询
+      try {
+        await prisma.$queryRaw`SELECT 1 as test`
+        debugInfo.prismaConnection.canQuery = true
+      } catch (queryError) {
+        debugInfo.prismaConnection.canQuery = false
+        debugInfo.prismaConnection.queryError = queryError instanceof Error ? queryError.message : 'Unknown query error'
+      }
+      
+      await prisma.$disconnect()
+    } catch (prismaError) {
+      debugInfo.prismaConnection = {
+        status: 'error',
+        canConnect: false,
+        error: prismaError instanceof Error ? prismaError.message : 'Unknown Prisma error'
+      }
     }
 
     // 测试 Supabase 连接
