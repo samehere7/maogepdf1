@@ -39,24 +39,61 @@ export default function SimpleAuthTestPage() {
       
       addLog('✅ Supabase 客户端创建成功')
       
-      // 测试基本连接
-      addLog('🔍 测试基本连接...')
-      const { data, error } = await supabase.auth.getUser()
+      // 测试网络连接到 Supabase
+      addLog('🌐 测试网络连接到 Supabase...')
+      try {
+        const networkTest = await fetch(`${supabaseUrl}/rest/v1/`, {
+          method: 'HEAD',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        })
+        addLog(`🌐 网络连接状态: ${networkTest.status} ${networkTest.statusText}`)
+      } catch (networkError: any) {
+        addLog(`❌ 网络连接失败: ${networkError.message}`)
+      }
       
-      if (error) {
-        addLog(`⚠️ Auth 错误 (可能正常): ${error.message}`)
-      } else {
-        addLog(`✅ Auth 连接成功, 用户: ${data.user?.email || '未登录'}`)
+      // 测试基本连接，添加超时机制
+      addLog('🔍 测试基本连接 (5秒超时)...')
+      
+      try {
+        const getUserPromise = supabase.auth.getUser()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('getUser() 超时')), 5000)
+        )
+        
+        const result = await Promise.race([getUserPromise, timeoutPromise]) as any
+        const { data, error } = result
+        
+        if (error) {
+          addLog(`⚠️ Auth 错误 (可能正常): ${error.message}`)
+        } else {
+          addLog(`✅ Auth 连接成功, 用户: ${data.user?.email || '未登录'}`)
+        }
+      } catch (timeoutError: any) {
+        addLog(`⏰ getUser() 超时: ${timeoutError.message}`)
       }
 
       // 测试认证状态
-      addLog('📊 检查认证状态...')
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      addLog('📊 检查认证状态 (5秒超时)...')
       
-      if (sessionError) {
-        addLog(`❌ 会话错误: ${sessionError.message}`)
-      } else {
-        addLog(`📊 会话状态: ${sessionData.session ? '有效' : '无会话'}`)
+      try {
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise2 = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('getSession() 超时')), 5000)
+        )
+        
+        const sessionResult = await Promise.race([sessionPromise, timeoutPromise2]) as any
+        const { data: sessionData, error: sessionError } = sessionResult
+        
+        if (sessionError) {
+          addLog(`❌ 会话错误: ${sessionError.message}`)
+        } else {
+          addLog(`📊 会话状态: ${sessionData.session ? '有效' : '无会话'}`)
+        }
+      } catch (timeoutError: any) {
+        addLog(`⏰ getSession() 超时: ${timeoutError.message}`)
       }
 
       // 测试 Google OAuth 配置
@@ -108,17 +145,61 @@ export default function SimpleAuthTestPage() {
     }
   }
 
+  const testAuthAPI = async () => {
+    addLog('🔌 测试 Supabase Auth API 直接连接...')
+    setLoading(true)
+
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      // 直接测试 Auth API
+      addLog('📡 直接调用 Auth API...')
+      const authApiTest = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseKey!,
+          'Authorization': `Bearer ${supabaseKey!}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      addLog(`📡 Auth API 响应: ${authApiTest.status} ${authApiTest.statusText}`)
+      
+      if (authApiTest.ok) {
+        const authData = await authApiTest.json()
+        addLog(`📊 Auth API 数据: ${JSON.stringify(authData)}`)
+      } else {
+        const errorText = await authApiTest.text()
+        addLog(`❌ Auth API 错误: ${errorText}`)
+      }
+
+    } catch (error: any) {
+      addLog(`💥 Auth API 测试失败: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">🧪 简单认证测试</h1>
       
-      <div className="space-x-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <button 
           onClick={testBasicSupabase}
           disabled={loading}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
         >
           {loading ? '测试中...' : '测试基础连接'}
+        </button>
+        
+        <button 
+          onClick={testAuthAPI}
+          disabled={loading}
+          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:bg-gray-400"
+        >
+          测试 Auth API
         </button>
         
         <button 
