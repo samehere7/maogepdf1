@@ -4,11 +4,12 @@ import { useState, Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 function LoginContent() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const locale = useLocale()
   const searchParams = useSearchParams()
   const redirectedFrom = searchParams.get('redirectedFrom') || '/'
   const t = useTranslations('auth')
@@ -19,7 +20,7 @@ function LoginContent() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirectedFrom=${encodeURIComponent(redirectedFrom)}`,
+          redirectTo: `${window.location.origin}/${locale}/auth/callback?redirectedFrom=${encodeURIComponent(redirectedFrom)}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
