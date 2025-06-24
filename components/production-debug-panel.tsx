@@ -14,14 +14,18 @@ export function ProductionDebugPanel() {
   const fetchDebugInfo = async () => {
     setLoading(true)
     try {
-      const [routeInfo, middlewareTest] = await Promise.all([
+      const [routeInfo, middlewareTest, redirectTest, middlewareTrace] = await Promise.all([
         fetch('/api/debug/route-info').then(r => r.json()),
-        fetch('/api/debug/middleware-test').then(r => r.json())
+        fetch('/api/debug/middleware-test').then(r => r.json()),
+        fetch('/api/debug/redirect-test?url=/').then(r => r.json()),
+        fetch('/api/debug/middleware-trace?path=/').then(r => r.json())
       ])
       
       setDebugData({
         routeInfo,
         middlewareTest,
+        redirectTest,
+        middlewareTrace,
         clientInfo: {
           pathname,
           location: typeof window !== 'undefined' ? {
@@ -118,9 +122,14 @@ export function ProductionDebugPanel() {
 
           {/* 调试URL */}
           <div className="text-xs">
-            <strong>调试URL:</strong>
-            <div className="bg-gray-100 p-1 rounded mt-1 break-all">
-              {generateDebugUrl()}
+            <strong>高级调试:</strong>
+            <div className="grid grid-cols-1 gap-1 mt-1">
+              <div className="bg-gray-100 p-1 rounded break-all text-xs">
+                重定向测试: /api/debug/redirect-test?url=/
+              </div>
+              <div className="bg-gray-100 p-1 rounded break-all text-xs">
+                中间件追踪: /api/debug/middleware-trace?path=/
+              </div>
             </div>
           </div>
 
