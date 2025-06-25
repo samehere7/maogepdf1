@@ -43,7 +43,7 @@ export default function RefundPage() {
                 申请退款请按以下步骤操作：
               </p>
               <ol className="list-decimal pl-6 mb-4">
-                <li>发送邮件至 <strong>support@maogepdf.com</strong></li>
+                <li>发送邮件至 <strong>maogepdf@163.com</strong></li>
                 <li>邮件主题：申请Plus会员退款</li>
                 <li>提供以下信息：
                   <ul className="list-disc pl-6 mt-2">
@@ -138,7 +138,9 @@ export default function RefundPage() {
                 退款相关问题请联系：
               </p>
               <ul className="list-none mb-4">
-                <li><strong>邮箱</strong>：support@maogepdf.com</li>
+                <li><strong>公司</strong>：四川壳叽互联网信息服务有限公司</li>
+                <li><strong>地址</strong>：四川省内江市东兴区兰桂大道337号孵化器</li>
+                <li><strong>邮箱</strong>：maogepdf@163.com</li>
                 <li><strong>主题</strong>：Plus会员退款申请</li>
                 <li><strong>响应时间</strong>：1-2个工作日</li>
               </ul>

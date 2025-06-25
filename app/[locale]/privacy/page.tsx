@@ -142,8 +142,10 @@ export default function PrivacyPage() {
                 如有隐私相关问题，请联系我们：
               </p>
               <ul className="list-none mb-4">
-                <li>邮箱：privacy@maogepdf.com</li>
-                <li>客服邮箱：support@maogepdf.com</li>
+                <li>公司：四川壳叽互联网信息服务有限公司</li>
+                <li>地址：四川省内江市东兴区兰桂大道337号孵化器</li>
+                <li>邮箱：maogepdf@163.com</li>
+                <li>客服邮箱：maogepdf@163.com</li>
                 <li>网址：https://maogepdf.com</li>
               </ul>
             </section>

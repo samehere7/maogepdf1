@@ -18,6 +18,7 @@ import AuthButton from "@/components/AuthButton"
 import { useUser } from '@/components/UserProvider'
 import ShareReceiveModal from "@/components/share-receive-modal"
 import ShareDetector from "@/components/share-detector"
+import { PolicyModal } from "@/components/policy-modal"
 import { Suspense } from 'react'
 
 export default function HomePage() {
@@ -37,6 +38,8 @@ export default function HomePage() {
   const [shareId, setShareId] = useState<string | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [pdfFlashcardCounts, setPdfFlashcardCounts] = useState<{[pdfId: string]: number}>({})
+  const [showPolicyModal, setShowPolicyModal] = useState(false)
+  const [policyModalType, setPolicyModalType] = useState<'terms' | 'privacy' | 'refund' | 'contact'>('terms')
   
   // 默认非Plus会员
   const isPlus = profile?.plus && profile?.is_active
@@ -539,30 +542,30 @@ export default function HomePage() {
         <div className="flex max-w-6xl flex-1 flex-col">
           <div className="flex flex-col gap-6 px-5 py-8 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              <a
-                href={`/${locale}/terms`}
-                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
+              <button
+                onClick={() => { setPolicyModalType('terms'); setShowPolicyModal(true) }}
+                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors cursor-pointer"
               >
                 {t("footer.termsOfService")}
-              </a>
-              <a
-                href={`/${locale}/privacy`}
-                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
+              </button>
+              <button
+                onClick={() => { setPolicyModalType('privacy'); setShowPolicyModal(true) }}
+                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors cursor-pointer"
               >
                 {t("footer.privacyPolicy")}
-              </a>
-              <a
-                href={`/${locale}/refund`}
-                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
+              </button>
+              <button
+                onClick={() => { setPolicyModalType('refund'); setShowPolicyModal(true) }}
+                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors cursor-pointer"
               >
-                退款政策
-              </a>
-              <a
-                href={`/${locale}/contact`}
-                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors"
+                {t("footer.refundPolicy")}
+              </button>
+              <button
+                onClick={() => { setPolicyModalType('contact'); setShowPolicyModal(true) }}
+                className="text-slate-600 hover:text-[#8b5cf6] text-sm font-medium leading-normal min-w-32 transition-colors cursor-pointer"
               >
                 {t("footer.contactUs")}
-              </a>
+              </button>
             </div>
             <p className="text-slate-500 text-sm font-normal leading-normal">
               © 2024 Maoge PDF. {t("footer.allRightsReserved")}
@@ -585,6 +588,13 @@ export default function HomePage() {
           isLoggedIn={isLoggedIn}
         />
       )}
+
+      {/* Policy Modal */}
+      <PolicyModal
+        isOpen={showPolicyModal}
+        onClose={() => setShowPolicyModal(false)}
+        type={policyModalType}
+      />
       </div>
     </div>
   )

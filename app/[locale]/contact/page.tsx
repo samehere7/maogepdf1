@@ -26,7 +26,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">客服邮箱</h3>
-                    <p className="text-gray-600">support@maogepdf.com</p>
+                    <p className="text-gray-600">maogepdf@163.com</p>
                     <p className="text-sm text-gray-500 mt-1">我们会在1-2个工作日内回复</p>
                   </div>
                 </div>
@@ -54,6 +54,19 @@ export default function ContactPage() {
                     <h3 className="font-medium text-gray-900">客服时间</h3>
                     <p className="text-gray-600">周一至周五 9:00-18:00</p>
                     <p className="text-sm text-gray-500 mt-1">北京时间（UTC+8）</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">公司信息</h3>
+                    <p className="text-gray-600">四川壳叽互联网信息服务有限公司</p>
+                    <p className="text-sm text-gray-500 mt-1">四川省内江市东兴区兰桂大道337号孵化器</p>
                   </div>
                 </div>
               </div>
@@ -103,7 +116,7 @@ export default function ContactPage() {
                     </svg>
                   </summary>
                   <div className="mt-2 p-4 text-sm text-gray-600">
-                    在我的账户页面可以管理订阅，或发送邮件到support@maogepdf.com申请取消。取消后您仍可使用Plus功能直到当前周期结束。
+                    在我的账户页面可以管理订阅，或发送邮件到maogepdf@163.com申请取消。取消后您仍可使用Plus功能直到当前周期结束。
                   </div>
                 </details>
 
@@ -165,7 +178,7 @@ export default function ContactPage() {
             <h3 className="font-medium text-red-900 mb-2">🆘 紧急情况</h3>
             <p className="text-red-800 text-sm">
               如遇账户安全问题、数据丢失或其他紧急情况，请立即发送邮件至 
-              <strong> urgent@maogepdf.com</strong>，我们将优先处理。
+              <strong> maogepdf@163.com</strong>，我们将优先处理。
             </p>
           </div>
         </div>

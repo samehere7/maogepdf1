@@ -98,7 +98,7 @@ export function FooterModal({ isOpen, onClose, type }: FooterModalProps) {
             
             <div className="bg-slate-50 p-4 rounded-lg">
               <p className="font-medium">Email Address:</p>
-              <p className="text-[#8b5cf6]">a12311001001@163.com</p>
+              <p className="text-[#8b5cf6]">maogepdf@163.com</p>
             </div>
             
             <p>Our team will respond to your inquiries as soon as possible. Typically, we respond within 1-2 business days.</p>
