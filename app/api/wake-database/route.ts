@@ -34,7 +34,6 @@ export async function POST() {
       .from('user_profiles')
       .select('count')
       .limit(0)
-      .timeout(30000) // 30秒超时
     
     const responseTime = Date.now() - startTime
     
@@ -60,7 +59,6 @@ export async function POST() {
       const startTime = Date.now()
       const { data, error } = await supabaseAdmin
         .rpc('version')
-        .timeout(45000) // 45秒超时，给数据库更多时间启动
       
       const responseTime = Date.now() - startTime
       
@@ -95,7 +93,7 @@ export async function POST() {
             'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
             'Content-Type': 'application/json'
           },
-          signal: AbortSignal.timeout(60000) // 60秒超时
+          // signal: AbortSignal.timeout(60000) // 60秒超时
         }
       )
 

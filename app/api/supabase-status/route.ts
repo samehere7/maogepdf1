@@ -53,7 +53,6 @@ export async function GET() {
       const startTime = Date.now()
       const { data, error } = await supabaseAdmin
         .rpc('version') // PostgreSQL version function
-        .timeout(10000) // 10 秒超时
 
       const responseTime = Date.now() - startTime
 
@@ -63,7 +62,6 @@ export async function GET() {
           .from('user_profiles')
           .select('count')
           .limit(0)
-          .timeout(10000)
 
         results.checks.push({
           name: "Database Wake-up Test",
@@ -148,7 +146,6 @@ export async function GET() {
           .from(table)
           .select('*')
           .limit(0)
-          .timeout(8000)
         const queryTime = Date.now() - startTime
 
         results.checks.push({
