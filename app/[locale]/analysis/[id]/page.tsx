@@ -42,6 +42,7 @@ interface AnalysisResult {
 export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations()
   const [user, setUser] = useState<any>(null)
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
