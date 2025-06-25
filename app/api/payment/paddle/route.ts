@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 可以通过环境变量控制是否启用测试模式
-    const enableTestMode = process.env.PADDLE_TEST_MODE === 'true'
+    // 临时强制启用测试模式以避免API调用问题
+    const enableTestMode = process.env.PADDLE_TEST_MODE === 'true' || true
     
     const requestId = Math.random().toString(36).substring(7)
     console.log('=== Processing Payment ===', {
