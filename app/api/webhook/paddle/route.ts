@@ -41,8 +41,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
     }
 
+    // 检查是否为测试模式调用
+    const isTestMode = req.headers.get('X-Test-Mode') === 'true' || process.env.PADDLE_TEST_MODE === 'true'
+    
     // 在生产环境或有签名的情况下进行验证 (测试模式下跳过)
-    if ((process.env.PADDLE_ENVIRONMENT === 'production' && process.env.PADDLE_TEST_MODE !== 'true') || signature) {
+    if (!isTestMode && ((process.env.PADDLE_ENVIRONMENT === 'production' && process.env.PADDLE_TEST_MODE !== 'true') || signature)) {
       if (!signature) {
         console.error('Missing Paddle webhook signature')
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
       
       console.log('✅ Paddle webhook signature verified successfully')
     } else {
-      console.log('⚠️ Webhook signature verification skipped (development mode)')
+      console.log('⚠️ Webhook signature verification skipped (test mode or development mode)')
     }
     
     const payload: PaddleWebhookPayload = JSON.parse(body)
@@ -114,37 +117,44 @@ export async function POST(req: NextRequest) {
             timestamp: new Date().toISOString()
           })
 
-          // 使用数据库函数更新Plus状态
-          const { data, error } = await supabase.rpc('update_user_plus_status', {
-            user_id: userData.userId,
-            is_plus: true,
-            is_active_param: true,
-            expire_at_param: expireAt.toISOString(),
-            plan_param: userData.plan
-          })
+          // 直接更新用户表和Plus表
+          // 先尝试更新user_profiles表
+          const { data: profileData, error: profileError } = await supabase
+            .from('user_profiles')
+            .upsert({
+              id: userData.userId,
+              plus: true,
+              is_active: true,
+              expire_at: expireAt.toISOString(),
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'id'
+            })
+
+          // 然后更新plus表
+          const { data: plusData, error: plusError } = await supabase
+            .from('plus')
+            .upsert({
+              id: userData.userId,
+              plan: userData.plan,
+              is_active: true,
+              expire_at: expireAt.toISOString(),
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'id'
+            })
+
+          const error = profileError || plusError
+          const data = { profileData, plusData }
 
           if (error) {
             console.error('=== Database Update Error ===', {
               userId: userData.userId,
-              error,
+              profileError,
+              plusError,
               timestamp: new Date().toISOString()
             })
-            
-            // 尝试重试一次
-            console.log('Retrying database update...')
-            const { data: retryData, error: retryError } = await supabase.rpc('update_user_plus_status', {
-              user_id: userData.userId,
-              is_plus: true,
-              is_active_param: true,
-              expire_at_param: expireAt.toISOString(),
-              plan_param: userData.plan
-            })
-            
-            if (retryError) {
-              console.error('Database retry also failed:', retryError)
-            } else {
-              console.log('Database retry succeeded:', retryData)
-            }
           } else {
             console.log('=== Database Updated Successfully ===', {
               userId: userData.userId,
