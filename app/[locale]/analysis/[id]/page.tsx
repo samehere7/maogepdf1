@@ -749,9 +749,9 @@ export default function AnalysisPage() {
   if (pdfError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold mb-4">文件未找到</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
         <p className="text-gray-600 mb-6">{pdfError}</p>
-        <Button onClick={() => window.location.href = "/"}>返回首页</Button>
+        <Button onClick={() => window.location.href = "/"}>{t('backToHome')}</Button>
       </div>
     );
   }
@@ -759,9 +759,9 @@ export default function AnalysisPage() {
   if (!fileInfo && !loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold mb-4">文件未找到</h1>
-        <p className="text-gray-600 mb-6">无法找到指定的PDF文件</p>
-        <Button onClick={() => window.location.href = "/"}>返回首页</Button>
+        <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
+        <p className="text-gray-600 mb-6">{t('cannotFindSpecifiedPdf')}</p>
+        <Button onClick={() => window.location.href = "/"}>{t('backToHome')}</Button>
       </div>
     );
   }
@@ -873,7 +873,7 @@ export default function AnalysisPage() {
               <div className="flex items-center justify-center h-full bg-gray-50">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-                  <p className="text-slate-600">加载PDF中...</p>
+                  <p className="text-slate-600">{t('loadingPdf')}...</p>
                 </div>
               </div>
             ) : pdfError ? (
@@ -891,7 +891,7 @@ export default function AnalysisPage() {
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-                      <p className="text-slate-600">初始化PDF查看器...</p>
+                      <p className="text-slate-600">{t('initializingPdfViewer')}...</p>
                     </div>
                   </div>
                 )}
@@ -900,7 +900,7 @@ export default function AnalysisPage() {
               <div className="flex items-center justify-center h-full text-gray-500">
                 <div className="text-center">
                   <div className="text-4xl mb-4">📄</div>
-                  <p>暂无PDF文件</p>
+                  <p>{t('noPdfFile')}</p>
                 </div>
               </div>
             )}
@@ -917,7 +917,7 @@ export default function AnalysisPage() {
                 }}
               >
                 <BookOpen className="h-4 w-4" />
-                闪卡
+                {t('flashcard.createFlashcard')}
               </Button>
               <Button
                 variant="outline"
@@ -927,7 +927,7 @@ export default function AnalysisPage() {
                 }}
               >
                 <Share2 className="h-4 w-4" />
-                分享PDF
+                {t('share.shareThisPdf')}
               </Button>
             </div>
           </div>
@@ -986,10 +986,10 @@ export default function AnalysisPage() {
             <div className="p-3 border-b border-gray-200 bg-white">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Send className="h-5 w-5 text-[#8b5cf6]" />
-                对话
+{t('conversation')}
               </h3>
               <div className="text-sm text-gray-500 mt-1">
-                当前模式: {modelQuality === 'fast' ? '快速模式' : '高质量模式'}
+{t('currentMode')}: {modelQuality === 'fast' ? t('fastMode') : t('highQualityMode')}
               </div>
             </div>
 
@@ -1002,8 +1002,8 @@ export default function AnalysisPage() {
                     <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center mb-4 mx-auto">
                       <Send className="h-8 w-8 text-white" />
                     </div>
-                    <p className="text-gray-600 mb-2">准备对话环境</p>
-                    <p className="text-gray-400 text-sm">PDF加载完成后即可开始对话</p>
+                    <p className="text-gray-600 mb-2">{t('preparingChatEnvironment')}</p>
+                    <p className="text-gray-400 text-sm">{t('chatAvailableAfterPdfLoad')}</p>
                   </div>
                 </div>
               ) : (
@@ -1069,7 +1069,7 @@ export default function AnalysisPage() {
                     className="text-left px-4 py-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded cursor-pointer text-xs text-purple-800 transition"
                     onClick={() => setQuestion(q)}
                   >
-                    你可以问我：{q}
+{t('youCanAskMe')}: {q}
                   </button>
                 ))}
               </div>
@@ -1090,7 +1090,7 @@ export default function AnalysisPage() {
               }}
             >
               <Zap className="mr-2 h-4 w-4" />
-              快速
+{t('fast')}
             </Button>
             <Button 
               variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
@@ -1102,7 +1102,7 @@ export default function AnalysisPage() {
               }}
             >
               <Sparkles className="mr-2 h-4 w-4" />
-              高质量
+{t('highQuality')}
             </Button>
           </div>
 
@@ -1122,7 +1122,7 @@ export default function AnalysisPage() {
                   if (e.key === "Enter") handleSendQuestion();
                 }}
                 onClick={(e) => e.stopPropagation()}
-                placeholder={loading ? "PDF加载中..." : "向文档提问..."}
+                placeholder={loading ? t('loadingPdf') : t('askDocument')}
                 className="flex-1 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
                 disabled={answering || loading}
               />

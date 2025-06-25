@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, BookOpen, Clock } from "lucide-react"
+import { useTranslations } from 'next-intl'
 import FlashcardEditModal from "./flashcard-edit-modal"
 
 interface Flashcard {
@@ -28,6 +29,7 @@ interface FlashcardListProps {
 }
 
 export default function FlashcardList({ pdfId, className }: FlashcardListProps) {
+  const t = useTranslations()
   const [flashcards, setFlashcards] = useState<Flashcard[]>([])
   const [loading, setLoading] = useState(true)
   const [editModal, setEditModal] = useState<{
@@ -57,7 +59,7 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
         setStats(statsData)
       }
     } catch (error) {
-      console.error('加载闪卡失败:', error)
+      console.error(t('loadFlashcardsFailed'), error)
     } finally {
       setLoading(false)
     }
@@ -89,17 +91,17 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
         setEditModal({ open: false })
         loadFlashcards()
       } else {
-        throw new Error('保存失败')
+        throw new Error(t('saveFailed'))
       }
     } catch (error) {
-      console.error('保存闪卡失败:', error)
-      alert('保存失败，请重试')
+      console.error(t('saveFlashcardFailed'), error)
+      alert(t('saveFailedRetry'))
     }
   }
 
   // 删除闪卡
   const handleDeleteFlashcard = async (id: string) => {
-    if (!confirm('确定要删除这张闪卡吗？')) return
+    if (!confirm(t('confirmDeleteFlashcard'))) return
 
     try {
       const response = await fetch(`/api/flashcards/${id}`, {
@@ -109,11 +111,11 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
       if (response.ok) {
         loadFlashcards()
       } else {
-        throw new Error('删除失败')
+        throw new Error(t('deleteFailed'))
       }
     } catch (error) {
-      console.error('删除闪卡失败:', error)
-      alert('删除失败，请重试')
+      console.error(t('deleteFlashcardFailed'), error)
+      alert(t('deleteFailedRetry'))
     }
   }
 
@@ -130,9 +132,9 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
   // 获取难度文本
   const getDifficultyText = (difficulty: string) => {
     switch (difficulty) {
-      case 'EASY': return '简单'
-      case 'MEDIUM': return '中等'
-      case 'HARD': return '困难'
+      case 'EASY': return t('easy')
+      case 'MEDIUM': return t('medium')
+      case 'HARD': return t('hard')
       default: return difficulty
     }
   }
@@ -161,14 +163,14 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
-            闪卡学习
+            {t('flashcardStudy')}
           </h2>
           <Button
             onClick={() => setEditModal({ open: true })}
             className="bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            新建闪卡
+            {t('newFlashcard')}
           </Button>
         </div>
 
@@ -176,25 +178,25 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-              <div className="text-sm text-gray-600">总数</div>
+              <div className="text-sm text-gray-600">{t('total')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-green-600">{stats.reviewed}</div>
-              <div className="text-sm text-gray-600">已复习</div>
+              <div className="text-sm text-gray-600">{t('reviewed')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-orange-600">{stats.due}</div>
-              <div className="text-sm text-gray-600">待复习</div>
+              <div className="text-sm text-gray-600">{t('dueForReview')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-purple-600">{stats.new}</div>
-              <div className="text-sm text-gray-600">新卡片</div>
+              <div className="text-sm text-gray-600">{t('newCards')}</div>
             </CardContent>
           </Card>
         </div>
@@ -205,14 +207,14 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
         <Card>
           <CardContent className="p-8 text-center">
             <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">还没有闪卡</h3>
-            <p className="text-gray-600 mb-4">创建你的第一张闪卡开始学习吧！</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noFlashcardsYet')}</h3>
+            <p className="text-gray-600 mb-4">{t('createFirstFlashcard')}</p>
             <Button
               onClick={() => setEditModal({ open: true })}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
-              创建闪卡
+              {t('createFlashcard')}
             </Button>
           </CardContent>
         </Card>
@@ -231,7 +233,7 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
                     {isDue(flashcard) && (
                       <Badge className="bg-orange-100 text-orange-800">
                         <Clock className="h-3 w-3 mr-1" />
-                        待复习
+                        {t('dueForReview')}
                       </Badge>
                     )}
                   </div>
@@ -256,18 +258,18 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-1">问题</h4>
+                    <h4 className="font-medium text-gray-900 mb-1">{t('question')}</h4>
                     <p className="text-gray-700">{flashcard.question}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-1">答案</h4>
+                    <h4 className="font-medium text-gray-900 mb-1">{t('answer')}</h4>
                     <p className="text-gray-700">{flashcard.answer}</p>
                   </div>
                   {flashcard.reviews.length > 0 && (
                     <div className="text-sm text-gray-500">
-                      上次复习: {new Date(flashcard.reviews[0].reviewedAt).toLocaleDateString()}
+                      {t('lastReview')}: {new Date(flashcard.reviews[0].reviewedAt).toLocaleDateString()}
                       {" | "}
-                      下次复习: {new Date(flashcard.reviews[0].nextReview).toLocaleDateString()}
+                      {t('nextReview')}: {new Date(flashcard.reviews[0].nextReview).toLocaleDateString()}
                     </div>
                   )}
                 </div>
@@ -286,7 +288,7 @@ export default function FlashcardList({ pdfId, className }: FlashcardListProps) 
           question: editModal.flashcard.question,
           answer: editModal.flashcard.answer,
         } : undefined}
-        title={editModal.flashcard ? "编辑闪卡" : "新建闪卡"}
+        title={editModal.flashcard ? t('editFlashcard') : t('newFlashcard')}
       />
     </div>
   )
