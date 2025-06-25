@@ -138,3 +138,4 @@ npx ts-node scripts/puppeteer-example.ts
 ## �� 许可证
 
 MIT License
+# Deploy trigger 2025年 6月25日 星期三 14时39分00秒 CST
