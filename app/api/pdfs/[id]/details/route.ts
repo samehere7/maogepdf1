@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getPDF } from '@/lib/pdf-service';
+import { getPDF } from '@/lib/pdf-service-supabase';
 
 // 获取单个PDF详情
 export async function GET(

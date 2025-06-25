@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPDF } from '@/lib/pdf-service';
+import { getPDF } from '@/lib/pdf-service-supabase';
 import { createClient } from '@/lib/supabase/server';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { uploadPDF } from '@/lib/pdf-service';
+import { uploadPDF } from '@/lib/pdf-service-supabase';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 import { supabaseService } from '@/lib/supabase/service-client';
 
