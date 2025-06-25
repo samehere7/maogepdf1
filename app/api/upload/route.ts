@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { uploadPDF } from '@/lib/pdf-service';
-import { prisma } from '@/lib/prisma';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
+import { supabaseService } from '@/lib/supabase/service-client';
 
 // 免费用户限制配置
 const FREE_USER_PDF_LIMIT = 3; // PDF总数限制
@@ -45,21 +45,28 @@ export async function POST(req: Request) {
     const userEmail = user.email;
     console.log('[Upload API] 用户已登录:', userEmail, '用户ID:', userId);
 
-    // 确保用户在数据库中存在 - 使用user_profiles表
-    const userExists = await prisma.user_profiles.findUnique({
-      where: { id: userId }
-    });
+    // 确保用户在数据库中存在 - 使用Supabase客户端
+    const { data: userExists } = await supabaseService
+      .from('user_profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
     
     if (!userExists) {
       console.log('[Upload API] 用户在数据库中不存在，创建用户记录');
-      await prisma.user_profiles.create({
-        data: {
+      const { error: createUserError } = await supabaseService
+        .from('user_profiles')
+        .insert({
           id: userId,
           email: userEmail,
           name: user.user_metadata?.name || userEmail.split('@')[0]
-        }
-      });
-      console.log('[Upload API] 用户记录已创建');
+        });
+      
+      if (createUserError) {
+        console.error('[Upload API] 创建用户记录失败:', createUserError);
+      } else {
+        console.log('[Upload API] 用户记录已创建');
+      }
     }
 
     // 检查用户Plus状态 - 先尝试使用user_with_plus视图
@@ -80,10 +87,11 @@ export async function POST(req: Request) {
       console.log('[Upload API] user_with_plus视图不可用，直接从User表获取数据');
       
       // 如果视图不可用，直接从user_profiles表获取
-      const userProfile = await prisma.user_profiles.findUnique({
-        where: { id: userId },
-        select: { plus: true, is_active: true }
-      });
+      const { data: userProfile } = await supabaseService
+        .from('user_profiles')
+        .select('plus, is_active')
+        .eq('id', userId)
+        .single();
       
       isPlus = userProfile?.plus || false;
       isActive = userProfile?.is_active !== false;
@@ -175,18 +183,25 @@ export async function POST(req: Request) {
         
       console.log('[Upload API] 文件已上传，URL:', publicUrl);
       
-      // 使用Prisma创建PDF记录
+      // 使用Supabase创建PDF记录
       console.log('[Upload API] 准备创建数据库记录');
       
-      const pdf = await prisma.pdfs.create({
-        data: {
+      const { data: pdf, error: pdfCreateError } = await supabaseService
+        .from('pdfs')
+        .insert({
           name: fileName,
           url: publicUrl,
           size: file.size,
           user_id: userId,
           summary: fileName
-        } as any
-      });
+        })
+        .select()
+        .single();
+      
+      if (pdfCreateError) {
+        console.error('[Upload API] 创建PDF记录失败:', pdfCreateError);
+        throw new Error('数据库记录创建失败: ' + pdfCreateError.message);
+      }
       
       console.log('[Upload API] 数据库记录创建成功，PDF ID:', pdf.id);
       
