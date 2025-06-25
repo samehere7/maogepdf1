@@ -94,7 +94,7 @@ export async function GET() {
 
   // ===== Prisma 客户端详细测试 =====
   try {
-    const { PrismaClient } = await import('@prisma/client')
+    const { PrismaClient } = await import('@/lib/generated/prisma')
     
     // 测试多种 Prisma 配置
     const prismaConfigs = [

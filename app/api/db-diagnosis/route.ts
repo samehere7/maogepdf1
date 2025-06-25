@@ -97,7 +97,7 @@ export async function GET() {
 
     // 7. 测试 Prisma 连接
     try {
-      const { PrismaClient } = await import('@prisma/client')
+      const { PrismaClient } = await import('@/lib/generated/prisma')
       const prisma = new PrismaClient({
         log: ['error'],
         errorFormat: 'pretty'

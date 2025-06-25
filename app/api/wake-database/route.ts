@@ -127,7 +127,7 @@ export async function POST() {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000)) // 等待2秒
       
-      const { PrismaClient } = await import('@prisma/client')
+      const { PrismaClient } = await import('@/lib/generated/prisma')
       const prisma = new PrismaClient()
       
       const startTime = Date.now()
