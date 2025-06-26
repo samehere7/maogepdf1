@@ -1152,7 +1152,7 @@ export default function AnalysisPage() {
                   if (e.key === "Enter") handleSendQuestion();
                 }}
                 onClick={(e) => e.stopPropagation()}
-                placeholder={loading ? t('loadingPdf') : t('analysis.askDocument')}
+                placeholder={loading ? t('common.loading') : t('analysis.askDocument')}
                 className="flex-1 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
                 disabled={answering || loading}
               />
