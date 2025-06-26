@@ -43,7 +43,7 @@ export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
   const locale = useLocale()
-  const t = useTranslations()
+  const t = useTranslations('analysis')
   
   // Locale防护机制
   useEffect(() => {
@@ -336,7 +336,7 @@ export default function AnalysisPage() {
       // 添加模型切换消息
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: `已切换到${quality === 'fast' ? '快速' : '高质量'}模式。` 
+        content: quality === 'fast' ? t('switchedToFastMode') : t('switchedToHighQualityMode')
       }]);
     }
   };

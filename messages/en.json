@@ -349,6 +349,10 @@
     "authorQuestion": "Who is the author of this article?",
     "scrollToPage": "Scroll to Page 1"
   },
+  "analysis": {
+    "switchedToFastMode": "Switched to fast mode.",
+    "switchedToHighQualityMode": "Switched to high quality mode."
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Analysis",
     "description": "Upload PDF documents for intelligent analysis and Q&A"

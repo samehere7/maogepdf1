@@ -341,6 +341,10 @@
     "authorQuestion": "この記事の著者は誰ですか？",
     "scrollToPage": "ページ1にスクロール"
   },
+  "analysis": {
+    "switchedToFastMode": "高速モードに切り替えました。",
+    "switchedToHighQualityMode": "高品質モードに切り替えました。"
+  },
   "metadata": {
     "title": "猫哥PDF - AI PDF チャット & 分析",
     "description": "PDFドキュメントをアップロードしてインテリジェント分析とQ&Aを行う"

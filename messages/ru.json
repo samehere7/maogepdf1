@@ -324,6 +324,10 @@
     "initializingPdfViewer": "Инициализация PDF просмотрщика",
     "noPdfFile": "Нет PDF файла"
   },
+  "analysis": {
+    "switchedToFastMode": "Переключено на быстрый режим.",
+    "switchedToHighQualityMode": "Переключено на высококачественный режим."
+  },
   "metadata": {
     "title": "Maoge PDF - ИИ PDF Чат и Анализ",
     "description": "Загружайте PDF документы для интеллектуального анализа и вопросов-ответов"

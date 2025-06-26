@@ -306,6 +306,10 @@
     "initializingPdfViewer": "Initialisation du visualiseur PDF",
     "noPdfFile": "Aucun fichier PDF"
   },
+  "analysis": {
+    "switchedToFastMode": "Basculé en mode rapide.",
+    "switchedToHighQualityMode": "Basculé en mode haute qualité."
+  },
   "metadata": {
     "title": "Maoge PDF - Chat et Analyse PDF avec IA",
     "description": "Téléchargez des documents PDF pour une analyse intelligente et des Q&R"

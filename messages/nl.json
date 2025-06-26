@@ -306,6 +306,10 @@
     "initializingPdfViewer": "Initialiseren PDF-viewer",
     "noPdfFile": "Geen PDF-bestand"
   },
+  "analysis": {
+    "switchedToFastMode": "Overgeschakeld naar snelle modus.",
+    "switchedToHighQualityMode": "Overgeschakeld naar hoge kwaliteitsmodus."
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Analyse",
     "description": "Upload PDF-documenten voor intelligente analyse en vragen en antwoorden"

@@ -325,6 +325,10 @@
     "authorQuestion": "이 기사의 저자는 누구인가요?",
     "scrollToPage": "1페이지로 스크롤"
   },
+  "analysis": {
+    "switchedToFastMode": "빠른 모드로 전환했습니다.",
+    "switchedToHighQualityMode": "고품질 모드로 전환했습니다."
+  },
   "metadata": {
     "title": "고양이 형 PDF - AI PDF 채팅 및 분석",
     "description": "지능형 분석 및 Q&A를 위한 PDF 문서 업로드"

@@ -337,6 +337,10 @@
     "authorQuestion": "这篇文章的作者是谁？",
     "scrollToPage": "滚动到第1页"
   },
+  "analysis": {
+    "switchedToFastMode": "已切换到快速模式。",
+    "switchedToHighQualityMode": "已切换到高质量模式。"
+  },
   "metadata": {
     "title": "猫哥PDF - AI PDF聊天与分析",
     "description": "上传PDF文档进行智能分析和问答"

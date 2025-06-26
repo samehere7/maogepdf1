@@ -321,6 +321,10 @@
     "authorQuestion": "Wer ist der Autor dieses Artikels?",
     "scrollToPage": "Zu Seite 1 scrollen"
   },
+  "analysis": {
+    "switchedToFastMode": "Zu schnellem Modus gewechselt.",
+    "switchedToHighQualityMode": "Zu hochwertigem Modus gewechselt."
+  },
   "metadata": {
     "title": "Maoge PDF - KI PDF Chat & Analyse",
     "description": "PDF-Dokumente für intelligente Analyse und Fragen & Antworten hochladen"

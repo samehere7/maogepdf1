@@ -306,6 +306,10 @@
     "processing": "Processando...",
     "processingError": "Erro ocorreu durante o processamento, tente novamente."
   },
+  "analysis": {
+    "switchedToFastMode": "Mudou para modo rápido.",
+    "switchedToHighQualityMode": "Mudou para modo de alta qualidade."
+  },
   "metadata": {
     "title": "Maoge PDF - Chat e Análise PDF com IA",
     "description": "Carregue documentos PDF para análise inteligente e perguntas e respostas"
