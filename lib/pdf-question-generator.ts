@@ -231,21 +231,21 @@ export function generateRecommendedQuestions(analysis: DocumentAnalysis): Genera
   const universalQuestions: GeneratedQuestion[] = [
     {
       id: 'q1',
-      text: 'welcome.question1', // 翻译键
+      text: 'question1', // 相对翻译键，对应welcome.question1
       icon: '📋',
       category: 'summary' as const
     },
     {
       id: 'q2',
-      text: 'welcome.question2', // 翻译键
+      text: 'question2', // 相对翻译键，对应welcome.question2
       icon: '💡',
       category: 'concept' as const
     },
     {
       id: 'q3',
-      text: 'welcome.question3', // 翻译键
+      text: 'question3', // 相对翻译键，对应welcome.question3
       icon: '📚',
-      category: 'process' as const
+      category: 'application' as const
     }
   ];
   
@@ -290,21 +290,21 @@ export async function generatePDFQuestions(content: string, fileName: string): P
     const defaultQuestions: GeneratedQuestion[] = [
       {
         id: 'default1',
-        text: 'welcome.question1', // 翻译键
+        text: 'question1', // 相对翻译键，对应welcome.question1
         icon: '📋',
         category: 'summary'
       },
       {
         id: 'default2', 
-        text: 'welcome.question2', // 翻译键
+        text: 'question2', // 相对翻译键，对应welcome.question2
         icon: '💡',
         category: 'concept'
       },
       {
         id: 'default3',
-        text: 'welcome.question3', // 翻译键
+        text: 'question3', // 相对翻译键，对应welcome.question3
         icon: '📚',
-        category: 'process'
+        category: 'application'
       }
     ];
     
