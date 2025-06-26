@@ -292,9 +292,11 @@
     "chatErrorMessage": "抱歉，处理您的问题时出错了。请重试。",
     "chatHistorySaved": "聊天历史已保存",
     "chatHistorySaveFailed": "保存聊天历史失败",
+    "conversation": "对话",
+    "currentMode": "当前模式",
     "responseMode": "回复模式",
     "fastMode": "快速",
-    "qualityMode": "高质量"
+    "highQualityMode": "高质量"
   },
   "pdfViewer": {
     "cannotProcessPdf": "无法处理PDF",

@@ -1016,10 +1016,10 @@ export default function AnalysisPage() {
             <div className="p-3 border-b border-gray-200 bg-white">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Send className="h-5 w-5 text-[#8b5cf6]" />
-{t('conversation')}
+{t('chat.conversation')}
               </h3>
               <div className="text-sm text-gray-500 mt-1">
-{t('currentMode')}: {modelQuality === 'fast' ? t('fastMode') : t('highQualityMode')}
+{t('chat.currentMode')}: {modelQuality === 'fast' ? t('chat.fastMode') : t('chat.highQualityMode')}
               </div>
             </div>
 
