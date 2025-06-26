@@ -146,9 +146,28 @@ export async function POST(req: Request) {
   try {
     // 检查用户认证
     const supabase = createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (authError || !user?.id) {
+    // 尝试从Authorization头获取token
+    const authHeader = req.headers.get('authorization');
+    let user = null;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(token);
+      if (!tokenError && tokenUser) {
+        user = tokenUser;
+      }
+    }
+    
+    // 如果Bearer token认证失败，尝试使用服务器端session
+    if (!user) {
+      const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser();
+      if (!sessionError && sessionUser) {
+        user = sessionUser;
+      }
+    }
+    
+    if (!user?.id) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
 
