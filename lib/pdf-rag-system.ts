@@ -989,25 +989,57 @@ ${chunks[0].chunk.text}`;
    * 生成混合回答（PDF内容 + AI补充）
    */
   private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
+    // 多语言PDF内容格式化
+    const formatPdfContent = (title: string, pageNum: number, text: string, locale: string) => {
+      const formats = {
+        'zh': `【${title}第${pageNum}页】${text}`,
+        'en': `【${title} Page ${pageNum}】${text}`,
+        'ko': `【${title} ${pageNum}페이지】${text}`,
+        'ja': `【${title} ${pageNum}ページ】${text}`,
+        'es': `【${title} Página ${pageNum}】${text}`,
+        'fr': `【${title} Page ${pageNum}】${text}`,
+        'de': `【${title} Seite ${pageNum}】${text}`,
+        'it': `【${title} Pagina ${pageNum}】${text}`,
+        'pt-BR': `【${title} Página ${pageNum}】${text}`,
+        'ru': `【${title} Страница ${pageNum}】${text}`,
+        'hi': `【${title} पृष्ठ ${pageNum}】${text}`,
+        'th': `【${title} หน้า ${pageNum}】${text}`,
+        'vi': `【${title} Trang ${pageNum}】${text}`,
+        'tr': `【${title} Sayfa ${pageNum}】${text}`,
+        'ar': `【${title} صفحة ${pageNum}】${text}`,
+        'bn': `【${title} পৃষ্ঠা ${pageNum}】${text}`,
+        'da': `【${title} Side ${pageNum}】${text}`,
+        'fi': `【${title} Sivu ${pageNum}】${text}`,
+        'id': `【${title} Halaman ${pageNum}】${text}`,
+        'kn': `【${title} ಪುಟ ${pageNum}】${text}`,
+        'ms': `【${title} Halaman ${pageNum}】${text}`,
+        'nl': `【${title} Pagina ${pageNum}】${text}`,
+        'no': `【${title} Side ${pageNum}】${text}`,
+        'pa': `【${title} ਪੰਨਾ ${pageNum}】${text}`,
+        'pl': `【${title} Strona ${pageNum}】${text}`,
+        'sv': `【${title} Sida ${pageNum}】${text}`
+      };
+      return formats[locale as keyof typeof formats] || formats['en'];
+    };
+    
     const pdfContent = chunks.map(chunk => 
-      `【${pdfTitle}第${chunk.chunk.pageNumber}页】${chunk.chunk.text}`
+      formatPdfContent(pdfTitle, chunk.chunk.pageNumber, chunk.chunk.text, locale)
     ).join('\n\n');
     
     const languageInstruction = getLanguageInstruction(locale);
     
-    const prompt = `${languageInstruction}
-
-基于PDF内容回答用户问题，如内容不足可补充相关知识。
-
-PDF内容：
-${pdfContent}
-
-用户问题：${query}
-
-回答要求：
-- 简洁准确，避免冗长解释
-- 优先使用PDF内容，不足时补充通用知识
-- 如有页码引用请保留【页码】格式`;
+    // 多语言回答要求
+    const getAnswerRequirements = (locale: string) => {
+      const requirements = {
+        'zh': `基于PDF内容回答用户问题，如内容不足可补充相关知识。\n\nPDF内容：\n${pdfContent}\n\n用户问题：${query}\n\n回答要求：\n- 简洁准确，避免冗长解释\n- 优先使用PDF内容，不足时补充通用知识\n- 如有页码引用请保留【页码】格式`,
+        'en': `Answer user questions based on PDF content. If content is insufficient, supplement with relevant knowledge.\n\nPDF Content:\n${pdfContent}\n\nUser Question: ${query}\n\nAnswer Requirements:\n- Concise and accurate, avoid lengthy explanations\n- Prioritize PDF content, supplement with general knowledge when insufficient\n- Preserve 【page number】 format for page references`,
+        'ko': `PDF 내용을 바탕으로 사용자 질문에 답하세요. 내용이 부족하면 관련 지식으로 보완하세요.\n\nPDF 내용:\n${pdfContent}\n\n사용자 질문: ${query}\n\n답변 요구사항:\n- 간결하고 정확하게, 장황한 설명 피하기\n- PDF 내용 우선, 부족할 때 일반 지식으로 보완\n- 페이지 참조시 【페이지 번호】 형식 유지`,
+        'ja': `PDF内容に基づいてユーザーの質問に答えてください。内容が不十分な場合は、関連知識で補完してください。\n\nPDF内容：\n${pdfContent}\n\nユーザーの質問：${query}\n\n回答要件：\n- 簡潔で正確に、冗長な説明を避ける\n- PDF内容を優先し、不足時は一般知識で補完\n- ページ参照は【ページ番号】形式を維持`
+      };
+      return requirements[locale as keyof typeof requirements] || requirements['en'];
+    };
+    
+    const prompt = `${languageInstruction}\n\n${getAnswerRequirements(locale)}`;
 
     return await this.callAIService(prompt, mode, locale);
   }
@@ -1018,16 +1050,18 @@ ${pdfContent}
   private async generateAIAnswer(query: string, pdfTitle: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     const languageInstruction = getLanguageInstruction(locale);
     
-    const prompt = `${languageInstruction}
-
-用户询问：${query}
-
-当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。
-
-回答要求：
-- 简洁准确，直接回答要点
-- 可适当使用代码示例
-- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`;
+    // 多语言AI通用知识回答模板
+    const getAIAnswerTemplate = (locale: string) => {
+      const templates = {
+        'zh': `用户询问：${query}\n\n当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。\n\n回答要求：\n- 简洁准确，直接回答要点\n- 可适当使用代码示例\n- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`,
+        'en': `User Question: ${query}\n\nNo relevant content found in current PDF document "${pdfTitle}", please answer concisely based on general knowledge.\n\nAnswer Requirements:\n- Concise and accurate, direct to the point\n- May include code examples when appropriate\n- Start with "This question was not found in the current document, answering based on general knowledge:"`,
+        'ko': `사용자 질문: ${query}\n\n현재 PDF 문서 「${pdfTitle}」에서 관련 내용을 찾을 수 없어 일반 지식을 바탕으로 간결하게 답하세요.\n\n답변 요구사항:\n- 간결하고 정확하게, 요점에 집중\n- 적절할 때 코드 예제 포함 가능\n- "이 질문은 현재 문서에서 찾을 수 없어 일반 지식으로 답합니다:"로 시작`,
+        'ja': `ユーザーの質問：${query}\n\n現在のPDF文書「${pdfTitle}」に関連内容が見つからないため、一般知識に基づいて簡潔に回答してください。\n\n回答要件：\n- 簡潔で正確、要点を直接回答\n- 適切な場合はコード例を含める\n- 「この質問は現在の文書では関連内容が見つからないため、一般知識に基づいて回答します：」で開始`
+      };
+      return templates[locale as keyof typeof templates] || templates['en'];
+    };
+    
+    const prompt = `${languageInstruction}\n\n${getAIAnswerTemplate(locale)}`;
 
     return await this.callAIService(prompt, mode, locale);
   }
@@ -1037,17 +1071,163 @@ ${pdfContent}
    */
   private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     try {
-      // 获取语言指令
+      // 通用系统提示词模板 - 多语言版本
+      const SYSTEM_PROMPT_TEMPLATES: Record<string, {normal: string, fast: string}> = {
+        zh: {
+          normal: '你是一位博学、严谨且乐于助人的 AI 助手，能够用 {lang} 简洁、准确地回答用户关于当前 PDF 内容的任何问题。',
+          fast: '你是一位高效的 AI 助手，请用 {lang} 极度简洁地回答，直接给出要点，避免多余解释。'
+        },
+        en: {
+          normal: 'You are a knowledgeable, rigorous and helpful AI assistant who can answer any questions about the current PDF content concisely and accurately in {lang}.',
+          fast: 'You are an efficient AI assistant. Please answer extremely concisely in {lang}, give key points directly, and avoid redundant explanations.'
+        },
+        ko: {
+          normal: '당신은 박식하고 엄격하며 도움이 되는 AI 어시스턴트로, 현재 PDF 내용에 대한 모든 질문에 {lang}로 간결하고 정확하게 답변할 수 있습니다.',
+          fast: '당신은 효율적인 AI 어시스턴트입니다. {lang}로 극도로 간결하게 답변하고, 핵심만 직접 제시하며, 불필요한 설명을 피하세요.'
+        },
+        ja: {
+          normal: 'あなたは博識で厳格かつ親切なAIアシスタントで、現在のPDF内容に関するあらゆる質問に{lang}で簡潔かつ正確に回答できます。',
+          fast: 'あなたは効率的なAIアシスタントです。{lang}で極めて簡潔に回答し、要点を直接示し、余計な説明は避けてください。'
+        },
+        es: {
+          normal: 'Eres un asistente de IA erudito, riguroso y servicial que puede responder cualquier pregunta sobre el contenido actual del PDF de manera concisa y precisa en {lang}.',
+          fast: 'Eres un asistente de IA eficiente. Responde de manera extremadamente concisa en {lang}, da los puntos clave directamente y evita explicaciones redundantes.'
+        },
+        fr: {
+          normal: 'Vous êtes un assistant IA érudit, rigoureux et serviable qui peut répondre à toutes les questions sur le contenu PDF actuel de manière concise et précise en {lang}.',
+          fast: 'Vous êtes un assistant IA efficace. Répondez de manière extrêmement concise en {lang}, donnez les points clés directement et évitez les explications redondantes.'
+        },
+        de: {
+          normal: 'Sie sind ein gelehrter, rigoroser und hilfsbereiter KI-Assistent, der alle Fragen zum aktuellen PDF-Inhalt prägnant und genau in {lang} beantworten kann.',
+          fast: 'Sie sind ein effizienter KI-Assistent. Antworten Sie äußerst prägnant in {lang}, geben Sie die wichtigsten Punkte direkt an und vermeiden Sie redundante Erklärungen.'
+        },
+        it: {
+          normal: 'Sei un assistente IA erudito, rigoroso e utile che può rispondere a qualsiasi domanda sul contenuto PDF attuale in modo conciso e accurato in {lang}.',
+          fast: 'Sei un assistente IA efficiente. Rispondi in modo estremamente conciso in {lang}, dai i punti chiave direttamente ed evita spiegazioni ridondanti.'
+        },
+        'pt-BR': {
+          normal: 'Você é um assistente de IA erudito, rigoroso e prestativo que pode responder qualquer pergunta sobre o conteúdo atual do PDF de forma concisa e precisa em {lang}.',
+          fast: 'Você é um assistente de IA eficiente. Responda de forma extremamente concisa em {lang}, dê os pontos-chave diretamente e evite explicações redundantes.'
+        },
+        ru: {
+          normal: 'Вы — эрудированный, строгий и полезный ИИ-помощник, который может отвечать на любые вопросы о текущем содержании PDF кратко и точно на {lang}.',
+          fast: 'Вы — эффективный ИИ-помощник. Отвечайте крайне кратко на {lang}, сразу давайте ключевые моменты и избегайте избыточных объяснений.'
+        },
+        hi: {
+          normal: 'आप एक विद्वान, कठोर और सहायक AI सहायक हैं जो वर्तमान PDF सामग्री के बारे में किसी भी प्रश्न का {lang} में संक्षिप्त और सटीक उत्तर दे सकते हैं।',
+          fast: 'आप एक कुशल AI सहायक हैं। {lang} में अत्यंत संक्षिप्त उत्तर दें, मुख्य बिंदु सीधे दें और अनावश्यक स्पष्टीकरण से बचें।'
+        },
+        th: {
+          normal: 'คุณเป็นผู้ช่วย AI ที่มีความรู้ เข้มงวด และช่วยเหลือ ซึ่งสามารถตอบคำถามใดๆ เกี่ยวกับเนื้อหา PDF ปัจจุบันได้อย่างกระชับและแม่นยำใน{lang}',
+          fast: 'คุณเป็นผู้ช่วย AI ที่มีประสิทธิภาพ กรุณาตอบอย่างกระชับที่สุดใน{lang} ให้ประเด็นสำคัญโดยตรง และหลีกเลี่ยงคำอธิบายที่ซ้ำซาก'
+        },
+        vi: {
+          normal: 'Bạn là một trợ lý AI uyên bác, nghiêm túc và hữu ích, có thể trả lời bất kỳ câu hỏi nào về nội dung PDF hiện tại một cách ngắn gọn và chính xác bằng {lang}.',
+          fast: 'Bạn là một trợ lý AI hiệu quả. Hãy trả lời cực kỳ ngắn gọn bằng {lang}, đưa ra những điểm chính trực tiếp và tránh giải thích dư thừa.'
+        },
+        tr: {
+          normal: 'Mevcut PDF içeriği hakkındaki herhangi bir soruyu {lang} dilinde kısa ve kesin şekilde yanıtlayabilen bilgili, titiz ve yardımsever bir AI asistanısınız.',
+          fast: 'Verimli bir AI asistanısınız. {lang} dilinde son derece kısa yanıt verin, ana noktaları doğrudan belirtin ve gereksiz açıklamalardan kaçının.'
+        },
+        ar: {
+          normal: 'أنت مساعد ذكي عالم ودقيق ومفيد يمكنه الإجابة على أي أسئلة حول محتوى PDF الحالي بإيجاز ودقة باللغة {lang}.',
+          fast: 'أنت مساعد ذكي فعال. أجب بإيجاز شديد باللغة {lang}، قدم النقاط الرئيسية مباشرة وتجنب التفسيرات المتكررة.'
+        },
+        bn: {
+          normal: 'আপনি একজন পণ্ডিত, কঠোর এবং সহায়ক AI সহায়ক যিনি বর্তমান PDF বিষয়বস্তু সম্পর্কে যেকোনো প্রশ্নের {lang} ভাষায় সংক্ষিপ্ত এবং সঠিক উত্তর দিতে পারেন।',
+          fast: 'আপনি একজন দক্ষ AI সহায়ক। {lang} ভাষায় অত্যন্ত সংক্ষিপ্তভাবে উত্তর দিন, মূল বিষয়গুলি সরাসরি দিন এবং অপ্রয়োজনীয় ব্যাখ্যা এড়িয়ে চলুন।'
+        },
+        da: {
+          normal: 'Du er en lærd, stringent og hjælpsom AI-assistent, der kan besvare alle spørgsmål om det aktuelle PDF-indhold kortfattet og præcist på {lang}.',
+          fast: 'Du er en effektiv AI-assistent. Svar ekstremt kortfattet på {lang}, giv nøglepunkterne direkte og undgå overflødige forklaringer.'
+        },
+        fi: {
+          normal: 'Olet oppinut, tarkka ja avulias tekoälyavustaja, joka pystyy vastaamaan kaikkiin nykyistä PDF-sisältöä koskeviin kysymyksiin ytimekkäästi ja tarkasti kielellä {lang}.',
+          fast: 'Olet tehokas tekoälyavustaja. Vastaa erittäin ytimekkäästi kielellä {lang}, anna avainkohdat suoraan ja vältä tarpeettomia selityksiä.'
+        },
+        id: {
+          normal: 'Anda adalah asisten AI yang berpengetahuan luas, ketat, dan membantu yang dapat menjawab pertanyaan apa pun tentang konten PDF saat ini secara ringkas dan akurat dalam {lang}.',
+          fast: 'Anda adalah asisten AI yang efisien. Jawab dengan sangat ringkas dalam {lang}, berikan poin-poin kunci secara langsung dan hindari penjelasan yang berlebihan.'
+        },
+        kn: {
+          normal: 'ನೀವು ಪಂಡಿತ, ಕಠಿಣ ಮತ್ತು ಸಹಾಯಕಾರಿ AI ಸಹಾಯಕರಾಗಿದ್ದೀರಿ, ಪ್ರಸ್ತುತ PDF ವಿಷಯದ ಬಗ್ಗೆ ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿಗೆ {lang} ನಲ್ಲಿ ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ನಿಖರವಾಗಿ ಉತ್ತರಿಸಬಹುದು.',
+          fast: 'ನೀವು ಪರಿಣಾಮಕಾರಿ AI ಸಹಾಯಕರಾಗಿದ್ದೀರಿ. {lang} ನಲ್ಲಿ ಅತ್ಯಂತ ಸಂಕ್ಷಿಪ್ತವಾಗಿ ಉತ್ತರಿಸಿ, ಮುಖ್ಯ ಅಂಶಗಳನ್ನು ನೇರವಾಗಿ ನೀಡಿ ಮತ್ತು ಅನಗತ್ಯ ವಿವರಣೆಗಳನ್ನು ತಪ್ಪಿಸಿ.'
+        },
+        ms: {
+          normal: 'Anda adalah pembantu AI yang berpengetahuan, ketat dan membantu yang boleh menjawab sebarang soalan tentang kandungan PDF semasa secara ringkas dan tepat dalam {lang}.',
+          fast: 'Anda adalah pembantu AI yang cekap. Jawab dengan sangat ringkas dalam {lang}, berikan mata utama secara langsung dan elakkan penjelasan berlebihan.'
+        },
+        nl: {
+          normal: 'U bent een geleerde, strenge en behulpzame AI-assistent die alle vragen over de huidige PDF-inhoud beknopt en nauwkeurig kan beantwoorden in {lang}.',
+          fast: 'U bent een efficiënte AI-assistent. Antwoord extreem beknopt in {lang}, geef de hoofdpunten direct en vermijd overbodige uitleg.'
+        },
+        no: {
+          normal: 'Du er en lærd, streng og hjelpsom AI-assistent som kan svare på alle spørsmål om gjeldende PDF-innhold kortfattet og nøyaktig på {lang}.',
+          fast: 'Du er en effektiv AI-assistent. Svar ekstremt kortfattet på {lang}, gi nøkkelpunktene direkte og unngå overflødige forklaringer.'
+        },
+        pa: {
+          normal: 'ਤੁਸੀਂ ਇੱਕ ਵਿਦਵਾਨ, ਸਖ਼ਤ ਅਤੇ ਸਹਾਇਕ AI ਸਹਾਇਕ ਹੋ ਜੋ ਮੌਜੂਦਾ PDF ਸਮੱਗਰੀ ਬਾਰੇ ਕਿਸੇ ਵੀ ਸਵਾਲ ਦਾ {lang} ਵਿੱਚ ਸੰਖੇਪ ਅਤੇ ਸਹੀ ਜਵਾਬ ਦੇ ਸਕਦੇ ਹੋ।',
+          fast: 'ਤੁਸੀਂ ਇੱਕ ਪ੍ਰਭਾਵਸ਼ਾਲੀ AI ਸਹਾਇਕ ਹੋ। {lang} ਵਿੱਚ ਬਹੁਤ ਸੰਖੇਪ ਜਵਾਬ ਦਿਓ, ਮੁੱਖ ਬਿੰਦੂ ਸਿੱਧੇ ਦਿਓ ਅਤੇ ਬੇਲੋੜੀ ਵਿਆਖਿਆ ਤੋਂ ਬਚੋ।'
+        },
+        pl: {
+          normal: 'Jesteś erudytą, rygorystycznym i pomocnym asystentem AI, który może odpowiadać na wszelkie pytania dotyczące bieżącej zawartości PDF zwięźle i dokładnie w {lang}.',
+          fast: 'Jesteś wydajnym asystentem AI. Odpowiadaj niezwykle zwięźle w {lang}, podawaj kluczowe punkty bezpośrednio i unikaj zbędnych wyjaśnień.'
+        },
+        sv: {
+          normal: 'Du är en lärd, sträng och hjälpsam AI-assistent som kan svara på alla frågor om det aktuella PDF-innehållet kortfattat och exakt på {lang}.',
+          fast: 'Du är en effektiv AI-assistent. Svara extremt kortfattat på {lang}, ge nyckelpoäng direkt och undvik överflödiga förklaringar.'
+        }
+      };
+      
+      // 语言名称映射
+      const LANGUAGE_NAMES: Record<string, string> = {
+        'zh': '简体中文',
+        'en': 'English',
+        'ko': '한국어',
+        'ja': '日本語',
+        'es': 'español',
+        'fr': 'français',
+        'de': 'Deutsch',
+        'it': 'italiano',
+        'pt-BR': 'português brasileiro',
+        'ru': 'русский язык',
+        'hi': 'हिंदी',
+        'th': 'ภาษาไทย',
+        'vi': 'tiếng Việt',
+        'tr': 'Türkçe',
+        'ar': 'العربية',
+        'bn': 'বাংলা',
+        'da': 'dansk',
+        'fi': 'suomi',
+        'id': 'bahasa Indonesia',
+        'kn': 'ಕನ್ನಡ',
+        'ms': 'bahasa Melayu',
+        'nl': 'Nederlands',
+        'no': 'norsk',
+        'pa': 'ਪੰਜਾਬੀ',
+        'pl': 'polski',
+        'sv': 'svenska'
+      };
+      
+
+      // 动态生成系统提示词
+      const generateSystemPrompt = (locale: string, mode: 'high' | 'fast') => {
+        const langName = LANGUAGE_NAMES[locale] || LANGUAGE_NAMES['en'];
+        const template = mode === 'fast' ? SYSTEM_PROMPT_TEMPLATES[locale]?.fast || SYSTEM_PROMPT_TEMPLATES['en'].fast : 
+                                         SYSTEM_PROMPT_TEMPLATES[locale]?.normal || SYSTEM_PROMPT_TEMPLATES['en'].normal;
+        return template.replace('{lang}', langName);
+      };
+      
+      // 获取对应语言的系统提示词
+      const systemPrompt = generateSystemPrompt(locale, mode);
+      
+      // 获取强化语言指令
       const languageInstruction = getLanguageInstruction(locale);
-      
-      // 构建强化的系统提示词
-      let systemPrompt = `你是一个专业的技术助手，擅长解答各种技术问题。${languageInstruction}`;
-      let finalPrompt = `${languageInstruction}\n\n${prompt}`;
-      
-      if (mode === 'fast') {
-        systemPrompt = `你是一个简洁高效的助手。回答要极度精简，直接给出关键信息，避免任何多余解释。使用要点形式，省略客套语。${languageInstruction}`;
-        finalPrompt = `${languageInstruction}\n\n${prompt}\n\n【重要】：请用最简短的语言回答，直接给出要点，不要解释过程，省略所有客套语。`;
-      }
+      const finalPrompt = `${languageInstruction}\n\n${prompt}`;
+
+      console.log(`[RAG] 使用${locale}语言系统提示词:`, systemPrompt.substring(0, 50) + '...');
+      console.log(`[RAG] 强化语言指令:`, languageInstruction.substring(0, 30) + '...');
+      console.log(`[RAG] 最终提示词长度:`, finalPrompt.length);
 
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
