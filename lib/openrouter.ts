@@ -8,8 +8,8 @@ interface AnalysisResult {
   conclusions: string
 }
 
-// 使用环境变量中的API密钥
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY
+// 使用环境变量中的API密钥 - 只使用服务端变量，不使用NEXT_PUBLIC前缀
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async function callOpenRouter(messages: any[]) {
