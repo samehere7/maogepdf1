@@ -356,7 +356,7 @@ export default function AnalysisPage() {
     setAnswering(true);
     
     // 立即显示"正在思考"状态
-    const thinkingMessage = { role: "assistant" as const, content: "🤔 正在分析PDF内容..." };
+    const thinkingMessage = { role: "assistant" as const, content: `🤔 ${t('analyzingPdfContent')}` };
     setMessages(prev => [...prev, thinkingMessage]);
 
     // 保存用户问题到数据库
@@ -379,7 +379,8 @@ export default function AnalysisPage() {
         body: JSON.stringify({
           messages: [{ role: "user", content: userQuestion }],
           pdfId: fileInfo.id,
-          quality: modelQuality
+          quality: modelQuality,
+          locale: locale
         }),
       });
 
@@ -1151,7 +1152,7 @@ export default function AnalysisPage() {
                   if (e.key === "Enter") handleSendQuestion();
                 }}
                 onClick={(e) => e.stopPropagation()}
-                placeholder={loading ? t('loadingPdf') : t('askDocument')}
+                placeholder={loading ? t('loadingPdf') : t('analysis.askDocument')}
                 className="flex-1 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
                 disabled={answering || loading}
               />

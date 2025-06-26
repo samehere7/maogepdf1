@@ -326,6 +326,8 @@
     "switchedToHighQualityMode": "Zu hochwertigem Modus gewechselt.",
     "fast": "schnell",
     "highQuality": "hochwertig",
+    "analyzingPdfContent": "PDF-Inhalt wird analysiert...",
+    "askDocument": "Fragen zu diesem Dokument...",
     "flashcard": {
       "createFlashcard": "Karteikarte erstellen"
     },

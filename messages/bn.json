@@ -352,6 +352,8 @@
     "switchedToHighQualityMode": "উচ্চ মানের মোডে স্যুইচ করা হয়েছে।",
     "fast": "দ্রুত",
     "highQuality": "উচ্চ মান",
+    "analyzingPdfContent": "PDF বিষয়বস্তু বিশ্লেষণ করা হচ্ছে...",
+    "askDocument": "এই নথি সম্পর্কে জিজ্ঞাসা করুন...",
     "flashcard": {
       "createFlashcard": "ফ্ল্যাশকার্ড তৈরি করুন"
     },

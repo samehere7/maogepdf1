@@ -23,22 +23,70 @@ const MODEL_CONFIGS = {
   }
 };
 
+// 语言指令映射
+function getLanguageInstruction(locale: string): string {
+  const instructions = {
+    'zh': '请用中文回答，保持简洁实用。',
+    'en': 'Please respond in English, keep it concise and practical.',
+    'ko': '한국어로 답변해 주세요. 간결하고 실용적으로 유지하세요.',
+    'ja': '日本語で回答してください。簡潔で実用的に保ってください。',
+    'es': 'Por favor responde en español, manteniéndolo conciso y práctico.',
+    'fr': 'Veuillez répondre en français, en restant concis et pratique.',
+    'de': 'Bitte antworten Sie auf Deutsch, prägnant und praktisch.',
+    'it': 'Si prega di rispondere in italiano, mantenendolo conciso e pratico.',
+    'pt-BR': 'Por favor, responda em português, mantendo-o conciso e prático.',
+    'ru': 'Пожалуйста, отвечайте на русском языке, оставайтесь краткими и практичными.',
+    'hi': 'कृपया हिंदी में उत्तर दें, इसे संक्षिप्त और व्यावहारिक रखें।',
+    'th': 'กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
+    'vi': 'Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
+    'tr': 'Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
+    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.'
+  };
+  
+  return instructions[locale as keyof typeof instructions] || instructions['en'];
+}
+
 // 简化的降级回答生成器
-function generateSmartAnswer(userMessage: string, pdf: any): string {
-  return `抱歉，无法连接到AI服务。
+function generateSmartAnswer(userMessage: string, pdf: any, locale: string = 'zh'): string {
+  const errorMessages = {
+    'zh': `抱歉，无法连接到AI服务。
 
 **您的问题：** ${userMessage}
 **文档：** ${pdf.name}
 
-请稍后重试，或检查网络连接。`;
+请稍后重试，或检查网络连接。`,
+    'en': `Sorry, unable to connect to AI service.
+
+**Your question:** ${userMessage}
+**Document:** ${pdf.name}
+
+Please try again later or check your network connection.`,
+    'ko': `죄송합니다. AI 서비스에 연결할 수 없습니다.
+
+**귀하의 질문:** ${userMessage}
+**문서:** ${pdf.name}
+
+나중에 다시 시도하거나 네트워크 연결을 확인해 주세요.`,
+    'ja': `申し訳ありませんが、AIサービスに接続できません。
+
+**ご質問：** ${userMessage}
+**文書：** ${pdf.name}
+
+後でもう一度お試しいただくか、ネットワーク接続をご確認ください。`
+  };
+  
+  return errorMessages[locale as keyof typeof errorMessages] || errorMessages['en'];
 }
 
 
 
 // 构建简化的系统提示词
-function buildSystemPrompt(pdf: any): string {
+function buildSystemPrompt(pdf: any, locale: string = 'zh'): string {
   const fileName = pdf.name || 'PDF文档';
   const summary = pdf.summary || '';
+  
+  // 根据语言设置回答语言
+  const languageInstruction = getLanguageInstruction(locale);
   
   return `你是一个专业的PDF文档助手，正在帮助用户理解和分析文档内容。
 
@@ -53,11 +101,11 @@ function buildSystemPrompt(pdf: any): string {
 - 如果文档中没有相关信息，请直接说明。
 - 回答语言与用户界面一致（如中文、英文等）。
 
-请用中文回答，保持简洁实用。`;
+${languageInstruction}`;
 }
 
 // 构建增强的系统提示词（使用RAG检索结果）
-function buildEnhancedSystemPrompt(pdf: any, relevantChunks: any[], userQuestion: string): string {
+function buildEnhancedSystemPrompt(pdf: any, relevantChunks: any[], userQuestion: string, locale: string = 'zh'): string {
   const fileName = pdf.name || 'PDF文档';
   const summary = pdf.summary || '';
   
@@ -73,6 +121,9 @@ function buildEnhancedSystemPrompt(pdf: any, relevantChunks: any[], userQuestion
       contextContent += `页面${pageNumber}：${chunkText}\n\n`;
     });
   }
+  
+  // 根据语言获取对应的回答指令
+  const languageInstruction = getLanguageInstruction(locale);
   
   const basePrompt = `你是专业的PDF文档助手，基于提供的文档内容自然回答用户问题。
 
@@ -94,7 +145,7 @@ ${contextContent}
 - "Git分支允许开发者独立开发功能，避免影响主线代码【3】。合并时使用git merge命令即可【5】。"
 - "根据文档，主要包括三个步骤：首先...【2】，然后...【4】，最后...【6】。"
 
-请用自然、准确、简洁的中文回答用户问题。`;
+${languageInstruction}`;
 
   return basePrompt;
 }
@@ -124,7 +175,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'JSON格式错误' }, { status: 400 });
     }
     
-    const { messages, pdfId, quality = 'highQuality' } = requestBody;
+    const { messages, pdfId, quality = 'highQuality', locale = 'zh' } = requestBody;
     console.log(`[聊天API] 解析参数 - pdfId: ${pdfId}, quality: ${quality}, messages数量: ${messages?.length}`);
     
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -203,12 +254,15 @@ export async function POST(req: Request) {
       if (isSimpleTextOperation) {
         // 简单文本操作，使用简化的提示词
         console.log('[聊天API] 检测到简单文本操作，使用简化处理');
+        const languageInstruction = getLanguageInstruction(locale);
         enhancedSystemPrompt = `你是一个专业的文本处理助手。请根据用户要求直接处理文本，给出简洁准确的回答。
 
 要求：
 1. 直接回答，不添加解释或额外信息
 2. 保持简洁明了
 3. 专注于用户的具体要求
+
+${languageInstruction}
 
 用户请求：${lastUserMessage}`;
         
@@ -226,8 +280,8 @@ export async function POST(req: Request) {
             console.log('[聊天API] 已切换到目标PDF的RAG内容');
           }
           
-          // 使用智能RAG系统生成回答
-          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name);
+          // 使用智能RAG系统生成回答，传递语言信息
+          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name, 'high', locale);
           console.log('[聊天API] RAG系统生成回答成功');
           
           // 直接返回RAG系统的回答，不再调用OpenRouter
@@ -239,7 +293,7 @@ export async function POST(req: Request) {
         } catch (ragError) {
           console.error('[聊天API] RAG系统失败，使用传统方式:', ragError);
           // 降级到传统方式
-          enhancedSystemPrompt = buildSystemPrompt(pdf);
+          enhancedSystemPrompt = buildSystemPrompt(pdf, locale);
           
           // 记录RAG失败的详细信息，用于后续优化
           console.log('[聊天API] RAG失败详情:', {
@@ -289,7 +343,7 @@ export async function POST(req: Request) {
     } catch (answerError) {
       console.error('[聊天API] AI服务调用失败:', answerError);
       // 降级到简单错误提示
-      const fallbackAnswer = generateSmartAnswer(lastUserMessage, pdf);
+      const fallbackAnswer = generateSmartAnswer(lastUserMessage, pdf, locale);
       return NextResponse.json({
         content: fallbackAnswer,
         role: 'assistant'

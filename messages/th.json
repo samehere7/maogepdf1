@@ -327,6 +327,8 @@
     "switchedToHighQualityMode": "เปลี่ยนเป็นโหมดคุณภาพสูง",
     "fast": "เร็ว",
     "highQuality": "คุณภาพสูง",
+    "analyzingPdfContent": "กำลังวิเคราะห์เนื้อหา PDF...",
+    "askDocument": "ถามเกี่ยวกับเอกสารนี้...",
     "flashcard": {
       "createFlashcard": "สร้างฟลาชการ์ด"
     },

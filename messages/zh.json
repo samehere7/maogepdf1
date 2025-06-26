@@ -342,6 +342,8 @@
     "switchedToHighQualityMode": "已切换到高质量模式。",
     "fast": "快速",
     "highQuality": "高质量",
+    "analyzingPdfContent": "正在分析PDF内容...",
+    "askDocument": "问点什么...",
     "flashcard": {
       "createFlashcard": "创建闪卡"
     },

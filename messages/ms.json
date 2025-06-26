@@ -327,6 +327,8 @@
     "switchedToHighQualityMode": "Beralih ke mod kualiti tinggi.",
     "fast": "Pantas",
     "highQuality": "Kualiti tinggi",
+    "analyzingPdfContent": "Menganalisis kandungan PDF...",
+    "askDocument": "Tanya tentang dokumen ini...",
     "flashcard": {
       "createFlashcard": "Cipta kad imbas"
     },

@@ -346,6 +346,8 @@
     "switchedToHighQualityMode": "高品質モードに切り替えました。",
     "fast": "高速",
     "highQuality": "高品質",
+    "analyzingPdfContent": "PDFコンテンツを分析中...",
+    "askDocument": "この文書について質問...",
     "flashcard": {
       "createFlashcard": "フラッシュカード作成"
     },

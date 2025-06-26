@@ -352,6 +352,8 @@
     "switchedToHighQualityMode": "Yüksek kalite moduna geçildi.",
     "fast": "Hızlı",
     "highQuality": "Yüksek kalite",
+    "analyzingPdfContent": "PDF içeriği analiz ediliyor...",
+    "askDocument": "Bu belge hakkında sor...",
     "flashcard": {
       "createFlashcard": "Kart Oluştur"
     },

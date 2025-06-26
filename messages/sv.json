@@ -329,6 +329,8 @@
     "switchedToHighQualityMode": "Bytte till högkvalitetsläge.",
     "fast": "Snabb",
     "highQuality": "Hög kvalitet",
+    "analyzingPdfContent": "Analyserar PDF-innehåll...",
+    "askDocument": "Fråga om detta dokument...",
     "flashcard": {
       "createFlashcard": "Skapa Flashcard"
     },

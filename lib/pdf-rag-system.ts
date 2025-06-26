@@ -40,6 +40,29 @@ interface ConversationContext {
   };
 }
 
+// 语言指令映射
+function getLanguageInstruction(locale: string): string {
+  const instructions = {
+    'zh': '请用中文回答，保持简洁实用。',
+    'en': 'Please respond in English, keep it concise and practical.',
+    'ko': '한국어로 답변해 주세요. 간결하고 실용적으로 유지하세요.',
+    'ja': '日本語で回答してください。簡潔で実用的に保ってください。',
+    'es': 'Por favor responde en español, manteniéndolo conciso y práctico.',
+    'fr': 'Veuillez répondre en français, en restant concis et pratique.',
+    'de': 'Bitte antworten Sie auf Deutsch, prägnant und praktisch.',
+    'it': 'Si prega di rispondere in italiano, mantenendolo conciso e pratico.',
+    'pt-BR': 'Por favor, responda em português, mantendo-o conciso e prático.',
+    'ru': 'Пожалуйста, отвечайте на русском языке, оставайтесь краткими и практичными.',
+    'hi': 'कृपया हिंदी में उत्तर दें, इसे संक्षिप्त और व्यावहारिक रखें।',
+    'th': 'กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
+    'vi': 'Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
+    'tr': 'Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
+    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.'
+  };
+  
+  return instructions[locale as keyof typeof instructions] || instructions['en'];
+}
+
 /**
  * PDF RAG 系统核心类
  * 实现文档分段、向量检索、智能对话功能
@@ -660,7 +683,7 @@ export class PDFRAGSystem {
   /**
    * 生成智能回答
    */
-  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' = 'high'): Promise<string> {
+  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     try {
       console.log(`[RAG] 开始生成答案: "${query}", 模式: ${mode}`);
       
@@ -681,11 +704,11 @@ export class PDFRAGSystem {
         console.log('[RAG] 使用PDF内容生成回答');
       } else if (contentQuality.quality === 'medium') {
         // 中等质量：混合模式（PDF内容 + AI补充）
-        answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle, mode);
+        answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle, mode, locale);
         console.log('[RAG] 使用混合模式生成回答');
       } else {
         // 低质量：使用AI通用知识回答
-        answer = await this.generateAIAnswer(query, pdfTitle, mode);
+        answer = await this.generateAIAnswer(query, pdfTitle, mode, locale);
         console.log('[RAG] 使用AI通用知识生成回答');
       }
       
@@ -704,7 +727,7 @@ export class PDFRAGSystem {
       
     } catch (error) {
       console.error('[RAG] 生成答案失败:', error);
-      return this.generateFallbackAnswer(query);
+      return this.generateFallbackAnswer(query, locale);
     }
   }
   
@@ -954,10 +977,12 @@ ${chunks[0].chunk.text}`;
   /**
    * 生成混合回答（PDF内容 + AI补充）
    */
-  private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
+  private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     const pdfContent = chunks.map(chunk => 
       `【${pdfTitle}第${chunk.chunk.pageNumber}页】${chunk.chunk.text}`
     ).join('\n\n');
+    
+    const languageInstruction = getLanguageInstruction(locale);
     
     const prompt = `基于PDF内容回答用户问题，如内容不足可补充相关知识。
 
@@ -969,7 +994,9 @@ ${pdfContent}
 回答要求：
 - 简洁准确，避免冗长解释
 - 优先使用PDF内容，不足时补充通用知识
-- 如有页码引用请保留【页码】格式`;
+- 如有页码引用请保留【页码】格式
+
+${languageInstruction}`;
 
     return await this.callAIService(prompt, mode);
   }
@@ -977,7 +1004,9 @@ ${pdfContent}
   /**
    * 生成AI通用知识回答
    */
-  private async generateAIAnswer(query: string, pdfTitle: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
+  private async generateAIAnswer(query: string, pdfTitle: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
+    const languageInstruction = getLanguageInstruction(locale);
+    
     const prompt = `用户询问：${query}
 
 当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。
@@ -985,7 +1014,9 @@ ${pdfContent}
 回答要求：
 - 简洁准确，直接回答要点
 - 可适当使用代码示例
-- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`;
+- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："
+
+${languageInstruction}`;
 
     return await this.callAIService(prompt, mode);
   }
@@ -1042,20 +1073,38 @@ ${pdfContent}
       return aiResponse;
     } catch (error) {
       console.error('[RAG] AI服务调用失败:', error);
-      return this.generateFallbackAnswer(prompt);
+      return this.generateFallbackAnswer('', 'zh');
     }
   }
 
   /**
    * 生成后备回答
    */
-  private generateFallbackAnswer(query: string): string {
-    const fallbacks = [
-      '抱歉，我暂时无法回答这个问题。请尝试用不同的关键词提问，或者检查网络连接。',
-      '系统暂时遇到问题，请稍后重试或尝试更具体的问题。',
-      '抱歉，无法处理您的问题。您可以尝试重新表述问题或联系技术支持。'
-    ];
+  private generateFallbackAnswer(query: string, locale: string = 'zh'): string {
+    const fallbacksByLocale = {
+      'zh': [
+        '抱歉，我暂时无法回答这个问题。请尝试用不同的关键词提问，或者检查网络连接。',
+        '系统暂时遇到问题，请稍后重试或尝试更具体的问题。',
+        '抱歉，无法处理您的问题。您可以尝试重新表述问题或联系技术支持。'
+      ],
+      'en': [
+        'Sorry, I cannot answer this question at the moment. Please try asking with different keywords or check your network connection.',
+        'The system is temporarily experiencing issues. Please try again later or ask a more specific question.',
+        'Sorry, I cannot process your question. You can try rephrasing it or contact technical support.'
+      ],
+      'ko': [
+        '죄송합니다. 지금은 이 질문에 답할 수 없습니다. 다른 키워드로 질문하거나 네트워크 연결을 확인해 주세요.',
+        '시스템에 일시적인 문제가 발생했습니다. 나중에 다시 시도하거나 더 구체적인 질문을 해주세요.',
+        '죄송합니다. 귀하의 질문을 처리할 수 없습니다. 질문을 다시 표현하거나 기술 지원에 문의하세요.'
+      ],
+      'ja': [
+        '申し訳ありませんが、現在この質問にお答えできません。異なるキーワードで質問するか、ネットワーク接続を確認してください。',
+        'システムに一時的な問題が発生しています。後でもう一度お試しいただくか、より具体的な質問をしてください。',
+        '申し訳ありませんが、ご質問を処理できません。質問を言い換えるか、テクニカルサポートにお問い合わせください。'
+      ]
+    };
     
+    const fallbacks = fallbacksByLocale[locale as keyof typeof fallbacksByLocale] || fallbacksByLocale['en'];
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
   

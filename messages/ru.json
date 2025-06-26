@@ -329,6 +329,8 @@
     "switchedToHighQualityMode": "Переключено на высококачественный режим.",
     "fast": "Быстро",
     "highQuality": "Высокое качество",
+    "analyzingPdfContent": "Анализ содержимого PDF...",
+    "askDocument": "Спросить об этом документе...",
     "flashcard": {
       "createFlashcard": "Создать флеш-карту"
     },

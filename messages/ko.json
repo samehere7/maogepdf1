@@ -330,6 +330,8 @@
     "switchedToHighQualityMode": "고품질 모드로 전환했습니다.",
     "fast": "빠른",
     "highQuality": "고품질",
+    "analyzingPdfContent": "PDF 내용 분석 중...",
+    "askDocument": "문서에 대해 질문하세요...",
     "flashcard": {
       "createFlashcard": "플래시카드 생성"
     },

@@ -311,6 +311,8 @@
     "switchedToHighQualityMode": "Passato alla modalità di alta qualità.",
     "fast": "Veloce",
     "highQuality": "Alta qualità",
+    "analyzingPdfContent": "Analisi del contenuto PDF in corso...",
+    "askDocument": "Chiedi informazioni su questo documento...",
     "flashcard": {
       "createFlashcard": "Crea Flashcard"
     },

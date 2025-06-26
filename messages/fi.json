@@ -310,6 +310,8 @@
     "switchedToHighQualityMode": "Vaihdettiin korkealaatuiseen tilaan.",
     "fast": "Nopea",
     "highQuality": "Korkea laatu",
+    "analyzingPdfContent": "Analysoidaan PDF-sisältöä...",
+    "askDocument": "Kysy tästä asiakirjasta...",
     "flashcard": {
       "createFlashcard": "Luo Muistikortti"
     },

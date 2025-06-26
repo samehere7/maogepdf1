@@ -345,6 +345,8 @@
     "switchedToHighQualityMode": "ಉನ್ನತ ಗುಣಮಟ್ಟದ ಮೋಡ್‌ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.",
     "fast": "ವೇಗದ",
     "highQuality": "ಉನ್ನತ ಗುಣಮಟ್ಟ",
+    "analyzingPdfContent": "PDF ವಿಷಯವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
+    "askDocument": "ಈ ದಾಖಲೆಯ ಬಗ್ಗೆ ಕೇಳಿ...",
     "flashcard": {
       "createFlashcard": "ಫ್ಲ್ಯಾಶ್‌ಕಾರ್ಡ್ ರಚಿಸಿ"
     },

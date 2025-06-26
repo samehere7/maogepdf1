@@ -327,6 +327,8 @@
     "switchedToHighQualityMode": "Đã chuyển sang chế độ chất lượng cao.",
     "fast": "Nhanh",
     "highQuality": "Chất lượng cao",
+    "analyzingPdfContent": "Đang phân tích nội dung PDF...",
+    "askDocument": "Hỏi về tài liệu này...",
     "flashcard": {
       "createFlashcard": "Tạo thẻ ghi nhớ"
     },

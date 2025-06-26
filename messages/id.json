@@ -327,6 +327,8 @@
     "switchedToHighQualityMode": "Beralih ke mode kualitas tinggi.",
     "fast": "Cepat",
     "highQuality": "Kualitas tinggi",
+    "analyzingPdfContent": "Menganalisis konten PDF...",
+    "askDocument": "Tanya tentang dokumen ini...",
     "flashcard": {
       "createFlashcard": "Buat kartu belajar"
     },
