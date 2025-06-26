@@ -40,7 +40,18 @@ function getLanguageInstruction(locale: string): string {
     'th': 'กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
     'vi': 'Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
     'tr': 'Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
-    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.'
+    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.',
+    'bn': 'অনুগ্রহ করে বাংলায় উত্তর দিন, সংক্ষিপ্ত এবং ব্যবহারিক রাখুন।',
+    'da': 'Svar venligst på dansk, hold det kortfattet og praktisk.',
+    'fi': 'Vastaa suomeksi, pidä se ytimekkäänä ja käytännöllisenä.',
+    'id': 'Harap jawab dalam bahasa Indonesia, jaga agar ringkas dan praktis.',
+    'kn': 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಪ್ರಾಯೋಗಿಕವಾಗಿ ಇರಿಸಿ।',
+    'ms': 'Sila jawab dalam bahasa Melayu, pastikan ringkas dan praktikal.',
+    'nl': 'Antwoord alstublieft in het Nederlands, houd het beknopt en praktisch.',
+    'no': 'Vennligst svar på norsk, hold det konsist og praktisk.',
+    'pa': 'ਕਿਰਪਾ ਕਰਕੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ, ਇਸਨੂੰ ਸੰਖੇਪ ਅਤੇ ਵਿਹਾਰਕ ਰੱਖੋ।',
+    'pl': 'Proszę odpowiedzieć po polsku, zachowując zwięzłość i praktyczność.',
+    'sv': 'Vänligen svara på svenska, håll det kortfattat och praktiskt.'
   };
   
   return instructions[locale as keyof typeof instructions] || instructions['en'];

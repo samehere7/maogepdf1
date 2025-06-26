@@ -57,7 +57,18 @@ function getLanguageInstruction(locale: string): string {
     'th': 'กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
     'vi': 'Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
     'tr': 'Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
-    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.'
+    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.',
+    'bn': 'অনুগ্রহ করে বাংলায় উত্তর দিন, সংক্ষিপ্ত এবং ব্যবহারিক রাখুন।',
+    'da': 'Svar venligst på dansk, hold det kortfattet og praktisk.',
+    'fi': 'Vastaa suomeksi, pidä se ytimekkäänä ja käytännöllisenä.',
+    'id': 'Harap jawab dalam bahasa Indonesia, jaga agar ringkas dan praktis.',
+    'kn': 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಪ್ರಾಯೋಗಿಕವಾಗಿ ಇರಿಸಿ।',
+    'ms': 'Sila jawab dalam bahasa Melayu, pastikan ringkas dan praktikal.',
+    'nl': 'Antwoord alstublieft in het Nederlands, houd het beknopt en praktisch.',
+    'no': 'Vennligst svar på norsk, hold det konsist og praktisk.',
+    'pa': 'ਕਿਰਪਾ ਕਰਕੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ, ਇਸਨੂੰ ਸੰਖੇਪ ਅਤੇ ਵਿਹਾਰਕ ਰੱਖੋ।',
+    'pl': 'Proszę odpowiedzieć po polsku, zachowując zwięzłość i praktyczność.',
+    'sv': 'Vänligen svara på svenska, håll det kortfattat och praktiskt.'
   };
   
   return instructions[locale as keyof typeof instructions] || instructions['en'];
@@ -1101,6 +1112,116 @@ ${languageInstruction}`;
         '申し訳ありませんが、現在この質問にお答えできません。異なるキーワードで質問するか、ネットワーク接続を確認してください。',
         'システムに一時的な問題が発生しています。後でもう一度お試しいただくか、より具体的な質問をしてください。',
         '申し訳ありませんが、ご質問を処理できません。質問を言い換えるか、テクニカルサポートにお問い合わせください。'
+      ],
+      'es': [
+        'Lo siento, no puedo responder esta pregunta en este momento. Intenta preguntar con palabras clave diferentes o verifica tu conexión de red.',
+        'El sistema está experimentando problemas temporales. Inténtalo de nuevo más tarde o haz una pregunta más específica.',
+        'Lo siento, no puedo procesar tu pregunta. Puedes intentar reformularla o contactar al soporte técnico.'
+      ],
+      'fr': [
+        'Désolé, je ne peux pas répondre à cette question pour le moment. Essayez de poser la question avec des mots-clés différents ou vérifiez votre connexion réseau.',
+        'Le système rencontre temporairement des problèmes. Veuillez réessayer plus tard ou poser une question plus spécifique.',
+        'Désolé, je ne peux pas traiter votre question. Vous pouvez essayer de la reformuler ou contacter le support technique.'
+      ],
+      'de': [
+        'Entschuldigung, ich kann diese Frage momentan nicht beantworten. Versuchen Sie es mit anderen Stichwörtern oder überprüfen Sie Ihre Netzverbindung.',
+        'Das System hat vorübergehend Probleme. Bitte versuchen Sie es später erneut oder stellen Sie eine spezifischere Frage.',
+        'Entschuldigung, ich kann Ihre Frage nicht verarbeiten. Sie können versuchen, sie umzuformulieren oder den technischen Support zu kontaktieren.'
+      ],
+      'it': [
+        'Mi dispiace, al momento non posso rispondere a questa domanda. Prova a chiedere con parole chiave diverse o controlla la tua connessione di rete.',
+        'Il sistema sta riscontrando problemi temporanei. Riprova più tardi o fai una domanda più specifica.',
+        'Mi dispiace, non posso elaborare la tua domanda. Puoi provare a riformularla o contattare il supporto tecnico.'
+      ],
+      'pt-BR': [
+        'Desculpe, não posso responder a esta pergunta no momento. Tente perguntar com palavras-chave diferentes ou verifique sua conexão de rede.',
+        'O sistema está enfrentando problemas temporários. Tente novamente mais tarde ou faça uma pergunta mais específica.',
+        'Desculpe, não posso processar sua pergunta. Você pode tentar reformulá-la ou entrar em contato com o suporte técnico.'
+      ],
+      'ru': [
+        'Извините, я не могу ответить на этот вопрос в данный момент. Попробуйте задать вопрос с другими ключевыми словами или проверьте подключение к сети.',
+        'В системе временные проблемы. Попробуйте еще раз позже или задайте более конкретный вопрос.',
+        'Извините, я не могу обработать ваш вопрос. Вы можете попробовать переформулировать его или обратиться в техническую поддержку.'
+      ],
+      'hi': [
+        'खुशफ़हमी, मैं इस समय इस सवाल का जवाब नहीं दे सकता। अलग कीवर्ड के साथ पूछने की कोशिश करें या अपने नेटवर्क कनेक्शन की जांच करें।',
+        'सिस्टम में अस्थायी समस्याएं हैं। बाद में फिर कोशिश करें या अधिक विशिष्ट सवाल पूछें।',
+        'खुशफ़हमी, मैं आपके सवाल को प्रोसेस नहीं कर सकता। आप इसे दोबारा शब्दों में रखने की कोशिश कर सकते हैं या तकनीकी सहायता से संपर्क कर सकते हैं।'
+      ],
+      'th': [
+        'ขออพัย ตอนนี้ไม่สามารถตอบคำถามนี้ได้ กรุณาลองถามด้วยคำสำคัญที่ต่างออกไป หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',
+        'ระบบมีปัญหาชั่วคราว กรุณาลองใหม่ในภายหลัง หรือถามคำถามที่เฉพาะเจาะจงมากขึ้น',
+        'ขออไว ไม่สามารถประมวลผลคำถามของคุณได้ คุณสามารถลองกลับคำถามใหม่ หรือติดต่อฝ่ายสนับสนุนเทคนิค'
+      ],
+      'vi': [
+        'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Hãy thử hỏi với từ khóa khác hoặc kiểm tra kết nối mạng.',
+        'Hệ thống đang gặp sự cố tạm thời. Vui lòng thử lại sau hoặc đặt câu hỏi cụ thể hơn.',
+        'Xin lỗi, tôi không thể xử lý câu hỏi của bạn. Bạn có thể thử diễn đạt lại hoặc liên hệ hỗ trợ kỹ thuật.'
+      ],
+      'tr': [
+        'Üzgünüm, şu anda bu soruyu yanıtlayamıyorum. Farklı anahtar kelimelerle sormayı deneyin veya ağ bağlantınızı kontrol edin.',
+        'Sistem geçici sorunlar yaşıyor. Lütfen daha sonra tekrar deneyin veya daha spesifik bir soru sorun.',
+        'Üzgünüm, sorunuzu işleyemiyorum. Yeniden ifade etmeyi deneyebilir veya teknik destek ile iletişime geçebilirsiniz.'
+      ],
+      'ar': [
+        'آسف، لا أستطيع الإجابة على هذا السؤال في الوقت الحالي. حاول السؤال بكلمات مفتاحية مختلفة أو تحقق من اتصال الشبكة.',
+        'النظام يواجه مشاكل مؤقتة. يرجى المحاولة مرة أخرى لاحقاً أو طرح سؤال أكثر تحديداً.',
+        'آسف، لا أستطيع معالجة سؤالك. يمكنك محاولة إعادة صياغته أو الاتصال بالدعم التقني.'
+      ],
+      'bn': [
+        'দুঃখিত, আমি এই মুহূর্তে এই প্রশ্নের উত্তর দিতে পারছি না। অন্য কীওয়ার্ড দিয়ে প্রশ্ন করার চেষ্টা করুন বা নেটওয়ার্ক সংযোগ পরীক্ষা করুন।',
+        'সিস্টেমে সাময়িক সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন বা আরো নির্দিষ্ট প্রশ্ন করুন।',
+        'দুঃখিত, আমি আপনার প্রশ্ন প্রক্রিয়া করতে পারছি না। আপনি এটি পুনরায় বাক্যে রাখার চেষ্টা করতে পারেন বা প্রযুক্তিগত সহায়তার সাথে যোগাযোগ করতে পারেন।'
+      ],
+      'da': [
+        'Undskyld, jeg kan ikke besvare dette spørgsmål lige nu. Prøv at spørge med andre nøgleord eller tjek din netværksforbindelse.',
+        'Systemet oplever midlertidige problemer. Prøv igen senere eller stil et mere specifikt spørgsmål.',
+        'Undskyld, jeg kan ikke behandle dit spørgsmål. Du kan prøve at omformulere det eller kontakte teknisk support.'
+      ],
+      'fi': [
+        'Anteeksi, en voi vastata tähän kysymykseen tällä hetkellä. Kokeile kysyä eri avainsanoilla tai tarkista verkkoyhteytesi.',
+        'Järjestelmässä on tilapäisiä ongelmia. Yritä myöhemmin uudelleen tai esitä tarkempi kysymys.',
+        'Anteeksi, en voi käsitellä kysymystäsi. Voit yrittää muotoilla sen uudelleen tai ottaa yhteyttä tekniseen tukeen.'
+      ],
+      'id': [
+        'Maaf, saya tidak dapat menjawab pertanyaan ini saat ini. Coba tanyakan dengan kata kunci yang berbeda atau periksa koneksi jaringan Anda.',
+        'Sistem mengalami masalah sementara. Silakan coba lagi nanti atau ajukan pertanyaan yang lebih spesifik.',
+        'Maaf, saya tidak dapat memproses pertanyaan Anda. Anda dapat mencoba merumuskannya kembali atau menghubungi dukungan teknis.'
+      ],
+      'kn': [
+        'ಕ್ಷಮಿಸಿ, ಈ ಸಮಯದಲ್ಲಿ ನಾನು ಈ ಪ್ರಶ್ನೆಗೆ ಉತ್ತರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ವಿಭಿನ್ನ ಮುಖ್ಯಪದಗಳೊಂದಿಗೆ ಕೇಳಲು ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ.',
+        'ಸಿಸ್ಟಂ ತಾತ್ಕಾಲಿಕ ಸಮಸ್ಯೆಗಳನ್ನು ಎದುರಿಸುತ್ತಿದೆ. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಹೆಚ್ಚು ನಿರ್ದಿಷ್ಟ ಪ್ರಶ್ನೆ ಕೇಳಿ.',
+        'ಕ್ಷಮಿಸಿ, ನಾನು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನೀವು ಅದನ್ನು ಮರುಹೇಳಲು ಪ್ರಯತ್ನಿಸಬಹುದು ಅಥವಾ ತಾಂತ್ರಿಕ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಬಹುದು.'
+      ],
+      'ms': [
+        'Maaf, saya tidak dapat menjawab soalan ini pada masa ini. Cuba tanya dengan kata kunci yang berbeza atau periksa sambungan rangkaian anda.',
+        'Sistem mengalami masalah sementara. Sila cuba lagi kemudian atau tanya soalan yang lebih spesifik.',
+        'Maaf, saya tidak dapat memproses soalan anda. Anda boleh cuba merumuskannya semula atau hubungi sokongan teknikal.'
+      ],
+      'nl': [
+        'Sorry, ik kan deze vraag op dit moment niet beantwoorden. Probeer te vragen met andere trefwoorden of controleer uw netwerkverbinding.',
+        'Het systeem ondervindt tijdelijke problemen. Probeer het later opnieuw of stel een meer specifieke vraag.',
+        'Sorry, ik kan uw vraag niet verwerken. U kunt proberen het te herformuleren of contact opnemen met technische ondersteuning.'
+      ],
+      'no': [
+        'Beklager, jeg kan ikke svare på dette spørsmålet akkurat nå. Prøv å spørre med andre nøkkelord eller sjekk nettverkstilkoblingen din.',
+        'Systemet opplever midlertidige problemer. Prøv igjen senere eller still et mer spesifikt spørsmål.',
+        'Beklager, jeg kan ikke behandle spørsmålet ditt. Du kan prøve å omformulere det eller kontakte teknisk støtte.'
+      ],
+      'pa': [
+        'ਮਾਫ਼ ਕਰਨਾ, ਮੈਂ ਇਸ ਸਮੇਂ ਇਸ ਸਵਾਲ ਦਾ ਜਵਾਬ ਨਹੀਂ ਦੇ ਸਕਦਾ। ਵੱਖਰੇ ਮੁੱਖ ਸ਼ਬਦਾਂ ਨਾਲ ਪੁੱਛਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਆਪਣੇ ਨੈੱਟਵਰਕ ਕੁਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ।',
+        'ਸਿਸਟਮ ਵਿੱਚ ਅਸਥਾਈ ਸਮੱਸਿਆਵਾਂ ਹਨ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਵਧੇਰੇ ਖਾਸ ਸਵਾਲ ਪੁੱਛੋ।',
+        'ਮਾਫ਼ ਕਰਨਾ, ਮੈਂ ਤੁਹਾਡੇ ਸਵਾਲ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕਰ ਸਕਦਾ। ਤੁਸੀਂ ਇਸਨੂੰ ਦੁਬਾਰਾ ਸ਼ਬਦਾਂ ਵਿੱਚ ਰੱਖਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਤਕਨੀਕੀ ਸਹਾਇਤਾ ਨਾਲ ਸੰਪਰਕ ਕਰ ਸਕਦੇ ਹੋ।'
+      ],
+      'pl': [
+        'Przepraszam, nie mogę odpowiedzieć na to pytanie w tej chwili. Spróbuj zapytać używając innych słów kluczowych lub sprawdź połączenie z siecią.',
+        'System napotyka tymczasowe problemy. Spróbuj ponownie później lub zadaj bardziej konkretne pytanie.',
+        'Przepraszam, nie mogę przetworzyć twojego pytania. Możesz spróbować je przeformułować lub skontaktować się z pomocą techniczną.'
+      ],
+      'sv': [
+        'Förlåt, jag kan inte svara på denna fråga just nu. Försök fråga med andra nyckelord eller kontrollera din nätverksanslutning.',
+        'Systemet upplever tillfälliga problem. Försök igen senare eller ställ en mer specifik fråga.',
+        'Förlåt, jag kan inte bearbeta din fråga. Du kan försöka omformulera den eller kontakta teknisk support.'
       ]
     };
     
