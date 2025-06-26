@@ -233,7 +233,10 @@
     "freeAskTip": "💡 Bạn cũng có thể hỏi tự do trong hộp nhập ở bên dưới, AI sẽ trả lời dựa trên nội dung PDF",
     "analyzingPdf": "Đang phân tích \"{fileName}\", chuẩn bị câu hỏi đề xuất thông minh cho bạn...",
     "generatingQuestions": "Đang tạo câu hỏi đề xuất...",
-    "afterGenerationTip": "💡 Sau khi tạo, bạn có thể nhấp vào câu hỏi để bắt đầu trò chuyện ngay lập tức"
+    "afterGenerationTip": "💡 Sau khi tạo, bạn có thể nhấp vào câu hỏi để bắt đầu trò chuyện ngay lập tức",
+    "question1": "Tóm tắt nội dung chính của PDF",
+    "question2": "Liệt kê các khái niệm hoặc thuật ngữ chính trong tài liệu",
+    "question3": "Phân tích cấu trúc hoặc tổ chức của tài liệu"
   },
   "share": {
     "shareChat": "Chia sẻ trò chuyện",

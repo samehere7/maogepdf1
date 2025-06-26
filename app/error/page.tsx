@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useUser } from '@/components/UserProvider'
 import { useEffect, Suspense } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 function ErrorContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const locale = useLocale()
   const { profile, loading } = useUser()
   const t = useTranslations('error')
   const errorMessage = searchParams.get('message') || t('unknownError')
@@ -19,7 +20,7 @@ function ErrorContent() {
     if (!loading && profile && errorMessage.includes(t('authorizationFailed'))) {
       console.log('用户已登录但在错误页面，自动重定向到首页')
       setTimeout(() => {
-        router.push('/')
+        router.push(`/${locale}`)
       }, 2000)
     }
   }, [profile, loading, errorMessage, router, t])
@@ -57,7 +58,7 @@ function ErrorContent() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="flex justify-center">
-            <Link href="/">
+            <Link href={`/${locale}`}>
               <Button>
                 {t('returnHome')}
               </Button>

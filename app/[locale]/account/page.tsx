@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from "next-intl"
 export default function AccountPage() {
   const t = useTranslations()
   const router = useRouter()
+  const locale = useLocale()
   const [userPdfs, setUserPdfs] = useState<any[]>([])
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -26,7 +27,7 @@ export default function AccountPage() {
     // Check if user is logged in
     const savedUserInfo = JSON.parse(localStorage.getItem("userInfo") || "{}")
     if (!savedUserInfo.isLoggedIn) {
-      router.push("/")
+      router.push(`/${locale}`)
       return
     }
 
@@ -55,7 +56,7 @@ export default function AccountPage() {
 
   const handleManageSubscription = () => {
     // Open subscription management page or modal
-    router.push("/pricing")
+    router.push(`/${locale}/pricing`)
   }
 
   return (
@@ -139,7 +140,7 @@ export default function AccountPage() {
                       {new Date(pdf.uploadDate).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm">
-                      <a className="text-[#3b82f6] hover:text-[#2563eb] font-medium" href={`/analysis/${pdf.id}`}>
+                      <a className="text-[#3b82f6] hover:text-[#2563eb] font-medium" href={`/${locale}/analysis/${pdf.id}`}>
                         {t("viewAnalysis")}
                       </a>
                     </td>

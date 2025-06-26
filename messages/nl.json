@@ -217,7 +217,10 @@
     "freeAskTip": "💡 Je kunt ook vrij vragen stellen in het invoerveld hieronder, AI zal antwoorden gebaseerd op PDF-inhoud",
     "analyzingPdf": "Analyseren van \"{fileName}\", genereren van slimme aanbevelingsvragen voor jou...",
     "generatingQuestions": "Genereren van aanbevelingsvragen...",
-    "afterGenerationTip": "💡 Na voltooiing van generatie kun je op vragen klikken om snel een gesprek te starten"
+    "afterGenerationTip": "💡 Na voltooiing van generatie kun je op vragen klikken om snel een gesprek te starten",
+    "question1": "Vat de hoofdinhoud van de PDF samen",
+    "question2": "Som de kernconcepten of termen op",
+    "question3": "Analyseer de structuur of indeling van het document"
   },
   "share": {
     "shareChat": "Chat delen",

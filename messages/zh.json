@@ -258,7 +258,10 @@
     "freeAskTip": "💡 你也可以在下方输入框自由提问，AI会基于PDF内容为你解答",
     "analyzingPdf": "正在分析 \"{fileName}\"，马上为你生成智能推荐问题...",
     "generatingQuestions": "正在生成推荐问题...",
-    "afterGenerationTip": "💡 生成完成后，你可以点击问题快速开始对话"
+    "afterGenerationTip": "💡 生成完成后，你可以点击问题快速开始对话",
+    "question1": "总结本PDF的主要内容",
+    "question2": "列出文档中的关键概念或术语",
+    "question3": "文档的结构或章节安排是怎样的？"
   },
   "share": {
     "shareChat": "分享聊天",

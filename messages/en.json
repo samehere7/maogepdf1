@@ -260,7 +260,10 @@
     "freeAskTip": "💡 You can also ask freely in the input box below, AI will answer based on PDF content",
     "analyzingPdf": "Analyzing \"{fileName}\", generating smart recommendation questions for you...",
     "generatingQuestions": "Generating recommendation questions...",
-    "afterGenerationTip": "💡 After generation is complete, you can click questions to quickly start a conversation"
+    "afterGenerationTip": "💡 After generation is complete, you can click questions to quickly start a conversation",
+    "question1": "Summarize the main content of this PDF",
+    "question2": "List the key concepts or terms in the document",
+    "question3": "What is the structure or organization of the document?"
   },
   "share": {
     "shareChat": "Share Chat",

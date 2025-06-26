@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { Pencil, Trash2, FolderIcon, Share, Brain } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -24,6 +25,8 @@ interface SidebarProps {
 
 export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }: SidebarProps) {
   const router = useRouter()
+  const params = useParams()
+  const locale = params?.locale as string || 'en'
   const fileInputRef = useRef<HTMLInputElement>(null)
   const t = useTranslations('pdf')
   const tc = useTranslations('common')
@@ -154,7 +157,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           await loadPDFsFromAPI()
           
           // 跳转到分析页面
-          router.push(`/analysis/${result.pdf.id}`)
+          router.push(`/${locale}/analysis/${result.pdf.id}`)
         } else {
           const error = await response.json()
           alert(`${t('uploadError')}: ${error.error || tc('error')}`)
@@ -432,7 +435,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     setMousePosition(null)
     setDraggedPdfId(null)
     
-    router.push(`/analysis/${pdfId}`)
+    router.push(`/${locale}/analysis/${pdfId}`)
   }
 
   // 处理分享按钮点击
@@ -462,7 +465,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
       {/* 顶部标题 */}
       <div 
         className="flex items-center gap-2 p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800/50 transition-colors"
-        onClick={() => router.push('/')}
+        onClick={() => router.push(`/${locale}`)}
       >
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-purple-600 text-white font-bold">
           P

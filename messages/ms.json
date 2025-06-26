@@ -233,7 +233,10 @@
     "freeAskTip": "💡 Anda juga boleh bertanya secara bebas dalam kotak input di bawah, AI akan menjawab berdasarkan kandungan PDF",
     "analyzingPdf": "Sedang menganalisis \"{fileName}\", menyediakan soalan cadangan pintar untuk anda...",
     "generatingQuestions": "Sedang menjana soalan cadangan...",
-    "afterGenerationTip": "💡 Selepas dijana, anda boleh klik pada soalan untuk mula sembang serta-merta"
+    "afterGenerationTip": "💡 Selepas dijana, anda boleh klik pada soalan untuk mula sembang serta-merta",
+    "question1": "Ringkaskan kandungan utama PDF",
+    "question2": "Senaraikan konsep atau istilah utama dalam dokumen",
+    "question3": "Analisis struktur atau organisasi dokumen"
   },
   "share": {
     "shareChat": "Kongsi sembang",

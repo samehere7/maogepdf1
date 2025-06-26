@@ -26,8 +26,8 @@ export default function SharePage() {
 
       if (shareId) {
         console.log('分享页面重定向:', { shareId, params })
-        // 重定向到首页，携带分享ID参数
-        const redirectUrl = `/?share=${encodeURIComponent(shareId)}`
+        // 重定向到默认语言首页，携带分享ID参数
+        const redirectUrl = `/en?share=${encodeURIComponent(shareId)}`
         console.log('重定向到:', redirectUrl)
         router.replace(redirectUrl)
       } else {
@@ -59,7 +59,7 @@ export default function SharePage() {
           
           <div className="space-y-2">
             <Button 
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/en')}
               className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed]"
             >
               返回首页

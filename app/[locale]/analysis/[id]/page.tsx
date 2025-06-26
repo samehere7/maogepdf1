@@ -44,6 +44,28 @@ export default function AnalysisPage() {
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations()
+  
+  // Locale防护机制
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname
+      const pathSegments = currentPath.split('/').filter(Boolean)
+      const firstSegment = pathSegments[0]
+      
+      // 检查URL是否包含有效的locale前缀
+      const validLocales = ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt-BR', 'ru', 'it', 'nl', 'sv', 'da', 'no', 'fi', 'pl', 'tr', 'hi', 'bn', 'pa', 'kn', 'th', 'vi', 'id', 'ms']
+      const hasValidLocale = validLocales.includes(firstSegment)
+      
+      // 如果URL缺少locale前缀，执行重定向
+      if (!hasValidLocale && pathSegments.length >= 2 && pathSegments[0] === 'analysis') {
+        const targetLocale = locale || 'en'
+        const newPath = `/${targetLocale}${currentPath}`
+        console.log('[Locale防护] 检测到缺少locale前缀，重定向到:', newPath)
+        window.location.href = newPath
+        return
+      }
+    }
+  }, [locale])
   const [user, setUser] = useState<any>(null)
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -126,7 +148,7 @@ export default function AnalysisPage() {
         console.log('[分析页] 早期检测到flashcard参数，标记需要打开闪卡');
         setShouldOpenFlashcard(true);
         // 清除URL参数
-        window.history.replaceState({}, '', `/analysis/${params.id}`);
+        window.history.replaceState({}, '', `/${locale}/analysis/${params.id}`);
       }
     }
   }, [params.id]);
@@ -230,10 +252,10 @@ export default function AnalysisPage() {
         
         if (nextPdfId) {
           // 导航到下一个PDF
-          router.push(`/analysis/${nextPdfId}`);
+          router.push(`/${locale}/analysis/${nextPdfId}`);
         } else {
           // 没有其他PDF了，回到主页
-          router.push('/');
+          router.push(`/${locale}`);
         }
       }
     };
@@ -268,12 +290,12 @@ export default function AnalysisPage() {
 
   // 切换到其他PDF
   const switchToPdf = (id: string) => {
-    router.push(`/analysis/${id}`)
+    router.push(`/${locale}/analysis/${id}`)
   }
 
   // 上传新PDF
   const uploadNewPdf = () => {
-    router.push('/')
+    router.push(`/${locale}`)
   }
 
   // PDF 预览功能
@@ -752,7 +774,7 @@ export default function AnalysisPage() {
       <div className="flex flex-col items-center justify-center h-screen">
         <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
         <p className="text-gray-600 mb-6">{pdfError}</p>
-        <Button onClick={() => window.location.href = "/"}>{t('backToHome')}</Button>
+        <Button onClick={() => window.location.href = `/${locale}`}>{t('backToHome')}</Button>
       </div>
     );
   }
@@ -762,7 +784,7 @@ export default function AnalysisPage() {
       <div className="flex flex-col items-center justify-center h-screen">
         <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
         <p className="text-gray-600 mb-6">{t('cannotFindSpecifiedPdf')}</p>
-        <Button onClick={() => window.location.href = "/"}>{t('backToHome')}</Button>
+        <Button onClick={() => window.location.href = `/${locale}`}>{t('backToHome')}</Button>
       </div>
     );
   }
@@ -779,7 +801,7 @@ export default function AnalysisPage() {
               setFlashcardView('manage');
             } else {
               // 如果是其他PDF的闪卡，跳转到对应页面并打开闪卡
-              router.push(`/analysis/${pdfId}?flashcard=true`);
+              router.push(`/${locale}/analysis/${pdfId}?flashcard=true`);
             }
           }}
         />

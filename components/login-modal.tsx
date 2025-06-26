@@ -50,9 +50,9 @@ export function LoginModal({ children }: LoginModalProps) {
           </Button>
           <p className="text-xs text-slate-400 text-center">
             {t("termsAndConditionsPrompt")}
-            <a href="/terms" className="underline hover:text-slate-500">{tf("termsOfService")}</a>
+            <a href={`/${locale}/terms`} className="underline hover:text-slate-500">{tf("termsOfService")}</a>
             {t('and')}
-            <a href="/privacy" className="underline hover:text-slate-500">{tf("privacyPolicy")}</a>
+            <a href={`/${locale}/privacy`} className="underline hover:text-slate-500">{tf("privacyPolicy")}</a>
             .
           </p>
         </div>

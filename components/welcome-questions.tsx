@@ -39,8 +39,10 @@ export function WelcomeQuestions({
     return () => clearTimeout(timer);
   }, []);
 
-  const handleQuestionClick = (questionText: string) => {
-    onQuestionClick(questionText);
+  const handleQuestionClick = (questionKey: string) => {
+    // 获取翻译后的文本
+    const translatedText = t(questionKey);
+    onQuestionClick(translatedText);
     // 点击问题后隐藏欢迎界面
     setIsVisible(false);
     if (onClose) {
@@ -134,7 +136,7 @@ export function WelcomeQuestions({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium leading-relaxed">
-                          {question.text}
+                          {t(question.text)}
                         </p>
                       </div>
                     </div>

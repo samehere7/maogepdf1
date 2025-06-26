@@ -109,7 +109,7 @@ export default function ShareReceiveModal({ isOpen, onClose, shareId, isLoggedIn
       if (result.success) {
         // 成功接收，跳转到PDF页面
         onClose()
-        router.push(`/analysis/${result.pdfId}`)
+        router.push(`/${locale}/analysis/${result.pdfId}`)
       } else {
         throw new Error(result.message || '接收分享失败')
       }

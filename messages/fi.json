@@ -216,7 +216,10 @@
     "freeAskTip": "💡 Voit myös kysyä vapaasti alla olevassa syöttökentässä, tekoäly vastaa PDF-sisällön perusteella",
     "analyzingPdf": "Analysoidaan \"{fileName}\", luodaan älykkäitä suosituskysymyksiä sinulle...",
     "generatingQuestions": "Luodaan suosituskysymyksiä...",
-    "afterGenerationTip": "💡 Luomisen valmistuttua voit klikata kysymyksiä aloittaaksesi nopeasti keskustelun"
+    "afterGenerationTip": "💡 Luomisen valmistuttua voit klikata kysymyksiä aloittaaksesi nopeasti keskustelun",
+    "question1": "Tiivistä PDF:n pääsisältö",
+    "question2": "Luettele asiakirjan avainkäsitteet tai termit",
+    "question3": "Analysoi asiakirjan rakenne tai järjestely"
   },
   "share": {
     "shareChat": "Jaa Keskustelu",

@@ -232,7 +232,10 @@
     "freeAskTip": "💡 Sie können auch frei im Eingabefeld unten fragen, die KI wird basierend auf dem PDF-Inhalt antworten",
     "analyzingPdf": "Analysiere \"{fileName}\", generiere intelligente Empfehlungsfragen für Sie...",
     "generatingQuestions": "Generiere Empfehlungsfragen...",
-    "afterGenerationTip": "💡 Nach Abschluss der Generierung können Sie auf Fragen klicken, um schnell ein Gespräch zu beginnen"
+    "afterGenerationTip": "💡 Nach Abschluss der Generierung können Sie auf Fragen klicken, um schnell ein Gespräch zu beginnen",
+    "question1": "Fassen Sie den Hauptinhalt der PDF zusammen",
+    "question2": "Listen Sie die Schlüsselkonzepte oder Begriffe auf",
+    "question3": "Analysieren Sie die Struktur oder Gliederung des Dokuments"
   },
   "share": {
     "shareChat": "Chat teilen",

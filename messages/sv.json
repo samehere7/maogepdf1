@@ -235,7 +235,10 @@
     "freeAskTip": "💡 Du kan också fråga fritt i inmatningsrutan nedan, AI kommer att svara baserat på PDF-innehållet",
     "analyzingPdf": "Analyserar \"{fileName}\", genererar smarta rekommendationsfrågor för dig...",
     "generatingQuestions": "Genererar rekommendationsfrågor...",
-    "afterGenerationTip": "💡 Efter att genereringen är klar kan du klicka på frågor för att snabbt starta en konversation"
+    "afterGenerationTip": "💡 Efter att genereringen är klar kan du klicka på frågor för att snabbt starta en konversation",
+    "question1": "Sammanfatta PDF:ens huvudinnehåll",
+    "question2": "Lista nyckelbegrepp eller termer i dokumentet",
+    "question3": "Analysera dokumentets struktur eller organisation"
   },
   "share": {
     "shareChat": "Dela Chatt",

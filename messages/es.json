@@ -236,7 +236,10 @@
     "freeAskTip": "💡 También puedes preguntar libremente en el cuadro de entrada de abajo, la IA responderá basándose en el contenido del PDF",
     "analyzingPdf": "Analizando \"{fileName}\", generando preguntas de recomendación inteligentes para ti...",
     "generatingQuestions": "Generando preguntas de recomendación...",
-    "afterGenerationTip": "💡 Una vez completada la generación, puedes hacer clic en las preguntas para iniciar rápidamente una conversación"
+    "afterGenerationTip": "💡 Una vez completada la generación, puedes hacer clic en las preguntas para iniciar rápidamente una conversación",
+    "question1": "Resume el contenido principal del PDF",
+    "question2": "Lista los conceptos clave o términos del documento",
+    "question3": "Analiza la estructura o organización del documento"
   },
   "share": {
     "shareChat": "Compartir Chat",

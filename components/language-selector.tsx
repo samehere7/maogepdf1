@@ -47,7 +47,7 @@ export function LanguageSelector() {
     return path.replace(/\/+/g, '/').replace(/\/$/, '') || '/'
   }
 
-  // FIXED: 改进的 locale 检测逻辑
+  // ENHANCED: 增强的 locale 检测逻辑
   const actualLocale = (() => {
     const pathSegments = pathname.split('/').filter(Boolean)
     const firstSegment = pathSegments[0]
@@ -60,16 +60,35 @@ export function LanguageSelector() {
     console.log('🔍 Language Selector - Is valid locale:', isValidLocale)
     console.log('🔍 Language Selector - useLocale() returns:', locale)
     
+    // 优先级1：URL路径中的有效locale
     if (isValidLocale) {
       console.log('🔍 Language Selector - Detected locale from path:', firstSegment)
       return firstSegment
-    } else {
-      // For localePrefix: 'always', all paths should have locale prefix
-      // If no valid locale in path, default to 'en'
-      const detectedLocale = 'en'
-      console.log('🔍 Language Selector - Fallback locale:', detectedLocale)
-      return detectedLocale
     }
+    
+    // 优先级2：next-intl的useLocale hook
+    if (locale && languages.some(lang => lang.code === locale)) {
+      console.log('🔍 Language Selector - Using locale from useLocale hook:', locale)
+      return locale
+    }
+    
+    // 优先级3：浏览器语言检测
+    if (typeof window !== 'undefined') {
+      const browserLang = navigator.language.toLowerCase()
+      const matchedBrowserLang = languages.find(lang => 
+        browserLang.startsWith(lang.code.toLowerCase()) || 
+        lang.code.toLowerCase().startsWith(browserLang)
+      )
+      if (matchedBrowserLang) {
+        console.log('🔍 Language Selector - Detected from browser:', matchedBrowserLang.code)
+        return matchedBrowserLang.code
+      }
+    }
+    
+    // 优先级4：默认回退到英文
+    const detectedLocale = 'en'
+    console.log('🔍 Language Selector - Final fallback locale:', detectedLocale)
+    return detectedLocale
   })()
 
   const currentLanguage = languages.find((lang) => lang.code === actualLocale) || languages[0]

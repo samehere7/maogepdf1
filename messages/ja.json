@@ -252,7 +252,10 @@
     "freeAskTip": "💡 下の入力ボックスで自由に質問することもできます。AIがPDF内容に基づいて回答します",
     "analyzingPdf": "\"{fileName}\"を分析中、すぐにスマートな推奨質問を生成します...",
     "generatingQuestions": "推奨質問を生成中...",
-    "afterGenerationTip": "💡 生成完了後、質問をクリックして素早く会話を開始できます"
+    "afterGenerationTip": "💡 生成完了後、質問をクリックして素早く会話を開始できます",
+    "question1": "このPDFの主な内容を要約してください",
+    "question2": "文書の重要な概念や用語を列挙してください",
+    "question3": "文書の構造や章立てはどのようになっていますか？"
   },
   "share": {
     "shareChat": "チャットを共有",

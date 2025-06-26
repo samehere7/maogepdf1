@@ -224,57 +224,32 @@ function isCommonEnglishWord(word: string): boolean {
 }
 
 /**
- * 生成通用引导问题（不再基于文档分析）
+ * 生成通用引导问题（使用翻译键）
  */
 export function generateRecommendedQuestions(analysis: DocumentAnalysis): GeneratedQuestion[] {
-  const { language } = analysis;
+  // 返回通用问题结构，文本内容将由组件通过翻译系统获取
+  const universalQuestions: GeneratedQuestion[] = [
+    {
+      id: 'q1',
+      text: 'welcome.question1', // 翻译键
+      icon: '📋',
+      category: 'summary' as const
+    },
+    {
+      id: 'q2',
+      text: 'welcome.question2', // 翻译键
+      icon: '💡',
+      category: 'concept' as const
+    },
+    {
+      id: 'q3',
+      text: 'welcome.question3', // 翻译键
+      icon: '📚',
+      category: 'process' as const
+    }
+  ];
   
-  // 通用引导问题模板
-  const universalQuestions = {
-    zh: [
-      {
-        id: 'q1',
-        text: '总结本PDF的主要内容',
-        icon: '📋',
-        category: 'summary' as const
-      },
-      {
-        id: 'q2',
-        text: '列出文档中的关键概念或术语',
-        icon: '💡',
-        category: 'concept' as const
-      },
-      {
-        id: 'q3',
-        text: '文档的结构或章节安排是怎样的？',
-        icon: '📚',
-        category: 'process' as const
-      }
-    ],
-    en: [
-      {
-        id: 'q1',
-        text: 'Summarize the main content of this PDF',
-        icon: '📋',
-        category: 'summary' as const
-      },
-      {
-        id: 'q2',
-        text: 'List the key concepts or terms in the document',
-        icon: '💡',
-        category: 'concept' as const
-      },
-      {
-        id: 'q3',
-        text: 'What is the structure or organization of the document?',
-        icon: '📚',
-        category: 'process' as const
-      }
-    ]
-  };
-  
-  // 根据语言返回对应的通用问题
-  return language === 'zh' ? universalQuestions.zh : universalQuestions.en;
+  return universalQuestions;
 }
 
 /**
@@ -311,23 +286,23 @@ export async function generatePDFQuestions(content: string, fileName: string): P
   } catch (error) {
     console.error('[问题生成器] 生成问题失败:', error);
     
-    // 返回默认通用问题
+    // 返回默认通用问题（使用翻译键）
     const defaultQuestions: GeneratedQuestion[] = [
       {
         id: 'default1',
-        text: '总结本PDF的主要内容',
+        text: 'welcome.question1', // 翻译键
         icon: '📋',
         category: 'summary'
       },
       {
         id: 'default2', 
-        text: '列出文档中的关键概念或术语',
+        text: 'welcome.question2', // 翻译键
         icon: '💡',
         category: 'concept'
       },
       {
         id: 'default3',
-        text: '文档的结构或章节安排是怎样的？',
+        text: 'welcome.question3', // 翻译键
         icon: '📚',
         category: 'process'
       }

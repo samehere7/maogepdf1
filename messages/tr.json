@@ -235,7 +235,10 @@
     "freeAskTip": "💡 Aşağıdaki giriş kutusunda özgürce soru da sorabilirsiniz, AI PDF içeriğine dayalı yanıt verecek",
     "analyzingPdf": "\"{fileName}\" analiz ediliyor, sizin için akıllı öneri soruları oluşturuluyor...",
     "generatingQuestions": "Öneri soruları oluşturuluyor...",
-    "afterGenerationTip": "💡 Oluşturma tamamlandıktan sonra hızlıca konuşma başlatmak için sorulara tıklayabilirsiniz"
+    "afterGenerationTip": "💡 Oluşturma tamamlandıktan sonra hızlıca konuşma başlatmak için sorulara tıklayabilirsiniz",
+    "question1": "PDF'nin ana içeriğini özetleyin",
+    "question2": "Belgedeki anahtar kavramları veya terimleri listeleyin",
+    "question3": "Belgenin yapısını veya düzenini analiz edin"
   },
   "share": {
     "shareChat": "Sohbeti Paylaş",
