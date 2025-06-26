@@ -158,9 +158,13 @@ export async function POST(req: Request) {
     // 使用前端传递的PDF内容，如果没有则使用默认内容
     let content = pdfContent || '';
     
+    console.log(`[本地闪卡生成] 接收到的内容长度: ${content.length}`);
+    console.log(`[本地闪卡生成] PDF名称: ${pdfName}`);
+    
     // 如果内容太短，使用默认内容提示
     if (content.length < 100) {
       content = `PDF文档: ${pdfName || 'Unknown'}\n\n请根据这个文档的标题和内容生成相关的学习闪卡。如果无法获取具体内容，请生成与文档主题相关的通用学习问题。`;
+      console.log(`[本地闪卡生成] 使用默认内容模板`);
     }
 
     // 生成闪卡内容
@@ -196,6 +200,10 @@ export async function POST(req: Request) {
         errorMessage = 'AI服务暂时不可用，请稍后重试';
       } else if (error.message.includes('响应格式错误')) {
         errorMessage = 'AI生成内容格式错误，请重试';
+      } else if (error.message.includes('fetch')) {
+        errorMessage = '网络连接失败，请检查网络连接后重试';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = '请求超时，请稍后重试';
       } else {
         errorMessage = error.message;
       }

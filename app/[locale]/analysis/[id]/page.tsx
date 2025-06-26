@@ -88,6 +88,9 @@ export default function AnalysisPage() {
   // 新增：存储示例问题
   const [exampleQuestions, setExampleQuestions] = useState<string[]>([]);
   
+  // 新增：存储PDF文本内容
+  const [pdfTextContent, setPdfTextContent] = useState<string>('');
+  
   // 闪卡相关状态
   const [activeTab, setActiveTab] = useState<'flashcards' | 'study'>('flashcards');
   
@@ -509,6 +512,9 @@ export default function AnalysisPage() {
       // 提取PDF文本内容
       const pdfContent = await extractTextFromPDF(pdfUrl);
       console.log('[欢迎问题] PDF内容提取完成，长度:', pdfContent.length);
+      
+      // 保存PDF内容到状态中，供闪卡创建使用
+      setPdfTextContent(pdfContent);
       
       // 生成推荐问题
       const questions = await generatePDFQuestions(pdfContent, fileName);
@@ -1186,6 +1192,7 @@ export default function AnalysisPage() {
           onClose={() => setShowFlashcardModal(false)}
           pdfId={fileInfo.id}
           pdfName={fileInfo.name}
+          pdfContent={pdfTextContent}
           onSuccess={(flashcards) => {
             setFlashcards(flashcards);
             setFlashcardView('manage');
