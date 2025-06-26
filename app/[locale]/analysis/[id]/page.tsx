@@ -43,7 +43,8 @@ export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
   const locale = useLocale()
-  const t = useTranslations('analysis')
+  const t = useTranslations()
+  const tAnalysis = useTranslations('analysis')
   
   // Locale防护机制
   useEffect(() => {
@@ -356,7 +357,7 @@ export default function AnalysisPage() {
     setAnswering(true);
     
     // 立即显示"正在思考"状态
-    const thinkingMessage = { role: "assistant" as const, content: `🤔 ${t('analyzingPdfContent')}` };
+    const thinkingMessage = { role: "assistant" as const, content: `🤔 ${tAnalysis('analyzingPdfContent')}` };
     setMessages(prev => [...prev, thinkingMessage]);
 
     // 保存用户问题到数据库
@@ -1032,8 +1033,8 @@ export default function AnalysisPage() {
                     <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center mb-4 mx-auto">
                       <Send className="h-8 w-8 text-white" />
                     </div>
-                    <p className="text-gray-600 mb-2">{t('preparingChatEnvironment')}</p>
-                    <p className="text-gray-400 text-sm">{t('chatAvailableAfterPdfLoad')}</p>
+                    <p className="text-gray-600 mb-2">{t('chat.preparingChatEnvironment')}</p>
+                    <p className="text-gray-400 text-sm">{t('chat.chatAvailableAfterPdfLoad')}</p>
                   </div>
                 </div>
               ) : (
@@ -1152,7 +1153,7 @@ export default function AnalysisPage() {
                   if (e.key === "Enter") handleSendQuestion();
                 }}
                 onClick={(e) => e.stopPropagation()}
-                placeholder={loading ? t('common.loading') : t('analysis.askDocument')}
+                placeholder={loading ? t('common.loading') : tAnalysis('askDocument')}
                 className="flex-1 p-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
                 disabled={answering || loading}
               />
