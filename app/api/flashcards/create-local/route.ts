@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 
 // 闪卡生成模板
 const FLASHCARD_PROMPTS = {
@@ -143,35 +142,8 @@ ${pageRange ? `6. 重点关注第${pageRange.join('、')}页的内容` : ''}
 
 export async function POST(req: Request) {
   try {
-    // 检查用户认证
-    const supabase = createClient();
-    
-    // 尝试从Authorization头获取token
-    const authHeader = req.headers.get('authorization');
-    let user = null;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(token);
-      if (!tokenError && tokenUser) {
-        user = tokenUser;
-      }
-    }
-    
-    // 如果Bearer token认证失败，尝试使用服务器端session
-    if (!user) {
-      const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser();
-      if (!sessionError && sessionUser) {
-        user = sessionUser;
-      }
-    }
-    
-    if (!user?.id) {
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
-    }
-
-    // 解析请求
-    const { pdfId, contentAmount, pageRange, pdfName, pdfContent } = await req.json();
+    // 基本的请求验证，不需要数据库
+    const { pdfId, pdfName, pdfContent, contentAmount, pageRange } = await req.json();
     
     if (!pdfId || !contentAmount) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
@@ -180,7 +152,7 @@ export async function POST(req: Request) {
     // 解析页面范围
     const targetPages = parsePageRange(pageRange);
     
-    console.log(`[闪卡生成] 开始为PDF ${pdfName || pdfId} 生成${contentAmount}级别闪卡`, 
+    console.log(`[本地闪卡生成] 开始为PDF ${pdfName || pdfId} 生成${contentAmount}级别闪卡`, 
                 targetPages ? `，页面范围: ${targetPages.join(',')}` : '');
 
     // 使用前端传递的PDF内容，如果没有则使用默认内容
@@ -198,14 +170,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '未能生成有效的闪卡内容' }, { status: 500 });
     }
 
-    console.log(`[闪卡生成] 成功生成${generatedCards.length}张闪卡`);
+    console.log(`[本地闪卡生成] 成功生成${generatedCards.length}张闪卡`);
 
     // 直接返回生成的闪卡数据，不保存到数据库
     return NextResponse.json({
       success: true,
       message: `成功生成${generatedCards.length}张闪卡`,
       flashcards: generatedCards.map((card, index) => ({
-        id: `temp_${Date.now()}_${index}`, // 临时ID
+        id: `local_${Date.now()}_${index}`, // 本地临时ID
         question: card.question,
         answer: card.answer,
         page_number: card.page_number,
@@ -216,7 +188,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error('[闪卡生成] 错误:', error);
+    console.error('[本地闪卡生成] 错误:', error);
     
     let errorMessage = '创建闪卡失败';
     if (error instanceof Error) {

@@ -660,9 +660,9 @@ export class PDFRAGSystem {
   /**
    * 生成智能回答
    */
-  async generateAnswer(query: string, pdfTitle: string = ''): Promise<string> {
+  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' = 'high'): Promise<string> {
     try {
-      console.log(`[RAG] 开始生成答案: "${query}"`);
+      console.log(`[RAG] 开始生成答案: "${query}", 模式: ${mode}`);
       
       // 1. 检索相关内容
       const relevantChunks = await this.searchRelevantChunks(query, 3);
@@ -681,11 +681,11 @@ export class PDFRAGSystem {
         console.log('[RAG] 使用PDF内容生成回答');
       } else if (contentQuality.quality === 'medium') {
         // 中等质量：混合模式（PDF内容 + AI补充）
-        answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle);
+        answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle, mode);
         console.log('[RAG] 使用混合模式生成回答');
       } else {
         // 低质量：使用AI通用知识回答
-        answer = await this.generateAIAnswer(query, pdfTitle);
+        answer = await this.generateAIAnswer(query, pdfTitle, mode);
         console.log('[RAG] 使用AI通用知识生成回答');
       }
       
@@ -954,7 +954,7 @@ ${chunks[0].chunk.text}`;
   /**
    * 生成混合回答（PDF内容 + AI补充）
    */
-  private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string): Promise<string> {
+  private async generateHybridAnswer(query: string, chunks: SearchResult[], pdfTitle: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
     const pdfContent = chunks.map(chunk => 
       `【${pdfTitle}第${chunk.chunk.pageNumber}页】${chunk.chunk.text}`
     ).join('\n\n');
@@ -971,13 +971,13 @@ ${pdfContent}
 - 优先使用PDF内容，不足时补充通用知识
 - 如有页码引用请保留【页码】格式`;
 
-    return await this.callAIService(prompt);
+    return await this.callAIService(prompt, mode);
   }
 
   /**
    * 生成AI通用知识回答
    */
-  private async generateAIAnswer(query: string, pdfTitle: string): Promise<string> {
+  private async generateAIAnswer(query: string, pdfTitle: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
     const prompt = `用户询问：${query}
 
 当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。
@@ -987,14 +987,23 @@ ${pdfContent}
 - 可适当使用代码示例
 - 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`;
 
-    return await this.callAIService(prompt);
+    return await this.callAIService(prompt, mode);
   }
 
   /**
    * 调用AI服务
    */
-  private async callAIService(prompt: string): Promise<string> {
+  private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
     try {
+      // 只为快速模式添加特殊指令
+      let systemPrompt = '你是一个专业的技术助手，擅长解答各种技术问题。';
+      let finalPrompt = prompt;
+      
+      if (mode === 'fast') {
+        systemPrompt = '你是一个简洁高效的助手。回答要极度精简，直接给出关键信息，避免任何多余解释。使用要点形式，省略客套语。';
+        finalPrompt = `${prompt}\n\n【重要】：请用最简短的语言回答，直接给出要点，不要解释过程，省略所有客套语。`;
+      }
+
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -1006,8 +1015,8 @@ ${pdfContent}
         body: JSON.stringify({
           model: "deepseek/deepseek-chat-v3-0324:free",
           messages: [
-            { role: 'system', content: '你是一个专业的技术助手，擅长解答各种技术问题。' },
-            { role: 'user', content: prompt }
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: finalPrompt }
           ],
           temperature: 0.7,
           max_tokens: 1500
@@ -1033,7 +1042,7 @@ ${pdfContent}
       return aiResponse;
     } catch (error) {
       console.error('[RAG] AI服务调用失败:', error);
-      return this.generateFallbackAnswer(query);
+      return this.generateFallbackAnswer(prompt);
     }
   }
 

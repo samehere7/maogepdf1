@@ -10,12 +10,22 @@ const FREE_USER_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB文件大小限制
 
 
 // 异步处理PDF到RAG系统
-async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: string): Promise<void> {
+async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: string, quality: string = 'high'): Promise<void> {
   try {
-    console.log('[RAG处理] 开始处理PDF到RAG系统:', fileName, 'ID:', pdfId);
+    console.log('[RAG处理] 开始处理PDF到RAG系统:', fileName, 'ID:', pdfId, '质量模式:', quality);
     
     // 处理PDF文档到RAG系统，传入PDF ID
     await pdfRAGSystem.extractAndChunkPDF(pdfUrl, pdfId);
+    
+    // 将质量模式保存到数据库
+    const { error } = await supabaseService
+      .from('pdfs')
+      .update({ quality_mode: quality })
+      .eq('id', pdfId);
+      
+    if (error) {
+      console.error('[RAG处理] 更新质量模式失败:', error);
+    }
     
     console.log('[RAG处理] PDF成功添加到RAG系统:', fileName, 'ID:', pdfId);
   } catch (error) {
@@ -206,7 +216,7 @@ export async function POST(req: Request) {
       console.log('[Upload API] 数据库记录创建成功，PDF ID:', pdf.id);
       
       // 后台处理PDF到RAG系统（不阻塞响应）
-      processPDFToRAGSystem(pdf.id, fileName, publicUrl).catch(error => {
+      processPDFToRAGSystem(pdf.id, fileName, publicUrl, quality).catch(error => {
         console.error('[Upload API] RAG系统处理失败:', error);
       });
       
@@ -224,7 +234,7 @@ export async function POST(req: Request) {
       console.log('[Upload API] 文件上传成功, ID:', pdf.id);
       
       // 后台处理PDF到RAG系统（不阻塞响应）
-      processPDFToRAGSystem(pdf.id, fileName, pdf.url).catch(error => {
+      processPDFToRAGSystem(pdf.id, fileName, pdf.url, quality).catch(error => {
         console.error('[Upload API] RAG系统处理失败:', error);
       });
       

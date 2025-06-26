@@ -12,6 +12,7 @@ interface FlashcardCreateModalProps {
   onClose: () => void
   pdfId: string
   pdfName: string
+  pdfContent?: string
   onSuccess: (flashcards: any[]) => void
 }
 
@@ -22,6 +23,7 @@ export default function FlashcardCreateModal({
   onClose, 
   pdfId, 
   pdfName, 
+  pdfContent = '',
   onSuccess 
 }: FlashcardCreateModalProps) {
   const [contentAmount, setContentAmount] = useState<ContentAmount>('medium')
@@ -55,21 +57,15 @@ export default function FlashcardCreateModal({
     try {
       setIsCreating(true)
       
-      // 获取当前用户的认证令牌
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError || !session?.access_token) {
-        throw new Error('用户未登录，请先登录')
-      }
-      
-      const response = await fetch('/api/flashcards/create', {
+      const response = await fetch('/api/flashcards/create-local', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           pdfId,
+          pdfName,
+          pdfContent,
           contentAmount,
           pageRange: pageRange.trim() || null
         }),
@@ -77,14 +73,7 @@ export default function FlashcardCreateModal({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: '未知错误' }))
-        
-        if (response.status === 401) {
-          throw new Error('登录已过期，请重新登录')
-        } else if (response.status === 403) {
-          throw new Error('无权访问该PDF文件')
-        } else {
-          throw new Error(errorData.error || t('createFlashcardFailed'))
-        }
+        throw new Error(errorData.error || t('createFlashcardFailed'))
       }
 
       const result = await response.json()
