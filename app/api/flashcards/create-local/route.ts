@@ -86,13 +86,13 @@ ${pageRange ? `6. 重点关注第${pageRange.join('、')}页的内容` : ''}
         'X-Title': 'Maoge PDF Flashcard Generator'
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "deepseek/deepseek-chat-v3-0324:free",
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `请基于以下PDF内容生成${config.count}张闪卡：\n\n${pdfContent}` }
         ],
         temperature: 0.7,
-        max_tokens: 1500
+        max_tokens: 2000
       })
     });
 
