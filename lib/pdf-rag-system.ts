@@ -40,35 +40,35 @@ interface ConversationContext {
   };
 }
 
-// 语言指令映射
+// 语言指令映射 - 增强版本
 function getLanguageInstruction(locale: string): string {
   const instructions = {
-    'zh': '请用中文回答，保持简洁实用。',
-    'en': 'Please respond in English, keep it concise and practical.',
-    'ko': '한국어로 답변해 주세요. 간결하고 실용적으로 유지하세요.',
-    'ja': '日本語で回答してください。簡潔で実用的に保ってください。',
-    'es': 'Por favor responde en español, manteniéndolo conciso y práctico.',
-    'fr': 'Veuillez répondre en français, en restant concis et pratique.',
-    'de': 'Bitte antworten Sie auf Deutsch, prägnant und praktisch.',
-    'it': 'Si prega di rispondere in italiano, mantenendolo conciso e pratico.',
-    'pt-BR': 'Por favor, responda em português, mantendo-o conciso e prático.',
-    'ru': 'Пожалуйста, отвечайте на русском языке, оставайтесь краткими и практичными.',
-    'hi': 'कृपया हिंदी में उत्तर दें, इसे संक्षिप्त और व्यावहारिक रखें।',
-    'th': 'กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
-    'vi': 'Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
-    'tr': 'Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
-    'ar': 'يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.',
-    'bn': 'অনুগ্রহ করে বাংলায় উত্তর দিন, সংক্ষিপ্ত এবং ব্যবহারিক রাখুন।',
-    'da': 'Svar venligst på dansk, hold det kortfattet og praktisk.',
-    'fi': 'Vastaa suomeksi, pidä se ytimekkäänä ja käytännöllisenä.',
-    'id': 'Harap jawab dalam bahasa Indonesia, jaga agar ringkas dan praktis.',
-    'kn': 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಪ್ರಾಯೋಗಿಕವಾಗಿ ಇರಿಸಿ।',
-    'ms': 'Sila jawab dalam bahasa Melayu, pastikan ringkas dan praktikal.',
-    'nl': 'Antwoord alstublieft in het Nederlands, houd het beknopt en praktisch.',
-    'no': 'Vennligst svar på norsk, hold det konsist og praktisk.',
-    'pa': 'ਕਿਰਪਾ ਕਰਕੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ, ਇਸਨੂੰ ਸੰਖੇਪ ਅਤੇ ਵਿਹਾਰਕ ਰੱਖੋ।',
-    'pl': 'Proszę odpowiedzieć po polsku, zachowując zwięzłość i praktyczność.',
-    'sv': 'Vänligen svara på svenska, håll det kortfattat och praktiskt.'
+    'zh': '【重要】必须用中文回答！不要使用英文。请用中文回答，保持简洁实用。',
+    'en': '【IMPORTANT】You must respond in English! Please respond in English, keep it concise and practical.',
+    'ko': '【중요】반드시 한국어로 답변하세요! 영어를 사용하지 마세요. 한국어로 답변해 주세요. 간결하고 실용적으로 유지하세요.',
+    'ja': '【重要】必ず日本語で回答してください！英語を使わないでください。日本語で回答してください。簡潔で実用的に保ってください。',
+    'es': '【IMPORTANTE】¡Debes responder en español! No uses inglés. Por favor responde en español, manteniéndolo conciso y práctico.',
+    'fr': '【IMPORTANT】Vous devez répondre en français ! N\'utilisez pas l\'anglais. Veuillez répondre en français, en restant concis et pratique.',
+    'de': '【WICHTIG】Sie müssen auf Deutsch antworten! Verwenden Sie kein Englisch. Bitte antworten Sie auf Deutsch, prägnant und praktisch.',
+    'it': '【IMPORTANTE】Devi rispondere in italiano! Non usare l\'inglese. Si prega di rispondere in italiano, mantenendolo conciso e pratico.',
+    'pt-BR': '【IMPORTANTE】Você deve responder em português! Não use inglês. Por favor, responda em português, mantendo-o conciso e prático.',
+    'ru': '【ВАЖНО】Вы должны отвечать на русском языке! Не используйте английский. Пожалуйста, отвечайте на русском языке, оставайтесь краткими и практичными.',
+    'hi': '【महत्वपूर्ण】आपको हिंदी में उत्तर देना चाहिए! अंग्रेजी का उपयोग न करें। कृपया हिंदी में उत्तर दें, इसे संक्षिप्त और व्यावहारिक रखें।',
+    'th': '【สำคัญ】คุณต้องตอบเป็นภาษาไทย! อย่าใช้ภาษาอังกฤษ กรุณาตอบเป็นภาษาไทย ให้กระชับและใช้งานได้จริง',
+    'vi': '【QUAN TRỌNG】Bạn phải trả lời bằng tiếng Việt! Đừng sử dụng tiếng Anh. Vui lòng trả lời bằng tiếng Việt, giữ cho ngắn gọn và thực tế.',
+    'tr': '【ÖNEMLİ】Türkçe yanıtlamalısınız! İngilizce kullanmayın. Lütfen Türkçe yanıtlayın, kısa ve pratik tutun.',
+    'ar': '【مهم】يجب أن تجيب باللغة العربية! لا تستخدم الإنجليزية. يرجى الإجابة باللغة العربية، واجعلها موجزة وعملية.',
+    'bn': '【গুরুত্বপূর্ণ】আপনাকে অবশ্যই বাংলায় উত্তর দিতে হবে! ইংরেজি ব্যবহার করবেন না। অনুগ্রহ করে বাংলায় উত্তর দিন, সংক্ষিপ্ত এবং ব্যবহারিক রাখুন।',
+    'da': '【VIGTIGT】Du skal svare på dansk! Brug ikke engelsk. Svar venligst på dansk, hold det kortfattet og praktisk.',
+    'fi': '【TÄRKEÄÄ】Sinun täytyy vastata suomeksi! Älä käytä englantia. Vastaa suomeksi, pidä se ytimekkäänä ja käytännöllisenä.',
+    'id': '【PENTING】Anda harus menjawab dalam bahasa Indonesia! Jangan gunakan bahasa Inggris. Harap jawab dalam bahasa Indonesia, jaga agar ringkas dan praktis.',
+    'kn': '【ಮುಖ್ಯ】ನೀವು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಬೇಕು! ಇಂಗ್ಲಿಷ್ ಬಳಸಬೇಡಿ। ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ, ಸಂಕ್ಷಿಪ್ತ ಮತ್ತು ಪ್ರಾಯೋಗಿಕವಾಗಿ ಇರಿಸಿ।',
+    'ms': '【PENTING】Anda mesti menjawab dalam bahasa Melayu! Jangan guna bahasa Inggeris. Sila jawab dalam bahasa Melayu, pastikan ringkas dan praktikal.',
+    'nl': '【BELANGRIJK】Je moet in het Nederlands antwoorden! Gebruik geen Engels. Antwoord alstublieft in het Nederlands, houd het beknopt en praktisch.',
+    'no': '【VIKTIG】Du må svare på norsk! Ikke bruk engelsk. Vennligst svar på norsk, hold det konsist og praktisk.',
+    'pa': '【ਮਹੱਤਵਪੂਰਨ】ਤੁਹਾਨੂੰ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦੇਣਾ ਚਾਹੀਦਾ ਹੈ! ਅੰਗਰੇਜ਼ੀ ਦੀ ਵਰਤੋਂ ਨਾ ਕਰੋ। ਕਿਰਪਾ ਕਰਕੇ ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ, ਇਸਨੂੰ ਸੰਖੇਪ ਅਤੇ ਵਿਹਾਰਕ ਰੱਖੋ।',
+    'pl': '【WAŻNE】Musisz odpowiadać po polsku! Nie używaj angielskiego. Proszę odpowiedzieć po polsku, zachowując zwięzłość i praktyczność.',
+    'sv': '【VIKTIGT】Du måste svara på svenska! Använd inte engelska. Vänligen svara på svenska, håll det kortfattat och praktiskt.'
   };
   
   return instructions[locale as keyof typeof instructions] || instructions['en'];
@@ -1037,13 +1037,16 @@ ${pdfContent}
    */
   private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     try {
-      // 只为快速模式添加特殊指令
-      let systemPrompt = '你是一个专业的技术助手，擅长解答各种技术问题。';
-      let finalPrompt = prompt;
+      // 获取语言指令
+      const languageInstruction = getLanguageInstruction(locale);
+      
+      // 构建强化的系统提示词
+      let systemPrompt = `你是一个专业的技术助手，擅长解答各种技术问题。${languageInstruction}`;
+      let finalPrompt = `${languageInstruction}\n\n${prompt}`;
       
       if (mode === 'fast') {
-        systemPrompt = '你是一个简洁高效的助手。回答要极度精简，直接给出关键信息，避免任何多余解释。使用要点形式，省略客套语。';
-        finalPrompt = `${prompt}\n\n【重要】：请用最简短的语言回答，直接给出要点，不要解释过程，省略所有客套语。`;
+        systemPrompt = `你是一个简洁高效的助手。回答要极度精简，直接给出关键信息，避免任何多余解释。使用要点形式，省略客套语。${languageInstruction}`;
+        finalPrompt = `${languageInstruction}\n\n${prompt}\n\n【重要】：请用最简短的语言回答，直接给出要点，不要解释过程，省略所有客套语。`;
       }
 
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
