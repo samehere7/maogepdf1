@@ -308,7 +308,15 @@
   },
   "analysis": {
     "switchedToFastMode": "Overgeschakeld naar snelle modus.",
-    "switchedToHighQualityMode": "Overgeschakeld naar hoge kwaliteitsmodus."
+    "switchedToHighQualityMode": "Overgeschakeld naar hoge kwaliteitsmodus.",
+    "fast": "Snel",
+    "highQuality": "Hoge kwaliteit",
+    "flashcard": {
+      "createFlashcard": "Flashcard maken"
+    },
+    "share": {
+      "shareThisPdf": "Deze PDF delen"
+    }
   },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Analyse",

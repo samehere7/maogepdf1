@@ -323,6 +323,42 @@
     "authorQuestion": "इस लेख के लेखक कौन हैं?",
     "scrollToPage": "पृष्ठ 1 पर स्क्रॉल करें"
   },
+  "chat": {
+    "chatHistorySaved": "चैट इतिहास सफलतापूर्वक डेटाबेस में सहेजा गया",
+    "chatHistorySaveFailed": "चैट इतिहास डेटाबेस में सहेजने में विफल",
+    "chatRequestFailed": "चैट अनुरोध विफल",
+    "chatError": "चैट त्रुटि हुई",
+    "sendMessage": "संदेश भेजें",
+    "typeMessage": "अपना संदेश टाइप करें...",
+    "conversation": "बातचीत",
+    "currentMode": "वर्तमान मोड",
+    "fastMode": "तेज़ मोड",
+    "highQualityMode": "उच्च गुणवत्ता मोड",
+    "fast": "तेज़",
+    "highQuality": "उच्च गुणवत्ता",
+    "preparingChatEnvironment": "चैट वातावरण तैयार कर रहे हैं",
+    "chatAvailableAfterPdfLoad": "PDF लोड होने के बाद चैट उपलब्ध होगा",
+    "youCanAskMe": "आप मुझसे पूछ सकते हैं",
+    "loadingPdf": "PDF लोड हो रहा है",
+    "askDocument": "दस्तावेज़ से पूछें",
+    "fileNotFound": "फ़ाइल नहीं मिली",
+    "backToHome": "होम पर वापस",
+    "cannotFindSpecifiedPdf": "निर्दिष्ट PDF फ़ाइल नहीं मिल सकती",
+    "initializingPdfViewer": "PDF व्यूअर प्रारंभ कर रहे हैं",
+    "noPdfFile": "कोई PDF फ़ाइल नहीं"
+  },
+  "analysis": {
+    "switchedToFastMode": "तेज़ मोड में स्विच किया गया।",
+    "switchedToHighQualityMode": "उच्च गुणवत्ता मोड में स्विच किया गया।",
+    "fast": "तेज़",
+    "highQuality": "उच्च गुणवत्ता",
+    "flashcard": {
+      "createFlashcard": "फ्लैशकार्ड बनाएं"
+    },
+    "share": {
+      "shareThisPdf": "इस PDF को साझा करें"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF चैट और विश्लेषण",
     "description": "बुद्धिमान विश्लेषण और प्रश्न-उत्तर के लिए PDF दस्तावेज़ अपलोड करें"

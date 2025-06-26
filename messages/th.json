@@ -322,6 +322,18 @@
     "authorQuestion": "ใครเป็นผู้เขียนบทความนี้?",
     "scrollToPage": "เลื่อนไปหน้า 1"
   },
+  "analysis": {
+    "switchedToFastMode": "เปลี่ยนเป็นโหมดเร็ว",
+    "switchedToHighQualityMode": "เปลี่ยนเป็นโหมดคุณภาพสูง",
+    "fast": "เร็ว",
+    "highQuality": "คุณภาพสูง",
+    "flashcard": {
+      "createFlashcard": "สร้างฟลาชการ์ด"
+    },
+    "share": {
+      "shareThisPdf": "แชร์ PDF นี้"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF แชทและการวิเคราะห์",
     "description": "อัปโหลดเอกสาร PDF สำหรับการวิเคราะห์อย่างชาญฉลาดและการถามตอบ"

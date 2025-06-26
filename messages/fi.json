@@ -287,7 +287,35 @@
     "chatRequestFailed": "Keskustelupyyntö epäonnistui",
     "chatError": "Keskusteluvirhe tapahtui",
     "sendMessage": "Lähetä viesti",
-    "typeMessage": "Kirjoita viestisi..."
+    "typeMessage": "Kirjoita viestisi...",
+    "conversation": "Keskustelu",
+    "currentMode": "Nykyinen tila",
+    "fastMode": "Nopea tila",
+    "highQualityMode": "Korkealaatuinen tila",
+    "fast": "Nopea",
+    "highQuality": "Korkea laatu",
+    "preparingChatEnvironment": "Valmistellaan keskusteluympäristöä",
+    "chatAvailableAfterPdfLoad": "Keskustelu saatavilla PDF:n latauksen jälkeen",
+    "youCanAskMe": "Voit kysyä minulta",
+    "loadingPdf": "Ladataan PDF",
+    "askDocument": "Kysy dokumentilta",
+    "fileNotFound": "Tiedostoa ei löytynyt",
+    "backToHome": "Takaisin kotiin",
+    "cannotFindSpecifiedPdf": "Määritettyä PDF-tiedostoa ei löydy",
+    "initializingPdfViewer": "Alustetaan PDF-katselinta",
+    "noPdfFile": "Ei PDF-tiedostoa"
+  },
+  "analysis": {
+    "switchedToFastMode": "Vaihdettiin nopeaan tilaan.",
+    "switchedToHighQualityMode": "Vaihdettiin korkealaatuiseen tilaan.",
+    "fast": "Nopea",
+    "highQuality": "Korkea laatu",
+    "flashcard": {
+      "createFlashcard": "Luo Muistikortti"
+    },
+    "share": {
+      "shareThisPdf": "Jaa tämä PDF"
+    }
   },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat ja Analyysi",

@@ -340,6 +340,18 @@
     "authorQuestion": "ਇਸ ਲੇਖ ਦਾ ਲੇਖਕ ਕੌਣ ਹੈ?",
     "scrollToPage": "ਪੰਨਾ 1 ਤੱਕ ਸਕ੍ਰੌਲ ਕਰੋ"
   },
+  "analysis": {
+    "switchedToFastMode": "ਤੇਜ਼ ਮੋਡ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ।",
+    "switchedToHighQualityMode": "ਉੱਚ ਗੁਣਵੱਤਾ ਮੋਡ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ।",
+    "fast": "ਤੇਜ਼",
+    "highQuality": "ਉੱਚ ਗੁਣਵੱਤਾ",
+    "flashcard": {
+      "createFlashcard": "ਫਲੈਸ਼ਕਾਰਡ ਬਣਾਓ"
+    },
+    "share": {
+      "shareThisPdf": "ਇਹ PDF ਸਾਂਝਾ ਕਰੋ"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF ਚੈਟ ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ",
     "description": "ਬੁੱਧੀਮਾਨ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ ਸਵਾਲ-ਜਵਾਬ ਲਈ PDF ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ ਕਰੋ"

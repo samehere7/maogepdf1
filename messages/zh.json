@@ -339,7 +339,15 @@
   },
   "analysis": {
     "switchedToFastMode": "已切换到快速模式。",
-    "switchedToHighQualityMode": "已切换到高质量模式。"
+    "switchedToHighQualityMode": "已切换到高质量模式。",
+    "fast": "快速",
+    "highQuality": "高质量",
+    "flashcard": {
+      "createFlashcard": "创建闪卡"
+    },
+    "share": {
+      "shareThisPdf": "分享此PDF"
+    }
   },
   "metadata": {
     "title": "猫哥PDF - AI PDF聊天与分析",

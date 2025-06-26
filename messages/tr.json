@@ -323,6 +323,42 @@
     "processing": "İşleniyor...",
     "processingError": "İşlem sırasında hata oluştu, lütfen tekrar deneyin."
   },
+  "chat": {
+    "chatHistorySaved": "Sohbet geçmişi veritabanına başarıyla kaydedildi",
+    "chatHistorySaveFailed": "Sohbet geçmişi veritabanına kaydedilemedi",
+    "chatRequestFailed": "Sohbet isteği başarısız",
+    "chatError": "Sohbet hatası oluştu",
+    "sendMessage": "Mesaj gönder",
+    "typeMessage": "Mesajınızı yazın...",
+    "conversation": "Konuşma",
+    "currentMode": "Mevcut mod",
+    "fastMode": "Hızlı mod",
+    "highQualityMode": "Yüksek kalite modu",
+    "fast": "Hızlı",
+    "highQuality": "Yüksek kalite",
+    "preparingChatEnvironment": "Sohbet ortamı hazırlanıyor",
+    "chatAvailableAfterPdfLoad": "PDF yüklendikten sonra sohbet kullanılabilir",
+    "youCanAskMe": "Bana sorabilirsiniz",
+    "loadingPdf": "PDF yükleniyor",
+    "askDocument": "Belgeyi sor",
+    "fileNotFound": "Dosya bulunamadı",
+    "backToHome": "Ana sayfaya dön",
+    "cannotFindSpecifiedPdf": "Belirtilen PDF dosyası bulunamıyor",
+    "initializingPdfViewer": "PDF görüntüleyici başlatılıyor",
+    "noPdfFile": "PDF dosyası yok"
+  },
+  "analysis": {
+    "switchedToFastMode": "Hızlı moda geçildi.",
+    "switchedToHighQualityMode": "Yüksek kalite moduna geçildi.",
+    "fast": "Hızlı",
+    "highQuality": "Yüksek kalite",
+    "flashcard": {
+      "createFlashcard": "Kart Oluştur"
+    },
+    "share": {
+      "shareThisPdf": "Bu PDF'yi Paylaş"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Sohbet ve Analiz",
     "description": "Akıllı analiz ve soru-cevap için PDF belgelerini yükleyin"

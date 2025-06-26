@@ -326,7 +326,15 @@
   },
   "analysis": {
     "switchedToFastMode": "Переключено на быстрый режим.",
-    "switchedToHighQualityMode": "Переключено на высококачественный режим."
+    "switchedToHighQualityMode": "Переключено на высококачественный режим.",
+    "fast": "Быстро",
+    "highQuality": "Высокое качество",
+    "flashcard": {
+      "createFlashcard": "Создать флеш-карту"
+    },
+    "share": {
+      "shareThisPdf": "Поделиться этим PDF"
+    }
   },
   "metadata": {
     "title": "Maoge PDF - ИИ PDF Чат и Анализ",

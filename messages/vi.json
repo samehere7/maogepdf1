@@ -322,6 +322,18 @@
     "authorQuestion": "Ai là tác giả của bài viết này?",
     "scrollToPage": "Cuộn đến trang 1"
   },
+  "analysis": {
+    "switchedToFastMode": "Đã chuyển sang chế độ nhanh.",
+    "switchedToHighQualityMode": "Đã chuyển sang chế độ chất lượng cao.",
+    "fast": "Nhanh",
+    "highQuality": "Chất lượng cao",
+    "flashcard": {
+      "createFlashcard": "Tạo thẻ ghi nhớ"
+    },
+    "share": {
+      "shareThisPdf": "Chia sẻ PDF này"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Phân tích",
     "description": "Tải lên tài liệu PDF để phân tích thông minh và hỏi đáp"

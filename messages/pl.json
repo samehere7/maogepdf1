@@ -323,6 +323,18 @@
     "initializingPdfViewer": "Inicjalizowanie przeglądarki PDF",
     "noPdfFile": "Brak pliku PDF"
   },
+  "analysis": {
+    "switchedToFastMode": "Przełączono na tryb szybki.",
+    "switchedToHighQualityMode": "Przełączono na tryb wysokiej jakości.",
+    "fast": "Szybki",
+    "highQuality": "Wysoka jakość",
+    "flashcard": {
+      "createFlashcard": "Utwórz kartę"
+    },
+    "share": {
+      "shareThisPdf": "Udostępnij ten PDF"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat i Analiza",
     "description": "Prześlij dokumenty PDF do inteligentnej analizy i pytań oraz odpowiedzi"

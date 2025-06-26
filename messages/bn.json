@@ -323,6 +323,42 @@
     "authorQuestion": "এই নিবন্ধের লেখক কে?",
     "scrollToPage": "পৃষ্ঠা 1 এ স্ক্রোল করুন"
   },
+  "chat": {
+    "chatHistorySaved": "চ্যাট ইতিহাস সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে",
+    "chatHistorySaveFailed": "চ্যাট ইতিহাস ডাটাবেসে সংরক্ষণ করতে ব্যর্থ",
+    "chatRequestFailed": "চ্যাট অনুরোধ ব্যর্থ",
+    "chatError": "চ্যাট ত্রুটি ঘটেছে",
+    "sendMessage": "বার্তা পাঠান",
+    "typeMessage": "আপনার বার্তা টাইপ করুন...",
+    "conversation": "কথোপকথন",
+    "currentMode": "বর্তমান মোড",
+    "fastMode": "দ্রুত মোড",
+    "highQualityMode": "উচ্চ মানের মোড",
+    "fast": "দ্রুত",
+    "highQuality": "উচ্চ মান",
+    "preparingChatEnvironment": "চ্যাট পরিবেশ প্রস্তুত করা হচ্ছে",
+    "chatAvailableAfterPdfLoad": "PDF লোড হওয়ার পর চ্যাট উপলব্ধ হবে",
+    "youCanAskMe": "আপনি আমাকে জিজ্ঞাসা করতে পারেন",
+    "loadingPdf": "PDF লোড হচ্ছে",
+    "askDocument": "নথিকে জিজ্ঞাসা করুন",
+    "fileNotFound": "ফাইল পাওয়া যায়নি",
+    "backToHome": "হোমে ফিরে যান",
+    "cannotFindSpecifiedPdf": "নির্দিষ্ট PDF ফাইল খুঁজে পাওয়া যাচ্ছে না",
+    "initializingPdfViewer": "PDF ভিউয়ার শুরু করা হচ্ছে",
+    "noPdfFile": "কোন PDF ফাইল নেই"
+  },
+  "analysis": {
+    "switchedToFastMode": "দ্রুত মোডে স্যুইচ করা হয়েছে।",
+    "switchedToHighQualityMode": "উচ্চ মানের মোডে স্যুইচ করা হয়েছে।",
+    "fast": "দ্রুত",
+    "highQuality": "উচ্চ মান",
+    "flashcard": {
+      "createFlashcard": "ফ্ল্যাশকার্ড তৈরি করুন"
+    },
+    "share": {
+      "shareThisPdf": "এই PDF শেয়ার করুন"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF চ্যাট ও বিশ্লেষণ",
     "description": "বুদ্ধিমান বিশ্লেষণ এবং প্রশ্ন-উত্তরের জন্য PDF নথি আপলোড করুন"

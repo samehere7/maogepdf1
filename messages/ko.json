@@ -327,7 +327,15 @@
   },
   "analysis": {
     "switchedToFastMode": "빠른 모드로 전환했습니다.",
-    "switchedToHighQualityMode": "고품질 모드로 전환했습니다."
+    "switchedToHighQualityMode": "고품질 모드로 전환했습니다.",
+    "fast": "빠른",
+    "highQuality": "고품질",
+    "flashcard": {
+      "createFlashcard": "플래시카드 생성"
+    },
+    "share": {
+      "shareThisPdf": "이 PDF 공유"
+    }
   },
   "metadata": {
     "title": "고양이 형 PDF - AI PDF 채팅 및 분석",

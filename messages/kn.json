@@ -340,6 +340,18 @@
     "authorQuestion": "ಈ ಲೇಖನದ ಲೇಖಕ ಯಾರು?",
     "scrollToPage": "ಪುಟ 1 ಗೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"
   },
+  "analysis": {
+    "switchedToFastMode": "ವೇಗದ ಮೋಡ್‌ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.",
+    "switchedToHighQualityMode": "ಉನ್ನತ ಗುಣಮಟ್ಟದ ಮೋಡ್‌ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.",
+    "fast": "ವೇಗದ",
+    "highQuality": "ಉನ್ನತ ಗುಣಮಟ್ಟ",
+    "flashcard": {
+      "createFlashcard": "ಫ್ಲ್ಯಾಶ್‌ಕಾರ್ಡ್ ರಚಿಸಿ"
+    },
+    "share": {
+      "shareThisPdf": "ಈ PDF ಹಂಚಿಕೊಳ್ಳಿ"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF ಚಾಟ್ ಮತ್ತು ವಿಶ್ಲೇಷಣೆ",
     "description": "ಬುದ್ಧಿವಂತ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪ್ರಶ್ನೋತ್ತರಗಳಿಗಾಗಿ PDF ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ"

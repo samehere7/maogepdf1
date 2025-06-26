@@ -326,7 +326,15 @@
   },
   "analysis": {
     "switchedToFastMode": "Cambiado a modo rápido.",
-    "switchedToHighQualityMode": "Cambiado a modo de alta calidad."
+    "switchedToHighQualityMode": "Cambiado a modo de alta calidad.",
+    "fast": "rápido",
+    "highQuality": "alta calidad",
+    "flashcard": {
+      "createFlashcard": "Crear tarjeta de memoria"
+    },
+    "share": {
+      "shareThisPdf": "Compartir este PDF"
+    }
   },
   "metadata": {
     "title": "Maoge PDF - Chat y Análisis de PDF con IA",

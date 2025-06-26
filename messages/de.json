@@ -323,7 +323,15 @@
   },
   "analysis": {
     "switchedToFastMode": "Zu schnellem Modus gewechselt.",
-    "switchedToHighQualityMode": "Zu hochwertigem Modus gewechselt."
+    "switchedToHighQualityMode": "Zu hochwertigem Modus gewechselt.",
+    "fast": "schnell",
+    "highQuality": "hochwertig",
+    "flashcard": {
+      "createFlashcard": "Karteikarte erstellen"
+    },
+    "share": {
+      "shareThisPdf": "Diese PDF teilen"
+    }
   },
   "metadata": {
     "title": "Maoge PDF - KI PDF Chat & Analyse",

@@ -322,6 +322,18 @@
     "authorQuestion": "Siapa penulis artikel ini?",
     "scrollToPage": "Scroll ke halaman 1"
   },
+  "analysis": {
+    "switchedToFastMode": "Beralih ke mode cepat.",
+    "switchedToHighQualityMode": "Beralih ke mode kualitas tinggi.",
+    "fast": "Cepat",
+    "highQuality": "Kualitas tinggi",
+    "flashcard": {
+      "createFlashcard": "Buat kartu belajar"
+    },
+    "share": {
+      "shareThisPdf": "Bagikan PDF ini"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Analisis",
     "description": "Unggah dokumen PDF untuk analisis cerdas dan tanya jawab"

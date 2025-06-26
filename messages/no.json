@@ -324,6 +324,18 @@
     "initializingPdfViewer": "Initialiserer PDF-visning",
     "noPdfFile": "Ingen PDF-fil"
   },
+  "analysis": {
+    "switchedToFastMode": "Byttet til rask modus.",
+    "switchedToHighQualityMode": "Byttet til høy kvalitetsmodus.",
+    "fast": "Rask",
+    "highQuality": "Høy kvalitet",
+    "flashcard": {
+      "createFlashcard": "Opprett Flashcard"
+    },
+    "share": {
+      "shareThisPdf": "Del denne PDF-en"
+    }
+  },
   "metadata": {
     "title": "Maoge PDF - AI PDF Chat & Analyse",
     "description": "Last opp PDF-dokumenter for intelligent analyse og spørsmål og svar"

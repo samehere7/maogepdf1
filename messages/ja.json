@@ -343,7 +343,15 @@
   },
   "analysis": {
     "switchedToFastMode": "高速モードに切り替えました。",
-    "switchedToHighQualityMode": "高品質モードに切り替えました。"
+    "switchedToHighQualityMode": "高品質モードに切り替えました。",
+    "fast": "高速",
+    "highQuality": "高品質",
+    "flashcard": {
+      "createFlashcard": "フラッシュカード作成"
+    },
+    "share": {
+      "shareThisPdf": "このPDFを共有"
+    }
   },
   "metadata": {
     "title": "猫哥PDF - AI PDF チャット & 分析",
