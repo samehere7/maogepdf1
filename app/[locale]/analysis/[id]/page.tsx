@@ -340,7 +340,7 @@ export default function AnalysisPage() {
       // 添加模型切换消息
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: quality === 'fast' ? t('switchedToFastMode') : t('switchedToHighQualityMode')
+        content: quality === 'fast' ? tAnalysis('switchedToFastMode') : tAnalysis('switchedToHighQualityMode')
       }]);
     }
   };
@@ -780,9 +780,9 @@ export default function AnalysisPage() {
   if (pdfError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('chat.fileNotFound')}</h1>
         <p className="text-gray-600 mb-6">{pdfError}</p>
-        <Button onClick={() => window.location.href = `/${locale}`}>{t('backToHome')}</Button>
+        <Button onClick={() => window.location.href = `/${locale}`}>{t('chat.backToHome')}</Button>
       </div>
     );
   }
@@ -790,9 +790,9 @@ export default function AnalysisPage() {
   if (!fileInfo && !loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold mb-4">{t('fileNotFound')}</h1>
-        <p className="text-gray-600 mb-6">{t('cannotFindSpecifiedPdf')}</p>
-        <Button onClick={() => window.location.href = `/${locale}`}>{t('backToHome')}</Button>
+        <h1 className="text-2xl font-bold mb-4">{t('chat.fileNotFound')}</h1>
+        <p className="text-gray-600 mb-6">{t('chat.cannotFindSpecifiedPdf')}</p>
+        <Button onClick={() => window.location.href = `/${locale}`}>{t('chat.backToHome')}</Button>
       </div>
     );
   }
@@ -1121,7 +1121,7 @@ export default function AnalysisPage() {
               }}
             >
               <Zap className="mr-2 h-4 w-4" />
-{t('fast')}
+{tAnalysis('fast')}
             </Button>
             <Button 
               variant={modelQuality === 'highQuality' ? 'default' : 'outline'}
@@ -1133,7 +1133,7 @@ export default function AnalysisPage() {
               }}
             >
               <Sparkles className="mr-2 h-4 w-4" />
-{t('highQuality')}
+{tAnalysis('highQuality')}
             </Button>
           </div>
 

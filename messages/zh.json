@@ -298,7 +298,10 @@
     "fastMode": "快速",
     "highQualityMode": "高质量",
     "preparingChatEnvironment": "准备聊天环境中",
-    "chatAvailableAfterPdfLoad": "PDF加载后可聊天"
+    "chatAvailableAfterPdfLoad": "PDF加载后可聊天",
+    "fileNotFound": "文件未找到",
+    "backToHome": "返回首页",
+    "cannotFindSpecifiedPdf": "无法找到指定的PDF文件"
   },
   "pdfViewer": {
     "cannotProcessPdf": "无法处理PDF",
