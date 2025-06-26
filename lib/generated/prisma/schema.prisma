@@ -331,6 +331,7 @@ model users {
   @@schema("auth")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model chat_messages {
   id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
   user_id     String?   @db.Uuid
@@ -348,6 +349,68 @@ model chat_messages {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model flashcard_reviews {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  flashcard_id       String              @db.Uuid
+  session_id         String?             @db.Uuid
+  user_id            String              @db.Uuid
+  difficulty_rating  Int
+  response_time      Int?
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  flashcards         flashcards          @relation(fields: [flashcard_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  flashcard_sessions flashcard_sessions? @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+  user_profiles      user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([flashcard_id], map: "idx_flashcard_reviews_flashcard")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model flashcard_sessions {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pdf_id            String
+  user_id           String              @db.Uuid
+  cards_studied     Int?                @default(0)
+  cards_easy        Int?                @default(0)
+  cards_medium      Int?                @default(0)
+  cards_hard        Int?                @default(0)
+  start_time        DateTime?           @default(now()) @db.Timestamptz(6)
+  end_time          DateTime?           @db.Timestamptz(6)
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  flashcard_reviews flashcard_reviews[]
+  pdfs              pdfs                @relation(fields: [pdf_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_profiles     user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([pdf_id, user_id], map: "idx_flashcard_sessions_pdf_user")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model flashcards {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pdf_id            String
+  user_id           String              @db.Uuid
+  question          String
+  answer            String
+  page_number       Int?
+  difficulty        Int?                @default(0)
+  last_reviewed_at  DateTime?           @db.Timestamptz(6)
+  next_review_at    DateTime?           @db.Timestamptz(6)
+  review_count      Int?                @default(0)
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  flashcard_reviews flashcard_reviews[]
+  pdfs              pdfs                @relation(fields: [pdf_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_profiles     user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([difficulty], map: "idx_flashcards_difficulty")
+  @@index([next_review_at], map: "idx_flashcards_next_review")
+  @@index([pdf_id, user_id], map: "idx_flashcards_pdf_user")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model pdfs {
   id                 String               @id @default(dbgenerated("(gen_random_uuid())::text"))
   name               String
@@ -357,12 +420,12 @@ model pdfs {
   last_viewed        DateTime?            @default(now()) @db.Timestamptz(6)
   user_id            String?              @db.Uuid
   content_type       String?              @default("application/pdf")
-  summary            String?              @default("")
   created_at         DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  summary            String?              @default("")
   chat_messages      chat_messages[]
-  flashcards         flashcards[]
   flashcard_sessions flashcard_sessions[]
+  flashcards         flashcards[]
   users              users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([upload_date(sort: Desc)], map: "idx_pdfs_upload_date")
@@ -370,6 +433,7 @@ model pdfs {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model plus {
   id         String    @id @db.Uuid
   is_paid    Boolean?  @default(true)
@@ -383,6 +447,7 @@ model plus {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_daily_quota {
   id         String    @id @db.Uuid
   pdf_count  Int?      @default(0)
@@ -393,6 +458,7 @@ model user_daily_quota {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_profiles {
   id                 String               @id @db.Uuid
   email              String?
@@ -403,69 +469,11 @@ model user_profiles {
   expire_at          DateTime?            @db.Timestamptz(6)
   created_at         DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  users              users                @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  flashcards         flashcards[]
-  flashcard_sessions flashcard_sessions[]
   flashcard_reviews  flashcard_reviews[]
+  flashcard_sessions flashcard_sessions[]
+  flashcards         flashcards[]
+  users              users                @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("public")
-}
-
-model flashcards {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pdf_id            String
-  user_id           String              @db.Uuid
-  question          String
-  answer            String
-  page_number       Int?
-  difficulty        Int                 @default(0)
-  last_reviewed_at  DateTime?           @db.Timestamptz(6)
-  next_review_at    DateTime?           @db.Timestamptz(6)
-  review_count      Int                 @default(0)
-  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  pdfs              pdfs                @relation(fields: [pdf_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user_profiles     user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  flashcard_reviews flashcard_reviews[]
-
-  @@index([pdf_id, user_id], map: "idx_flashcards_pdf_user")
-  @@index([difficulty], map: "idx_flashcards_difficulty")
-  @@index([next_review_at], map: "idx_flashcards_next_review")
-  @@schema("public")
-}
-
-model flashcard_sessions {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pdf_id            String
-  user_id           String              @db.Uuid
-  cards_studied     Int                 @default(0)
-  cards_easy        Int                 @default(0)
-  cards_medium      Int                 @default(0)
-  cards_hard        Int                 @default(0)
-  start_time        DateTime?           @default(now()) @db.Timestamptz(6)
-  end_time          DateTime?           @db.Timestamptz(6)
-  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  pdfs              pdfs                @relation(fields: [pdf_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user_profiles     user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  flashcard_reviews flashcard_reviews[]
-
-  @@index([pdf_id, user_id], map: "idx_flashcard_sessions_pdf_user")
-  @@schema("public")
-}
-
-model flashcard_reviews {
-  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  flashcard_id       String              @db.Uuid
-  session_id         String?             @db.Uuid
-  user_id            String              @db.Uuid
-  difficulty_rating  Int
-  response_time      Int?
-  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
-  flashcards         flashcards          @relation(fields: [flashcard_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  flashcard_sessions flashcard_sessions? @relation(fields: [session_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  user_profiles      user_profiles       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([flashcard_id], map: "idx_flashcard_reviews_flashcard")
   @@schema("public")
 }
 
