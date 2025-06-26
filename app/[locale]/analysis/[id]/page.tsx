@@ -350,6 +350,13 @@ export default function AnalysisPage() {
     const questionToSend = customQuestion || question;
     if (!questionToSend.trim() || !fileInfo) return;
     
+    // 检查用户登录状态
+    if (!user) {
+      console.warn('[聊天] 用户未登录，无法发送消息');
+      router.push(`/${locale}/auth/login`);
+      return;
+    }
+    
     // 添加用户问题到消息列表
     const userQuestion = questionToSend;
     setMessages(prev => [...prev, { role: "user", content: userQuestion }]);
@@ -361,7 +368,10 @@ export default function AnalysisPage() {
     setMessages(prev => [...prev, thinkingMessage]);
 
     // 保存用户问题到数据库
-    await saveChatMessage(fileInfo.id, userQuestion, true);
+    const userSaveSuccess = await saveChatMessage(fileInfo.id, userQuestion, true);
+    if (!userSaveSuccess) {
+      console.warn('[聊天记录] 用户消息保存失败，但继续处理请求');
+    }
 
     try {
       // 确保fileUrl是完整的URL路径
@@ -405,7 +415,10 @@ export default function AnalysisPage() {
       });
       
       // 保存AI回答到数据库
-      await saveChatMessage(fileInfo.id, assistantReply, false);
+      const assistantSaveSuccess = await saveChatMessage(fileInfo.id, assistantReply, false);
+      if (!assistantSaveSuccess) {
+        console.warn('[聊天记录] AI回答保存失败');
+      }
       
     } catch (error) {
       console.error("聊天错误:", error);
@@ -421,7 +434,10 @@ export default function AnalysisPage() {
       });
       
       // 保存错误消息到数据库
-      await saveChatMessage(fileInfo.id, errorMessage, false);
+      const errorSaveSuccess = await saveChatMessage(fileInfo.id, errorMessage, false);
+      if (!errorSaveSuccess) {
+        console.warn('[聊天记录] 错误消息保存失败');
+      }
     } finally {
       setAnswering(false);
     }
@@ -455,13 +471,27 @@ export default function AnalysisPage() {
   // 加载聊天消息
   const loadChatMessages = async (documentId: string) => {
     try {
-      const response = await fetch(`/api/chat-messages?documentId=${documentId}`);
+      console.log('[聊天记录] 开始加载聊天消息，文档ID:', documentId);
+      const response = await fetch(`/api/chat-messages?documentId=${documentId}`, {
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('[聊天记录] 加载成功，消息数量:', data.messages?.length || 0);
         return data.messages || [];
+      } else {
+        const errorData = await response.json();
+        console.error('[聊天记录] 加载失败:', response.status, errorData);
+        if (response.status === 401) {
+          console.log('[聊天记录] 用户未登录，跳转到登录页');
+          router.push(`/${locale}/auth/login`);
+        }
       }
     } catch (error) {
-      console.error('加载聊天记录失败:', error);
+      console.error('[聊天记录] 加载聊天记录异常:', error);
     }
     return [];
   };
@@ -469,7 +499,9 @@ export default function AnalysisPage() {
   // 保存聊天消息
   const saveChatMessage = async (documentId: string, content: string, isUser: boolean) => {
     try {
-      await fetch('/api/chat-messages', {
+      console.log('[聊天记录] 开始保存聊天消息，文档ID:', documentId, '是否用户消息:', isUser, '内容长度:', content.length);
+      
+      const response = await fetch('/api/chat-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -480,8 +512,22 @@ export default function AnalysisPage() {
           isUser
         })
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[聊天记录] 保存成功，消息ID:', data.id);
+        return true;
+      } else {
+        const errorData = await response.json();
+        console.error('[聊天记录] 保存失败:', response.status, errorData);
+        if (response.status === 401) {
+          console.log('[聊天记录] 用户未登录，无法保存消息');
+        }
+        return false;
+      }
     } catch (error) {
-      console.error('保存聊天消息失败:', error);
+      console.error('[聊天记录] 保存聊天消息异常:', error);
+      return false;
     }
   };
 
