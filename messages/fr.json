@@ -218,9 +218,9 @@
     "analyzingPdf": "Analyse de \"{fileName}\", génération de questions de recommandation intelligentes pour vous...",
     "generatingQuestions": "Génération de questions de recommandation...",
     "afterGenerationTip": "💡 Une fois la génération terminée, vous pouvez cliquer sur les questions pour démarrer rapidement une conversation",
-    "question1": "Résumez le contenu principal du PDF",
-    "question2": "Listez les concepts clés ou termes du document",
-    "question3": "Analysez la structure ou l'organisation du document"
+    "question1": "Quel est le contenu principal de ce document ?",
+    "question2": "Quels sont les points de vue ou découvertes les plus importants du document ?",
+    "question3": "Comment les informations de ce document peuvent-elles être appliquées à des situations réelles ?"
   },
   "share": {
     "shareChat": "Partager le Chat",

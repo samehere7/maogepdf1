@@ -234,9 +234,9 @@
     "analyzingPdf": "Đang phân tích \"{fileName}\", chuẩn bị câu hỏi đề xuất thông minh cho bạn...",
     "generatingQuestions": "Đang tạo câu hỏi đề xuất...",
     "afterGenerationTip": "💡 Sau khi tạo, bạn có thể nhấp vào câu hỏi để bắt đầu trò chuyện ngay lập tức",
-    "question1": "Tóm tắt nội dung chính của PDF",
-    "question2": "Liệt kê các khái niệm hoặc thuật ngữ chính trong tài liệu",
-    "question3": "Phân tích cấu trúc hoặc tổ chức của tài liệu"
+    "question1": "Nội dung chính của tài liệu này là gì?",
+    "question2": "Những quan điểm hoặc phát hiện quan trọng nhất trong tài liệu là gì?",
+    "question3": "Làm thế nào có thể áp dụng thông tin trong tài liệu này vào các tình huống thực tế?"
   },
   "share": {
     "shareChat": "Chia sẻ trò chuyện",

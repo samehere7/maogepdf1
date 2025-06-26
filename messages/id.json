@@ -234,9 +234,9 @@
     "analyzingPdf": "Sedang menganalisis \"{fileName}\", menyiapkan pertanyaan rekomendasi cerdas untuk Anda...",
     "generatingQuestions": "Sedang menghasilkan pertanyaan rekomendasi...",
     "afterGenerationTip": "💡 Setelah dihasilkan, Anda bisa klik pada pertanyaan untuk memulai chat secara langsung",
-    "question1": "Ringkas konten utama PDF",
-    "question2": "Daftar konsep atau istilah kunci dalam dokumen",
-    "question3": "Analisis struktur atau organisasi dokumen"
+    "question1": "Apa isi utama dokumen ini?",
+    "question2": "Apa sudut pandang atau temuan terpenting dalam dokumen?",
+    "question3": "Bagaimana informasi dalam dokumen ini dapat diterapkan pada situasi nyata?"
   },
   "share": {
     "shareChat": "Bagikan chat",

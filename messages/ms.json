@@ -234,9 +234,9 @@
     "analyzingPdf": "Sedang menganalisis \"{fileName}\", menyediakan soalan cadangan pintar untuk anda...",
     "generatingQuestions": "Sedang menjana soalan cadangan...",
     "afterGenerationTip": "💡 Selepas dijana, anda boleh klik pada soalan untuk mula sembang serta-merta",
-    "question1": "Ringkaskan kandungan utama PDF",
-    "question2": "Senaraikan konsep atau istilah utama dalam dokumen",
-    "question3": "Analisis struktur atau organisasi dokumen"
+    "question1": "Apakah kandungan utama dokumen ini?",
+    "question2": "Apakah pandangan atau penemuan terpenting dalam dokumen?",
+    "question3": "Bagaimana maklumat dalam dokumen ini boleh digunakan dalam situasi sebenar?"
   },
   "share": {
     "shareChat": "Kongsi sembang",

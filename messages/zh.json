@@ -259,9 +259,9 @@
     "analyzingPdf": "正在分析 \"{fileName}\"，马上为你生成智能推荐问题...",
     "generatingQuestions": "正在生成推荐问题...",
     "afterGenerationTip": "💡 生成完成后，你可以点击问题快速开始对话",
-    "question1": "总结本PDF的主要内容",
-    "question2": "列出文档中的关键概念或术语",
-    "question3": "文档的结构或章节安排是怎样的？"
+    "question1": "这份文档的主要内容是什么？",
+    "question2": "文档中最重要的观点或发现是什么？",
+    "question3": "如何将这份文档中的信息应用到实际情况中？"
   },
   "share": {
     "shareChat": "分享聊天",

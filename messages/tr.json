@@ -95,7 +95,7 @@
     "newFlashcard": "Yeni Kart",
     "totalCards": "toplam kart",
     "studyProgress": "Çalışma İlerlemesi",
-    "newCards": "Yeni",
+    "newCards": "Yeni Kartlar",
     "easyCards": "Kolay",
     "mediumCards": "Orta",
     "hardCards": "Zor",
@@ -127,7 +127,6 @@
     "total": "Toplam",
     "reviewed": "İncelendi",
     "dueForReview": "İnceleme Sırası",
-    "newCards": "Yeni Kartlar",
     "noFlashcardsYet": "Henüz kart yok",
     "createFirstFlashcard": "İlk kartınızı oluşturun",
     "question": "Soru",
@@ -236,9 +235,9 @@
     "analyzingPdf": "\"{fileName}\" analiz ediliyor, sizin için akıllı öneri soruları oluşturuluyor...",
     "generatingQuestions": "Öneri soruları oluşturuluyor...",
     "afterGenerationTip": "💡 Oluşturma tamamlandıktan sonra hızlıca konuşma başlatmak için sorulara tıklayabilirsiniz",
-    "question1": "PDF'nin ana içeriğini özetleyin",
-    "question2": "Belgedeki anahtar kavramları veya terimleri listeleyin",
-    "question3": "Belgenin yapısını veya düzenini analiz edin"
+    "question1": "Bu belgenin ana içeriği nedir?",
+    "question2": "Belgedeki en önemli görüşler veya bulgular nelerdir?",
+    "question3": "Bu belgedeki bilgiler gerçek durumlarda nasıl uygulanabilir?"
   },
   "share": {
     "shareChat": "Sohbeti Paylaş",

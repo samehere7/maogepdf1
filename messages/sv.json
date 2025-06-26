@@ -236,9 +236,9 @@
     "analyzingPdf": "Analyserar \"{fileName}\", genererar smarta rekommendationsfrågor för dig...",
     "generatingQuestions": "Genererar rekommendationsfrågor...",
     "afterGenerationTip": "💡 Efter att genereringen är klar kan du klicka på frågor för att snabbt starta en konversation",
-    "question1": "Sammanfatta PDF:ens huvudinnehåll",
-    "question2": "Lista nyckelbegrepp eller termer i dokumentet",
-    "question3": "Analysera dokumentets struktur eller organisation"
+    "question1": "Vad är huvudinnehållet i detta dokument?",
+    "question2": "Vilka är de viktigaste synpunkterna eller upptäckterna i dokumentet?",
+    "question3": "Hur kan informationen i detta dokument tillämpas på verkliga situationer?"
   },
   "share": {
     "shareChat": "Dela Chatt",

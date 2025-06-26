@@ -217,9 +217,9 @@
     "analyzingPdf": "Analysoidaan \"{fileName}\", luodaan älykkäitä suosituskysymyksiä sinulle...",
     "generatingQuestions": "Luodaan suosituskysymyksiä...",
     "afterGenerationTip": "💡 Luomisen valmistuttua voit klikata kysymyksiä aloittaaksesi nopeasti keskustelun",
-    "question1": "Tiivistä PDF:n pääsisältö",
-    "question2": "Luettele asiakirjan avainkäsitteet tai termit",
-    "question3": "Analysoi asiakirjan rakenne tai järjestely"
+    "question1": "Mikä on tämän asiakirjan pääsisältö?",
+    "question2": "Mitkä ovat asiakirjan tärkeimmät näkökulmat tai löydökset?",
+    "question3": "Miten tämän asiakirjan tiedot voidaan soveltaa todellisiin tilanteisiin?"
   },
   "share": {
     "shareChat": "Jaa Keskustelu",

@@ -95,7 +95,7 @@
     "newFlashcard": "Nueva Tarjeta",
     "totalCards": "tarjetas totales",
     "studyProgress": "Progreso de Estudio",
-    "newCards": "Nuevas",
+    "newCards": "Nuevas Tarjetas",
     "easyCards": "Fáciles",
     "mediumCards": "Medias",
     "hardCards": "Difíciles",
@@ -128,7 +128,6 @@
     "total": "Total",
     "reviewed": "Revisadas",
     "dueForReview": "Pendientes",
-    "newCards": "Nuevas Tarjetas",
     "noFlashcardsYet": "Aún no hay tarjetas",
     "createFirstFlashcard": "¡Crea tu primera tarjeta para comenzar a aprender!",
     "question": "Pregunta",
@@ -237,9 +236,9 @@
     "analyzingPdf": "Analizando \"{fileName}\", generando preguntas de recomendación inteligentes para ti...",
     "generatingQuestions": "Generando preguntas de recomendación...",
     "afterGenerationTip": "💡 Una vez completada la generación, puedes hacer clic en las preguntas para iniciar rápidamente una conversación",
-    "question1": "Resume el contenido principal del PDF",
-    "question2": "Lista los conceptos clave o términos del documento",
-    "question3": "Analiza la estructura o organización del documento"
+    "question1": "¿Cuál es el contenido principal de este documento?",
+    "question2": "¿Cuáles son los puntos de vista o hallazgos más importantes del documento?",
+    "question3": "¿Cómo se puede aplicar la información de este documento a situaciones reales?"
   },
   "share": {
     "shareChat": "Compartir Chat",
