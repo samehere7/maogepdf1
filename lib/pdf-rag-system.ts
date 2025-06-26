@@ -995,7 +995,9 @@ ${chunks[0].chunk.text}`;
     
     const languageInstruction = getLanguageInstruction(locale);
     
-    const prompt = `基于PDF内容回答用户问题，如内容不足可补充相关知识。
+    const prompt = `${languageInstruction}
+
+基于PDF内容回答用户问题，如内容不足可补充相关知识。
 
 PDF内容：
 ${pdfContent}
@@ -1005,11 +1007,9 @@ ${pdfContent}
 回答要求：
 - 简洁准确，避免冗长解释
 - 优先使用PDF内容，不足时补充通用知识
-- 如有页码引用请保留【页码】格式
+- 如有页码引用请保留【页码】格式`;
 
-${languageInstruction}`;
-
-    return await this.callAIService(prompt, mode);
+    return await this.callAIService(prompt, mode, locale);
   }
 
   /**
@@ -1018,24 +1018,24 @@ ${languageInstruction}`;
   private async generateAIAnswer(query: string, pdfTitle: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     const languageInstruction = getLanguageInstruction(locale);
     
-    const prompt = `用户询问：${query}
+    const prompt = `${languageInstruction}
+
+用户询问：${query}
 
 当前PDF文档《${pdfTitle}》中未找到相关内容，请基于通用知识简洁回答。
 
 回答要求：
 - 简洁准确，直接回答要点
 - 可适当使用代码示例
-- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："
+- 开头说明"此问题在当前文档中未找到相关内容，以下基于通用知识回答："`;
 
-${languageInstruction}`;
-
-    return await this.callAIService(prompt, mode);
+    return await this.callAIService(prompt, mode, locale);
   }
 
   /**
    * 调用AI服务
    */
-  private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high'): Promise<string> {
+  private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
     try {
       // 只为快速模式添加特殊指令
       let systemPrompt = '你是一个专业的技术助手，擅长解答各种技术问题。';
@@ -1084,7 +1084,7 @@ ${languageInstruction}`;
       return aiResponse;
     } catch (error) {
       console.error('[RAG] AI服务调用失败:', error);
-      return this.generateFallbackAnswer('', 'zh');
+      return this.generateFallbackAnswer('', locale);
     }
   }
 
