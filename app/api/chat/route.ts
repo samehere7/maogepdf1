@@ -186,8 +186,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'JSON格式错误' }, { status: 400 });
     }
     
+    // 🔥 增强DEBUG - 完整请求体日志
+    console.log('[聊天API] ===== 完整请求体DEBUG =====');
+    console.log('[聊天API] 原始请求体:', JSON.stringify(requestBody, null, 2));
+    console.log('[聊天API] =========================');
+    
     const { messages, pdfId, quality = 'highQuality', locale = 'zh' } = requestBody;
-    console.log(`[聊天API] 解析参数 - pdfId: ${pdfId}, quality: ${quality}, messages数量: ${messages?.length}, locale: ${locale}`);
+    console.log(`[聊天API] ===== 关键参数DEBUG =====`);
+    console.log(`[聊天API] pdfId: ${pdfId}`);
+    console.log(`[聊天API] quality: ${quality}`);
+    console.log(`[聊天API] messages数量: ${messages?.length}`);
+    console.log(`[聊天API] locale值: "${locale}"`);
+    console.log(`[聊天API] locale类型: ${typeof locale}`);
+    console.log(`[聊天API] 是否有locale字段: ${'locale' in requestBody}`);
+    console.log(`[聊天API] requestBody.locale: "${requestBody.locale}"`);
+    console.log(`[聊天API] ========================`);
     
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       console.log('[聊天API] 消息格式无效');

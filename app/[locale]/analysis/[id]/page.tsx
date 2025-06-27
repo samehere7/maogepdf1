@@ -381,18 +381,27 @@ export default function AnalysisPage() {
         
       console.log('发送聊天请求，文件URL:', fileUrl);
       
+      // 🔥 增强DEBUG - 前端locale传递
+      const requestPayload = {
+        messages: [{ role: "user", content: userQuestion }],
+        pdfId: fileInfo.id,
+        quality: modelQuality,
+        locale: locale
+      };
+      
+      console.log('===== 前端聊天请求DEBUG =====');
+      console.log('useLocale()返回值:', locale);
+      console.log('locale类型:', typeof locale);
+      console.log('完整请求payload:', JSON.stringify(requestPayload, null, 2));
+      console.log('============================');
+      
       // 调用聊天API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: userQuestion }],
-          pdfId: fileInfo.id,
-          quality: modelQuality,
-          locale: locale
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       if (!response.ok) {
