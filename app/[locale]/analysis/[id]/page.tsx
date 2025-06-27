@@ -46,6 +46,10 @@ export default function AnalysisPage() {
   const t = useTranslations()
   const tAnalysis = useTranslations('analysis')
   
+  // 🔥 页面级别的locale调试
+  console.log('🔥 页面加载 - useLocale()返回值:', locale);
+  console.log('🔥 页面加载 - window.location.pathname:', typeof window !== 'undefined' ? window.location.pathname : 'SSR');
+  
   // Locale防护机制
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -347,8 +351,17 @@ export default function AnalysisPage() {
 
   // 发送问题
   const handleSendQuestion = async (customQuestion?: string) => {
+    console.log('🔥 handleSendQuestion 开始执行');
+    console.log('🔥 customQuestion:', customQuestion);
+    console.log('🔥 question state:', question);
+    
     const questionToSend = customQuestion || question;
-    if (!questionToSend.trim() || !fileInfo) return;
+    console.log('🔥 最终问题:', questionToSend);
+    
+    if (!questionToSend.trim() || !fileInfo) {
+      console.log('🔥 提前返回 - 问题为空或fileInfo不存在');
+      return;
+    }
     
     // 检查用户登录状态
     if (!user) {
@@ -356,6 +369,8 @@ export default function AnalysisPage() {
       router.push(`/${locale}/auth/login`);
       return;
     }
+    
+    console.log('🔥 用户验证通过，继续执行');
     
     // 添加用户问题到消息列表
     const userQuestion = questionToSend;
