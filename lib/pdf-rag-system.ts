@@ -707,11 +707,12 @@ export class PDFRAGSystem {
       
       let answer: string;
       
-      // 3. 根据质量选择回答模式
+      // 3. 根据质量选择回答模式 - 始终使用AI生成以支持多语言
       if (contentQuality.quality === 'high') {
-        // 高质量匹配：基于PDF内容回答
+        // 高质量匹配：基于PDF内容用AI生成回答
         const context = this.buildContext(query, relevantChunks, pdfTitle);
-        answer = this.generateContextualAnswer(context);
+        const prompt = this.buildPromptFromContext(context);
+        answer = await this.callAIService(prompt, locale, mode);
         console.log('[RAG] 使用PDF内容生成回答');
       } else if (contentQuality.quality === 'medium') {
         // 中等质量：混合模式（PDF内容 + AI补充）
@@ -799,6 +800,27 @@ export class PDFRAGSystem {
     }
   }
   
+  /**
+   * 从上下文构建AI提示词
+   */
+  private buildPromptFromContext(context: ConversationContext): string {
+    const { query, relevantChunks, pdfMetadata } = context;
+    
+    let prompt = `基于以下PDF文档内容回答用户问题：\n\n`;
+    
+    // 添加相关内容
+    relevantChunks.forEach((result, index) => {
+      prompt += `【内容${index + 1}】(第${result.chunk.pageNumber}页)\n`;
+      prompt += `${result.chunk.text}\n\n`;
+    });
+    
+    // 添加用户问题
+    prompt += `用户问题：${query}\n\n`;
+    prompt += `请基于以上PDF内容回答问题。如果内容不足以完全回答问题，请说明并提供相关建议。`;
+    
+    return prompt;
+  }
+
   /**
    * 查询分类
    */
