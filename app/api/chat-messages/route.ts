@@ -27,16 +27,44 @@ export async function GET(request: NextRequest) {
     console.log('[Chat Messages API] 获取聊天记录，文档ID:', documentId, '用户:', userId);
 
     // 从数据库获取聊天消息
-    const whereClause = user?.id 
-      ? { document_id: documentId, user_id: user.id }
-      : { document_id: documentId, user_id: null }; // 开发环境查询匿名消息
-    
-    const messages = await prisma.chat_messages.findMany({
-      where: whereClause,
-      orderBy: {
-        timestamp: 'asc'
+    let messages;
+    try {
+      // 首先尝试使用Prisma
+      const whereClause = user?.id 
+        ? { document_id: documentId, user_id: user.id }
+        : { document_id: documentId, user_id: null };
+      
+      messages = await prisma.chat_messages.findMany({
+        where: whereClause,
+        orderBy: {
+          timestamp: 'asc'
+        }
+      });
+    } catch (prismaError) {
+      console.warn('[Chat Messages API] Prisma查询失败，尝试使用Supabase客户端:', prismaError);
+      
+      // 如果Prisma失败，使用Supabase客户端
+      const query = supabaseService
+        .from('chat_messages')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('timestamp', { ascending: true });
+      
+      if (user?.id) {
+        query.eq('user_id', user.id);
+      } else {
+        query.is('user_id', null);
       }
-    });
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('[Chat Messages API] Supabase查询也失败:', error);
+        throw error;
+      }
+      
+      messages = data || [];
+    }
     
     console.log('[Chat Messages API] 找到消息数量:', messages.length);
 
@@ -82,37 +110,85 @@ export async function POST(request: NextRequest) {
     console.log('[Chat Messages API] 保存聊天消息，文档ID:', documentId, '用户:', userId, '是否用户消息:', isUser);
 
     // 确保PDF文档存在，如果不存在则创建临时文档
-    const existingPdf = await prisma.pdfs.findUnique({
-      where: { id: documentId }
-    });
+    let existingPdf;
+    let message;
     
-    if (!existingPdf) {
-      console.log('[Chat Messages API] 创建临时PDF文档，ID:', documentId);
-      try {
-        await prisma.pdfs.create({
-          data: {
+    try {
+      // 首先尝试使用Prisma
+      existingPdf = await prisma.pdfs.findUnique({
+        where: { id: documentId }
+      });
+      
+      if (!existingPdf) {
+        console.log('[Chat Messages API] 创建临时PDF文档，ID:', documentId);
+        try {
+          await prisma.pdfs.create({
+            data: {
+              id: documentId,
+              name: 'Chat Session Document',
+              url: 'temp://chat-session',
+              size: 0,
+              user_id: user?.id || null
+            }
+          });
+        } catch (createError) {
+          console.error('[Chat Messages API] 创建PDF文档失败:', createError);
+        }
+      }
+
+      // 保存到数据库
+      message = await prisma.chat_messages.create({
+        data: {
+          user_id: user?.id || null,
+          document_id: documentId,
+          content: content,
+          is_user: isUser || false
+        }
+      });
+      
+    } catch (prismaError) {
+      console.warn('[Chat Messages API] Prisma操作失败，尝试使用Supabase客户端:', prismaError);
+      
+      // 如果Prisma失败，使用Supabase客户端
+      // 首先检查PDF是否存在
+      const { data: pdfData } = await supabaseService
+        .from('pdfs')
+        .select('id')
+        .eq('id', documentId)
+        .single();
+      
+      if (!pdfData) {
+        console.log('[Chat Messages API] 使用Supabase创建临时PDF文档');
+        await supabaseService
+          .from('pdfs')
+          .insert({
             id: documentId,
             name: 'Chat Session Document',
             url: 'temp://chat-session',
             size: 0,
             user_id: user?.id || null
-          }
-        });
-      } catch (createError) {
-        console.error('[Chat Messages API] 创建PDF文档失败:', createError);
-        // 如果创建失败，可能是ID冲突，继续执行
+          });
       }
+      
+      // 保存消息
+      const { data: messageData, error: messageError } = await supabaseService
+        .from('chat_messages')
+        .insert({
+          user_id: user?.id || null,
+          document_id: documentId,
+          content: content,
+          is_user: isUser || false
+        })
+        .select()
+        .single();
+      
+      if (messageError) {
+        console.error('[Chat Messages API] Supabase消息保存失败:', messageError);
+        throw messageError;
+      }
+      
+      message = messageData;
     }
-
-    // 保存到数据库
-    const message = await prisma.chat_messages.create({
-      data: {
-        user_id: user?.id || null, // 允许null值
-        document_id: documentId,
-        content: content,
-        is_user: isUser || false
-      }
-    });
     
     console.log('[Chat Messages API] 消息保存成功，ID:', message.id);
 
