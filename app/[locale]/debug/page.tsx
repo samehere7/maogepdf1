@@ -164,6 +164,78 @@ export default function DebugPage() {
     }
   };
 
+  const testChatAPILocale = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
+    const steps: DebugStep[] = [];
+    const addStep = (step: string, status: 'success' | 'error' | 'warning', message: string, data?: any) => {
+      steps.push({
+        step,
+        status,
+        message,
+        data,
+        timestamp: new Date().toISOString()
+      });
+      setDebugSteps([...steps]);
+    };
+
+    try {
+      addStep('start', 'success', '开始测试聊天API多语言功能');
+
+      // 测试不同locale值
+      const locales = ['zh', 'ja', 'ko', 'en'];
+      
+      for (const locale of locales) {
+        addStep(`locale-${locale}`, 'success', `测试locale: ${locale}`);
+        
+        const requestPayload = {
+          messages: [{ role: "user", content: testContent }],
+          pdfId: documentId,
+          quality: 'fast',
+          locale: locale
+        };
+        
+        addStep(`payload-${locale}`, 'success', `请求载荷 (${locale})`, requestPayload);
+
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload)
+          });
+
+          const responseText = await response.text();
+          let result;
+          try {
+            result = JSON.parse(responseText);
+          } catch (e) {
+            result = { rawResponse: responseText };
+          }
+
+          addStep(`response-${locale}`, response.ok ? 'success' : 'error', 
+            `${locale}语言API响应 (${response.status})`, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            body: result
+          });
+          
+          // 短暂延迟避免请求过快
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+        } catch (apiError) {
+          addStep(`error-${locale}`, 'error', `${locale}语言API请求失败`, { error: String(apiError) });
+        }
+      }
+
+    } catch (error) {
+      addStep('api-error', 'error', '聊天API测试失败', { error: String(error) });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const testOriginalAPI = async () => {
     setIsLoading(true);
     setDebugSteps([]);
@@ -270,7 +342,7 @@ export default function DebugPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
                 onClick={runSystemCheck} 
                 disabled={isLoading}
@@ -284,6 +356,36 @@ export default function DebugPage() {
                 </div>
               </Button>
 
+              <Button 
+                onClick={testChatAPILocale} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="default"
+                style={{ backgroundColor: '#ef4444', borderColor: '#ef4444' }}
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Bug className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">🔥 多语言聊天API</div>
+                  <div className="text-sm text-white">测试zh/ja/ko/en四种语言</div>
+                </div>
+              </Button>
+
+              <Button 
+                onClick={testOriginalAPI} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Shield className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">原始API测试</div>
+                  <div className="text-sm text-gray-500">测试生产API响应</div>
+                </div>
+              </Button>
+            </div>
+            
+            {/* 第二行：其他测试 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <Button 
                 onClick={runChatTest} 
                 disabled={isLoading}
@@ -318,21 +420,8 @@ export default function DebugPage() {
               >
                 {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
                 <div className="text-left">
-                  <div className="font-medium">多语言测试</div>
+                  <div className="font-medium">Locale参数测试</div>
                   <div className="text-sm text-gray-500">测试locale参数传递</div>
-                </div>
-              </Button>
-
-              <Button 
-                onClick={testOriginalAPI} 
-                disabled={isLoading}
-                className="flex items-center gap-2 h-16"
-                variant="outline"
-              >
-                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Shield className="h-5 w-5" />}
-                <div className="text-left">
-                  <div className="font-medium">原始API测试</div>
-                  <div className="text-sm text-gray-500">测试生产API响应</div>
                 </div>
               </Button>
             </div>
