@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { supabaseService } from '@/lib/supabase/service-client';
 
+// 获取多语言系统提示词
+function getSystemPromptByLocale(locale: string, pdfName: string): string {
+  const prompts = {
+    'zh': `你是一个智能文档助手。用户正在查看一个名为"${pdfName}"的PDF文档，请根据用户的问题给出有帮助的回答。请用中文回答。`,
+    'en': `You are an intelligent document assistant. The user is viewing a PDF document named "${pdfName}". Please provide helpful answers based on the user's questions. Please respond in English.`,
+    'ja': `あなたは賢い文書アシスタントです。ユーザーは「${pdfName}」というPDF文書を見ています。ユーザーの質問に基づいて役立つ回答を提供してください。日本語で回答してください。`,
+    'ko': `당신은 지능적인 문서 도우미입니다. 사용자가 "${pdfName}"라는 PDF 문서를 보고 있습니다. 사용자의 질문에 따라 도움이 되는 답변을 제공해 주세요. 한국어로 답변해 주세요.`,
+    'es': `Eres un asistente inteligente de documentos. El usuario está viendo un documento PDF llamado "${pdfName}". Proporciona respuestas útiles basadas en las preguntas del usuario. Por favor responde en español.`,
+    'fr': `Vous êtes un assistant intelligent de documents. L'utilisateur consulte un document PDF nommé "${pdfName}". Veuillez fournir des réponses utiles basées sur les questions de l'utilisateur. Veuillez répondre en français.`,
+    'de': `Sie sind ein intelligenter Dokumentenassistent. Der Benutzer betrachtet ein PDF-Dokument namens "${pdfName}". Bitte geben Sie hilfreiche Antworten basierend auf den Fragen des Benutzers. Bitte antworten Sie auf Deutsch.`,
+    'it': `Sei un assistente intelligente per documenti. L'utente sta visualizzando un documento PDF chiamato "${pdfName}". Fornisci risposte utili basate sulle domande dell'utente. Si prega di rispondere in italiano.`,
+    'pt-BR': `Você é um assistente inteligente de documentos. O usuário está visualizando um documento PDF chamado "${pdfName}". Forneça respostas úteis baseadas nas perguntas do usuário. Por favor, responda em português.`,
+    'ru': `Вы - умный помощник по документам. Пользователь просматривает PDF-документ под названием "${pdfName}". Пожалуйста, предоставьте полезные ответы на основе вопросов пользователя. Пожалуйста, отвечайте на русском языке.`
+  };
+  
+  return prompts[locale as keyof typeof prompts] || prompts['en'];
+}
+
 interface DebugStep {
   step: string;
   status: 'success' | 'error' | 'warning';
@@ -20,30 +38,6 @@ function createDebugStep(step: string, status: 'success' | 'error' | 'warning', 
   };
 }
 
-// 备用回答生成函数
-function generateFallbackAnswer(question: string, documentName: string): string {
-  const questionLower = question.toLowerCase();
-  
-  if (questionLower.includes('重要') || questionLower.includes('关键') || questionLower.includes('主要')) {
-    return `关于文档"${documentName}"中的重要内容，我建议您：
-
-1. 仔细阅读文档的标题和章节标题，这通常包含了最重要的信息
-2. 查看文档中的总结、结论或要点部分
-3. 注意任何突出显示、加粗或重复提及的内容
-4. 关注数字、统计数据和具体的事实信息
-
-由于当前无法直接分析文档内容，建议您重点关注这些部分来获取关键信息。`;
-  }
-  
-  return `感谢您关于文档"${documentName}"的提问。目前我无法直接分析文档内容，但我建议您：
-
-1. 仔细阅读文档，重点关注标题、小标题和总结部分
-2. 查找与您的问题相关的关键词
-3. 如果文档较长，可以先浏览目录了解整体结构
-4. 对于具体问题，建议重点阅读相关章节
-
-如果您能提供更具体的问题，我可以给出更有针对性的建议。`;
-}
 
 export async function POST(request: NextRequest) {
   const debugSteps: DebugStep[] = [];
@@ -61,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ debugSteps }, { status: 400 });
     }
 
-    const { pdfId, question, mode = 'fast' } = requestData;
+    const { pdfId, question, mode = 'fast', locale = 'zh' } = requestData;
 
     // 检查认证
     const supabase = createClient();
@@ -149,7 +143,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: 'system',
-              content: `你是一个智能文档助手。用户正在查看一个名为"${pdf.name}"的PDF文档，请根据用户的问题给出有帮助的回答。请用中文回答。`
+              content: getSystemPromptByLocale(locale, pdf.name)
             },
             {
               role: 'user',
@@ -170,23 +164,15 @@ export async function POST(request: NextRequest) {
 
       if (!openRouterResponse.ok) {
         const errorText = await openRouterResponse.text();
-        debugSteps.push(createDebugStep('6b', 'warning', 'OpenRouter失败，使用备用回答', { 
-          error: errorText 
+        debugSteps.push(createDebugStep('6b', 'error', 'OpenRouter API失败', { 
+          error: errorText,
+          status: openRouterResponse.status
         }));
         
-        // 使用备用回答
-        const answer = generateFallbackAnswer(question, pdf.name);
-        
-        debugSteps.push(createDebugStep('7', 'success', '备用回答生成成功', {
-          answerLength: answer.length,
-          method: 'fallback',
-          preview: answer.substring(0, 100) + '...'
-        }));
-
-        return NextResponse.json({
-          success: true,
-          answer,
-          debugSteps
+        return NextResponse.json({ 
+          success: false,
+          error: 'AI服务暂时不可用',
+          debugSteps 
         });
       }
 

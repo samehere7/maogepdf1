@@ -159,7 +159,8 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
         body: JSON.stringify({ 
           pdfId: documentId,
           question: input.trim(),
-          mode: modelType === 'quality' ? 'high' : 'fast'
+          mode: modelType === 'quality' ? 'high' : 'fast',
+          locale: locale
         }),
       })
       
