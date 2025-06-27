@@ -133,6 +133,37 @@ export default function DebugPage() {
     }
   };
 
+  const testLocaleDebug = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
+    try {
+      const response = await fetch('/api/debug/locale-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfId: documentId,
+          question: testContent,
+          mode: 'fast',
+          locale: 'ja' // 测试日语
+        })
+      });
+      
+      const result = await response.json();
+      setDebugSteps(result.debugSteps || []);
+    } catch (error) {
+      setDebugSteps([{
+        step: 'network',
+        status: 'error',
+        message: 'Locale调试请求失败',
+        data: { error: String(error) },
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const testOriginalAPI = async () => {
     setIsLoading(true);
     setDebugSteps([]);
@@ -239,7 +270,7 @@ export default function DebugPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <Button 
                 onClick={runSystemCheck} 
                 disabled={isLoading}
@@ -276,6 +307,19 @@ export default function DebugPage() {
                 <div className="text-left">
                   <div className="font-medium">PDF QA测试</div>
                   <div className="text-sm text-gray-500">测试AI回复生成</div>
+                </div>
+              </Button>
+
+              <Button 
+                onClick={testLocaleDebug} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">多语言测试</div>
+                  <div className="text-sm text-gray-500">测试locale参数传递</div>
                 </div>
               </Button>
 
