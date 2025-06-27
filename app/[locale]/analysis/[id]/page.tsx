@@ -392,6 +392,8 @@ export default function AnalysisPage() {
       console.log('===== 前端聊天请求DEBUG =====');
       console.log('useLocale()返回值:', locale);
       console.log('locale类型:', typeof locale);
+      console.log('当前URL路径:', window.location.pathname);
+      console.log('URL第一段:', window.location.pathname.split('/')[1]);
       console.log('完整请求payload:', JSON.stringify(requestPayload, null, 2));
       console.log('============================');
       
