@@ -103,6 +103,36 @@ export default function DebugPage() {
     }
   };
 
+  const testPdfQA = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
+    try {
+      const response = await fetch('/api/debug/pdf-qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfId: documentId,
+          question: testContent,
+          mode: 'fast'
+        })
+      });
+      
+      const result = await response.json();
+      setDebugSteps(result.debugSteps || []);
+    } catch (error) {
+      setDebugSteps([{
+        step: 'network',
+        status: 'error',
+        message: 'PDF QA调试请求失败',
+        data: { error: String(error) },
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const testOriginalAPI = async () => {
     setIsLoading(true);
     setDebugSteps([]);
@@ -209,7 +239,7 @@ export default function DebugPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Button 
                 onClick={runSystemCheck} 
                 disabled={isLoading}
@@ -233,6 +263,19 @@ export default function DebugPage() {
                 <div className="text-left">
                   <div className="font-medium">聊天测试</div>
                   <div className="text-sm text-gray-500">完整的聊天流程测试</div>
+                </div>
+              </Button>
+
+              <Button 
+                onClick={testPdfQA} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Bug className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">PDF QA测试</div>
+                  <div className="text-sm text-gray-500">测试AI回复生成</div>
                 </div>
               </Button>
 
