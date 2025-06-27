@@ -46,7 +46,7 @@ function getLanguageInstruction(locale: string): string {
     'zh': '【重要】必须用中文回答！不要使用英文。请用中文回答，保持简洁实用。',
     'en': '【IMPORTANT】You must respond in English! Please respond in English, keep it concise and practical.',
     'ko': '【중요】반드시 한국어로 답변하세요! 영어를 사용하지 마세요. 한국어로 답변해 주세요. 간결하고 실용적으로 유지하세요.',
-    'ja': '【重要】必ず日本語で回答してください！英語を使わないでください。日本語で回答してください。簡潔で実用的に保ってください。',
+    'ja': '【超重要】絶対に日本語のみで回答してください！英語は一切使用禁止です！全ての回答は日本語で書いてください。英語の単語や文章を混ぜないでください。完全に日本語で回答することが必須要件です。',
     'es': '【IMPORTANTE】¡Debes responder en español! No uses inglés. Por favor responde en español, manteniéndolo conciso y práctico.',
     'fr': '【IMPORTANT】Vous devez répondre en français ! N\'utilisez pas l\'anglais. Veuillez répondre en français, en restant concis et pratique.',
     'de': '【WICHTIG】Sie müssen auf Deutsch antworten! Verwenden Sie kein Englisch. Bitte antworten Sie auf Deutsch, prägnant und praktisch.',
@@ -814,9 +814,13 @@ export class PDFRAGSystem {
       prompt += `${result.chunk.text}\n\n`;
     });
     
-    // 添加用户问题
+    // 添加用户问题和回答指导
     prompt += `用户问题：${query}\n\n`;
-    prompt += `请基于以上PDF内容回答问题。如果内容不足以完全回答问题，请说明并提供相关建议。`;
+    prompt += `请严格基于以上PDF内容回答问题。要求：\n`;
+    prompt += `1. 优先使用PDF文档中的具体信息\n`;
+    prompt += `2. 引用具体的页码信息\n`;
+    prompt += `3. 如果PDF内容不足，可以适当补充常识\n`;
+    prompt += `4. 保持回答简洁实用\n`;
     
     return prompt;
   }
