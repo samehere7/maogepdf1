@@ -75,26 +75,54 @@ export async function POST(request: NextRequest) {
     }
 
     // 步骤5: 测试Prisma数据库连接
+    let prismaWorking = false;
     try {
       await prisma.$connect();
       debugSteps.push(createDebugStep('5', 'success', 'Prisma数据库连接成功'));
+      prismaWorking = true;
     } catch (error) {
-      debugSteps.push(createDebugStep('5', 'error', 'Prisma数据库连接失败', { error: String(error) }));
-      return NextResponse.json({ debugSteps }, { status: 500 });
+      debugSteps.push(createDebugStep('5', 'warning', 'Prisma数据库连接失败，将使用Supabase备用方案', { error: String(error) }));
+      prismaWorking = false;
+    }
+
+    // 步骤5b: 如果Prisma失败，测试Supabase服务角色连接
+    if (!prismaWorking) {
+      try {
+        const { data, error } = await supabaseService
+          .from('chat_messages')
+          .select('count')
+          .limit(1);
+        
+        if (error) throw error;
+        debugSteps.push(createDebugStep('5b', 'success', 'Supabase服务角色连接成功，备用方案可用'));
+      } catch (supabaseError) {
+        debugSteps.push(createDebugStep('5b', 'error', 'Supabase备用方案也失败', { error: String(supabaseError) }));
+        return NextResponse.json({ debugSteps }, { status: 500 });
+      }
     }
 
     // 步骤6: 检查PDF文档是否存在
     let existingPdf = null;
     try {
-      existingPdf = await prisma.pdfs.findUnique({
-        where: { id: documentId }
-      });
+      if (prismaWorking) {
+        existingPdf = await prisma.pdfs.findUnique({
+          where: { id: documentId }
+        });
+      } else {
+        const { data } = await supabaseService
+          .from('pdfs')
+          .select('*')
+          .eq('id', documentId)
+          .single();
+        existingPdf = data;
+      }
       
       debugSteps.push(createDebugStep('6', existingPdf ? 'success' : 'warning', 
         existingPdf ? 'PDF文档存在' : 'PDF文档不存在，需要创建', {
         documentExists: !!existingPdf,
         documentId: documentId,
-        documentName: existingPdf?.name
+        documentName: existingPdf?.name,
+        method: prismaWorking ? 'Prisma' : 'Supabase'
       }));
     } catch (error) {
       debugSteps.push(createDebugStep('6', 'error', 'PDF文档查询失败', { error: String(error) }));
@@ -103,18 +131,38 @@ export async function POST(request: NextRequest) {
     // 步骤7: 如果需要，创建临时PDF文档
     if (!existingPdf) {
       try {
-        const newPdf = await prisma.pdfs.create({
-          data: {
-            id: documentId,
-            name: 'Debug Chat Session',
-            url: 'debug://chat-session',
-            size: 0,
-            user_id: user?.id || null
-          }
-        });
+        let newPdf;
+        if (prismaWorking) {
+          newPdf = await prisma.pdfs.create({
+            data: {
+              id: documentId,
+              name: 'Debug Chat Session',
+              url: 'debug://chat-session',
+              size: 0,
+              user_id: user?.id || null
+            }
+          });
+        } else {
+          const { data, error } = await supabaseService
+            .from('pdfs')
+            .insert({
+              id: documentId,
+              name: 'Debug Chat Session',
+              url: 'debug://chat-session',
+              size: 0,
+              user_id: user?.id || null
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          newPdf = data;
+        }
+        
         debugSteps.push(createDebugStep('7', 'success', '临时PDF文档创建成功', {
           pdfId: newPdf.id,
-          pdfName: newPdf.name
+          pdfName: newPdf.name,
+          method: prismaWorking ? 'Prisma' : 'Supabase'
         }));
       } catch (error) {
         debugSteps.push(createDebugStep('7', 'error', '临时PDF文档创建失败', { error: String(error) }));
@@ -126,30 +174,59 @@ export async function POST(request: NextRequest) {
 
     // 步骤8: 测试聊天消息插入
     try {
-      const message = await prisma.chat_messages.create({
-        data: {
-          user_id: user?.id || null,
-          document_id: documentId,
-          content: content,
-          is_user: isUser || false
-        }
-      });
+      let message;
+      if (prismaWorking) {
+        message = await prisma.chat_messages.create({
+          data: {
+            user_id: user?.id || null,
+            document_id: documentId,
+            content: content,
+            is_user: isUser || false
+          }
+        });
+      } else {
+        const { data, error } = await supabaseService
+          .from('chat_messages')
+          .insert({
+            user_id: user?.id || null,
+            document_id: documentId,
+            content: content,
+            is_user: isUser || false
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        message = data;
+      }
       
       debugSteps.push(createDebugStep('8', 'success', '聊天消息保存成功', {
         messageId: message.id,
         userId: message.user_id,
         documentId: message.document_id,
-        isUser: message.is_user
+        isUser: message.is_user,
+        method: prismaWorking ? 'Prisma' : 'Supabase'
       }));
 
       // 步骤9: 验证消息是否能查询到
-      const savedMessage = await prisma.chat_messages.findUnique({
-        where: { id: message.id }
-      });
+      let savedMessage;
+      if (prismaWorking) {
+        savedMessage = await prisma.chat_messages.findUnique({
+          where: { id: message.id }
+        });
+      } else {
+        const { data } = await supabaseService
+          .from('chat_messages')
+          .select('*')
+          .eq('id', message.id)
+          .single();
+        savedMessage = data;
+      }
       
       debugSteps.push(createDebugStep('9', savedMessage ? 'success' : 'error', 
         savedMessage ? '消息查询验证成功' : '消息查询验证失败', {
-        messageFound: !!savedMessage
+        messageFound: !!savedMessage,
+        method: prismaWorking ? 'Prisma' : 'Supabase'
       }));
 
       return NextResponse.json({
