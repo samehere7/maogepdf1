@@ -147,15 +147,71 @@ interface PageAnchorTextProps {
 }
 
 export function PageAnchorText({ content, onPageClick }: PageAnchorTextProps) {
-  // 匹配各种页码格式的正则表达式
+  // 匹配各种页码格式的正则表达式 - 完整多语言支持
   const pagePatterns = [
-    /【(\d+)】/g,         // 【X】- ChatPDF风格的主要格式
-    /（第(\d+)页）/g,     // （第X页）
-    /\(第(\d+)页\)/g,     // (第X页)
-    /第(\d+)页/g,         // 第X页
-    /页码:?\s*(\d+)/g,    // 页码:X 或 页码 X
-    /P\.?\s*(\d+)/gi,     // P.X 或 P X
-    /Page\s*(\d+)/gi      // Page X
+    // 统一格式（推荐AI使用）
+    /【(\d+)】/g,                     // 【X】- 统一格式，所有语言
+    
+    // 中文格式
+    /（第(\d+)页）/g,                 // （第X页）
+    /\(第(\d+)页\)/g,                 // (第X页)
+    /第(\d+)页/g,                     // 第X页
+    /页码:?\s*(\d+)/g,                // 页码:X 或 页码 X
+    /第(\d+)頁/g,                     // 第X頁 (繁体)
+    
+    // 英语格式
+    /Page\s*(\d+)/gi,                 // Page X
+    /P\.?\s*(\d+)/gi,                 // P.X 或 P X
+    /\(Page\s*(\d+)\)/gi,             // (Page X)
+    
+    // 日语格式
+    /(\d+)ページ/g,                    // Xページ
+    /ページ\s*(\d+)/g,                 // ページ X
+    /\((\d+)ページ\)/g,                // (Xページ)
+    /（(\d+)ページ）/g,                // （Xページ）
+    
+    // 韩语格式
+    /(\d+)페이지/g,                    // X페이지
+    /페이지\s*(\d+)/g,                 // 페이지 X
+    /\((\d+)페이지\)/g,                // (X페이지)
+    /（(\d+)페이지）/g,                // （X페이지）
+    
+    // 西班牙语格式
+    /Página\s*(\d+)/gi,               // Página X
+    /Pág\.?\s*(\d+)/gi,               // Pág.X 或 Pág X
+    /\(Página\s*(\d+)\)/gi,           // (Página X)
+    
+    // 法语格式
+    /Page\s*n°?\s*(\d+)/gi,           // Page 3 或 Page n°3
+    /\(Page\s*(\d+)\)/gi,             // (Page X)
+    
+    // 德语格式
+    /Seite\s*(\d+)/gi,                // Seite X
+    /S\.?\s*(\d+)/gi,                 // S.X 或 S X
+    /\(Seite\s*(\d+)\)/gi,            // (Seite X)
+    
+    // 意大利语格式
+    /Pagina\s*(\d+)/gi,               // Pagina X
+    /Pag\.?\s*(\d+)/gi,               // Pag.X
+    /\(Pagina\s*(\d+)\)/gi,           // (Pagina X)
+    
+    // 葡萄牙语格式
+    /página\s*(\d+)/gi,               // página X
+    /pág\.?\s*(\d+)/gi,               // pág.X
+    /\(página\s*(\d+)\)/gi,           // (página X)
+    
+    // 俄语格式
+    /страниц[аеы]?\s*(\d+)/gi,        // страница X / страницы X / страницах X
+    /стр\.?\s*(\d+)/gi,               // стр.X
+    /\(страниц[аеы]?\s*(\d+)\)/gi,    // (страница X)
+    
+    // 阿拉伯语格式
+    /صفحة\s*(\d+)/g,                   // صفحة X
+    /\(صفحة\s*(\d+)\)/g,               // (صفحة X)
+    
+    // 通用数字格式（作为后备）
+    /\[(\d+)\]/g,                     // [X]
+    /\((\d+)\)/g                      // (X) - 注意：这个应该放最后，避免误匹配
   ];
 
   let processedContent = content;
