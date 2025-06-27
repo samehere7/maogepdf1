@@ -1094,6 +1094,13 @@ export default function AnalysisPage() {
               <div className="text-sm text-gray-500 mt-1">
 {t('chat.currentMode')}: {modelQuality === 'fast' ? t('chat.fastMode') : t('chat.highQualityMode')}
               </div>
+              {/* 🔥 临时调试信息显示 */}
+              <div className="text-xs bg-red-100 p-2 mt-2 rounded border">
+                <div><strong>🔥 调试信息:</strong></div>
+                <div>Locale: {locale}</div>
+                <div>URL: {typeof window !== 'undefined' ? window.location.pathname : 'SSR'}</div>
+                <div>User: {user?.email || 'None'}</div>
+              </div>
             </div>
 
           {/* 消息区域 */}
