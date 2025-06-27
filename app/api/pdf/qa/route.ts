@@ -9,8 +9,9 @@ export async function POST(request: NextRequest) {
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
+    // 检查认证，但允许匿名用户使用AI功能
     if (authError || !user?.id) {
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
+      console.log('[PDF QA API] 匿名用户使用AI功能');
     }
 
     // 解析请求数据
@@ -23,12 +24,17 @@ export async function POST(request: NextRequest) {
     console.log(`[PDF QA API] 处理问题，PDF ID: ${pdfId}，问题: "${question}"，模式: ${mode}`);
 
     // 获取PDF信息
-    const { data: pdf, error: pdfError } = await supabaseService
+    const query = supabaseService
       .from('pdfs')
       .select('*')
-      .eq('id', pdfId)
-      .eq('user_id', user.id)
-      .single();
+      .eq('id', pdfId);
+    
+    // 如果用户已登录，只查询属于该用户的PDF；否则查询所有PDF
+    if (user?.id) {
+      query.eq('user_id', user.id);
+    }
+    
+    const { data: pdf, error: pdfError } = await query.single();
       
     if (pdfError || !pdf) {
       console.error('[PDF QA API] 获取PDF信息失败:', pdfError);
