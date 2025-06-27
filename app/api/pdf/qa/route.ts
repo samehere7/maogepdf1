@@ -25,13 +25,23 @@ function getSystemPromptByLocale(locale: string, pdfName: string): string {
 export async function POST(request: NextRequest) {
   try {
     console.log('[PDF QA API] 收到新请求');
+    console.log('[PDF QA API] 请求头Accept-Language:', request.headers.get('accept-language'));
+    console.log('[PDF QA API] 请求头User-Agent:', request.headers.get('user-agent'));
     
     // 解析请求数据并记录完整内容
     const requestBody = await request.json();
-    console.log('[PDF QA API] 请求体内容:', JSON.stringify(requestBody, null, 2));
+    console.log('[PDF QA API] 原始请求体:', JSON.stringify(requestBody, null, 2));
     
     const { pdfId, question, mode = 'high', locale = 'zh' } = requestBody;
-    console.log('[PDF QA API] 提取的参数:', { pdfId, question, mode, locale });
+    console.log('[PDF QA API] ===== 关键参数分析 =====');
+    console.log('[PDF QA API] pdfId:', pdfId);
+    console.log('[PDF QA API] question:', question);
+    console.log('[PDF QA API] mode:', mode);
+    console.log('[PDF QA API] locale:', locale);
+    console.log('[PDF QA API] locale类型:', typeof locale);
+    console.log('[PDF QA API] 是否有locale字段:', 'locale' in requestBody);
+    console.log('[PDF QA API] requestBody.locale直接值:', requestBody.locale);
+    console.log('[PDF QA API] ========================');
     
     // 检查用户是否已登录
     const supabase = createClient();
