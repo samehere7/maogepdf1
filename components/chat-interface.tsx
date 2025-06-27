@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { chatWithDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { PageAnchorText } from "@/components/page-anchor-button"
+import { DebugPanel } from "@/components/debug-panel"
 
 interface Message {
   id: string
@@ -35,6 +36,8 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
   const [modelType, setModelType] = useState<'fast' | 'quality'>('fast')
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [isPro, setIsPro] = useState(false) // 这里可根据实际会员状态判断
+  const [showDebug, setShowDebug] = useState(false)
+  const [lastError, setLastError] = useState<string | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -88,8 +91,10 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
   // 保存聊天记录到数据库
   const saveChatToDatabase = async (userMessage: Message, aiMessage: Message) => {
     try {
+      setLastError(null);
+      
       // 保存用户消息
-      await fetch('/api/chat-messages', {
+      const userResponse = await fetch('/api/chat-messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -99,8 +104,13 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
         })
       });
 
+      if (!userResponse.ok) {
+        const errorData = await userResponse.json();
+        throw new Error(`保存用户消息失败: ${errorData.error} (${userResponse.status})`);
+      }
+
       // 保存AI回复
-      await fetch('/api/chat-messages', {
+      const aiResponse = await fetch('/api/chat-messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,10 +119,18 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
           isUser: false
         })
       });
+
+      if (!aiResponse.ok) {
+        const errorData = await aiResponse.json();
+        throw new Error(`保存AI消息失败: ${errorData.error} (${aiResponse.status})`);
+      }
       
       console.log(t('chat.chatHistorySaved'));
     } catch (error) {
-      console.error(t('chat.chatHistorySaveFailed'), error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setLastError(errorMessage);
+      console.error(t('chat.chatHistorySaveFailed'), errorMessage);
+      setShowDebug(true); // 出错时自动显示调试面板
     }
   }
 
@@ -236,8 +254,50 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
               {t("chat.qualityMode")}
             </button>
           </div>
+          
+          {/* 调试按钮 */}
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className={`px-3 py-1 text-sm rounded ${
+              showDebug ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            调试
+          </button>
         </div>
       </div>
+
+      {/* 错误提示 */}
+      {lastError && (
+        <div className="mx-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-red-800">聊天功能出现问题</p>
+              <p className="text-sm text-red-600 mt-1">{lastError}</p>
+            </div>
+            <button
+              onClick={() => setLastError(null)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 调试面板 */}
+      {showDebug && (
+        <div className="mx-4 mb-4">
+          <DebugPanel 
+            documentId={documentId}
+            onDebugComplete={(success) => {
+              if (success) {
+                setLastError(null);
+              }
+            }}
+          />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (

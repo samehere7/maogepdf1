@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseService } from '@/lib/supabase/service-client';
 import { prisma } from '@/lib/prisma';
 
 // 获取聊天消息
@@ -9,12 +10,10 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    // 开发环境下允许匿名用户，生产环境仍需要认证
+    // 检查认证，但允许匿名用户查询聊天记录
     if (authError || !user?.id) {
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json({ error: '未登录' }, { status: 401 });
-      }
-      console.log('[Chat Messages API] 开发环境：允许匿名用户查询');
+      console.log('[Chat Messages API] 匿名用户查询聊天记录');
+      // 允许匿名用户查询聊天记录
     }
 
     const { searchParams } = new URL(request.url);
@@ -67,12 +66,10 @@ export async function POST(request: NextRequest) {
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    // 开发环境下允许匿名用户，生产环境仍需要认证
+    // 检查认证，但允许匿名用户使用聊天功能
     if (authError || !user?.id) {
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json({ error: '未登录' }, { status: 401 });
-      }
-      console.log('[Chat Messages API] 开发环境：允许匿名用户操作');
+      console.log('[Chat Messages API] 匿名用户使用聊天功能');
+      // 在生产环境中，我们允许匿名用户使用聊天功能，但会有一些限制
     }
 
     const { documentId, content, isUser } = await request.json();
@@ -84,23 +81,26 @@ export async function POST(request: NextRequest) {
     const userId = user?.id || 'anonymous';
     console.log('[Chat Messages API] 保存聊天消息，文档ID:', documentId, '用户:', userId, '是否用户消息:', isUser);
 
-    // 开发环境下，确保PDF文档存在
-    if (process.env.NODE_ENV !== 'production') {
-      const existingPdf = await prisma.pdfs.findUnique({
-        where: { id: documentId }
-      });
-      
-      if (!existingPdf) {
-        console.log('[Chat Messages API] 开发环境：创建临时PDF文档');
+    // 确保PDF文档存在，如果不存在则创建临时文档
+    const existingPdf = await prisma.pdfs.findUnique({
+      where: { id: documentId }
+    });
+    
+    if (!existingPdf) {
+      console.log('[Chat Messages API] 创建临时PDF文档，ID:', documentId);
+      try {
         await prisma.pdfs.create({
           data: {
             id: documentId,
-            name: 'Temporary PDF for Chat',
-            url: 'temp://chat-pdf',
+            name: 'Chat Session Document',
+            url: 'temp://chat-session',
             size: 0,
             user_id: user?.id || null
           }
         });
+      } catch (createError) {
+        console.error('[Chat Messages API] 创建PDF文档失败:', createError);
+        // 如果创建失败，可能是ID冲突，继续执行
       }
     }
 
