@@ -34,11 +34,30 @@ export async function POST(request: NextRequest) {
       query.eq('user_id', user.id);
     }
     
-    const { data: pdf, error: pdfError } = await query.single();
+    let { data: pdf, error: pdfError } = await query.single();
       
     if (pdfError || !pdf) {
-      console.error('[PDF QA API] 获取PDF信息失败:', pdfError);
-      return NextResponse.json({ error: 'PDF不存在或无权访问' }, { status: 404 });
+      console.log('[PDF QA API] PDF不存在，创建临时文档:', pdfId);
+      
+      // 创建临时PDF文档以支持聊天
+      const { data: newPdf, error: createError } = await supabaseService
+        .from('pdfs')
+        .insert({
+          id: pdfId,
+          name: 'Chat Document',
+          url: 'temp://chat-document',
+          size: 0,
+          user_id: user?.id || null
+        })
+        .select()
+        .single();
+      
+      if (createError || !newPdf) {
+        console.error('[PDF QA API] 创建临时PDF失败:', createError);
+        return NextResponse.json({ error: 'PDF不存在且无法创建' }, { status: 404 });
+      }
+      
+      pdf = newPdf;
     }
 
     // 简化版本：直接使用OpenRouter生成回答
