@@ -61,16 +61,52 @@ export async function POST(request: NextRequest) {
     
     const { data: pdf, error: pdfError } = await query.single();
     
-    debugSteps.push(createDebugStep('4', pdf ? 'success' : 'error', 
-      pdf ? 'PDF文档找到' : 'PDF文档未找到', {
-      pdfFound: !!pdf,
-      pdfId: pdfId,
-      pdfName: pdf?.name,
-      error: pdfError?.message
-    }));
+    // 如果PDF不存在，尝试创建
+    if (pdfError || !pdf) {
+      debugSteps.push(createDebugStep('4', 'warning', 'PDF文档未找到，尝试创建', {
+        pdfFound: false,
+        pdfId: pdfId,
+        error: pdfError?.message
+      }));
 
-    if (!pdf) {
-      return NextResponse.json({ debugSteps }, { status: 404 });
+      try {
+        const { data: newPdf, error: createError } = await supabaseService
+          .from('pdfs')
+          .insert({
+            id: pdfId,
+            name: 'Debug Chat Document',
+            url: 'debug://chat-document',
+            size: 0,
+            user_id: user?.id || null
+          })
+          .select()
+          .single();
+
+        if (createError || !newPdf) {
+          debugSteps.push(createDebugStep('4b', 'error', 'PDF文档创建失败', { 
+            error: createError?.message 
+          }));
+          return NextResponse.json({ debugSteps }, { status: 404 });
+        }
+
+        pdf = newPdf;
+        debugSteps.push(createDebugStep('4b', 'success', 'PDF文档创建成功', {
+          pdfId: newPdf.id,
+          pdfName: newPdf.name
+        }));
+
+      } catch (error) {
+        debugSteps.push(createDebugStep('4b', 'error', 'PDF文档创建异常', { 
+          error: String(error) 
+        }));
+        return NextResponse.json({ debugSteps }, { status: 500 });
+      }
+    } else {
+      debugSteps.push(createDebugStep('4', 'success', 'PDF文档找到', {
+        pdfFound: true,
+        pdfId: pdfId,
+        pdfName: pdf?.name
+      }));
     }
 
     // 测试OpenRouter直接调用
