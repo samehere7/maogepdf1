@@ -181,7 +181,7 @@ export default function DebugPage() {
     };
 
     try {
-      addStep('start', 'success', '开始测试聊天API多语言功能');
+      addStep('start', 'success', '开始测试多语言聊天功能（使用专用调试API）');
 
       // 测试不同locale值
       const locales = ['zh', 'ja', 'ko', 'en'];
@@ -190,16 +190,15 @@ export default function DebugPage() {
         addStep(`locale-${locale}`, 'success', `测试locale: ${locale}`);
         
         const requestPayload = {
-          messages: [{ role: "user", content: testContent }],
-          pdfId: documentId,
-          quality: 'fast',
-          locale: locale
+          question: testContent,
+          locale: locale,
+          mode: 'fast'
         };
         
         addStep(`payload-${locale}`, 'success', `请求载荷 (${locale})`, requestPayload);
 
         try {
-          const response = await fetch('/api/chat', {
+          const response = await fetch('/api/debug/chat-locale', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestPayload)
@@ -221,8 +220,43 @@ export default function DebugPage() {
             body: result
           });
           
+          // 如果回答成功，检查语言是否正确
+          if (response.ok && result.success && result.data?.answer) {
+            const answer = result.data.answer;
+            let isCorrectLanguage = false;
+            let languageDetection = '';
+            
+            // 简单的语言检测
+            switch (locale) {
+              case 'zh':
+                isCorrectLanguage = /[\u4e00-\u9fa5]/.test(answer);
+                languageDetection = isCorrectLanguage ? '✅ 检测到中文' : '❌ 未检测到中文';
+                break;
+              case 'ja':
+                isCorrectLanguage = /[\u3040-\u309f\u30a0-\u30ff]/.test(answer) || answer.includes('です') || answer.includes('ます');
+                languageDetection = isCorrectLanguage ? '✅ 检测到日语' : '❌ 未检测到日语';
+                break;
+              case 'ko':
+                isCorrectLanguage = /[\uac00-\ud7af]/.test(answer);
+                languageDetection = isCorrectLanguage ? '✅ 检测到韩语' : '❌ 未检测到韩语';
+                break;
+              case 'en':
+                isCorrectLanguage = /^[a-zA-Z0-9\s\.,!?'"()-]+$/.test(answer.replace(/[【】]/g, ''));
+                languageDetection = isCorrectLanguage ? '✅ 检测到英语' : '❌ 未检测到英语';
+                break;
+            }
+            
+            addStep(`lang-check-${locale}`, isCorrectLanguage ? 'success' : 'error', 
+              `${locale}语言检测结果: ${languageDetection}`, {
+              expectedLanguage: locale,
+              detectedCorrect: isCorrectLanguage,
+              answerPreview: answer.substring(0, 100) + '...',
+              fullAnswer: answer
+            });
+          }
+          
           // 短暂延迟避免请求过快
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
         } catch (apiError) {
           addStep(`error-${locale}`, 'error', `${locale}语言API请求失败`, { error: String(apiError) });
@@ -230,7 +264,7 @@ export default function DebugPage() {
       }
 
     } catch (error) {
-      addStep('api-error', 'error', '聊天API测试失败', { error: String(error) });
+      addStep('api-error', 'error', '多语言聊天API测试失败', { error: String(error) });
     } finally {
       setIsLoading(false);
     }
