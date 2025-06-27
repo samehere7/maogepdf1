@@ -27,7 +27,7 @@ interface MaogeInterfaceProps {
 }
 
 export function MaogeInterface({ documentId, documentName, initialMessages, onPageJump }: MaogeInterfaceProps) {
-  const locale = useLocale()
+  const locale = useLocale() // 多语言支持 - 强制重新部署
   const t = useTranslations()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
