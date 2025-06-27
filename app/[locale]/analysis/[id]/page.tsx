@@ -42,13 +42,29 @@ interface AnalysisResult {
 export default function AnalysisPage() {
   const params = useParams()
   const router = useRouter()
-  const locale = useLocale()
+  const hookLocale = useLocale()
   const t = useTranslations()
   const tAnalysis = useTranslations('analysis')
   
-  // 🔥 页面级别的locale调试
-  console.log('🔥 页面加载 - useLocale()返回值:', locale);
-  console.log('🔥 页面加载 - window.location.pathname:', typeof window !== 'undefined' ? window.location.pathname : 'SSR');
+  // 🔥 修复：从URL直接提取locale
+  const [actualLocale, setActualLocale] = useState(hookLocale);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pathSegments = window.location.pathname.split('/').filter(Boolean);
+      const urlLocale = pathSegments[0];
+      const validLocales = ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt-BR', 'ru', 'it', 'nl', 'sv', 'da', 'no', 'fi', 'pl', 'tr', 'hi', 'bn', 'pa', 'kn', 'th', 'vi', 'id', 'ms'];
+      
+      if (validLocales.includes(urlLocale)) {
+        console.log('🔥 从URL提取的locale:', urlLocale);
+        console.log('🔥 useLocale()返回的locale:', hookLocale);
+        setActualLocale(urlLocale);
+      }
+    }
+  }, [hookLocale]);
+  
+  // 使用修正后的locale
+  const locale = actualLocale;
   
   // Locale防护机制
   useEffect(() => {
@@ -1097,7 +1113,8 @@ export default function AnalysisPage() {
               {/* 🔥 临时调试信息显示 */}
               <div className="text-xs bg-red-100 p-2 mt-2 rounded border">
                 <div><strong>🔥 调试信息:</strong></div>
-                <div>Locale: {locale}</div>
+                <div>Hook Locale: {hookLocale}</div>
+                <div>Fixed Locale: {locale}</div>
                 <div>URL: {typeof window !== 'undefined' ? window.location.pathname : 'SSR'}</div>
                 <div>User: {user?.email || 'None'}</div>
               </div>
