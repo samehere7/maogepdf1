@@ -84,6 +84,26 @@ export async function POST(request: NextRequest) {
     const userId = user?.id || 'anonymous';
     console.log('[Chat Messages API] 保存聊天消息，文档ID:', documentId, '用户:', userId, '是否用户消息:', isUser);
 
+    // 开发环境下，确保PDF文档存在
+    if (process.env.NODE_ENV !== 'production') {
+      const existingPdf = await prisma.pdfs.findUnique({
+        where: { id: documentId }
+      });
+      
+      if (!existingPdf) {
+        console.log('[Chat Messages API] 开发环境：创建临时PDF文档');
+        await prisma.pdfs.create({
+          data: {
+            id: documentId,
+            name: 'Temporary PDF for Chat',
+            url: 'temp://chat-pdf',
+            size: 0,
+            user_id: user?.id || null
+          }
+        });
+      }
+    }
+
     // 保存到数据库
     const message = await prisma.chat_messages.create({
       data: {
