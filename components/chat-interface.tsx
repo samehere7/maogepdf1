@@ -150,16 +150,21 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
     setIsLoading(true)
 
     try {
+      console.log("=== PDF聊天调试信息 ===");
+      console.log("locale变量类型:", typeof locale);
+      console.log("locale变量值:", locale);
+      console.log("useLocale()返回:", useLocale());
       console.log("开始PDF对话:", input.trim(), "文档ID:", documentId, "模式:", modelType, "语言:", locale);
       
       const requestPayload = { 
         pdfId: documentId,
         question: input.trim(),
         mode: modelType === 'quality' ? 'high' : 'fast',
-        locale: locale
+        locale: locale || 'zh' // 确保有默认值
       };
       
       console.log("发送请求payload:", JSON.stringify(requestPayload, null, 2));
+      console.log("payload中的locale:", requestPayload.locale);
       
       // 使用新的PDF QA API
       const response = await fetch("/api/pdf/qa", {
