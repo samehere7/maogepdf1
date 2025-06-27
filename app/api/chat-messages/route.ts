@@ -9,8 +9,12 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
+    // 开发环境下允许匿名用户，生产环境仍需要认证
     if (authError || !user?.id) {
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: '未登录' }, { status: 401 });
+      }
+      console.log('[Chat Messages API] 开发环境：允许匿名用户查询');
     }
 
     const { searchParams } = new URL(request.url);
@@ -20,14 +24,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '缺少文档ID' }, { status: 400 });
     }
 
-    console.log('[Chat Messages API] 获取聊天记录，文档ID:', documentId, '用户:', user.id);
+    const userId = user?.id || 'anonymous';
+    console.log('[Chat Messages API] 获取聊天记录，文档ID:', documentId, '用户:', userId);
 
     // 从数据库获取聊天消息
+    const whereClause = user?.id 
+      ? { document_id: documentId, user_id: user.id }
+      : { document_id: documentId, user_id: null }; // 开发环境查询匿名消息
+    
     const messages = await prisma.chat_messages.findMany({
-      where: {
-        document_id: documentId,
-        user_id: user.id
-      },
+      where: whereClause,
       orderBy: {
         timestamp: 'asc'
       }
@@ -61,8 +67,12 @@ export async function POST(request: NextRequest) {
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
+    // 开发环境下允许匿名用户，生产环境仍需要认证
     if (authError || !user?.id) {
-      return NextResponse.json({ error: '未登录' }, { status: 401 });
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: '未登录' }, { status: 401 });
+      }
+      console.log('[Chat Messages API] 开发环境：允许匿名用户操作');
     }
 
     const { documentId, content, isUser } = await request.json();
@@ -71,12 +81,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
     }
 
-    console.log('[Chat Messages API] 保存聊天消息，文档ID:', documentId, '用户:', user.id, '是否用户消息:', isUser);
+    const userId = user?.id || 'anonymous';
+    console.log('[Chat Messages API] 保存聊天消息，文档ID:', documentId, '用户:', userId, '是否用户消息:', isUser);
 
     // 保存到数据库
     const message = await prisma.chat_messages.create({
       data: {
-        user_id: user.id,
+        user_id: user?.id || null, // 允许null值
         document_id: documentId,
         content: content,
         is_user: isUser || false
