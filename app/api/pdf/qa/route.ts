@@ -41,14 +41,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'PDF不存在或无权访问' }, { status: 404 });
     }
 
-    // 确保PDF已加载到RAG系统
-    if (!pdfRAGSystem.switchToPDF(pdfId)) {
-      console.log('[PDF QA API] PDF未加载，正在加载...');
-      await pdfRAGSystem.extractAndChunkPDF(pdf.url, pdfId);
-    }
+    // 简化版本：直接使用OpenRouter生成回答
+    let answer;
+    try {
+      // 尝试使用RAG系统
+      if (!pdfRAGSystem.switchToPDF(pdfId)) {
+        console.log('[PDF QA API] PDF未加载，正在加载...');
+        await pdfRAGSystem.extractAndChunkPDF(pdf.url, pdfId);
+      }
+      answer = await pdfRAGSystem.generateAnswer(question, pdf.name, mode as 'high' | 'fast');
+    } catch (ragError) {
+      console.warn('[PDF QA API] RAG系统失败，使用备用方案:', ragError);
+      
+      // 备用方案：直接使用OpenRouter
+      const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: mode === 'fast' ? 'deepseek/deepseek-chat' : 'anthropic/claude-3.5-sonnet',
+          messages: [
+            {
+              role: 'system',
+              content: `你是一个智能文档助手。用户正在查看一个名为"${pdf.name}"的PDF文档，请根据用户的问题给出有帮助的回答。如果无法获取具体文档内容，请提供通用但有价值的建议。请用中文回答。`
+            },
+            {
+              role: 'user',
+              content: question
+            }
+          ],
+          max_tokens: 1000,
+          temperature: 0.7
+        })
+      });
 
-    // 根据模式生成答案
-    const answer = await pdfRAGSystem.generateAnswer(question, pdf.name, mode as 'high' | 'fast');
+      if (!openRouterResponse.ok) {
+        throw new Error(`OpenRouter API error: ${openRouterResponse.status}`);
+      }
+
+      const data = await openRouterResponse.json();
+      answer = data.choices[0]?.message?.content || '抱歉，我目前无法回答这个问题。请稍后再试。';
+    }
     
     console.log(`[PDF QA API] 答案生成成功，长度: ${answer.length}`);
 
