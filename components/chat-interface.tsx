@@ -150,18 +150,22 @@ export function MaogeInterface({ documentId, documentName, initialMessages, onPa
     setIsLoading(true)
 
     try {
-      console.log("开始PDF对话:", input.trim(), "文档ID:", documentId, "模式:", modelType);
+      console.log("开始PDF对话:", input.trim(), "文档ID:", documentId, "模式:", modelType, "语言:", locale);
+      
+      const requestPayload = { 
+        pdfId: documentId,
+        question: input.trim(),
+        mode: modelType === 'quality' ? 'high' : 'fast',
+        locale: locale
+      };
+      
+      console.log("发送请求payload:", JSON.stringify(requestPayload, null, 2));
       
       // 使用新的PDF QA API
       const response = await fetch("/api/pdf/qa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          pdfId: documentId,
-          question: input.trim(),
-          mode: modelType === 'quality' ? 'high' : 'fast',
-          locale: locale
-        }),
+        body: JSON.stringify(requestPayload),
       })
       
       console.log("PDF QA API响应状态:", response.status);

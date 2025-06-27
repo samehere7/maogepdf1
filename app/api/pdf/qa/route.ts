@@ -24,6 +24,15 @@ function getSystemPromptByLocale(locale: string, pdfName: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[PDF QA API] 收到新请求');
+    
+    // 解析请求数据并记录完整内容
+    const requestBody = await request.json();
+    console.log('[PDF QA API] 请求体内容:', JSON.stringify(requestBody, null, 2));
+    
+    const { pdfId, question, mode = 'high', locale = 'zh' } = requestBody;
+    console.log('[PDF QA API] 提取的参数:', { pdfId, question, mode, locale });
+    
     // 检查用户是否已登录
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -32,15 +41,12 @@ export async function POST(request: NextRequest) {
     if (authError || !user?.id) {
       console.log('[PDF QA API] 匿名用户使用AI功能');
     }
-
-    // 解析请求数据
-    const { pdfId, question, mode = 'high', locale = 'zh' } = await request.json();
     
     if (!pdfId || !question) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
     }
 
-    console.log(`[PDF QA API] 处理问题，PDF ID: ${pdfId}，问题: "${question}"，模式: ${mode}`);
+    console.log(`[PDF QA API] 处理问题，PDF ID: ${pdfId}，问题: "${question}"，模式: ${mode}，语言: ${locale}`);
 
     // 获取PDF信息
     const query = supabaseService
