@@ -187,7 +187,7 @@ export async function POST(req: Request) {
     }
     
     const { messages, pdfId, quality = 'highQuality', locale = 'zh' } = requestBody;
-    console.log(`[聊天API] 解析参数 - pdfId: ${pdfId}, quality: ${quality}, messages数量: ${messages?.length}`);
+    console.log(`[聊天API] 解析参数 - pdfId: ${pdfId}, quality: ${quality}, messages数量: ${messages?.length}, locale: ${locale}`);
     
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       console.log('[聊天API] 消息格式无效');
