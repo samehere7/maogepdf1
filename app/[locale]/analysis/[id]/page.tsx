@@ -46,7 +46,7 @@ export default function AnalysisPage() {
   const t = useTranslations()
   const tAnalysis = useTranslations('analysis')
   
-  // 🔥 修复：从URL直接提取locale
+  // 修复：从URL直接提取locale确保多语言功能正常
   const [actualLocale, setActualLocale] = useState(hookLocale);
   
   useEffect(() => {
@@ -56,14 +56,11 @@ export default function AnalysisPage() {
       const validLocales = ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt-BR', 'ru', 'it', 'nl', 'sv', 'da', 'no', 'fi', 'pl', 'tr', 'hi', 'bn', 'pa', 'kn', 'th', 'vi', 'id', 'ms'];
       
       if (validLocales.includes(urlLocale)) {
-        console.log('🔥 从URL提取的locale:', urlLocale);
-        console.log('🔥 useLocale()返回的locale:', hookLocale);
         setActualLocale(urlLocale);
       }
     }
   }, [hookLocale]);
   
-  // 使用修正后的locale
   const locale = actualLocale;
   
   // Locale防护机制
@@ -367,17 +364,8 @@ export default function AnalysisPage() {
 
   // 发送问题
   const handleSendQuestion = async (customQuestion?: string) => {
-    console.log('🔥 handleSendQuestion 开始执行');
-    console.log('🔥 customQuestion:', customQuestion);
-    console.log('🔥 question state:', question);
-    
     const questionToSend = customQuestion || question;
-    console.log('🔥 最终问题:', questionToSend);
-    
-    if (!questionToSend.trim() || !fileInfo) {
-      console.log('🔥 提前返回 - 问题为空或fileInfo不存在');
-      return;
-    }
+    if (!questionToSend.trim() || !fileInfo) return;
     
     // 检查用户登录状态
     if (!user) {
@@ -385,8 +373,6 @@ export default function AnalysisPage() {
       router.push(`/${locale}/auth/login`);
       return;
     }
-    
-    console.log('🔥 用户验证通过，继续执行');
     
     // 添加用户问题到消息列表
     const userQuestion = questionToSend;
@@ -412,29 +398,18 @@ export default function AnalysisPage() {
         
       console.log('发送聊天请求，文件URL:', fileUrl);
       
-      // 🔥 增强DEBUG - 前端locale传递
-      const requestPayload = {
-        messages: [{ role: "user", content: userQuestion }],
-        pdfId: fileInfo.id,
-        quality: modelQuality,
-        locale: locale
-      };
-      
-      console.log('===== 前端聊天请求DEBUG =====');
-      console.log('useLocale()返回值:', locale);
-      console.log('locale类型:', typeof locale);
-      console.log('当前URL路径:', window.location.pathname);
-      console.log('URL第一段:', window.location.pathname.split('/')[1]);
-      console.log('完整请求payload:', JSON.stringify(requestPayload, null, 2));
-      console.log('============================');
-      
       // 调用聊天API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify({
+          messages: [{ role: "user", content: userQuestion }],
+          pdfId: fileInfo.id,
+          quality: modelQuality,
+          locale: locale
+        }),
       });
 
       if (!response.ok) {
@@ -1109,14 +1084,6 @@ export default function AnalysisPage() {
               </h3>
               <div className="text-sm text-gray-500 mt-1">
 {t('chat.currentMode')}: {modelQuality === 'fast' ? t('chat.fastMode') : t('chat.highQualityMode')}
-              </div>
-              {/* 🔥 临时调试信息显示 */}
-              <div className="text-xs bg-red-100 p-2 mt-2 rounded border">
-                <div><strong>🔥 调试信息:</strong></div>
-                <div>Hook Locale: {hookLocale}</div>
-                <div>Fixed Locale: {locale}</div>
-                <div>URL: {typeof window !== 'undefined' ? window.location.pathname : 'SSR'}</div>
-                <div>User: {user?.email || 'None'}</div>
               </div>
             </div>
 
