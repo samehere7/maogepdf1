@@ -20,6 +20,31 @@ function createDebugStep(step: string, status: 'success' | 'error' | 'warning', 
   };
 }
 
+// 备用回答生成函数
+function generateFallbackAnswer(question: string, documentName: string): string {
+  const questionLower = question.toLowerCase();
+  
+  if (questionLower.includes('重要') || questionLower.includes('关键') || questionLower.includes('主要')) {
+    return `关于文档"${documentName}"中的重要内容，我建议您：
+
+1. 仔细阅读文档的标题和章节标题，这通常包含了最重要的信息
+2. 查看文档中的总结、结论或要点部分
+3. 注意任何突出显示、加粗或重复提及的内容
+4. 关注数字、统计数据和具体的事实信息
+
+由于当前无法直接分析文档内容，建议您重点关注这些部分来获取关键信息。`;
+  }
+  
+  return `感谢您关于文档"${documentName}"的提问。目前我无法直接分析文档内容，但我建议您：
+
+1. 仔细阅读文档，重点关注标题、小标题和总结部分
+2. 查找与您的问题相关的关键词
+3. 如果文档较长，可以先浏览目录了解整体结构
+4. 对于具体问题，建议重点阅读相关章节
+
+如果您能提供更具体的问题，我可以给出更有针对性的建议。`;
+}
+
 export async function POST(request: NextRequest) {
   const debugSteps: DebugStep[] = [];
   
@@ -145,10 +170,24 @@ export async function POST(request: NextRequest) {
 
       if (!openRouterResponse.ok) {
         const errorText = await openRouterResponse.text();
-        debugSteps.push(createDebugStep('6b', 'error', 'OpenRouter错误详情', { 
+        debugSteps.push(createDebugStep('6b', 'warning', 'OpenRouter失败，使用备用回答', { 
           error: errorText 
         }));
-        return NextResponse.json({ debugSteps }, { status: 500 });
+        
+        // 使用备用回答
+        const answer = generateFallbackAnswer(question, pdf.name);
+        
+        debugSteps.push(createDebugStep('7', 'success', '备用回答生成成功', {
+          answerLength: answer.length,
+          method: 'fallback',
+          preview: answer.substring(0, 100) + '...'
+        }));
+
+        return NextResponse.json({
+          success: true,
+          answer,
+          debugSteps
+        });
       }
 
       const data = await openRouterResponse.json();
