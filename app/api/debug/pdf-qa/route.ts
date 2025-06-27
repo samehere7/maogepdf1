@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       query.eq('user_id', user.id);
     }
     
-    const { data: pdf, error: pdfError } = await query.single();
+    let { data: pdf, error: pdfError } = await query.single();
     
     // 如果PDF不存在，尝试创建
     if (pdfError || !pdf) {
