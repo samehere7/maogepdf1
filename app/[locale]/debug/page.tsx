@@ -1,251 +1,318 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { CheckCircle, AlertCircle, AlertTriangle, RefreshCw, Bug, Zap, Database, Shield, FileText, MessageSquare } from 'lucide-react';
 
-interface TestResult {
-  name: string
-  status: 'success' | 'error' | 'pending'
-  details: string
-  timestamp: string
+interface DebugStep {
+  step: string;
+  status: 'success' | 'error' | 'warning';
+  message: string;
+  data?: any;
+  timestamp: string;
 }
 
 export default function DebugPage() {
-  const [results, setResults] = useState<TestResult[]>([])
-  const [isRunning, setIsRunning] = useState(false)
+  const [debugSteps, setDebugSteps] = useState<DebugStep[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [documentId, setDocumentId] = useState('debug-test-' + Date.now());
+  const [testContent, setTestContent] = useState('调试测试消息');
 
-  const addResult = (name: string, status: 'success' | 'error', details: string) => {
-    setResults(prev => [...prev, {
-      name,
-      status,
-      details,
-      timestamp: new Date().toLocaleTimeString()
-    }])
-  }
+  useEffect(() => {
+    // 页面加载时自动运行系统检查
+    runSystemCheck();
+  }, []);
 
-  const runDiagnostics = async () => {
-    setIsRunning(true)
-    setResults([])
-
-    // 1. 测试 Supabase 连接
-    try {
-      const { data, error } = await supabase.auth.getSession()
-      if (error) {
-        addResult('Supabase 连接', 'error', `连接失败: ${error.message}`)
-      } else {
-        addResult('Supabase 连接', 'success', `连接成功, Session: ${data.session ? '存在' : '不存在'}`)
-        
-        // 如果有session，获取access token信息
-        if (data.session?.access_token) {
-          try {
-            // 解析JWT token
-            const tokenParts = data.session.access_token.split('.')
-            if (tokenParts.length === 3) {
-              const payload = JSON.parse(atob(tokenParts[1]))
-              addResult('JWT Token 分析', 'success', 
-                `Token 字段: ${Object.keys(payload).join(', ')}\n` +
-                `包含 sub: ${payload.sub ? '是' : '否'}\n` +
-                `包含 aud: ${payload.aud ? '是' : '否'}\n` +
-                `Role: ${payload.role || '无'}\n` +
-                `过期时间: ${new Date(payload.exp * 1000).toLocaleString()}`
-              )
-            }
-          } catch (e) {
-            addResult('JWT Token 分析', 'error', `无法解析token: ${e}`)
-          }
-        }
-      }
-    } catch (e) {
-      addResult('Supabase 连接', 'error', `连接异常: ${e}`)
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'error':
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+      default:
+        return <AlertCircle className="h-5 w-5 text-gray-500" />;
     }
+  };
 
-    // 2. 测试用户配置文件 API
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'success':
+        return 'border-l-4 border-green-500 bg-green-50';
+      case 'error':
+        return 'border-l-4 border-red-500 bg-red-50';
+      case 'warning':
+        return 'border-l-4 border-yellow-500 bg-yellow-50';
+      default:
+        return 'border-l-4 border-gray-500 bg-gray-50';
+    }
+  };
+
+  const runSystemCheck = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
     try {
-      const { data: session } = await supabase.auth.getSession()
-      if (session?.session?.access_token) {
-        const response = await fetch('/api/user/profile', {
-          headers: {
-            'Authorization': `Bearer ${session.session.access_token}`
-          }
+      const response = await fetch('/api/debug/chat-messages');
+      const result = await response.json();
+      setDebugSteps(result.debugSteps || []);
+    } catch (error) {
+      setDebugSteps([{
+        step: 'network',
+        status: 'error',
+        message: '系统检查网络请求失败',
+        data: { error: String(error) },
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const runChatTest = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
+    try {
+      const response = await fetch('/api/debug/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: documentId,
+          content: testContent,
+          isUser: true
         })
-        
-        if (response.ok) {
-          const data = await response.json()
-          addResult('用户配置文件 API', 'success', `状态: ${response.status}, 数据: ${JSON.stringify(data, null, 2)}`)
-        } else {
-          const errorText = await response.text()
-          addResult('用户配置文件 API', 'error', `状态: ${response.status}, 错误: ${errorText}`)
-        }
-      } else {
-        addResult('用户配置文件 API', 'error', '无法获取访问令牌')
-      }
-    } catch (e) {
-      addResult('用户配置文件 API', 'error', `请求失败: ${e}`)
+      });
+      
+      const result = await response.json();
+      setDebugSteps(result.debugSteps || []);
+    } catch (error) {
+      setDebugSteps([{
+        step: 'network',
+        status: 'error',
+        message: '聊天测试网络请求失败',
+        data: { error: String(error) },
+        timestamp: new Date().toISOString()
+      }]);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // 3. 测试用户配额 API
+  const testOriginalAPI = async () => {
+    setIsLoading(true);
+    setDebugSteps([]);
+    
+    const steps: DebugStep[] = [];
+    const addStep = (step: string, status: 'success' | 'error' | 'warning', message: string, data?: any) => {
+      steps.push({
+        step,
+        status,
+        message,
+        data,
+        timestamp: new Date().toISOString()
+      });
+      setDebugSteps([...steps]);
+    };
+
     try {
-      const { data: session } = await supabase.auth.getSession()
-      if (session?.session?.access_token) {
-        const response = await fetch('/api/user/quota', {
-          headers: {
-            'Authorization': `Bearer ${session.session.access_token}`
-          }
+      addStep('start', 'success', '开始测试原始聊天API');
+
+      // 测试原始API
+      const response = await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentId: documentId,
+          content: testContent,
+          isUser: true
         })
-        
-        if (response.ok) {
-          const data = await response.json()
-          addResult('用户配额 API', 'success', `状态: ${response.status}, 数据: ${JSON.stringify(data, null, 2)}`)
-        } else {
-          const errorText = await response.text()
-          addResult('用户配额 API', 'error', `状态: ${response.status}, 错误: ${errorText}`)
-        }
-      } else {
-        addResult('用户配额 API', 'error', '无法获取访问令牌')
+      });
+
+      const responseText = await response.text();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        result = { rawResponse: responseText };
       }
-    } catch (e) {
-      addResult('用户配额 API', 'error', `请求失败: ${e}`)
+
+      addStep('api-response', response.ok ? 'success' : 'error', 
+        `原始API响应 (${response.status})`, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: result
+      });
+
+    } catch (error) {
+      addStep('api-error', 'error', '原始API请求失败', { error: String(error) });
+    } finally {
+      setIsLoading(false);
     }
-
-    // 4. 测试 PDF 列表 API
-    try {
-      const { data: session } = await supabase.auth.getSession()
-      if (session?.session?.access_token) {
-        const response = await fetch('/api/pdfs', {
-          headers: {
-            'Authorization': `Bearer ${session.session.access_token}`
-          }
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          addResult('PDF 列表 API', 'success', `状态: ${response.status}, PDF数量: ${data.pdfs?.length || 0}`)
-        } else {
-          const errorText = await response.text()
-          addResult('PDF 列表 API', 'error', `状态: ${response.status}, 错误: ${errorText}`)
-        }
-      } else {
-        addResult('PDF 列表 API', 'error', '无法获取访问令牌')
-      }
-    } catch (e) {
-      addResult('PDF 列表 API', 'error', `请求失败: ${e}`)
-    }
-
-    // 5. 测试支付 API
-    try {
-      const { data: session } = await supabase.auth.getSession()
-      if (session?.session?.user?.id) {
-        const response = await fetch('/api/payment/paddle', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            plan: 'monthly',
-            userId: session.session.user.id
-          })
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          addResult('支付 API', 'success', `状态: ${response.status}, 响应: ${JSON.stringify(data, null, 2)}`)
-        } else {
-          const errorText = await response.text()
-          addResult('支付 API', 'error', `状态: ${response.status}, 错误: ${errorText}`)
-        }
-      } else {
-        addResult('支付 API', 'error', '无法获取用户ID')
-      }
-    } catch (e) {
-      addResult('支付 API', 'error', `请求失败: ${e}`)
-    }
-
-    // 6. 测试健康检查 API
-    try {
-      const response = await fetch('/api/health')
-      if (response.ok) {
-        const data = await response.json()
-        addResult('健康检查 API', 'success', `状态: ${response.status}, 响应: ${JSON.stringify(data, null, 2)}`)
-      } else {
-        const errorText = await response.text()
-        addResult('健康检查 API', 'error', `状态: ${response.status}, 错误: ${errorText}`)
-      }
-    } catch (e) {
-      addResult('健康检查 API', 'error', `请求失败: ${e}`)
-    }
-
-    // 7. 环境变量检查
-    addResult('环境变量检查', 'success', 
-      `Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? '已配置' : '未配置'}\n` +
-      `Supabase Anon Key: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '已配置' : '未配置'}\n` +
-      `Base URL: ${process.env.NEXT_PUBLIC_BASE_URL || '未配置'}`
-    )
-
-    setIsRunning(false)
-  }
+  };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            🔧 系统诊断工具
-          </CardTitle>
-          <p className="text-center text-gray-600">
-            全面检测系统各项功能状态，快速定位问题所在
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 text-center">
-            <Button 
-              onClick={runDiagnostics} 
-              disabled={isRunning}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
-            >
-              {isRunning ? '正在诊断...' : '开始全面诊断'}
-            </Button>
-          </div>
-
-          {results.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">诊断结果:</h3>
-              {results.map((result, index) => (
-                <div 
-                  key={index}
-                  className={`p-4 rounded-lg border-l-4 ${
-                    result.status === 'success' 
-                      ? 'bg-green-50 border-green-500' 
-                      : 'bg-red-50 border-red-500'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">
-                      {result.status === 'success' ? '✅' : '❌'} {result.name}
-                    </h4>
-                    <span className="text-sm text-gray-500">{result.timestamp}</span>
-                  </div>
-                  <pre className="text-sm bg-gray-100 p-2 rounded overflow-x-auto whitespace-pre-wrap">
-                    {result.details}
-                  </pre>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium mb-2">📋 调试信息收集:</h4>
-            <p className="text-sm text-gray-700 mb-2">
-              运行诊断后，请将结果截图或复制文本发送给开发者进行分析。
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* 页面标题 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <Bug className="h-8 w-8 text-purple-600" />
+              聊天功能调试控制台
+            </CardTitle>
+            <p className="text-gray-600">
+              诊断生产环境聊天功能问题 - 详细的步骤追踪和错误分析
             </p>
-            <div className="text-xs text-gray-600">
-              <p>调试页面地址: {typeof window !== 'undefined' ? window.location.href : '/debug'}</p>
-              <p>生成时间: {new Date().toLocaleString()}</p>
+          </CardHeader>
+        </Card>
+
+        {/* 测试配置 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              测试配置
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">文档ID</label>
+              <Input
+                value={documentId}
+                onChange={(e) => setDocumentId(e.target.value)}
+                placeholder="输入测试文档ID"
+              />
             </div>
-          </div>
-        </CardContent>
-      </Card>
+            <div>
+              <label className="block text-sm font-medium mb-2">测试消息内容</label>
+              <Input
+                value={testContent}
+                onChange={(e) => setTestContent(e.target.value)}
+                placeholder="输入测试消息内容"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 测试按钮 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              诊断工具
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                onClick={runSystemCheck} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">系统检查</div>
+                  <div className="text-sm text-gray-500">环境变量、数据库连接</div>
+                </div>
+              </Button>
+
+              <Button 
+                onClick={runChatTest} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <MessageSquare className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">聊天测试</div>
+                  <div className="text-sm text-gray-500">完整的聊天流程测试</div>
+                </div>
+              </Button>
+
+              <Button 
+                onClick={testOriginalAPI} 
+                disabled={isLoading}
+                className="flex items-center gap-2 h-16"
+                variant="outline"
+              >
+                {isLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : <Shield className="h-5 w-5" />}
+                <div className="text-left">
+                  <div className="font-medium">原始API测试</div>
+                  <div className="text-sm text-gray-500">测试生产API响应</div>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 调试结果 */}
+        {debugSteps.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bug className="h-5 w-5" />
+                调试结果 ({debugSteps.length} 步骤)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {debugSteps.map((step, index) => (
+                  <div key={index} className={`p-4 rounded-lg ${getStatusColor(step.status)}`}>
+                    <div className="flex items-start gap-3">
+                      {getStatusIcon(step.status)}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="font-mono">
+                            {step.step}
+                          </Badge>
+                          <span className="font-medium">{step.message}</span>
+                        </div>
+                        
+                        <div className="text-sm text-gray-600 mb-2">
+                          {new Date(step.timestamp).toLocaleString('zh-CN')}
+                        </div>
+                        
+                        {step.data && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                              查看详细数据 ▼
+                            </summary>
+                            <pre className="mt-2 p-3 bg-white bg-opacity-70 rounded border text-xs overflow-auto max-h-60">
+                              {JSON.stringify(step.data, null, 2)}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 使用说明 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>使用说明</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-gray-600">
+            <div><strong>系统检查:</strong> 验证环境变量、数据库连接和用户认证状态</div>
+            <div><strong>聊天测试:</strong> 完整测试聊天消息保存流程，包括PDF文档创建和消息验证</div>
+            <div><strong>原始API测试:</strong> 直接测试生产环境的聊天API，查看原始响应</div>
+            <div className="mt-4 p-3 bg-blue-50 rounded">
+              <strong>提示:</strong> 如果测试失败，请仔细查看失败步骤的详细数据，这将帮助我们定位具体问题。
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  )
+  );
 }
