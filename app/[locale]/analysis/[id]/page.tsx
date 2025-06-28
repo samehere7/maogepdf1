@@ -218,6 +218,20 @@ export default function AnalysisPage() {
         console.log('[Analysis] 从数据库成功获取PDF信息');
         setFileInfo(pdf);
 
+        // 优先检查本地缓存的PDF数据用于即时预览
+        const localPdfKey = `pdf_local_${pdf.id}`;
+        const localPdfData = sessionStorage.getItem(localPdfKey);
+        
+        if (localPdfData) {
+          console.log('[PDF预览] 找到本地缓存数据，启用即时预览');
+          setPdfUrl(localPdfData);
+          // 清理本地缓存（一次性使用）
+          sessionStorage.removeItem(localPdfKey);
+        } else {
+          console.log('[PDF预览] 使用远程PDF URL');
+          setPdfUrl(pdf.url);
+        }
+
         // 从数据库加载聊天记录
         const chatMessages = await loadChatMessages(pdf.id);
         console.log('[智能推荐] 加载的聊天记录数量:', chatMessages.length);

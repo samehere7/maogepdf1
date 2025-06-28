@@ -268,8 +268,16 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
       // Render highlight layer
       renderHighlights(pageContainer, pageNum, viewport);
       
-      // Mark as rendered - status not updated here, handled by caller
-      // setRenderedPages(prev => new Set([...prev, pageNum]));
+      // 标记为已渲染
+      setRenderedPages(prev => new Set([...prev, pageNum]));
+      
+      // 移除占位符
+      const placeholder = pageContainer.querySelector('.pdf-page-placeholder');
+      if (placeholder) {
+        placeholder.remove();
+      }
+      
+      console.log(`[PDF渲染] 页面${pageNum}渲染完成`);
       
     } catch (err) {
       console.error(`Page ${pageNum} rendering error:`, err);
@@ -277,24 +285,44 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
     }
   };
   
-  // 渲染所有页面
+  // 优化版本：懒渲染所有页面（只创建容器，实际渲染在可见时进行）
   const renderAllPages = async () => {
     if (!pdfDoc || !containerRef.current) return Promise.resolve();
     
     const container = containerRef.current;
     container.innerHTML = '';
     
-    // 创建所有页面容器 - 移除页面标签，避免影响PDF排版
+    console.log(`[PDF渲染] 开始创建${numPages}个页面容器（懒渲染模式）`);
+    
+    // 创建所有页面容器，但不立即渲染内容（懒渲染策略）
     for (let pageNum = 1; pageNum <= numPages; pageNum++) {
       const pageContainer = document.createElement('div');
       pageContainer.className = 'pdf-page-container';
       pageContainer.setAttribute('data-page-num', pageNum.toString());
-      pageContainer.style.marginBottom = '15px'; // 增加页面间距
+      pageContainer.style.marginBottom = '15px';
+      pageContainer.style.minHeight = '600px'; // 预设高度避免布局跳动
       
       const pageContent = document.createElement('div');
       pageContent.className = 'pdf-page';
       pageContent.setAttribute('data-page-num', pageNum.toString());
       
+      // 添加懒加载标识
+      const placeholder = document.createElement('div');
+      placeholder.className = 'pdf-page-placeholder';
+      placeholder.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 600px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        color: #6b7280;
+        font-size: 14px;
+      `;
+      placeholder.textContent = `页面 ${pageNum} - 滚动到此处加载`;
+      
+      pageContent.appendChild(placeholder);
       pageContainer.appendChild(pageContent);
       container.appendChild(pageContainer);
       
@@ -564,53 +592,24 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
     }
   };
 
-  // 渲染所有页面 - 优化缩放体验
+  // 优化的PDF渲染 - 支持懒加载和缩放
   useEffect(() => {
     if (pdfDoc && numPages > 0) {
+      console.log(`[PDF渲染] 开始优化渲染，页数: ${numPages}, 缩放: ${scale}`);
+      
       // 获取当前可见页面位置，保持用户视野
       const currentVisiblePage = getCurrentVisiblePage();
-      const previouslyRendered = new Set(renderedPages);
       
-      // 避免无限循环：使用ref来避免状态更新触发重新渲染
-      const newRenderedPages = new Set<number>();
+      // 清空当前渲染状态，重新懒加载
+      setRenderedPages(new Set());
       
       renderAllPages().then(() => {
-        // 优先渲染当前可见页面及其周围页面
-        const pagesToRender = new Set<number>();
+        console.log(`[PDF渲染] 容器创建完成，开始滚动到页面 ${currentVisiblePage}`);
         
-        // 添加当前可见页面及其前后页面
-        for (let i = Math.max(1, currentVisiblePage - 2); i <= Math.min(numPages, currentVisiblePage + 2); i++) {
-          pagesToRender.add(i);
-        }
-        
-        // 添加之前已渲染的页面（用户可能很快滚回去）
-        previouslyRendered.forEach(pageNum => {
-          if (pageNum <= numPages) {
-            pagesToRender.add(pageNum);
-          }
-        });
-        
-        // 批量渲染，避免阻塞UI
-        const renderPromises = Array.from(pagesToRender).map(pageNum => 
-          new Promise<void>(resolve => {
-            setTimeout(() => {
-              renderPage(pageNum, true); // 强制重新渲染
-              newRenderedPages.add(pageNum);
-              resolve();
-            }, pageNum * 50); // 错开渲染时间，避免卡顿
-          })
-        );
-        
-        Promise.all(renderPromises).then(() => {
-          // 只在渲染完成后一次性更新状态
-          setRenderedPages(newRenderedPages);
-          
-          // 渲染完成后，滚动回到原来的可见页面
-          // 增加延迟，确保DOM元素已正确挂载
-          setTimeout(() => {
-            scrollToPage(currentVisiblePage);
-          }, 500);
-        });
+        // 滚动回到原来的可见页面
+        setTimeout(() => {
+          scrollToPage(currentVisiblePage);
+        }, 200); // 减少延迟，提高响应速度
       });
     }
   }, [pdfDoc, numPages, scale]);

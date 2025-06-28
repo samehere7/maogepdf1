@@ -267,6 +267,22 @@ export default function HomePage() {
       
       console.log("上传完成，跳转到分析页面:", pdfId);
       
+      // 将本地文件存储到sessionStorage，用于即时预览
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result;
+          if (result) {
+            // 存储PDF文件的Base64数据，用于本地预览
+            sessionStorage.setItem(`pdf_local_${pdfId}`, result as string);
+            console.log("本地PDF数据已缓存，用于即时预览");
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.warn("缓存本地PDF失败:", error);
+      }
+      
       // 使用语言感知的路由跳转
       router.push(`/${locale}/analysis/${pdfId}`)
     } catch (error) {
