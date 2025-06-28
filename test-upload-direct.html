@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Upload Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>PDF Upload Test</h1>
+    <div id="status">Loading...</div>
+    <div id="auth-status"></div>
+    <div id="upload-section" style="display: none;">
+        <input type="file" id="file-input" accept=".pdf" />
+        <button onclick="uploadFile()">Upload PDF</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        // 初始化Supabase客户端
+        const supabaseUrl = 'https://pwlvfmywfzllopuiisxg.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3bHZmbXl3ZnpsbG9wdWlpc3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4MzkyODQsImV4cCI6MjA2NjQxNTI4NH0.00kD5xnk3D8-ijEvL7gRdT-xItnj-rhii0nQegiqp6g';
+        
+        const { createClient } = supabase;
+        const client = createClient(supabaseUrl, supabaseKey);
+        
+        let currentUser = null;
+
+        // 检查认证状态
+        async function checkAuth() {
+            try {
+                const { data: { user }, error } = await client.auth.getUser();
+                
+                if (error || !user) {
+                    document.getElementById('auth-status').innerHTML = `
+                        <p>Not logged in. <button onclick="login()">Login with Google</button></p>
+                    `;
+                    document.getElementById('status').textContent = 'Not authenticated';
+                } else {
+                    currentUser = user;
+                    document.getElementById('auth-status').innerHTML = `
+                        <p>Logged in as: ${user.email} <button onclick="logout()">Logout</button></p>
+                    `;
+                    document.getElementById('upload-section').style.display = 'block';
+                    document.getElementById('status').textContent = 'Ready to upload';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                document.getElementById('status').textContent = 'Auth check failed: ' + error.message;
+            }
+        }
+
+        // 登录
+        async function login() {
+            try {
+                const { data, error } = await client.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.href
+                    }
+                });
+                
+                if (error) {
+                    document.getElementById('result').textContent = 'Login failed: ' + error.message;
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = 'Login error: ' + error.message;
+            }
+        }
+
+        // 登出
+        async function logout() {
+            try {
+                await client.auth.signOut();
+                window.location.reload();
+            } catch (error) {
+                document.getElementById('result').textContent = 'Logout error: ' + error.message;
+            }
+        }
+
+        // 上传文件
+        async function uploadFile() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                document.getElementById('result').textContent = 'Please select a file';
+                return;
+            }
+            
+            if (!currentUser) {
+                document.getElementById('result').textContent = 'Please login first';
+                return;
+            }
+
+            try {
+                document.getElementById('result').textContent = 'Uploading...';
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('quality', 'high');
+                
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    const data = JSON.parse(result);
+                    document.getElementById('result').innerHTML = `
+                        <p>Upload successful!</p>
+                        <p>PDF ID: ${data.pdf?.id}</p>
+                        <p>URL: <a href="${data.pdf?.url}" target="_blank">${data.pdf?.url}</a></p>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <p>Upload failed (${response.status})</p>
+                        <pre>${result}</pre>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = 'Upload error: ' + error.message;
+            }
+        }
+
+        // 监听认证状态变化
+        client.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event, session ? 'has session' : 'no session');
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+                setTimeout(checkAuth, 100);
+            }
+        });
+
+        // 初始检查
+        checkAuth();
+    </script>
+</body>
+</html>

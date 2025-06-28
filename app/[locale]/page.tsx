@@ -34,7 +34,7 @@ export default function HomePage() {
   const pathname = usePathname()
   const t = useTranslations();
   const locale = useLocale();
-  const { profile, loading: profileLoading } = useUser()
+  const { profile, loading: profileLoading, user } = useUser()
   const [shareId, setShareId] = useState<string | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [pdfFlashcardCounts, setPdfFlashcardCounts] = useState<{[pdfId: string]: number}>({})
@@ -172,6 +172,17 @@ export default function HomePage() {
     }
     setUploading(true)
     try {
+      // 获取用户的access token
+      let accessToken = null;
+      try {
+        const { supabase } = await import('@/lib/supabase/client');
+        const { data: { session } } = await supabase.auth.getSession();
+        accessToken = session?.access_token;
+        console.log("获取access token:", accessToken ? "成功" : "失败");
+      } catch (tokenError) {
+        console.warn("获取access token失败:", tokenError);
+      }
+      
       // 创建FormData对象
       const formData = new FormData();
       formData.append('file', file);
@@ -179,8 +190,15 @@ export default function HomePage() {
       
       console.log("开始上传文件:", file.name, "质量模式:", quality);
       
+      // 准备请求headers
+      const headers: Record<string, string> = {};
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+      
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
+        headers,
         body: formData
       });
       

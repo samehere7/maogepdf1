@@ -36,24 +36,58 @@ async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: st
 
 export async function POST(req: Request) {
   try {
-    // 检查用户是否已登录
-    const supabase = createClient();
+    // 方案1: 尝试从服务端cookie获取用户认证
+    let user = null;
+    let authMethod = '';
     
-    // 获取用户信息
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    console.log('[Upload API] 用户检查:', user ? `用户 ${user.id}` : '未找到用户', authError ? authError.message : '');
+    try {
+      const supabase = createClient();
+      const { data: { user: cookieUser }, error: cookieError } = await supabase.auth.getUser();
+      if (cookieUser && !cookieError) {
+        user = cookieUser;
+        authMethod = 'cookie';
+        console.log('[Upload API] Cookie认证成功:', user.email);
+      }
+    } catch (cookieError) {
+      console.log('[Upload API] Cookie认证失败:', cookieError);
+    }
+    
+    // 方案2: 如果cookie认证失败，尝试从Authorization header获取token
+    if (!user) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.replace('Bearer ', '');
+          const { createClient: createAuthClient } = await import('@supabase/supabase-js');
+          const authClient = createAuthClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          
+          const { data: { user: tokenUser }, error: tokenError } = await authClient.auth.getUser(token);
+          if (tokenUser && !tokenError) {
+            user = tokenUser;
+            authMethod = 'token';
+            console.log('[Upload API] Token认证成功:', user.email);
+          }
+        } catch (tokenError) {
+          console.log('[Upload API] Token认证失败:', tokenError);
+        }
+      }
+    }
     
     if (!user?.id || !user?.email) {
       console.log('[Upload API] 用户未登录或认证失败，拒绝上传');
       return NextResponse.json({ 
         error: '未登录或认证失败',
-        details: authError?.message || 'User not found'
+        details: '请先登录后再上传文件',
+        authMethod: authMethod || 'none'
       }, { status: 401 });
     }
     
     const userId = user.id;
     const userEmail = user.email;
-    console.log('[Upload API] 用户已登录:', userEmail, '用户ID:', userId);
+    console.log('[Upload API] 用户已登录:', userEmail, '用户ID:', userId, '认证方式:', authMethod);
 
     // 确保用户在数据库中存在 - 使用Supabase客户端
     const { data: userExists } = await supabaseService
@@ -79,37 +113,23 @@ export async function POST(req: Request) {
       }
     }
 
-    // 检查用户Plus状态 - 先尝试使用user_with_plus视图
+    // 检查用户Plus状态
     let isPlus = false;
     let isActive = true;
     
-    try {
-      // 尝试从user_with_plus视图获取数据
-      const { data: userData } = await supabase
-        .from('user_with_plus')
-        .select('plus, is_active')
-        .eq('id', userId)
-        .single();
-        
-      isPlus = userData?.plus || false;
-      isActive = userData?.is_active !== false;
-    } catch (viewError) {
-      console.log('[Upload API] user_with_plus视图不可用，直接从User表获取数据');
-      
-      // 如果视图不可用，直接从user_profiles表获取
-      const { data: userProfile } = await supabaseService
-        .from('user_profiles')
-        .select('plus, is_active')
-        .eq('id', userId)
-        .single();
-      
-      isPlus = userProfile?.plus || false;
-      isActive = userProfile?.is_active !== false;
-    }
+    // 直接从user_profiles表获取用户Plus状态
+    const { data: userProfile } = await supabaseService
+      .from('user_profiles')
+      .select('plus, is_active')
+      .eq('id', userId)
+      .single();
+    
+    isPlus = userProfile?.plus || false;
+    isActive = userProfile?.is_active !== false;
       
     // 非Plus用户的上传数量限制检查
     if (!isPlus || !isActive) {
-      const { data: pdfCount } = await supabase
+      const { data: pdfCount } = await supabaseService
         .from('pdfs')
         .select('id', { count: 'exact' })
         .eq('user_id', userId);
