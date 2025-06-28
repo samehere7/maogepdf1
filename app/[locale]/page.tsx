@@ -12,6 +12,7 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { UpgradePlusModal } from "@/components/upgrade-plus-modal"
 import FileSizeUpgradeModal from "@/components/FileSizeUpgradeModal"
+import PageLimitUpgradeModal from "@/components/page-limit-upgrade-modal"
 import { Sidebar } from "@/components/sidebar"
 import { ModelQuality } from "@/types/api"
 import AuthButton from "@/components/AuthButton"
@@ -28,6 +29,8 @@ export default function HomePage() {
   const [upgradeFile, setUpgradeFile] = useState<{name: string, size: number} | null>(null)
   const [showFileSizeUpgrade, setShowFileSizeUpgrade] = useState(false)
   const [oversizedFile, setOversizedFile] = useState<{name: string, size: number} | null>(null)
+  const [showPageLimitUpgrade, setShowPageLimitUpgrade] = useState(false)
+  const [pageLimitFile, setPageLimitFile] = useState<{name: string, pages: number, maxPages: number, userType: 'free' | 'plus'} | null>(null)
   const [modelQuality, setModelQuality] = useState<ModelQuality>('high')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
@@ -185,7 +188,42 @@ export default function HomePage() {
     }
     setUploading(true)
     try {
-      // 获取Supabase客户端
+      console.log("开始页数检查:", file.name);
+      
+      // 步骤1: 检查PDF页数
+      const pageCheckFormData = new FormData();
+      pageCheckFormData.append('file', file);
+      pageCheckFormData.append('isPlus', isPlus.toString());
+      
+      const pageCheckResponse = await fetch('/api/check-pages', {
+        method: 'POST',
+        body: pageCheckFormData
+      });
+      
+      if (!pageCheckResponse.ok) {
+        const errorData = await pageCheckResponse.json();
+        throw new Error(errorData.error || '页数检查失败');
+      }
+      
+      const pageCheckResult = await pageCheckResponse.json();
+      console.log("页数检查结果:", pageCheckResult);
+      
+      if (pageCheckResult.exceedsLimit) {
+        console.log("页数超限，显示升级弹窗");
+        setPageLimitFile({
+          name: file.name,
+          pages: pageCheckResult.numPages,
+          maxPages: pageCheckResult.maxPages,
+          userType: pageCheckResult.userType
+        });
+        setShowPageLimitUpgrade(true);
+        setUploading(false);
+        return;
+      }
+      
+      console.log("页数检查通过，开始上传:", pageCheckResult.message);
+      
+      // 步骤2: 获取Supabase客户端进行上传
       const { supabase } = await import('@/lib/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -371,6 +409,14 @@ export default function HomePage() {
           onOpenChange={setShowFileSizeUpgrade}
           fileName={oversizedFile?.name || ''}
           fileSizeMB={oversizedFile ? Math.round(oversizedFile.size / 1024 / 1024) : 0}
+        />
+        <PageLimitUpgradeModal
+          open={showPageLimitUpgrade}
+          onOpenChange={setShowPageLimitUpgrade}
+          fileName={pageLimitFile?.name || ''}
+          currentPages={pageLimitFile?.pages || 0}
+          maxPages={pageLimitFile?.maxPages || 0}
+          userType={pageLimitFile?.userType || 'free'}
         />
       {/* Header */}
       <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-slate-200 px-6 sm:px-10 py-4 bg-white shadow-sm">

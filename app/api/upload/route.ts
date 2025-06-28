@@ -9,9 +9,12 @@ export const maxDuration = 300; // 5分钟超时
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// 免费用户限制配置
+// 用户限制配置
 const FREE_USER_PDF_LIMIT = 3; // PDF总数限制
 const FREE_USER_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB文件大小限制
+const FREE_USER_MAX_PAGES = 120; // 免费用户页数限制
+
+const PLUS_USER_MAX_PAGES = 2000; // Plus用户页数限制
 
 // 处理Storage直传后的数据库记录创建
 async function handleStorageUploadRecord(req: Request) {
