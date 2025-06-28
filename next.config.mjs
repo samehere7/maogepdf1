@@ -91,11 +91,15 @@ const nextConfig = {
       },
     ];
   },
-  serverRuntimeConfig: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-    responseLimit: false,
+  experimental: {
+    serverComponentsExternalPackages: [
+      'pdf-parse', 
+      '@supabase/supabase-js', 
+      '@supabase/ssr',
+      '@formatjs/intl-localematcher',
+      '@formatjs/ecma402-abstract'
+    ],
+    optimizePackageImports: ['lucide-react'],
   }
 }
 

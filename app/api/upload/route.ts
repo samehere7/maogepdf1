@@ -184,15 +184,24 @@ export async function POST(req: Request) {
     }
     
     // 检查文件大小（免费用户限制为10MB，Plus用户无限制）
+    const fileSizeMB = Math.round((file.size / 1024 / 1024) * 100) / 100;
+    console.log(`[Upload API] 文件大小检查: ${fileName}, 大小: ${file.size} bytes (${fileSizeMB}MB), isPlus: ${isPlus}, isActive: ${isActive}`);
+    
     if (!isPlus || !isActive) {
+      console.log(`[Upload API] 非Plus用户，检查大小限制: ${file.size} > ${FREE_USER_MAX_FILE_SIZE} = ${file.size > FREE_USER_MAX_FILE_SIZE}`);
       if (file.size > FREE_USER_MAX_FILE_SIZE) {
         return NextResponse.json({ 
           error: '免费用户文件大小限制为10MB，请升级到Plus会员解锁无限制上传', 
-          code: 'FILE_TOO_LARGE_FREE' 
+          code: 'FILE_TOO_LARGE_FREE',
+          details: `文件大小: ${fileSizeMB}MB, 限制: 10MB`,
+          fileSize: file.size,
+          fileSizeMB: fileSizeMB,
+          maxSize: FREE_USER_MAX_FILE_SIZE
         }, { status: 400 });
       }
+    } else {
+      console.log(`[Upload API] Plus用户，无大小限制`);
     }
-    // Plus用户无文件大小限制
 
     console.log(`[Upload API] 处理上传文件: ${fileName}, 大小: ${file.size}, 质量模式: ${quality}`);
 
