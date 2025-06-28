@@ -33,14 +33,24 @@ interface Highlight {
   textItems: number[]; // 文本项索引
 }
 
+interface OutlineItem {
+  title: string;
+  dest: any; // PDF.js destination object
+  items?: OutlineItem[]; // 嵌套子项
+  pageNumber?: number; // 计算出的页码
+  level: number; // 层级深度
+}
+
 interface InteractivePDFViewerProps {
   file: string | null;
   onTextSelect?: (text: string, action: 'explain' | 'summarize' | 'rewrite') => void;
+  onOutlineLoaded?: (outline: OutlineItem[]) => void;
 }
 
 export interface PDFViewerRef {
   jumpToPage: (pageNumber: number) => void;
   getCurrentPage: () => number;
+  getOutline: () => OutlineItem[];
 }
 
 // 预定义的高亮颜色
@@ -54,7 +64,7 @@ const HIGHLIGHT_COLORS = [
   { name: '灰色', value: '#6b7280', bg: 'rgba(107, 114, 128, 0.25)' },
 ];
 
-const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>(({ file, onTextSelect }, ref) => {
+const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>(({ file, onTextSelect, onOutlineLoaded }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<HTMLDivElement>(null);
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
@@ -75,6 +85,86 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
   const [colorPickerPosition, setColorPickerPosition] = useState<{x: number, y: number} | null>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [textLayers, setTextLayers] = useState<Map<number, TextItem[]>>(new Map());
+  
+  // PDF目录相关状态
+  const [outline, setOutline] = useState<OutlineItem[]>([]);
+
+  // 提取PDF Outline（书签/目录）信息
+  const extractOutline = async (doc: PDFDocumentProxy) => {
+    try {
+      console.log('[PDF Outline] 开始提取PDF目录信息...');
+      
+      const outlineData = await doc.getOutline();
+      if (!outlineData || outlineData.length === 0) {
+        console.log('[PDF Outline] 此PDF没有目录信息');
+        setOutline([]);
+        onOutlineLoaded?.([]);
+        return;
+      }
+
+      console.log('[PDF Outline] 找到目录项:', outlineData.length);
+      
+      // 递归处理outline项，计算页码
+      const processOutlineItems = async (items: any[], level = 0): Promise<OutlineItem[]> => {
+        const result: OutlineItem[] = [];
+        
+        for (const item of items) {
+          let pageNumber: number | undefined;
+          
+          // 尝试解析目标页码
+          if (item.dest) {
+            try {
+              let dest = item.dest;
+              
+              // 如果dest是字符串，需要先获取destination
+              if (typeof dest === 'string') {
+                dest = await doc.getDestination(dest);
+              }
+              
+              if (dest && Array.isArray(dest) && dest.length > 0) {
+                const pageRef = dest[0];
+                
+                // 如果是页面引用对象，获取页码
+                if (pageRef && typeof pageRef === 'object' && 'num' in pageRef) {
+                  const pageIndex = await doc.getPageIndex(pageRef);
+                  pageNumber = pageIndex + 1; // PDF页码从1开始
+                } else if (typeof pageRef === 'number') {
+                  pageNumber = pageRef + 1;
+                }
+              }
+            } catch (error) {
+              console.warn('[PDF Outline] 解析目录项页码失败:', item.title, error);
+            }
+          }
+          
+          const outlineItem: OutlineItem = {
+            title: item.title || '未命名',
+            dest: item.dest,
+            pageNumber,
+            level,
+            items: item.items ? await processOutlineItems(item.items, level + 1) : undefined
+          };
+          
+          result.push(outlineItem);
+          
+          console.log(`[PDF Outline] 处理目录项: "${outlineItem.title}" -> 页码 ${pageNumber || '未知'} (层级 ${level})`);
+        }
+        
+        return result;
+      };
+      
+      const processedOutline = await processOutlineItems(outlineData);
+      setOutline(processedOutline);
+      onOutlineLoaded?.(processedOutline);
+      
+      console.log('[PDF Outline] 目录提取完成，共', processedOutline.length, '个顶级项目');
+      
+    } catch (error) {
+      console.error('[PDF Outline] 提取目录失败:', error);
+      setOutline([]);
+      onOutlineLoaded?.([]);
+    }
+  };
 
   // Scroll to specified page with enhanced error tolerance and retry mechanism
   const scrollToPage = useCallback((pageNum: number, retryCount = 0) => {
@@ -141,8 +231,9 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         console.warn(`页码${pageNumber}超出范围 (1-${numPages})`);
       }
     },
-    getCurrentPage: () => currentVisiblePage
-  }), [numPages, currentVisiblePage, scrollToPage]);
+    getCurrentPage: () => currentVisiblePage,
+    getOutline: () => outline
+  }), [numPages, currentVisiblePage, scrollToPage, outline]);
 
   // Auto-fit zoom to container width
   const fitToWidth = useCallback(async () => {
@@ -193,6 +284,9 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         setPdfDoc(doc);
         setNumPages(doc.numPages);
         setError(null);
+        
+        // 提取PDF目录信息
+        await extractOutline(doc);
         
         // Delay auto-fit zoom to ensure container is rendered
         setTimeout(() => {

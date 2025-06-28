@@ -26,6 +26,7 @@ import { WelcomeQuestions, WelcomeQuestionsLoading } from "@/components/welcome-
 import { generatePDFQuestions } from "@/lib/pdf-question-generator"
 import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
+import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 
 interface AnalysisResult {
   theme: string
@@ -35,6 +36,14 @@ interface AnalysisResult {
     description: string
   }>
   conclusions: string
+}
+
+interface OutlineItem {
+  title: string;
+  dest: any;
+  items?: OutlineItem[];
+  pageNumber?: number;
+  level: number;
 }
 
 // 移除硬编码的API密钥配置，改为通过后端API调用
@@ -129,6 +138,10 @@ export default function AnalysisPage() {
   
   // 分享弹窗状态
   const [showShareModal, setShowShareModal] = useState(false);
+  
+  // PDF目录相关状态
+  const [pdfOutline, setPdfOutline] = useState<OutlineItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // 闪卡功能状态
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
@@ -332,6 +345,35 @@ export default function AnalysisPage() {
   const uploadNewPdf = () => {
     router.push(`/${locale}`)
   }
+
+  // 处理PDF目录加载
+  const handleOutlineLoaded = (outline: OutlineItem[]) => {
+    console.log('[PDF目录] 接收到目录数据:', outline.length, '项');
+    setPdfOutline(outline);
+  };
+
+  // 处理跳转到指定页面
+  const handleJumpToPage = (pageNumber: number) => {
+    console.log('[PDF目录] 跳转到页面:', pageNumber);
+    if (pdfViewerRef.current) {
+      pdfViewerRef.current.jumpToPage(pageNumber);
+    }
+  };
+
+  // 更新当前页面（监听PDF查看器的页面变化）
+  useEffect(() => {
+    const updateCurrentPage = () => {
+      if (pdfViewerRef.current) {
+        const page = pdfViewerRef.current.getCurrentPage();
+        setCurrentPage(page);
+      }
+    };
+
+    // 定期更新当前页面
+    const interval = setInterval(updateCurrentPage, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // PDF 预览功能
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
@@ -975,6 +1017,18 @@ export default function AnalysisPage() {
 
         {/* PDF查看区域 */}
         <div className="flex-1 flex flex-col overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
+          {/* PDF目录导航（如果有目录的话） */}
+          {pdfOutline.length > 0 && (
+            <div className="border-b border-gray-200 bg-gray-50 max-h-48 overflow-hidden">
+              <PDFOutlineNavigator
+                outline={pdfOutline}
+                currentPage={currentPage}
+                onJumpToPage={handleJumpToPage}
+                className="text-sm"
+              />
+            </div>
+          )}
+          
           {/* PDF展示区 */}
           <div className="flex-1 overflow-hidden">
             {loading ? (
@@ -994,6 +1048,7 @@ export default function AnalysisPage() {
                     file={fileInfo.url.startsWith('http') ? fileInfo.url : 
                           (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url)}
                     onTextSelect={handleTextSelect}
+                    onOutlineLoaded={handleOutlineLoaded}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
