@@ -185,85 +185,87 @@ export default function HomePage() {
     }
     setUploading(true)
     try {
-      // 获取用户的access token
-      let accessToken = null;
-      try {
-        const { supabase } = await import('@/lib/supabase/client');
-        const { data: { session } } = await supabase.auth.getSession();
-        accessToken = session?.access_token;
-        console.log("获取access token:", accessToken ? "成功" : "失败");
-      } catch (tokenError) {
-        console.warn("获取access token失败:", tokenError);
+      // 获取Supabase客户端
+      const { supabase } = await import('@/lib/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('请先登录后再上传文件');
       }
       
-      // 创建FormData对象
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('quality', quality);
+      const userEmail = session.user.email || '';
+      const userId = session.user.id;
       
-      console.log("开始上传文件:", file.name, "质量模式:", quality);
+      console.log("开始直传文件到Supabase Storage:", file.name, "质量模式:", quality);
       
-      // 准备请求headers
-      const headers: Record<string, string> = {};
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
+      // 生成唯一文件名
+      const timestamp = Date.now();
+      const safeUserId = userEmail.split('@')[0];
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const uniqueFileName = `${safeUserId}_${timestamp}.${fileExtension}`;
+      
+      // 步骤1: 直接上传文件到Supabase Storage
+      console.log("步骤1: 上传文件到Storage...");
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('pdfs')
+        .upload(uniqueFileName, file, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+        
+      if (uploadError) {
+        console.error('Storage上传失败:', uploadError);
+        throw new Error('文件上传失败: ' + uploadError.message);
       }
       
-      const uploadResponse = await fetch('/api/upload', {
+      console.log("Storage上传成功:", uploadData.path);
+      
+      // 获取文件的公开URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('pdfs')
+        .getPublicUrl(uniqueFileName);
+        
+      console.log("文件URL:", publicUrl);
+      
+      // 步骤2: 调用API创建数据库记录
+      console.log("步骤2: 创建数据库记录...");
+      const dbResponse = await fetch('/api/upload', {
         method: 'POST',
-        headers,
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileUrl: publicUrl,
+          fileSize: file.size,
+          quality: quality,
+          storageUpload: true // 标识这是Storage直传后的数据库创建请求
+        })
       });
       
-      console.log("上传响应状态:", uploadResponse.status);
-      
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        let errorData;
+      if (!dbResponse.ok) {
+        const errorText = await dbResponse.text();
+        console.error("数据库记录创建失败:", errorText);
+        
+        // 如果数据库记录创建失败，尝试清理已上传的文件
         try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          console.error("解析错误响应失败:", errorText);
-          console.error("HTTP状态:", uploadResponse.status);
-          
-          // 处理特定的HTTP错误
-          if (uploadResponse.status === 413) {
-            throw new Error('文件过大！您的文件6.58MB超过了服务器限制。\n\n如果您之前能上传20MB文件，可能是服务器配置发生了变化。\n请尝试压缩PDF文件或联系管理员。');
-          } else if (uploadResponse.status === 502 || uploadResponse.status === 503) {
-            throw new Error('服务器暂时无响应，请稍后重试');
-          }
-          
-          throw new Error(`上传失败（状态码：${uploadResponse.status}）`);
-        }
-        console.error("上传错误:", errorData);
-        
-        // 如果是认证错误，提示用户登录
-        if (uploadResponse.status === 401) {
-          throw new Error('请先登录后再上传文件');
+          await supabase.storage.from('pdfs').remove([uniqueFileName]);
+          console.log("已清理Storage中的文件");
+        } catch (cleanupError) {
+          console.warn("清理Storage文件失败:", cleanupError);
         }
         
-        // 如果是413错误，显示文件大小错误
-        if (uploadResponse.status === 413) {
-          throw new Error(errorData.details || '文件过大，请选择较小的PDF文件');
-        }
-        
-        throw new Error(errorData.error || '上传失败');
+        throw new Error('创建PDF记录失败，请重试');
       }
       
-      let uploadResult;
-      try {
-        const resultText = await uploadResponse.text();
-        uploadResult = JSON.parse(resultText);
-      console.log("上传成功:", uploadResult);
-      } catch (e) {
-        console.error("解析成功响应失败:", e);
-        throw new Error('解析服务器响应失败');
-      }
+      const result = await dbResponse.json();
+      console.log("数据库记录创建成功:", result);
       
       // 使用服务器返回的PDF ID
-      const pdfId = uploadResult.pdf?.id || Date.now().toString();
+      const pdfId = result.pdf?.id || Date.now().toString();
       
-      console.log("上传成功，跳转到分析页面:", pdfId);
+      console.log("上传完成，跳转到分析页面:", pdfId);
       
       // 使用语言感知的路由跳转
       router.push(`/${locale}/analysis/${pdfId}`)

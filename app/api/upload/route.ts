@@ -13,6 +13,183 @@ export const runtime = 'nodejs';
 const FREE_USER_PDF_LIMIT = 3; // PDF总数限制
 const FREE_USER_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB文件大小限制
 
+// 处理Storage直传后的数据库记录创建
+async function handleStorageUploadRecord(req: Request) {
+  try {
+    const body = await req.json();
+    const { fileName, fileUrl, fileSize, quality, storageUpload } = body;
+    
+    console.log('[Storage Upload] 处理数据库记录创建:', { fileName, fileSize, quality });
+    
+    // 认证检查
+    let user = null;
+    let authMethod = '';
+    
+    // 方案1: 尝试从服务端cookie获取用户认证
+    try {
+      const supabase = createClient();
+      const { data: { user: cookieUser }, error: cookieError } = await supabase.auth.getUser();
+      if (cookieUser && !cookieError) {
+        user = cookieUser;
+        authMethod = 'cookie';
+        console.log('[Storage Upload] Cookie认证成功:', user.email);
+      }
+    } catch (cookieError) {
+      console.log('[Storage Upload] Cookie认证失败:', cookieError);
+    }
+    
+    // 方案2: 如果cookie认证失败，尝试从Authorization header获取token
+    if (!user) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.replace('Bearer ', '');
+          const { createClient: createAuthClient } = await import('@supabase/supabase-js');
+          const authClient = createAuthClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          
+          const { data: { user: tokenUser }, error: tokenError } = await authClient.auth.getUser(token);
+          if (tokenUser && !tokenError) {
+            user = tokenUser;
+            authMethod = 'token';
+            console.log('[Storage Upload] Token认证成功:', user.email);
+          }
+        } catch (tokenError) {
+          console.log('[Storage Upload] Token认证失败:', tokenError);
+        }
+      }
+    }
+    
+    if (!user?.id || !user?.email) {
+      console.log('[Storage Upload] 用户未登录或认证失败');
+      return NextResponse.json({ 
+        error: '未登录或认证失败',
+        details: '请先登录后再上传文件。如果已登录，请刷新页面重试。',
+        authMethod: authMethod || 'none'
+      }, { status: 401 });
+    }
+    
+    const userId = user.id;
+    const userEmail = user.email;
+    console.log('[Storage Upload] 用户已登录:', userEmail, '用户ID:', userId, '认证方式:', authMethod);
+
+    // 确保用户在数据库中存在
+    const { data: userExists } = await supabaseService
+      .from('user_profiles')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (!userExists) {
+      console.log('[Storage Upload] 用户在数据库中不存在，创建用户记录');
+      const { error: createUserError } = await supabaseService
+        .from('user_profiles')
+        .insert({
+          id: userId,
+          email: userEmail,
+          name: user.user_metadata?.name || userEmail.split('@')[0]
+        });
+      
+      if (createUserError) {
+        console.error('[Storage Upload] 创建用户记录失败:', createUserError);
+      } else {
+        console.log('[Storage Upload] 用户记录已创建');
+      }
+    }
+
+    // 检查用户Plus状态
+    let isPlus = false;
+    let isActive = true;
+    
+    const { data: userProfile } = await supabaseService
+      .from('user_profiles')
+      .select('plus, is_active')
+      .eq('id', userId)
+      .single();
+    
+    isPlus = userProfile?.plus || false;
+    isActive = userProfile?.is_active !== false;
+      
+    // 非Plus用户的上传数量限制检查
+    if (!isPlus || !isActive) {
+      const { data: pdfCount } = await supabaseService
+        .from('pdfs')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId);
+        
+      const count = pdfCount?.length || 0;
+      if (count >= FREE_USER_PDF_LIMIT) {
+        return NextResponse.json({ 
+          error: '免费用户最多上传3个PDF文件，请升级到Plus会员解锁无限上传', 
+          code: 'LIMIT_EXCEEDED' 
+        }, { status: 403 });
+      }
+    }
+
+    // 检查文件大小（免费用户限制为10MB，Plus用户无限制）
+    const fileSizeMB = Math.round((fileSize / 1024 / 1024) * 100) / 100;
+    console.log(`[Storage Upload] 文件大小检查: ${fileName}, 大小: ${fileSize} bytes (${fileSizeMB}MB), isPlus: ${isPlus}, isActive: ${isActive}`);
+    
+    if (!isPlus || !isActive) {
+      console.log(`[Storage Upload] 非Plus用户，检查大小限制: ${fileSize} > ${FREE_USER_MAX_FILE_SIZE} = ${fileSize > FREE_USER_MAX_FILE_SIZE}`);
+      if (fileSize > FREE_USER_MAX_FILE_SIZE) {
+        return NextResponse.json({ 
+          error: '免费用户文件大小限制为10MB，请升级到Plus会员解锁无限制上传', 
+          code: 'FILE_TOO_LARGE_FREE',
+          details: `文件大小: ${fileSizeMB}MB, 限制: 10MB`,
+          fileSize: fileSize,
+          fileSizeMB: fileSizeMB,
+          maxSize: FREE_USER_MAX_FILE_SIZE
+        }, { status: 400 });
+      }
+    } else {
+      console.log(`[Storage Upload] Plus用户，无大小限制`);
+    }
+
+    // 创建PDF记录
+    console.log('[Storage Upload] 创建数据库记录');
+    const { data: pdf, error: pdfCreateError } = await supabaseService
+      .from('pdfs')
+      .insert({
+        name: fileName,
+        url: fileUrl,
+        size: fileSize,
+        user_id: userId,
+        summary: fileName
+      })
+      .select()
+      .single();
+    
+    if (pdfCreateError) {
+      console.error('[Storage Upload] 创建PDF记录失败:', pdfCreateError);
+      throw new Error('数据库记录创建失败: ' + pdfCreateError.message);
+    }
+    
+    console.log('[Storage Upload] 数据库记录创建成功，PDF ID:', pdf.id);
+    
+    // 后台处理PDF到RAG系统（不阻塞响应）
+    processPDFToRAGSystem(pdf.id, fileName, fileUrl, quality).catch(error => {
+      console.error('[Storage Upload] RAG系统处理失败:', error);
+    });
+    
+    return NextResponse.json({
+      message: '文件上传成功',
+      pdf: pdf,
+      url: fileUrl
+    });
+    
+  } catch (error) {
+    console.error('[Storage Upload] 处理失败:', error);
+    const errorMessage = error instanceof Error ? error.message : '数据库记录创建失败';
+    return NextResponse.json({ 
+      error: errorMessage,
+      code: error instanceof Error ? error.name : 'DB_RECORD_ERROR'
+    }, { status: 500 });
+  }
+}
+
 
 // 异步处理PDF到RAG系统
 async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: string, quality: string = 'high'): Promise<void> {
@@ -41,6 +218,18 @@ async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: st
 
 export async function POST(req: Request) {
   try {
+    // 检查是否为Storage直传后的数据库创建请求
+    const contentType = req.headers.get('content-type');
+    const isStorageUpload = contentType?.includes('application/json');
+    
+    if (isStorageUpload) {
+      console.log('[Upload API] 处理Storage直传后的数据库记录创建请求');
+      return await handleStorageUploadRecord(req);
+    }
+    
+    // 原有的FormData文件上传逻辑（保留向后兼容）
+    console.log('[Upload API] 处理传统FormData文件上传');
+    
     // 检查Content-Length头以诊断413错误
     const contentLength = req.headers.get('content-length');
     console.log('[Upload API] Content-Length:', contentLength);
