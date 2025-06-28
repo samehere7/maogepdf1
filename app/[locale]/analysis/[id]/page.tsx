@@ -27,6 +27,7 @@ import { generatePDFQuestions } from "@/lib/pdf-question-generator"
 import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
+import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
 
 interface AnalysisResult {
   theme: string
@@ -126,7 +127,7 @@ export default function AnalysisPage() {
   const [editingTitle, setEditingTitle] = useState('');
   
   // PDF查看器ref
-  const pdfViewerRef = useRef<PDFViewerRef>(null);
+  const pdfViewerRef = useRef<PdfViewerRef>(null);
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -142,6 +143,9 @@ export default function AnalysisPage() {
   // PDF目录相关状态
   const [pdfOutline, setPdfOutline] = useState<OutlineItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // 本地PDF文件状态（用于即时预览）
+  const [localPdfFile, setLocalPdfFile] = useState<File | null>(null);
   
   // 闪卡功能状态
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
@@ -231,19 +235,31 @@ export default function AnalysisPage() {
         console.log('[Analysis] 从数据库成功获取PDF信息');
         setFileInfo(pdf);
 
-        // 优先检查本地缓存的PDF数据用于即时预览
+        // 优先检查本地缓存的PDF文件用于即时预览
         const localPdfKey = `pdf_local_${pdf.id}`;
         const localPdfData = sessionStorage.getItem(localPdfKey);
         
         if (localPdfData) {
           console.log('[PDF预览] 找到本地缓存数据，启用即时预览');
-          setPdfUrl(localPdfData);
+          // 将base64数据转换为File对象
+          try {
+            const response = await fetch(localPdfData);
+            const blob = await response.blob();
+            const file = new File([blob], pdf.name, { type: 'application/pdf' });
+            setLocalPdfFile(file);
+            console.log('[PDF预览] 本地文件对象创建成功');
+          } catch (error) {
+            console.warn('[PDF预览] 本地文件转换失败，使用远程URL:', error);
+            setLocalPdfFile(null);
+          }
           // 清理本地缓存（一次性使用）
           sessionStorage.removeItem(localPdfKey);
         } else {
           console.log('[PDF预览] 使用远程PDF URL');
-          setPdfUrl(pdf.url);
+          setLocalPdfFile(null);
         }
+        
+        setPdfUrl(pdf.url);
 
         // 从数据库加载聊天记录
         const chatMessages = await loadChatMessages(pdf.id);
@@ -1043,12 +1059,12 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <InteractivePDFViewer 
+                  <PdfViewer 
                     ref={pdfViewerRef}
-                    file={fileInfo.url.startsWith('http') ? fileInfo.url : 
-                          (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url)}
-                    onTextSelect={handleTextSelect}
+                    file={localPdfFile || (fileInfo.url.startsWith('http') ? fileInfo.url : 
+                          (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url))}
                     onOutlineLoaded={handleOutlineLoaded}
+                    onPageChange={setCurrentPage}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
