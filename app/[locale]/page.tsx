@@ -211,13 +211,27 @@ export default function HomePage() {
           errorData = JSON.parse(errorText);
         } catch (e) {
           console.error("解析错误响应失败:", errorText);
-          throw new Error('上传失败，服务器返回无效响应');
+          console.error("HTTP状态:", uploadResponse.status);
+          
+          // 处理特定的HTTP错误
+          if (uploadResponse.status === 413) {
+            throw new Error('文件过大，请选择小于10MB的PDF文件');
+          } else if (uploadResponse.status === 502 || uploadResponse.status === 503) {
+            throw new Error('服务器暂时无响应，请稍后重试');
+          }
+          
+          throw new Error(`上传失败（状态码：${uploadResponse.status}）`);
         }
         console.error("上传错误:", errorData);
         
         // 如果是认证错误，提示用户登录
         if (uploadResponse.status === 401) {
           throw new Error('请先登录后再上传文件');
+        }
+        
+        // 如果是413错误，显示文件大小错误
+        if (uploadResponse.status === 413) {
+          throw new Error(errorData.details || '文件过大，请选择较小的PDF文件');
         }
         
         throw new Error(errorData.error || '上传失败');

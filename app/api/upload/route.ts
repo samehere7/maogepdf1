@@ -4,6 +4,11 @@ import { uploadPDF } from '@/lib/pdf-service-supabase';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 import { supabaseService } from '@/lib/supabase/service-client';
 
+// 配置API路由选项，增加请求体大小限制
+export const maxDuration = 300; // 5分钟超时
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // 免费用户限制配置
 const FREE_USER_PDF_LIMIT = 3; // PDF总数限制
 const FREE_USER_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB文件大小限制
@@ -36,6 +41,17 @@ async function processPDFToRAGSystem(pdfId: string, fileName: string, pdfUrl: st
 
 export async function POST(req: Request) {
   try {
+    // 检查Content-Length头以诊断413错误
+    const contentLength = req.headers.get('content-length');
+    console.log('[Upload API] Content-Length:', contentLength);
+    
+    if (contentLength && parseInt(contentLength) > 50 * 1024 * 1024) { // 50MB限制
+      return NextResponse.json({
+        error: '文件过大',
+        details: `文件大小 ${Math.round(parseInt(contentLength) / 1024 / 1024)}MB 超过50MB限制`,
+        maxSize: '50MB'
+      }, { status: 413 });
+    }
     // 方案1: 尝试从服务端cookie获取用户认证
     let user = null;
     let authMethod = '';
@@ -267,6 +283,13 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('[Upload API] 上传处理失败:', error);
     
+    // 详细错误日志
+    if (error instanceof Error) {
+      console.error('[Upload API] Error name:', error.name);
+      console.error('[Upload API] Error message:', error.message);
+      console.error('[Upload API] Error stack:', error.stack);
+    }
+    
     // 根据错误类型返回适当的错误信息
     const errorMessage = error instanceof Error ? error.message : '上传处理失败';
     
@@ -278,11 +301,18 @@ export async function POST(req: Request) {
       statusCode = 403;
     } else if (errorMessage.includes('未找到文件') || errorMessage.includes('只支持PDF')) {
       statusCode = 400;
+    } else if (errorMessage.includes('PayloadTooLargeError') || errorMessage.includes('413')) {
+      statusCode = 413;
     }
     
     return NextResponse.json({ 
       error: errorMessage,
-      code: error instanceof Error ? error.name : 'UPLOAD_ERROR'
+      code: error instanceof Error ? error.name : 'UPLOAD_ERROR',
+      details: process.env.NODE_ENV === 'development' ? {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      } : undefined
     }, { status: statusCode });
   }
 } 
