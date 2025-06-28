@@ -43,10 +43,11 @@ const nextConfig = {
       os: false,
     };
     
-    // 在服务器端忽略 Supabase 客户端包，但不要忽略 tailwind-merge
+    // 在服务器端忽略某些包，但middleware需要 @supabase/ssr
     if (isServer) {
       config.externals = config.externals || [];
-      config.externals.push('@supabase/ssr', '@supabase/supabase-js');
+      // 只外部化 @supabase/supabase-js，保留 @supabase/ssr 给 middleware 使用
+      config.externals.push('@supabase/supabase-js');
       
       // 确保 tailwind-merge 不被外部化
       if (Array.isArray(config.externals)) {

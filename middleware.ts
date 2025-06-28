@@ -1,8 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
 
-const intlMiddleware = createMiddleware({
+export default createMiddleware({
   // 支持的语言列表
   locales: ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt-BR', 'ru', 'it', 'nl', 'sv', 'da', 'no', 'fi', 'pl', 'tr', 'hi', 'bn', 'pa', 'kn', 'th', 'vi', 'id', 'ms'],
   
@@ -30,47 +28,6 @@ const intlMiddleware = createMiddleware({
     '/ultimate-debug': '/ultimate-debug'
   }
 });
-
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  // 处理Supabase认证
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
-      },
-    }
-  );
-
-  // 刷新session
-  await supabase.auth.getUser();
-
-  // 处理国际化
-  return intlMiddleware(request);
-}
 
 export const config = {
   // 匹配所有路径，除了API路由、静态文件等
