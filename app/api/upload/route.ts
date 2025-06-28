@@ -94,10 +94,22 @@ export async function POST(req: Request) {
     
     if (!user?.id || !user?.email) {
       console.log('[Upload API] 用户未登录或认证失败，拒绝上传');
+      
+      // 详细的调试信息
+      const debugInfo = {
+        cookiesPresent: !!req.headers.get('cookie'),
+        authHeaderPresent: !!req.headers.get('authorization'),
+        userFound: !!user,
+        userEmail: user?.email || null,
+        authMethod: authMethod || 'none',
+        timestamp: new Date().toISOString()
+      };
+      
       return NextResponse.json({ 
         error: '未登录或认证失败',
-        details: '请先登录后再上传文件',
-        authMethod: authMethod || 'none'
+        details: '请先登录后再上传文件。如果已登录，请刷新页面重试。',
+        authMethod: authMethod || 'none',
+        debug: debugInfo
       }, { status: 401 });
     }
     

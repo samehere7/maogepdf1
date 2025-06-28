@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Auth Status</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Debug Authentication Status</h1>
+    <div id="status">Loading...</div>
+    <div id="session-info"></div>
+    <button onclick="checkAuth()">Check Auth Status</button>
+    <button onclick="testUpload()">Test Upload API</button>
+    <div id="result"></div>
+
+    <script>
+        // 初始化Supabase客户端
+        const supabaseUrl = 'https://pwlvfmywfzllopuiisxg.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3bHZmbXl3ZnpsbG9wdWlpc3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4MzkyODQsImV4cCI6MjA2NjQxNTI4NH0.00kD5xnk3D8-ijEvL7gRdT-xItnj-rhii0nQegiqp6g';
+        
+        const { createClient } = supabase;
+        const client = createClient(supabaseUrl, supabaseKey);
+        
+        async function checkAuth() {
+            try {
+                console.log('Checking auth status...');
+                
+                // 1. 检查用户
+                const { data: { user }, error: userError } = await client.auth.getUser();
+                console.log('User:', user);
+                console.log('User Error:', userError);
+                
+                // 2. 检查session
+                const { data: { session }, error: sessionError } = await client.auth.getSession();
+                console.log('Session:', session);
+                console.log('Session Error:', sessionError);
+                
+                // 3. 显示结果
+                document.getElementById('status').innerHTML = user ? 
+                    `✅ Logged in as: ${user.email}` : 
+                    `❌ Not logged in`;
+                
+                document.getElementById('session-info').innerHTML = `
+                    <h3>Session Info:</h3>
+                    <p>Access Token: ${session?.access_token ? 'Present' : 'Missing'}</p>
+                    <p>User ID: ${user?.id || 'N/A'}</p>
+                    <p>Email: ${user?.email || 'N/A'}</p>
+                    <p>Session Error: ${sessionError?.message || 'None'}</p>
+                `;
+                
+            } catch (error) {
+                console.error('Check auth failed:', error);
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testUpload() {
+            try {
+                // 获取session和token
+                const { data: { session } } = await client.auth.getSession();
+                const accessToken = session?.access_token;
+                
+                console.log('Testing upload with token:', accessToken ? 'Present' : 'Missing');
+                
+                // 创建测试FormData
+                const formData = new FormData();
+                formData.append('file', new Blob(['test'], { type: 'application/pdf' }), 'test.pdf');
+                formData.append('quality', 'high');
+                
+                // 准备headers
+                const headers = {};
+                if (accessToken) {
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                }
+                
+                console.log('Request headers:', headers);
+                
+                // 发送请求
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers,
+                    body: formData
+                });
+                
+                const result = await response.text();
+                console.log('Upload response:', response.status, result);
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Upload Test Result:</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Response: ${result}</p>
+                `;
+                
+            } catch (error) {
+                console.error('Upload test failed:', error);
+                document.getElementById('result').textContent = 'Upload test error: ' + error.message;
+            }
+        }
+        
+        // 自动检查状态
+        checkAuth();
+    </script>
+</body>
+</html>

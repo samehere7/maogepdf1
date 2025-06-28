@@ -162,7 +162,10 @@ export default function HomePage() {
       alert(t("upload.onlyPdfAllowed"))
       return
     }
-    const maxSize = isPlus ? Infinity : 10 * 1024 * 1024
+    // Vercel免费计划限制6MB，Plus用户也受此限制
+    const vercelLimit = 6 * 1024 * 1024; // 6MB Vercel限制
+    const userLimit = isPlus ? 10 * 1024 * 1024 : 10 * 1024 * 1024; // 用户限制
+    const maxSize = Math.min(vercelLimit, userLimit); // 取更小的限制
     const fileSizeMB = Math.round((file.size / 1024 / 1024) * 100) / 100
     
     console.log("文件上传检查:", {
@@ -177,11 +180,9 @@ export default function HomePage() {
     
     if (file.size > maxSize) {
       console.log("文件过大检查触发:", file.size, ">", maxSize)
-      if (!isPlus) {
-        setOversizedFile({name: file.name, size: file.size})
-        setShowFileSizeUpgrade(true)
-        return
-      }
+      const limitMB = Math.round((maxSize / 1024 / 1024) * 100) / 100;
+      alert(`文件过大！当前限制为${limitMB}MB（服务器限制）\n\n您的文件：${fileSizeMB}MB\n请压缩PDF文件后重试。`);
+      return
     }
     setUploading(true)
     try {
@@ -228,7 +229,7 @@ export default function HomePage() {
           
           // 处理特定的HTTP错误
           if (uploadResponse.status === 413) {
-            throw new Error('文件过大，请选择小于10MB的PDF文件');
+            throw new Error('文件过大，请选择小于6MB的PDF文件（服务器限制）');
           } else if (uploadResponse.status === 502 || uploadResponse.status === 503) {
             throw new Error('服务器暂时无响应，请稍后重试');
           }
