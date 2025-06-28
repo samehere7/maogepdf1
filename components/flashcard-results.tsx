@@ -3,6 +3,7 @@
 import React from 'react'
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 interface PracticeResults {
   totalCards: number
@@ -25,10 +26,12 @@ export default function FlashcardResults({
   onBack, 
   onPracticeAgain 
 }: FlashcardResultsProps) {
+  const t = useTranslations('flashcard')
+  
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
-    return `${minutes}分${remainingSeconds}秒`
+    return `${minutes}${t('minutes')}${remainingSeconds}${t('seconds')}`
   }
 
   const getPercentage = (count: number) => {
@@ -56,51 +59,51 @@ export default function FlashcardResults({
           <div className="text-center mb-8">
             <div className="text-4xl mb-4">🎉</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              练习完成！
+              {t('practiceComplete')}
             </h2>
             <p className="text-gray-600">
-              你已完成了本次闪卡练习
+              {t('practiceCompleteDesc')}
             </p>
           </div>
 
           {/* 学习统计 */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4">学习统计</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t('learningStats')}</h3>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">
                   {results.totalCards}
                 </div>
-                <div className="text-sm text-gray-600">学习卡片</div>
+                <div className="text-sm text-gray-600">{t('studiedCards')}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">
                   {formatTime(results.sessionTime)}
                 </div>
-                <div className="text-sm text-gray-600">学习时间</div>
+                <div className="text-sm text-gray-600">{t('sessionTime')}</div>
               </div>
             </div>
 
             {/* 平均时间 */}
             {results.totalCards > 0 && (
               <div className="text-center text-sm text-gray-600">
-                平均每卡片: {formatTime(Math.round(results.sessionTime / results.totalCards))}
+                {t('averagePerCard')}: {formatTime(Math.round(results.sessionTime / results.totalCards))}
               </div>
             )}
           </div>
 
           {/* 学习进度更新 */}
           <div className="space-y-4 mb-8">
-            <h3 className="font-semibold text-gray-900">学习进度</h3>
+            <h3 className="font-semibold text-gray-900">{t('learningProgress')}</h3>
             
             {/* 新 -> 容易 */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">
-                容易 ({getPercentage(results.easyCount)}%)
+                {t('easy')} ({getPercentage(results.easyCount)}%)
               </span>
               <span className="text-sm font-medium text-green-600">
-                {results.easyCount} 张卡片
+                {results.easyCount} {t('cards')}
                 {results.easyCount > 0 && (
                   <span className="text-green-500 ml-1">(+{results.easyCount})</span>
                 )}
@@ -118,10 +121,10 @@ export default function FlashcardResults({
             {/* 中等 */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">
-                中等 ({getPercentage(results.mediumCount)}%)
+                {t('medium')} ({getPercentage(results.mediumCount)}%)
               </span>
               <span className="text-sm font-medium">
-                {results.mediumCount} 张卡片
+                {results.mediumCount} {t('cards')}
               </span>
             </div>
             {results.mediumCount > 0 && (
@@ -136,10 +139,10 @@ export default function FlashcardResults({
             {/* 困难 */}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">
-                困难 ({getPercentage(results.hardCount)}%)
+                {t('hard')} ({getPercentage(results.hardCount)}%)
               </span>
               <span className="text-sm font-medium text-red-600">
-                {results.hardCount} 张卡片
+                {results.hardCount} {t('cards')}
                 {results.hardCount > 0 && (
                   <span className="text-red-500 ml-1">(-{results.hardCount})</span>
                 )}
@@ -161,31 +164,31 @@ export default function FlashcardResults({
               onClick={onPracticeAgain}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3"
             >
-              再次练习
+              {t('practiceAgain')}
             </Button>
             <Button
               onClick={onBack}
               variant="outline"
               className="w-full py-3"
             >
-              返回闪卡管理
+              {t('backToManagement')}
             </Button>
           </div>
 
           {/* 学习建议 */}
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">学习建议</h4>
+            <h4 className="font-medium text-blue-900 mb-2">{t('studySuggestions')}</h4>
             <div className="text-sm text-blue-800 space-y-1">
               {results.hardCount > 0 && (
-                <p>• 建议重点复习标记为"困难"的卡片</p>
+                <p>• {t('reviewHardCards')}</p>
               )}
               {results.easyCount > results.totalCards * 0.7 && (
-                <p>• 表现很好！可以尝试学习新的内容</p>
+                <p>• {t('performanceGood')}</p>
               )}
               {results.mediumCount > results.totalCards * 0.5 && (
-                <p>• 继续练习可以提高记忆效果</p>
+                <p>• {t('continueProgress')}</p>
               )}
-              <p>• 建议定期复习以巩固记忆</p>
+              <p>• {t('regularReview')}</p>
             </div>
           </div>
         </div>
