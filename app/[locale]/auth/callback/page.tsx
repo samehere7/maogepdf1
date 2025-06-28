@@ -3,11 +3,12 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 function AuthCallbackContent() {
   const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations('auth')
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
@@ -221,7 +222,7 @@ function AuthCallbackContent() {
             if (subscription) subscription.unsubscribe()
             
             addDebugLog('❌ 未能完成认证，可能是JWT问题')
-            setError('认证过程遇到问题，请重试')
+            setError(t('authenticationError'))
             setStatus('error')
             setTimeout(() => {
               addDebugLog('🔄 重定向到登录页面')
@@ -232,7 +233,7 @@ function AuthCallbackContent() {
 
       } catch (err: any) {
         addDebugLog(`💥 认证回调异常: ${err.message}`)
-        setError(err.message || '认证失败')
+        setError(err.message || t('loginFailed'))
         setStatus('error')
         
         setTimeout(() => {
@@ -256,8 +257,8 @@ function AuthCallbackContent() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
         <div className="text-center max-w-4xl w-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold mb-2">正在完成登录...</h2>
-          <p className="text-gray-600 mb-6">请稍候，我们正在验证您的身份</p>
+          <h2 className="text-xl font-semibold mb-2">{t('completingLogin')}</h2>
+          <p className="text-gray-600 mb-6">{t('verifyingIdentity')}</p>
           
           {/* 仅在开发环境显示调试日志 */}
           {process.env.NODE_ENV === 'development' && (
@@ -287,8 +288,8 @@ function AuthCallbackContent() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="text-green-500 text-6xl mb-4">✓</div>
-          <h2 className="text-xl font-semibold mb-2">登录成功！</h2>
-          <p className="text-gray-600">正在跳转到首页...</p>
+          <h2 className="text-xl font-semibold mb-2">{t('loginSuccessful')}</h2>
+          <p className="text-gray-600">{t('redirectingToHome')}</p>
         </div>
       </div>
     )
@@ -299,9 +300,9 @@ function AuthCallbackContent() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
         <div className="text-center max-w-md">
           <div className="text-red-500 text-6xl mb-4">✗</div>
-          <h2 className="text-xl font-semibold mb-2">登录失败</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('loginFailed')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">3秒后自动返回登录页面...</p>
+          <p className="text-sm text-gray-500">{t('autoReturnLogin')}</p>
         </div>
       </div>
     )
@@ -310,17 +311,23 @@ function AuthCallbackContent() {
   return null
 }
 
+function LoadingFallback() {
+  const t = useTranslations('auth')
+  
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
+        <h2 className="text-xl font-semibold mb-2">{t('initializing')}</h2>
+        <p className="text-gray-600">{t('pleaseWait')}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function AuthCallbackPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold mb-2">正在初始化...</h2>
-          <p className="text-gray-600">请稍候</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingFallback />}>
       <AuthCallbackContent />
     </Suspense>
   )

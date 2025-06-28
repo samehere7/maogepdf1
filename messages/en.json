@@ -38,7 +38,15 @@
     "loginSubtitle": "Use your account to access all features",
     "socialLogin": "Sign in with social account",
     "googleLogin": "Sign in with Google",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "completingLogin": "Completing sign in...",
+    "verifyingIdentity": "Please wait, we are verifying your identity",
+    "loginSuccessful": "Sign in successful!",
+    "redirectingToHome": "Redirecting to homepage...",
+    "loginFailed": "Sign in failed",
+    "autoReturnLogin": "Automatically returning to sign in page in 3 seconds...",
+    "initializing": "Initializing...",
+    "pleaseWait": "Please wait"
   },
   "upload": {
     "uploadPdf": "Upload PDF",

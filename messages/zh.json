@@ -38,7 +38,15 @@
     "loginSubtitle": "使用您的账号访问全部功能",
     "socialLogin": "使用社交账号登录",
     "googleLogin": "使用Google登录",
-    "processing": "处理中..."
+    "processing": "处理中...",
+    "completingLogin": "正在完成登录...",
+    "verifyingIdentity": "请稍候，我们正在验证您的身份",
+    "loginSuccessful": "登录成功！",
+    "redirectingToHome": "正在跳转到首页...",
+    "loginFailed": "登录失败",
+    "autoReturnLogin": "3秒后自动返回登录页面...",
+    "initializing": "正在初始化...",
+    "pleaseWait": "请稍候"
   },
   "upload": {
     "uploadPdf": "上传PDF",
