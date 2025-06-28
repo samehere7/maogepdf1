@@ -12,6 +12,7 @@ export default function AccountPage() {
   const router = useRouter()
   const locale = useLocale()
   const [userPdfs, setUserPdfs] = useState<any[]>([])
+  const [pdfFlashcardCounts, setPdfFlashcardCounts] = useState<{[pdfId: string]: number}>({})
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -22,6 +23,38 @@ export default function AccountPage() {
     status: "Active",
     nextBillingDate: "2024-07-15"
   })
+
+  // 加载闪卡数量
+  const loadFlashcardCounts = () => {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const counts: {[pdfId: string]: number} = {}
+      
+      // 遍历localStorage寻找闪卡数据
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key?.startsWith('flashcards_')) {
+          const pdfId = key.replace('flashcards_', '')
+          const data = localStorage.getItem(key)
+          if (data) {
+            try {
+              const flashcards = JSON.parse(data)
+              if (Array.isArray(flashcards)) {
+                counts[pdfId] = flashcards.length
+              }
+            } catch (e) {
+              console.warn('[Account] 解析闪卡数据失败:', key, e)
+            }
+          }
+        }
+      }
+      
+      setPdfFlashcardCounts(counts)
+    } catch (error) {
+      console.error('[Account] Failed to load flashcard counts:', error)
+    }
+  }
 
   useEffect(() => {
     // Check if user is logged in
@@ -37,7 +70,20 @@ export default function AccountPage() {
     // Load user PDFs from localStorage
     const pdfs = JSON.parse(localStorage.getItem("uploadedPdfs") || "[]")
     setUserPdfs(pdfs)
-  }, [router])
+
+    // Load flashcard counts
+    loadFlashcardCounts()
+
+    // 监听storage事件，当其他标签页更新闪卡时同步
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key?.startsWith('flashcards_')) {
+        loadFlashcardCounts()
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [router, locale])
 
   const handleInputChange = (field: string, value: string) => {
     setUserInfo((prev) => ({ ...prev, [field]: value }))
@@ -61,7 +107,13 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar />
+      <Sidebar 
+        pdfFlashcardCounts={pdfFlashcardCounts}
+        onFlashcardClick={(pdfId, pdfName) => {
+          // 跳转到PDF页面并直接打开闪卡管理
+          router.push(`/${locale}/analysis/${pdfId}?flashcard=true`);
+        }}
+      />
 
       <main className="flex-1 p-8 overflow-y-auto">
         <header className="mb-8">

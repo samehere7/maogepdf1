@@ -111,7 +111,7 @@ Annual Plan:
 # 客户支持
 
 ## 联系方式
-- 邮箱：support@yourapp.com
+- 邮箱：maogepdf@163.com
 - 响应时间：24小时内回复
 
 ## 常见问题

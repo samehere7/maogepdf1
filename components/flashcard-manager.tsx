@@ -80,41 +80,17 @@ export default function FlashcardManager({
     }
   }
 
-  // 加载闪卡数据（优先本地存储，后备API）
-  const loadFlashcards = async () => {
+  // 加载闪卡数据（仅从本地存储加载）
+  const loadFlashcards = () => {
     try {
       setLoading(true)
       
-      // 首先尝试从本地存储加载
+      // 从本地存储加载闪卡数据
       const localFlashcards = loadFlashcardsLocal()
-      
-      if (localFlashcards.length > 0) {
-        setLoading(false)
-        return
-      }
-      
-      // 本地没有数据，从API加载
-      console.log('[闪卡管理] 本地无数据，从API加载')
-      const response = await fetch(`/api/flashcards/${pdfId}`)
-      
-      if (!response.ok) {
-        throw new Error(t('createFlashcardFailed'))
-      }
-      
-      const data = await response.json()
-      const apiFlashcards = data.flashcards || []
-      setFlashcards(apiFlashcards)
-      calculateStats(apiFlashcards)
-      
-      // 保存到本地存储
-      if (apiFlashcards.length > 0) {
-        const storageKey = `flashcards_${pdfId}`
-        localStorage.setItem(storageKey, JSON.stringify(apiFlashcards))
-        console.log('[闪卡管理] API数据已保存到本地存储')
-      }
+      console.log('[闪卡管理] 从本地存储加载闪卡:', localFlashcards.length)
       
     } catch (error) {
-      console.error(t('createFlashcardFailed') + ':', error)
+      console.error('[闪卡管理] 加载闪卡失败:', error)
     } finally {
       setLoading(false)
     }

@@ -29,15 +29,6 @@ CREATE POLICY "pdfs_service_role_policy" ON public.pdfs
     current_setting('request.jwt.claims', true)::json->>'role' = 'service_role'
   );
 
-CREATE POLICY "flashcards_service_role_policy" ON public.flashcards
-  FOR ALL USING (
-    current_setting('request.jwt.claims', true)::json->>'role' = 'service_role'
-  );
-
-CREATE POLICY "flashcard_sessions_service_role_policy" ON public.flashcard_sessions
-  FOR ALL USING (
-    current_setting('request.jwt.claims', true)::json->>'role' = 'service_role'
-  );
 
 CREATE POLICY "shares_service_role_policy" ON public.shares
   FOR ALL USING (

@@ -1258,20 +1258,22 @@ export default function AnalysisPage() {
           pdfId={fileInfo.id}
           pdfName={fileInfo.name}
           pdfContent={pdfTextContent}
-          onSuccess={(flashcards) => {
-            setFlashcards(flashcards);
+          onSuccess={(newFlashcards) => {
+            // 合并新闪卡与现有闪卡
+            const mergedFlashcards = [...flashcards, ...newFlashcards];
+            setFlashcards(mergedFlashcards);
             setFlashcardView('manage');
             
-            // 保存新创建的闪卡到本地存储
+            // 保存合并后的闪卡到本地存储
             try {
               const storageKey = `flashcards_${fileInfo.id}`;
-              localStorage.setItem(storageKey, JSON.stringify(flashcards));
-              console.log('[闪卡创建] 新闪卡已保存到本地存储:', flashcards.length);
+              localStorage.setItem(storageKey, JSON.stringify(mergedFlashcards));
+              console.log('[闪卡创建] 新闪卡已合并并保存到本地存储:', mergedFlashcards.length);
               
               // 触发存储事件，通知其他页面更新闪卡计数
               window.dispatchEvent(new StorageEvent('storage', {
                 key: storageKey,
-                newValue: JSON.stringify(flashcards),
+                newValue: JSON.stringify(mergedFlashcards),
                 storageArea: localStorage
               }));
             } catch (error) {

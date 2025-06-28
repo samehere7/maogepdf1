@@ -214,6 +214,41 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     setShowDeleteModal(true);
   }
 
+  // 删除闪卡功能
+  const handleDeleteFlashcards = (pdfId: string) => {
+    const pdfToDelete = pdfs.find(pdf => pdf.id === pdfId);
+    const pdfName = pdfToDelete?.name || t('pdfFile');
+    const flashcardCount = pdfFlashcards[pdfId] || 0;
+    
+    if (confirm(t('deleteFlashcardsConfirm', { name: pdfName, count: flashcardCount }))) {
+      try {
+        // 从本地存储删除闪卡数据
+        const storageKey = `flashcards_${pdfId}`;
+        localStorage.removeItem(storageKey);
+        console.log('[Sidebar] 闪卡已从本地存储删除:', storageKey);
+        
+        // 更新状态，移除该PDF的闪卡计数
+        setPdfFlashcards(prev => {
+          const newCounts = { ...prev };
+          delete newCounts[pdfId];
+          return newCounts;
+        });
+        
+        // 触发存储事件，通知其他页面更新
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: storageKey,
+          newValue: null,
+          storageArea: localStorage
+        }));
+        
+        console.log('[Sidebar] 闪卡删除成功');
+      } catch (error) {
+        console.error('[Sidebar] 删除闪卡失败:', error);
+        alert(t('deleteFlashcardsFailed'));
+      }
+    }
+  }
+
   const confirmDeletePdf = async () => {
     if (!deletingPdf) return;
 
@@ -625,10 +660,9 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                   .map((pdf) => (
                     <div
                       key={`flashcard-${pdf.id}`}
-                      className="group flex items-center justify-between p-2 rounded-md hover:bg-[#2a2a2a] cursor-pointer transition-all duration-200"
-                      onClick={() => onFlashcardClick?.(pdf.id, pdf.name)}
+                      className="group flex items-center justify-between p-2 rounded-md hover:bg-[#2a2a2a] transition-all duration-200"
                     >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => onFlashcardClick?.(pdf.id, pdf.name)}>
                         <Brain size={16} className="text-purple-400 flex-shrink-0" />
                         <span className="text-gray-300 truncate" title={`${pdf.name} ${t('flashcardCollection')}`}>
                           {pdf.name}
@@ -636,6 +670,18 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                         <div className="flex items-center gap-1 bg-purple-600 text-white px-2 py-1 rounded-full text-xs flex-shrink-0">
                           <span>{pdfFlashcards[pdf.id]}</span>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteFlashcards(pdf.id);
+                          }}
+                          className="p-1 hover:bg-gray-700 rounded"
+                          title={t('deleteFlashcards')}
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                   ))}
