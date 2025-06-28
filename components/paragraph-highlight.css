@@ -1,0 +1,110 @@
+/* 段落高亮样式 */
+.pdf-viewer-with-paragraphs .pdf-page {
+  position: relative;
+}
+
+.pdf-viewer-with-paragraphs .highlight-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.pdf-viewer-with-paragraphs .textLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0;
+  line-height: 1;
+  z-index: 2;
+  cursor: crosshair;
+}
+
+/* 段落悬停时的光标效果 */
+.pdf-viewer-with-paragraphs .textLayer:hover {
+  cursor: crosshair;
+}
+
+/* 页面容器样式优化 */
+.pdf-viewer-with-paragraphs .pdf-page-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+/* 段落高亮动画效果 */
+@keyframes paragraphHighlight {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pdf-viewer-with-paragraphs .highlight-canvas.active {
+  animation: paragraphHighlight 0.15s ease-out;
+}
+
+/* 段落边界指示器 */
+.paragraph-boundary {
+  position: absolute;
+  border: 1px dashed rgba(255, 193, 7, 0.4);
+  background: rgba(255, 235, 59, 0.1);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  border-radius: 2px;
+}
+
+.paragraph-boundary.hovered {
+  border-color: rgba(255, 193, 7, 0.8);
+  background: rgba(255, 235, 59, 0.3);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
+}
+
+/* 段落高亮工具提示 */
+.paragraph-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.paragraph-tooltip.visible {
+  opacity: 1;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .pdf-viewer-with-paragraphs .textLayer {
+    cursor: pointer;
+  }
+  
+  .paragraph-tooltip {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+/* 打印时隐藏高亮层 */
+@media print {
+  .pdf-viewer-with-paragraphs .highlight-canvas,
+  .pdf-viewer-with-paragraphs .textLayer,
+  .paragraph-boundary,
+  .paragraph-tooltip {
+    display: none !important;
+  }
+}

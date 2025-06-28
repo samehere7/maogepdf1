@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import { VariableSizeList as List } from 'react-window'
 import * as pdfjsLib from 'pdfjs-dist'
 import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
+import './paragraph-highlight.css'
 
 // 配置 PDF.js worker
 if (typeof window !== 'undefined') {
@@ -37,6 +38,30 @@ interface PageData {
   height: number
   rendered: boolean
   canvas?: HTMLCanvasElement
+  textContent?: any
+  paragraphs?: Paragraph[]
+}
+
+interface TextItem {
+  str: string
+  x: number
+  y: number
+  width: number
+  height: number
+  fontSize: number
+  fontName: string
+  transform: number[]
+  dir: string
+}
+
+interface Paragraph {
+  id: string
+  items: TextItem[]
+  x: number
+  y: number
+  width: number
+  height: number
+  text: string
 }
 
 const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({ 
@@ -53,10 +78,28 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   const [error, setError] = useState<string | null>(null)
   const [outline, setOutline] = useState<OutlineItem[]>([])
   const [pageData, setPageData] = useState<PageData[]>([])
+  const [containerHeight, setContainerHeight] = useState(600)
+  const [hoveredParagraph, setHoveredParagraph] = useState<string | null>(null)
+  const [highlightCanvas, setHighlightCanvas] = useState<Map<number, HTMLCanvasElement>>(new Map())
   
   const listRef = useRef<List>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  // 监听容器尺寸变化
+  useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        setContainerHeight(containerRef.current.clientHeight)
+      } else {
+        setContainerHeight(window.innerHeight - 150)
+      }
+    }
+
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
 
   // 提取PDF outline信息
   const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
@@ -186,6 +229,282 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     loadPDF()
   }, [file, extractOutline])
 
+  // 段落分组算法 - 增强版
+  const groupIntoParagraphs = useCallback((textItems: TextItem[], viewport: any): Paragraph[] => {
+    if (!textItems || textItems.length === 0) return []
+    
+    const paragraphs: Paragraph[] = []
+    let currentParagraph: TextItem[] = []
+    let paragraphId = 0
+    
+    // 按Y坐标和X坐标排序文本项
+    const sortedItems = textItems.sort((a, b) => {
+      const yDiff = Math.abs(a.y - b.y)
+      if (yDiff < 3) { // 同一行的容差更小，提高精度
+        return a.x - b.x
+      }
+      return a.y - b.y
+    })
+    
+    // 计算平均字体大小和行高
+    const avgFontSize = sortedItems.reduce((sum, item) => sum + item.fontSize, 0) / sortedItems.length
+    const avgLineHeight = avgFontSize * 1.2
+    
+    for (let i = 0; i < sortedItems.length; i++) {
+      const item = sortedItems[i]
+      const prevItem = i > 0 ? sortedItems[i - 1] : null
+      const nextItem = i < sortedItems.length - 1 ? sortedItems[i + 1] : null
+      
+      let shouldStartNewParagraph = false
+      
+      if (!prevItem) {
+        // 第一个项目，开始新段落
+        shouldStartNewParagraph = true
+      } else {
+        // 增强的段落分割启发式规则
+        const verticalGap = item.y - (prevItem.y + prevItem.height)
+        const horizontalAlignment = Math.abs(item.x - prevItem.x)
+        
+        // 字体变化检测
+        const fontSizeChange = Math.abs(item.fontSize - prevItem.fontSize) > avgFontSize * 0.15
+        const significantFontChange = Math.abs(item.fontSize - prevItem.fontSize) > avgFontSize * 0.3
+        
+        // 缩进检测（段落开始的重要指标）
+        const hasIndent = item.x > prevItem.x + 15 // 明显的缩进
+        const hasOutdent = item.x < prevItem.x - 15 // 突出（如标题）
+        
+        // 行间距检测
+        const normalLineBreak = verticalGap > avgLineHeight * 0.6 && verticalGap < avgLineHeight * 2
+        const largeParagraphBreak = verticalGap > avgLineHeight * 1.5
+        
+        // 连续性检测
+        const textContinuity = item.str.trim().length > 0 && prevItem.str.trim().length > 0
+        
+        // 特殊文本模式检测
+        const isTitle = item.fontSize > avgFontSize * 1.2 || significantFontChange
+        const isListItem = /^[\d\w\s]*[\.\)]\s/.test(item.str) // 列表项检测
+        const isPunctuation = /^[。！？，；：""''（）[\]{}—–-]/.test(item.str)
+        
+        // 段落边界判断逻辑
+        if (largeParagraphBreak || (normalLineBreak && (hasIndent || hasOutdent))) {
+          shouldStartNewParagraph = true
+        } else if (isTitle && (fontSizeChange || verticalGap > avgLineHeight * 0.8)) {
+          shouldStartNewParagraph = true
+        } else if (isListItem && (hasIndent || verticalGap > avgLineHeight * 0.7)) {
+          shouldStartNewParagraph = true
+        } else if (significantFontChange && verticalGap > avgLineHeight * 0.5) {
+          shouldStartNewParagraph = true
+        }
+        
+        // 特殊情况：避免不必要的分割
+        if (shouldStartNewParagraph) {
+          // 如果是标点符号，不分割
+          if (isPunctuation) {
+            shouldStartNewParagraph = false
+          }
+          // 如果文本太短且间距不大，不分割
+          else if (item.str.trim().length < 3 && verticalGap < avgLineHeight) {
+            shouldStartNewParagraph = false
+          }
+        }
+      }
+      
+      if (shouldStartNewParagraph && currentParagraph.length > 0) {
+        // 完成当前段落
+        const paragraph = createParagraphFromItems(currentParagraph, `paragraph-${paragraphId++}`)
+        if (paragraph && paragraph.text.trim().length > 0) { // 确保段落有内容
+          paragraphs.push(paragraph)
+        }
+        currentParagraph = []
+      }
+      
+      currentParagraph.push(item)
+    }
+    
+    // 处理最后一个段落
+    if (currentParagraph.length > 0) {
+      const paragraph = createParagraphFromItems(currentParagraph, `paragraph-${paragraphId++}`)
+      if (paragraph && paragraph.text.trim().length > 0) {
+        paragraphs.push(paragraph)
+      }
+    }
+    
+    console.log(`[段落分组] 页面共分组为 ${paragraphs.length} 个段落，平均字体大小: ${avgFontSize.toFixed(1)}px`)
+    return paragraphs
+  }, [])
+  
+  // 从文本项创建段落对象
+  const createParagraphFromItems = useCallback((items: TextItem[], id: string): Paragraph | null => {
+    if (items.length === 0) return null
+    
+    const minX = Math.min(...items.map(item => item.x))
+    const maxX = Math.max(...items.map(item => item.x + item.width))
+    const minY = Math.min(...items.map(item => item.y))
+    const maxY = Math.max(...items.map(item => item.y + item.height))
+    
+    return {
+      id,
+      items,
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      text: items.map(item => item.str).join('').trim()
+    }
+  }, [])
+  
+  // 渲染高亮层
+  const renderHighlightLayer = useCallback((pageContainer: HTMLElement, pageNumber: number, viewport: any, paragraphs: Paragraph[]) => {
+    // 移除旧的高亮层
+    const existingCanvas = pageContainer.querySelector('.highlight-canvas')
+    if (existingCanvas) {
+      // 清理旧的事件监听器
+      if ((existingCanvas as any)._cleanup) {
+        (existingCanvas as any)._cleanup()
+      }
+      existingCanvas.remove()
+    }
+    
+    // 创建高亮canvas
+    const canvas = document.createElement('canvas')
+    canvas.className = 'highlight-canvas'
+    const context = canvas.getContext('2d')
+    if (!context) return
+    
+    const devicePixelRatio = window.devicePixelRatio || 1
+    canvas.width = viewport.width * devicePixelRatio
+    canvas.height = viewport.height * devicePixelRatio
+    canvas.style.width = `${viewport.width}px`
+    canvas.style.height = `${viewport.height}px`
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.left = '0'
+    canvas.style.pointerEvents = 'none'
+    canvas.style.zIndex = '10'
+    
+    context.scale(devicePixelRatio, devicePixelRatio)
+    
+    // 保存canvas引用
+    setHighlightCanvas(prev => new Map(prev).set(pageNumber, canvas))
+    
+    // 添加鼠标事件监听
+    const textLayer = pageContainer.querySelector('.textLayer')
+    if (textLayer) {
+      let currentHoveredId: string | null = null
+      
+      const handleMouseMove = (e: MouseEvent) => {
+        const rect = textLayer.getBoundingClientRect()
+        const x = ((e.clientX - rect.left) / rect.width) * viewport.width
+        const y = ((e.clientY - rect.top) / rect.height) * viewport.height
+        
+        // 查找悬停的段落
+        const hoveredPara = paragraphs.find(para => 
+          x >= para.x && x <= para.x + para.width &&
+          y >= para.y && y <= para.y + para.height
+        )
+        
+        if (hoveredPara && hoveredPara.id !== currentHoveredId) {
+          currentHoveredId = hoveredPara.id
+          setHoveredParagraph(hoveredPara.id)
+          drawParagraphHighlight(context, hoveredPara, viewport, devicePixelRatio)
+        } else if (!hoveredPara && currentHoveredId) {
+          currentHoveredId = null
+          setHoveredParagraph(null)
+          clearHighlight(context, canvas)
+        }
+      }
+      
+      const handleMouseLeave = () => {
+        currentHoveredId = null
+        setHoveredParagraph(null)
+        clearHighlight(context, canvas)
+      }
+      
+      // 添加事件监听器
+      textLayer.addEventListener('mousemove', handleMouseMove)
+      textLayer.addEventListener('mouseleave', handleMouseLeave)
+      
+      // 存储清理函数
+      const cleanupFn = () => {
+        textLayer.removeEventListener('mousemove', handleMouseMove)
+        textLayer.removeEventListener('mouseleave', handleMouseLeave)
+      }
+      
+      // 存储清理函数到canvas的自定义属性
+      ;(canvas as any)._cleanup = cleanupFn
+    }
+    
+    pageContainer.appendChild(canvas)
+  }, [])
+  
+  // 绘制段落高亮
+  const drawParagraphHighlight = useCallback((context: CanvasRenderingContext2D, paragraph: Paragraph, viewport: any, devicePixelRatio: number) => {
+    // 清除之前的高亮
+    context.clearRect(0, 0, viewport.width, viewport.height)
+    
+    // 设置高亮样式 - 渐变效果
+    const padding = 6
+    const x = paragraph.x - padding
+    const y = paragraph.y - padding
+    const width = paragraph.width + padding * 2
+    const height = paragraph.height + padding * 2
+    
+    // 创建渐变背景
+    const gradient = context.createLinearGradient(x, y, x, y + height)
+    gradient.addColorStop(0, 'rgba(255, 235, 59, 0.25)')
+    gradient.addColorStop(0.5, 'rgba(255, 235, 59, 0.35)')
+    gradient.addColorStop(1, 'rgba(255, 235, 59, 0.25)')
+    
+    // 绘制圆角矩形背景
+    context.fillStyle = gradient
+    context.beginPath()
+    const radius = 4
+    
+    // 手动绘制圆角矩形（兼容性更好）
+    context.moveTo(x + radius, y)
+    context.lineTo(x + width - radius, y)
+    context.quadraticCurveTo(x + width, y, x + width, y + radius)
+    context.lineTo(x + width, y + height - radius)
+    context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+    context.lineTo(x + radius, y + height)
+    context.quadraticCurveTo(x, y + height, x, y + height - radius)
+    context.lineTo(x, y + radius)
+    context.quadraticCurveTo(x, y, x + radius, y)
+    context.closePath()
+    
+    context.fill()
+    
+    // 绘制边框
+    context.strokeStyle = 'rgba(255, 193, 7, 0.7)'
+    context.lineWidth = 1.5
+    context.stroke()
+    
+    // 添加左侧强调线
+    context.strokeStyle = 'rgba(255, 152, 0, 0.8)'
+    context.lineWidth = 3
+    context.beginPath()
+    context.moveTo(x + 2, y + radius)
+    context.lineTo(x + 2, y + height - radius)
+    context.stroke()
+    
+    // 添加微妙的阴影效果
+    context.shadowColor = 'rgba(255, 193, 7, 0.3)'
+    context.shadowBlur = 4
+    context.shadowOffsetX = 1
+    context.shadowOffsetY = 1
+    
+    // 重置阴影
+    context.shadowColor = 'transparent'
+    context.shadowBlur = 0
+    context.shadowOffsetX = 0
+    context.shadowOffsetY = 0
+  }, [])
+  
+  // 清除高亮
+  const clearHighlight = useCallback((context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    context.clearRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1))
+  }, [])
+  
   // 渲染单个页面
   const renderPage = useCallback(async (
     doc: PDFDocumentProxy, 
@@ -195,6 +514,30 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     try {
       const page = await doc.getPage(pageNumber)
       const viewport = page.getViewport({ scale })
+      
+      // 获取文本内容
+      const textContent = await page.getTextContent()
+      
+      // 转换文本项为我们的格式
+      const textItems: TextItem[] = textContent.items.map((item: any) => {
+        const transform = item.transform
+        const fontHeight = Math.hypot(transform[2], transform[3])
+        
+        return {
+          str: item.str,
+          x: transform[4],
+          y: transform[5],
+          width: item.width,
+          height: fontHeight,
+          fontSize: fontHeight,
+          fontName: item.fontName || 'sans-serif',
+          transform: transform,
+          dir: item.dir || 'ltr'
+        }
+      })
+      
+      // 分组段落
+      const paragraphs = groupIntoParagraphs(textItems, viewport)
       
       // 创建canvas
       const canvas = document.createElement('canvas')
@@ -214,6 +557,9 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         canvasContext: context,
         viewport: viewport
       }).promise
+      
+      // 渲染文本层（用于悬停检测）
+      await renderTextLayer(page, viewport, pageNumber)
 
       // 更新页面数据
       setPageData(prev => {
@@ -222,17 +568,52 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
           ...newData[pageNumber - 1],
           height: viewport.height,
           rendered: true,
-          canvas
+          canvas,
+          textContent,
+          paragraphs
         }
         return newData
       })
 
-      console.log(`[PdfViewer] 页面${pageNumber}渲染完成`)
+      console.log(`[PdfViewer] 页面${pageNumber}渲染完成，包含${paragraphs.length}个段落`)
       
     } catch (error) {
       console.error(`[PdfViewer] 页面${pageNumber}渲染失败:`, error)
     }
-  }, [scale])
+  }, [scale, groupIntoParagraphs])
+  
+  // 渲染文本层（简化版，主要用于悬停检测）
+  const renderTextLayer = useCallback(async (page: any, viewport: any, pageNumber: number) => {
+    const pageContainer = containerRef.current?.querySelector(`.pdf-page[data-page-num="${pageNumber}"]`) as HTMLElement
+    if (!pageContainer) return
+    
+    // 移除旧的文本层
+    const existingTextLayer = pageContainer.querySelector('.textLayer')
+    if (existingTextLayer) {
+      existingTextLayer.remove()
+    }
+    
+    // 创建透明文本层用于悬停检测
+    const textLayerDiv = document.createElement('div')
+    textLayerDiv.className = 'textLayer'
+    textLayerDiv.style.position = 'absolute'
+    textLayerDiv.style.left = '0'
+    textLayerDiv.style.top = '0'
+    textLayerDiv.style.right = '0'
+    textLayerDiv.style.bottom = '0'
+    textLayerDiv.style.overflow = 'hidden'
+    textLayerDiv.style.opacity = '0' // 透明，仅用于悬停检测
+    textLayerDiv.style.lineHeight = '1'
+    textLayerDiv.style.zIndex = '2'
+    
+    pageContainer.appendChild(textLayerDiv)
+    
+    // 获取段落数据并渲染高亮层
+    const currentPageDataItem = pageData.find(p => p.pageNumber === pageNumber)
+    if (currentPageDataItem?.paragraphs) {
+      renderHighlightLayer(pageContainer, pageNumber, viewport, currentPageDataItem.paragraphs)
+    }
+  }, [renderHighlightLayer])
 
   // 页面组件
   const PageItem = ({ index, style }: { index: number; style: React.CSSProperties }) => {
@@ -255,7 +636,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
       if (pdfDoc && !pageInfo?.rendered) {
         renderPage(pdfDoc, pageNumber, pageData)
       }
-    }, [pageNumber, pageInfo?.rendered, pdfDoc])
+    }, [pageNumber, pageInfo?.rendered, pdfDoc, renderPage])
 
     return (
       <div style={style} className="flex justify-center p-4">
@@ -271,9 +652,18 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
             <div
               ref={node => {
                 if (node && pageInfo.canvas && !node.contains(pageInfo.canvas)) {
+                  // 清空并添加新内容
+                  node.innerHTML = ''
                   node.appendChild(pageInfo.canvas)
+                  
+                  // 添加高亮层（如果存在）
+                  const pageHighlightCanvas = highlightCanvas.get(pageNumber)
+                  if (pageHighlightCanvas && !node.contains(pageHighlightCanvas)) {
+                    node.appendChild(pageHighlightCanvas)
+                  }
                 }
               }}
+              style={{ position: 'relative' }}
             />
           ) : (
             <div className="flex items-center justify-center h-full bg-gray-50">

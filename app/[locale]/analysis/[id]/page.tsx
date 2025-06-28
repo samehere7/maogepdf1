@@ -28,6 +28,7 @@ import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
+import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 
 interface AnalysisResult {
   theme: string
@@ -771,7 +772,7 @@ export default function AnalysisPage() {
           pageNum = parseInt(match[1]);
         }
         
-        if (pageNum > 0 && pageNum <= numPages) {
+        if (pageNum > 0 && numPages && pageNum <= numPages) {
           pageReferences.push({
             pageNum,
             originalText: fullMatch
@@ -790,7 +791,7 @@ export default function AnalysisPage() {
     let lastIndex = 0;
     
     // 重新匹配所有页码引用以获取正确的位置
-    const allMatches = [];
+    const allMatches: Array<{index: number; length: number; pageNum: number; text: string}> = [];
     pagePatterns.forEach(pattern => {
       const matches = [...text.matchAll(pattern)];
       matches.forEach(match => {
@@ -812,7 +813,7 @@ export default function AnalysisPage() {
           pageNum = parseInt(match[1]);
         }
         
-        if (pageNum > 0 && pageNum <= numPages) {
+        if (pageNum > 0 && numPages && pageNum <= numPages) {
           allMatches.push({
             index: match.index || 0,
             length: match[0].length,
@@ -961,7 +962,7 @@ export default function AnalysisPage() {
                 type="text"
                 value={editingTitle}
                 onChange={(e) => setEditingTitle(e.target.value)}
-                onBlur={async () => {
+                onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
                   if (editingTitle.trim() && editingTitle !== fileInfo?.name) {
                     try {
                       const response = await fetch(`/api/pdfs/${params.id}`, {
@@ -973,7 +974,7 @@ export default function AnalysisPage() {
                       });
                       
                       if (response.ok) {
-                        setFileInfo(prev => prev ? {...prev, name: editingTitle.trim()} : null);
+                        setFileInfo((prev: any) => prev ? {...prev, name: editingTitle.trim()} : null);
                         // 通知侧边栏刷新PDF列表
                         window.dispatchEvent(new CustomEvent('pdf-renamed', { 
                           detail: { id: params.id, newName: editingTitle.trim() } 
@@ -1032,21 +1033,21 @@ export default function AnalysisPage() {
         </div>
 
         {/* PDF查看区域 */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
-          {/* PDF目录导航（如果有目录的话） */}
+        <div className="flex-1 flex overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
+          {/* PDF目录侧栏（如果有目录的话） */}
           {pdfOutline.length > 0 && (
-            <div className="border-b border-gray-200 bg-gray-50 max-h-48 overflow-hidden">
-              <PDFOutlineNavigator
+            <div className="w-64 flex-shrink-0 flex flex-col">
+              <PdfOutlineSidebar
                 outline={pdfOutline}
                 currentPage={currentPage}
                 onJumpToPage={handleJumpToPage}
-                className="text-sm"
+                className="h-full"
               />
             </div>
           )}
           
           {/* PDF展示区 */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden flex flex-col">
             {loading ? (
               <div className="flex items-center justify-center h-full bg-gray-50">
                 <div className="text-center">
@@ -1065,6 +1066,7 @@ export default function AnalysisPage() {
                           (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url))}
                     onOutlineLoaded={handleOutlineLoaded}
                     onPageChange={setCurrentPage}
+                    className="pdf-viewer-with-paragraphs"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
