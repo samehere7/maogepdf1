@@ -116,7 +116,8 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   useEffect(() => {
     if (!file) {
       console.log('[StaticPdfViewer] 没有文件，跳过加载')
-      setError('没有提供PDF文件')
+      setError(null) // 清除之前的错误
+      setIsLoading(false)
       return
     }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useMemo } from "react"
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
@@ -158,7 +158,7 @@ export default function AnalysisPage() {
       console.log('[分析页] 使用本地PDF文件:', localPdfFile.name);
       return localPdfFile;
     }
-    if (pdfUrl) {
+    if (pdfUrl && typeof pdfUrl === 'string' && pdfUrl.trim()) {
       const fullUrl = pdfUrl.startsWith('http') ? pdfUrl : 
         (typeof window !== 'undefined' ? window.location.origin + pdfUrl : pdfUrl);
       console.log('[分析页] 使用远程PDF URL:', fullUrl);
@@ -1084,24 +1084,13 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <>
-                    {/* 调试信息 */}
-                    <div className="bg-yellow-50 border border-yellow-200 p-2 text-xs text-yellow-800 mb-2">
-                      <div>调试信息:</div>
-                      <div>finalPdfFile: {String(finalPdfFile)}</div>
-                      <div>pdfUrl: {pdfUrl}</div>
-                      <div>localPdfFile: {localPdfFile ? localPdfFile.name : 'null'}</div>
-                      <div>isClient: {String(isClient)}</div>
-                    </div>
-                    
-                    <StaticPdfViewer 
-                      ref={pdfViewerRef}
-                      file={finalPdfFile}
-                      onOutlineLoaded={handleOutlineLoaded}
-                      onPageChange={setCurrentPage}
-                      className="pdf-viewer-with-paragraphs"
-                    />
-                  </>
+                  <StaticPdfViewer 
+                    ref={pdfViewerRef}
+                    file={finalPdfFile}
+                    onOutlineLoaded={handleOutlineLoaded}
+                    onPageChange={setCurrentPage}
+                    className="pdf-viewer-with-paragraphs"
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
