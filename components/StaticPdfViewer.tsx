@@ -48,7 +48,13 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   
   const containerRef = useRef<HTMLDivElement>(null)
   const renderingPages = useRef<Set<number>>(new Set())
+  const canvasesRef = useRef<Map<number, HTMLCanvasElement>>(new Map())
   const scale = 1.2 // 固定缩放比例
+  
+  // 同步canvases状态到ref
+  useEffect(() => {
+    canvasesRef.current = canvases
+  }, [canvases])
 
   // 提取PDF outline信息
   const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
@@ -188,9 +194,23 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         console.log('[StaticPdfViewer] 开始提取目录')
         await extractOutline(doc)
         
-        // 预渲染第一页
+        // 预渲染前几页以提供更好的用户体验
         console.log('[StaticPdfViewer] 开始预渲染第一页')
         await renderPage(doc, 1)
+        
+        // 异步预渲染第2、3页
+        if (doc.numPages > 1) {
+          setTimeout(() => {
+            console.log('[StaticPdfViewer] 预渲染第2页')
+            renderPage(doc, 2)
+          }, 100)
+        }
+        if (doc.numPages > 2) {
+          setTimeout(() => {
+            console.log('[StaticPdfViewer] 预渲染第3页')
+            renderPage(doc, 3)
+          }, 300)
+        }
         
         console.log('[StaticPdfViewer] PDF加载完成')
         
@@ -273,20 +293,18 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
             const pageNumber = parseInt(pageElement.getAttribute('data-page-num') || '0')
             
             if (pageNumber > 0 && !renderingPages.current.has(pageNumber)) {
-              // 检查是否已经渲染，避免重复渲染
-              setCanvases(currentCanvases => {
-                if (!currentCanvases.has(pageNumber)) {
-                  renderPage(pdfDoc, pageNumber)
-                }
-                return currentCanvases
-              })
+              // 使用ref检查是否已渲染，避免重复渲染
+              if (!canvasesRef.current.has(pageNumber)) {
+                console.log(`[StaticPdfViewer] 懒加载触发，渲染页面${pageNumber}`)
+                renderPage(pdfDoc, pageNumber)
+              }
             }
           }
         })
       },
       {
-        rootMargin: '200px',
-        threshold: 0.1
+        rootMargin: '400px', // 增大预加载范围
+        threshold: 0.01 // 降低触发阈值，更容易触发
       }
     )
 
