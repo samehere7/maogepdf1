@@ -150,6 +150,24 @@ export default function AnalysisPage() {
   // 本地PDF文件状态（用于即时预览）
   const [localPdfFile, setLocalPdfFile] = useState<File | null>(null);
   
+  // 计算最终的PDF文件（本地文件优先，否则使用URL）
+  const finalPdfFile = useMemo(() => {
+    console.log('[分析页] 重新计算finalPdfFile - localPdfFile:', localPdfFile, 'pdfUrl:', pdfUrl);
+    
+    if (localPdfFile) {
+      console.log('[分析页] 使用本地PDF文件:', localPdfFile.name);
+      return localPdfFile;
+    }
+    if (pdfUrl) {
+      const fullUrl = pdfUrl.startsWith('http') ? pdfUrl : 
+        (typeof window !== 'undefined' ? window.location.origin + pdfUrl : pdfUrl);
+      console.log('[分析页] 使用远程PDF URL:', fullUrl);
+      return fullUrl;
+    }
+    console.log('[分析页] 没有可用的PDF文件');
+    return null;
+  }, [localPdfFile, pdfUrl]);
+  
   // 闪卡功能状态
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
   const [flashcardView, setFlashcardView] = useState<'none' | 'create' | 'manage' | 'practice' | 'results'>('none');
@@ -195,6 +213,8 @@ export default function AnalysisPage() {
   }, [params.id]);
 
   useEffect(() => {
+    console.log('[分析页] PDF加载useEffect触发，参数:', { id: params.id, locale })
+    
     const loadPDF = async () => {
       // 获取当前用户
       const { data: { user }, error } = await supabase.auth.getUser();
@@ -280,33 +300,38 @@ export default function AnalysisPage() {
           setMessages(chatMessages);
         }
 
-        // TODO: 从数据库加载分析结果，而不是localStorage
-        // 这里暂时生成新的分析，后续可以添加分析结果的数据库存储
-        try {
-          const analysisData = await analyzeDocument(pdf.name);
-          if (analysisData) {
-            setAnalysis(analysisData);
+        // 分离PDF加载和文档分析，避免分析阻塞PDF显示
+        setLoading(false); // 先让PDF显示，分析可以异步进行
+        
+        // 异步执行文档分析，不阻塞PDF显示
+        setTimeout(async () => {
+          try {
+            console.log('[分析页] 开始生成文档分析');
+            const analysisData = await analyzeDocument(pdf.name);
+            if (analysisData) {
+              setAnalysis(analysisData);
+              console.log('[分析页] 文档分析完成');
+            }
+          } catch (err) {
+            console.error('[分析页] 生成分析失败:', err);
+            const fallbackAnalysis = {
+              theme: '无法生成分析',
+              mainPoints: [],
+              conclusions: '暂时无法生成分析结果，但您仍可以提问文档相关问题。'
+            };
+            setAnalysis(fallbackAnalysis);
           }
-        } catch (err) {
-          console.error('生成分析失败:', err);
-          const fallbackAnalysis = {
-            theme: '无法生成分析',
-            mainPoints: [],
-            conclusions: '暂时无法生成分析结果，但您仍可以提问文档相关问题。'
-          };
-          setAnalysis(fallbackAnalysis);
-        }
+        }, 100);
 
       } catch (error) {
         console.error("Error loading PDF:", error);
         setPdfError('加载PDF失败，请重试');
-      } finally {
         setLoading(false);
       }
     };
 
     loadPDF();
-  }, [params.id, router, supabase]);
+  }, [params.id, router, locale]);
 
   // 监听PDF删除事件，处理页面导航
   useEffect(() => {
@@ -366,10 +391,10 @@ export default function AnalysisPage() {
   }
 
   // 处理PDF目录加载
-  const handleOutlineLoaded = (outline: OutlineItem[]) => {
+  const handleOutlineLoaded = useCallback((outline: OutlineItem[]) => {
     console.log('[PDF目录] 接收到目录数据:', outline.length, '项');
     setPdfOutline(outline);
-  };
+  }, []);
 
   // 处理跳转到指定页面
   const handleJumpToPage = (pageNumber: number) => {
@@ -384,7 +409,14 @@ export default function AnalysisPage() {
     const updateCurrentPage = () => {
       if (pdfViewerRef.current) {
         const page = pdfViewerRef.current.getCurrentPage();
-        setCurrentPage(page);
+        // 只在页面真的变化时才更新状态
+        setCurrentPage(prevPage => {
+          if (prevPage !== page) {
+            console.log('[分析页] 页面变化:', prevPage, '->', page);
+            return page;
+          }
+          return prevPage;
+        });
       }
     };
 
@@ -537,6 +569,8 @@ export default function AnalysisPage() {
 
   // 新增：检测PDF文件是否可访问
   useEffect(() => {
+    console.log('[分析页] PDF可访问性检查useEffect触发，fileInfo.url:', fileInfo?.url)
+    
     if (fileInfo?.url) {
       // 确保URL是完整的
       const fullUrl = fileInfo.url.startsWith('http') ? fileInfo.url : 
@@ -1035,9 +1069,9 @@ export default function AnalysisPage() {
         </div>
 
         {/* PDF查看区域 */}
-        <div className="flex-1 flex overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
+        <div className="flex-1 flex flex-col overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
           {/* PDF展示区 */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center h-full bg-gray-50">
                 <div className="text-center">
@@ -1050,14 +1084,24 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <StaticPdfViewer 
-                    ref={pdfViewerRef}
-                    file={localPdfFile || (fileInfo.url.startsWith('http') ? fileInfo.url : 
-                          (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url))}
-                    onOutlineLoaded={handleOutlineLoaded}
-                    onPageChange={setCurrentPage}
-                    className="pdf-viewer-with-paragraphs"
-                  />
+                  <>
+                    {/* 调试信息 */}
+                    <div className="bg-yellow-50 border border-yellow-200 p-2 text-xs text-yellow-800 mb-2">
+                      <div>调试信息:</div>
+                      <div>finalPdfFile: {String(finalPdfFile)}</div>
+                      <div>pdfUrl: {pdfUrl}</div>
+                      <div>localPdfFile: {localPdfFile ? localPdfFile.name : 'null'}</div>
+                      <div>isClient: {String(isClient)}</div>
+                    </div>
+                    
+                    <StaticPdfViewer 
+                      ref={pdfViewerRef}
+                      file={finalPdfFile}
+                      onOutlineLoaded={handleOutlineLoaded}
+                      onPageChange={setCurrentPage}
+                      className="pdf-viewer-with-paragraphs"
+                    />
+                  </>
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
@@ -1077,7 +1121,7 @@ export default function AnalysisPage() {
             )}
           </div>
           
-          {/* 闪卡和分享按钮 */}
+          {/* 闪卡和分享按钮 - 移动到PDF下方 */}
           <div className="p-3 border-t border-gray-200 bg-white flex-shrink-0">
             <div className="flex gap-2">
               <Button

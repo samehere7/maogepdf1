@@ -44,8 +44,10 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const [error, setError] = useState<string | null>(null)
   const [outline, setOutline] = useState<OutlineItem[]>([])
   const [canvases, setCanvases] = useState<Map<number, HTMLCanvasElement>>(new Map())
+  const [loadingTimeout, setLoadingTimeout] = useState(false)
   
   const containerRef = useRef<HTMLDivElement>(null)
+  const renderingPages = useRef<Set<number>>(new Set())
   const scale = 1.2 // 固定缩放比例
 
   // 提取PDF outline信息
@@ -108,61 +110,130 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       setOutline([])
       onOutlineLoaded?.([])
     }
-  }, [onOutlineLoaded])
+  }, [])
 
   // 加载PDF文档
   useEffect(() => {
-    if (!file) return
+    if (!file) {
+      console.log('[StaticPdfViewer] 没有文件，跳过加载')
+      setError('没有提供PDF文件')
+      return
+    }
+
+    console.log('[StaticPdfViewer] 开始加载PDF文件:', file)
+  console.log('[StaticPdfViewer] 文件类型:', typeof file)
+  console.log('[StaticPdfViewer] 是否为File对象:', file instanceof File)
+
+    // 设置30秒加载超时
+    const timeoutId = setTimeout(() => {
+      console.log('[StaticPdfViewer] 加载超时，设置超时状态')
+      setLoadingTimeout(true)
+    }, 30000)
 
     const loadPDF = async () => {
       try {
         setIsLoading(true)
         setError(null)
+        setLoadingTimeout(false)
+        console.log('[StaticPdfViewer] 设置加载状态为true')
         
         let arrayBuffer: ArrayBuffer
         
         if (file instanceof File) {
+          console.log('[StaticPdfViewer] 处理本地文件:', file.name)
           arrayBuffer = await file.arrayBuffer()
         } else {
-          const response = await fetch(file)
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`)
+          console.log('[StaticPdfViewer] 获取远程文件:', file)
+          
+          // 添加超时机制
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 10000) // 10秒超时
+          
+          try {
+            const response = await fetch(file, { 
+              signal: controller.signal,
+              headers: {
+                'Accept': 'application/pdf,*/*'
+              }
+            })
+            clearTimeout(timeoutId)
+            
+            console.log('[StaticPdfViewer] 远程响应状态:', response.status)
+            console.log('[StaticPdfViewer] 响应Content-Type:', response.headers.get('content-type'))
+            
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+            }
+            
+            arrayBuffer = await response.arrayBuffer()
+          } catch (fetchError) {
+            clearTimeout(timeoutId)
+            if (fetchError.name === 'AbortError') {
+              throw new Error('PDF下载超时')
+            }
+            throw fetchError
           }
-          arrayBuffer = await response.arrayBuffer()
         }
         
+        console.log('[StaticPdfViewer] ArrayBuffer大小:', arrayBuffer.byteLength)
+        
         const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        console.log('[StaticPdfViewer] PDF文档加载成功，页数:', doc.numPages)
+        
         setPdfDoc(doc)
         setNumPages(doc.numPages)
         
         // 提取目录
+        console.log('[StaticPdfViewer] 开始提取目录')
         await extractOutline(doc)
         
         // 预渲染第一页
+        console.log('[StaticPdfViewer] 开始预渲染第一页')
         await renderPage(doc, 1)
         
+        console.log('[StaticPdfViewer] PDF加载完成')
+        
       } catch (err) {
-        console.error('PDF加载失败:', err)
+        console.error('[StaticPdfViewer] PDF加载失败:', err)
         setError(err instanceof Error ? err.message : '加载PDF失败')
       } finally {
+        console.log('[StaticPdfViewer] 设置加载状态为false')
+        clearTimeout(timeoutId)
         setIsLoading(false)
       }
     }
 
     loadPDF()
-  }, [file, extractOutline])
+    
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [file])
 
   // 渲染单个页面
   const renderPage = useCallback(async (doc: PDFDocumentProxy, pageNumber: number) => {
-    if (canvases.has(pageNumber)) return
+    console.log(`[StaticPdfViewer] 开始渲染页面${pageNumber}`)
+    
+    // 防止重复渲染同一页面
+    if (renderingPages.current.has(pageNumber)) {
+      console.log(`[StaticPdfViewer] 页面${pageNumber}正在渲染中，跳过`)
+      return
+    }
+    
+    renderingPages.current.add(pageNumber)
 
     try {
+      console.log(`[StaticPdfViewer] 获取页面${pageNumber}对象`)
       const page = await doc.getPage(pageNumber)
       const viewport = page.getViewport({ scale })
+      console.log(`[StaticPdfViewer] 页面${pageNumber}视口大小:`, viewport.width, 'x', viewport.height)
       
       const canvas = document.createElement('canvas')
       const context = canvas.getContext('2d')
-      if (!context) return
+      if (!context) {
+        console.error(`[StaticPdfViewer] 无法获取页面${pageNumber}的2D上下文`)
+        return
+      }
 
       const devicePixelRatio = window.devicePixelRatio || 1
       canvas.width = viewport.width * devicePixelRatio
@@ -172,21 +243,26 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       
       context.scale(devicePixelRatio, devicePixelRatio)
       
+      console.log(`[StaticPdfViewer] 开始渲染页面${pageNumber}到Canvas`)
       await page.render({
         canvasContext: context,
         viewport: viewport
       }).promise
       
+      console.log(`[StaticPdfViewer] 页面${pageNumber}渲染完成，更新Canvas状态`)
       setCanvases(prev => new Map(prev).set(pageNumber, canvas))
       
     } catch (error) {
-      console.error(`页面${pageNumber}渲染失败:`, error)
+      console.error(`[StaticPdfViewer] 页面${pageNumber}渲染失败:`, error)
+    } finally {
+      renderingPages.current.delete(pageNumber)
+      console.log(`[StaticPdfViewer] 页面${pageNumber}渲染流程结束`)
     }
-  }, [scale, canvases])
+  }, [scale])
 
   // 懒加载逻辑
   useEffect(() => {
-    if (!pdfDoc || !containerRef.current) return
+    if (!pdfDoc || !containerRef.current || numPages === 0) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -195,8 +271,14 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
             const pageElement = entry.target as HTMLElement
             const pageNumber = parseInt(pageElement.getAttribute('data-page-num') || '0')
             
-            if (pageNumber > 0 && !canvases.has(pageNumber)) {
-              renderPage(pdfDoc, pageNumber)
+            if (pageNumber > 0 && !renderingPages.current.has(pageNumber)) {
+              // 检查是否已经渲染，避免重复渲染
+              setCanvases(currentCanvases => {
+                if (!currentCanvases.has(pageNumber)) {
+                  renderPage(pdfDoc, pageNumber)
+                }
+                return currentCanvases
+              })
             }
           }
         })
@@ -207,15 +289,19 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       }
     )
 
-    const pageElements = containerRef.current.querySelectorAll('[data-page-num]')
-    pageElements.forEach((element) => {
-      observer.observe(element)
-    })
+    // 延迟观察器设置，确保DOM已渲染
+    const timeoutId = setTimeout(() => {
+      const pageElements = containerRef.current?.querySelectorAll('[data-page-num]')
+      pageElements?.forEach((element) => {
+        observer.observe(element)
+      })
+    }, 100)
 
     return () => {
+      clearTimeout(timeoutId)
       observer.disconnect()
     }
-  }, [pdfDoc])
+  }, [pdfDoc, numPages])
 
   // 滚动到指定页面
   const jumpToPage = useCallback((pageNumber: number) => {
@@ -242,6 +328,9 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">正在加载PDF...</p>
+          {loadingTimeout && (
+            <p className="text-orange-600 text-sm mt-2">加载时间较长，请检查网络连接</p>
+          )}
         </div>
       </div>
     )
