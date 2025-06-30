@@ -4,19 +4,26 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Search, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import './text-layer.css'
 
 // 动态导入PDF.js，避免服务端渲染问题
 let pdfjsLib: any = null
 let PDFDocumentProxy: any = null
+let pdfjsLoaded = false
 
 if (typeof window !== 'undefined') {
   import('pdfjs-dist').then((pdfjs) => {
     pdfjsLib = pdfjs
     PDFDocumentProxy = pdfjs.PDFDocumentProxy
+    pdfjsLoaded = true
     
     // 配置 PDF.js worker
     const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+    
+    console.log('[StaticPdfViewer] PDF.js加载完成')
+  }).catch((error) => {
+    console.error('[StaticPdfViewer] PDF.js加载失败:', error)
   })
 }
 
@@ -32,6 +39,7 @@ interface StaticPdfViewerProps {
   file: File | string | null
   onOutlineLoaded?: (outline: OutlineItem[]) => void
   onPageChange?: (currentPage: number) => void
+  onTextSelect?: (text: string, action: 'explain' | 'summarize' | 'rewrite') => void
   className?: string
 }
 
@@ -48,6 +56,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   file, 
   onOutlineLoaded, 
   onPageChange,
+  onTextSelect,
   className = ""
 }, ref) => {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null)
@@ -67,6 +76,11 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1)
   const [showSearchBar, setShowSearchBar] = useState(false)
   const [pageInput, setPageInput] = useState('')
+  
+  // 文本选择相关状态
+  const [selectedText, setSelectedText] = useState('')
+  const [showTextActions, setShowTextActions] = useState(false)
+  const [textActionsPosition, setTextActionsPosition] = useState<{x: number, y: number} | null>(null)
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false)
@@ -168,6 +182,127 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     }
   }, [])
 
+  // 渲染文本层
+  const renderTextLayer = useCallback(async (page: any, viewport: any, pageContainer: HTMLElement, pageNum: number) => {
+    try {
+      // 确保pdfjsLib已加载
+      if (!pdfjsLib) {
+        console.warn('[StaticPdfViewer] PDF.js未加载，跳过文本层渲染')
+        return
+      }
+      
+      const textContent = await page.getTextContent()
+      
+      // 创建文本层容器
+      const textLayerDiv = document.createElement('div')
+      textLayerDiv.className = 'textLayer'
+      textLayerDiv.style.position = 'absolute'
+      textLayerDiv.style.inset = '0'
+      textLayerDiv.style.overflow = 'clip'
+      textLayerDiv.style.opacity = '1'
+      textLayerDiv.style.lineHeight = '1'
+      textLayerDiv.style.zIndex = '10'
+      textLayerDiv.style.transformOrigin = '0 0'
+      
+      // 渲染文本项
+      textContent.items.forEach((item: any, index: number) => {
+        const span = document.createElement('span')
+        
+        // PDF.js官方坐标变换 - 添加安全检查
+        if (!pdfjsLib.Util || !pdfjsLib.Util.transform) {
+          console.warn('[StaticPdfViewer] PDF.js Util未可用，使用fallback')
+          // 使用简化的坐标计算作为fallback
+          const fallbackLeft = item.transform[4]
+          const fallbackTop = item.transform[5] - (item.height || 12)
+          
+          span.style.position = 'absolute'
+          span.style.left = `${((100 * fallbackLeft) / viewport.width).toFixed(4)}%`
+          span.style.top = `${((100 * fallbackTop) / viewport.height).toFixed(4)}%`
+          span.style.fontSize = `${item.height || 12}px`
+          span.style.fontFamily = 'sans-serif'
+          span.style.whiteSpace = 'pre'
+          span.style.color = 'transparent'
+          span.style.cursor = 'text'
+          span.style.userSelect = 'text'
+          span.style.webkitUserSelect = 'text'
+          span.style.pointerEvents = 'auto'
+          span.style.transformOrigin = '0% 0%'
+          
+          span.textContent = item.str
+          span.setAttribute('data-text-index', index.toString())
+          span.setAttribute('data-page-num', pageNum.toString())
+          
+          textLayerDiv.appendChild(span)
+          return
+        }
+        
+        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+        
+        let angle = Math.atan2(tx[1], tx[0])
+        const style = textContent.styles[item.fontName]
+        const fontFamily = style?.fontFamily || 'sans-serif'
+        
+        if (style?.vertical) {
+          angle += Math.PI / 2
+        }
+        
+        const fontHeight = Math.hypot(tx[2], tx[3])
+        const fontAscent = fontHeight * 0.8
+        
+        let left, top
+        if (angle === 0) {
+          left = tx[4]
+          top = tx[5] - fontAscent
+        } else {
+          left = tx[4] + fontAscent * Math.sin(angle)
+          top = tx[5] - fontAscent * Math.cos(angle)
+        }
+        
+        const pageWidth = viewport.width
+        const pageHeight = viewport.height
+        
+        span.style.position = 'absolute'
+        span.style.left = `${((100 * left) / pageWidth).toFixed(4)}%`
+        span.style.top = `${((100 * top) / pageHeight).toFixed(4)}%`
+        span.style.fontSize = `${fontHeight.toFixed(2)}px`
+        span.style.fontFamily = fontFamily
+        span.style.whiteSpace = 'pre'
+        span.style.color = 'transparent'
+        span.style.cursor = 'text'
+        span.style.userSelect = 'text'
+        span.style.webkitUserSelect = 'text'
+        span.style.pointerEvents = 'auto'
+        span.style.transformOrigin = '0% 0%'
+        
+        if (angle !== 0) {
+          span.style.transform = `rotate(${angle}rad)`
+        }
+        
+        span.textContent = item.str
+        span.setAttribute('data-text-index', index.toString())
+        span.setAttribute('data-page-num', pageNum.toString())
+        
+        textLayerDiv.appendChild(span)
+      })
+      
+      // 添加endOfContent元素
+      const endOfContent = document.createElement('div')
+      endOfContent.className = 'endOfContent'
+      endOfContent.style.display = 'block'
+      endOfContent.style.position = 'absolute'
+      endOfContent.style.inset = '100% 0 0'
+      endOfContent.style.zIndex = '-1'
+      endOfContent.style.cursor = 'default'
+      endOfContent.style.userSelect = 'none'
+      textLayerDiv.appendChild(endOfContent)
+      
+      pageContainer.appendChild(textLayerDiv)
+      
+    } catch (err) {
+      console.error('文本层渲染错误:', err)
+    }
+  }, [])
+
   // 加载PDF文档
   useEffect(() => {
     if (!file) {
@@ -195,11 +330,20 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         console.log('[StaticPdfViewer] 设置加载状态为true')
         
         // 等待pdfjs加载
-        if (!pdfjsLib) {
-          await new Promise(resolve => {
+        if (!pdfjsLib || !pdfjsLoaded) {
+          console.log('[StaticPdfViewer] 等待PDF.js加载...')
+          await new Promise((resolve, reject) => {
+            let attempts = 0
+            const maxAttempts = 50 // 最多等待5秒
+            
             const checkPdfjs = () => {
-              if (pdfjsLib) {
+              attempts++
+              if (pdfjsLib && pdfjsLoaded) {
+                console.log('[StaticPdfViewer] PDF.js加载验证成功')
                 resolve(pdfjsLib)
+              } else if (attempts >= maxAttempts) {
+                console.error('[StaticPdfViewer] PDF.js加载超时')
+                reject(new Error('PDF.js加载超时'))
               } else {
                 setTimeout(checkPdfjs, 100)
               }
@@ -357,13 +501,19 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       await renderTask.promise
       console.log(`[StaticPdfViewer] 页面${pageNumber}渲染完成`)
       
+      // 渲染文本层
+      const pageContainer = document.querySelector(`[data-page-num="${pageNumber}"]`) as HTMLElement
+      if (pageContainer) {
+        await renderTextLayer(page, viewport, pageContainer, pageNumber)
+      }
+      
     } catch (error) {
       console.error(`[StaticPdfViewer] 页面${pageNumber}渲染失败:`, error)
     } finally {
       renderingPages.current.delete(pageNumber)
       console.log(`[StaticPdfViewer] 页面${pageNumber}渲染流程结束`)
     }
-  }, [scale, rotation])
+  }, [scale, rotation, renderTextLayer])
 
   // 懒加载逻辑
   useEffect(() => {
@@ -519,6 +669,141 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       jumpToPage(searchResults[prevIndex].pageNumber)
     }
   }, [searchResults, currentSearchIndex, jumpToPage])
+
+  // 计算浮动面板位置
+  const calculateOptimalPosition = useCallback((selectionRect: DOMRect) => {
+    const PANEL_WIDTH = 300
+    const PANEL_HEIGHT = 120
+    const MARGIN = 15
+    const OFFSET_FROM_SELECTION = 10
+    
+    // 水平位置：居中对齐选中区域
+    let x = selectionRect.left + (selectionRect.width - PANEL_WIDTH) / 2
+    
+    // 检查左右边界
+    if (x < MARGIN) {
+      x = MARGIN
+    } else if (x + PANEL_WIDTH > window.innerWidth - MARGIN) {
+      x = window.innerWidth - PANEL_WIDTH - MARGIN
+    }
+    
+    // 垂直位置：优先显示在选中区域上方
+    let y = selectionRect.top - PANEL_HEIGHT - OFFSET_FROM_SELECTION
+    
+    // 如果上方空间不够，放在下方
+    if (y < MARGIN) {
+      y = selectionRect.bottom + OFFSET_FROM_SELECTION
+    }
+    
+    // 确保不超出下边界
+    if (y + PANEL_HEIGHT > window.innerHeight - MARGIN) {
+      y = selectionRect.top - PANEL_HEIGHT / 2
+      if (y < MARGIN) y = MARGIN
+    }
+    
+    return { x, y }
+  }, [])
+
+  // 处理文本选择
+  useEffect(() => {
+    let selectionTimeout: NodeJS.Timeout | null = null
+    
+    const handleSelectionChange = () => {
+      if (selectionTimeout) {
+        clearTimeout(selectionTimeout)
+      }
+      selectionTimeout = setTimeout(() => {
+        const selection = window.getSelection()
+        
+        if (!selection || selection.isCollapsed) {
+          setShowTextActions(false)
+          setSelectedText('')
+          return
+        }
+        
+        const selectedText = selection.toString().trim()
+        if (!selectedText || selectedText.length < 1) {
+          return
+        }
+        
+        // 检查选择是否在PDF文本层内
+        try {
+          const range = selection.getRangeAt(0)
+          const startElement = range.startContainer.nodeType === Node.TEXT_NODE 
+            ? range.startContainer.parentElement 
+            : range.startContainer as Element
+            
+          const textLayer = startElement?.closest('.textLayer')
+          if (!textLayer) {
+            return
+          }
+          
+          setSelectedText(selectedText)
+          
+          // 获取选择范围的位置并显示操作面板
+          const rect = range.getBoundingClientRect()
+          if (rect.width > 0 && rect.height > 0) {
+            const position = calculateOptimalPosition(rect)
+            setTextActionsPosition(position)
+            setShowTextActions(true)
+          }
+        } catch (error) {
+          console.warn('处理选择时出错:', error)
+        }
+      }, 300)
+    }
+    
+    document.addEventListener('selectionchange', handleSelectionChange)
+    
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange)
+      if (selectionTimeout) {
+        clearTimeout(selectionTimeout)
+      }
+    }
+  }, [calculateOptimalPosition])
+
+  // 处理点击外部区域
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Element
+      if (showTextActions && !target.closest('.text-actions-panel')) {
+        const isTextLayerClick = target.closest('.textLayer')
+        const currentSelection = window.getSelection()
+        const hasActiveSelection = currentSelection && !currentSelection.isCollapsed
+        
+        if (!hasActiveSelection || !isTextLayerClick) {
+          setTimeout(() => {
+            setShowTextActions(false)
+            setSelectedText('')
+            if (currentSelection) {
+              currentSelection.removeAllRanges()
+            }
+          }, 50)
+        }
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [showTextActions])
+
+  // 处理文本操作
+  const handleTextAction = useCallback((action: 'explain' | 'summarize' | 'rewrite') => {
+    if (onTextSelect && selectedText) {
+      onTextSelect(selectedText, action)
+    }
+    
+    // 清除选择和面板
+    setTimeout(() => {
+      setShowTextActions(false)
+      setSelectedText('')
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+      }
+    }, 100)
+  }, [onTextSelect, selectedText])
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
@@ -749,6 +1034,69 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         })}
         </div>
       </div>
+      
+      {/* 文本选择操作面板 */}
+      {showTextActions && textActionsPosition && (
+        <div 
+          className="fixed z-[9999] bg-white rounded-lg shadow-2xl border border-gray-300 text-actions-panel"
+          style={{ 
+            left: `${textActionsPosition.x}px`, 
+            top: `${textActionsPosition.y}px`,
+            width: '300px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.1)'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* 选中文本预览 */}
+          <div className="p-3 border-b border-gray-100">
+            <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+              <span>📝</span> 选中文本
+            </div>
+            <div className="text-sm text-gray-700 max-h-12 overflow-y-auto bg-gray-50 rounded px-2 py-1">
+              "{selectedText.slice(0, 60)}{selectedText.length > 60 ? '...' : ''}"
+            </div>
+          </div>
+          
+          {/* AI操作按钮 */}
+          <div className="p-3">
+            <div className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+              <span>✨</span> AI功能
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                className="px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded transition-colors border border-blue-200 hover:border-blue-300 font-medium"
+                onClick={() => handleTextAction('explain')}
+              >
+                🔍 解释
+              </button>
+              <button
+                className="px-3 py-2 text-sm bg-green-50 hover:bg-green-100 text-green-700 rounded transition-colors border border-green-200 hover:border-green-300 font-medium"
+                onClick={() => handleTextAction('summarize')}
+              >
+                📝 总结
+              </button>
+              <button
+                className="px-3 py-2 text-sm bg-purple-50 hover:bg-purple-100 text-purple-700 rounded transition-colors border border-purple-200 hover:border-purple-300 font-medium"
+                onClick={() => handleTextAction('rewrite')}
+              >
+                ✏️ 改写
+              </button>
+            </div>
+          </div>
+          
+          {/* 关闭按钮 */}
+          <button
+            className="absolute top-1 right-1 w-5 h-5 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors text-xs"
+            onClick={() => {
+              setShowTextActions(false)
+              setSelectedText('')
+              window.getSelection()?.removeAllRanges()
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   )
 })

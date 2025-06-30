@@ -19,9 +19,7 @@ import FlashcardCreateModal from "@/components/flashcard-create-modal"
 import FlashcardManager from "@/components/flashcard-manager"
 import FlashcardPractice from "@/components/flashcard-practice"
 import FlashcardResults from "@/components/flashcard-results"
-import { PDFViewerRef } from "@/components/interactive-pdf-viewer"
 import { PageAnchorText } from "@/components/page-anchor-button"
-import InteractivePDFViewer from "@/components/interactive-pdf-viewer"
 import { WelcomeQuestions, WelcomeQuestionsLoading } from "@/components/welcome-questions"
 import { generatePDFQuestions } from "@/lib/pdf-question-generator"
 import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
@@ -1089,6 +1087,7 @@ export default function AnalysisPage() {
                     file={finalPdfFile}
                     onOutlineLoaded={handleOutlineLoaded}
                     onPageChange={setCurrentPage}
+                    onTextSelect={handleTextSelect}
                     className="pdf-viewer-with-paragraphs"
                   />
                 ) : (
