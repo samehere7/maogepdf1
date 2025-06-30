@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 import { PDFDocumentProxy } from 'pdfjs-dist'
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Search, Download } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 // 配置 PDF.js worker
 if (typeof window !== 'undefined') {
@@ -29,6 +31,9 @@ export interface StaticPdfViewerRef {
   jumpToPage: (pageNumber: number) => void
   getCurrentPage: () => number
   getOutline: () => OutlineItem[]
+  zoomIn: () => void
+  zoomOut: () => void
+  resetZoom: () => void
 }
 
 const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({ 
@@ -46,15 +51,44 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const [canvases, setCanvases] = useState<Map<number, HTMLCanvasElement>>(new Map())
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   
+  // 新增：PDF查看器控制状态
+  const [scale, setScale] = useState(1.2) // 可变缩放比例
+  const [rotation, setRotation] = useState(0)
+  const [searchText, setSearchText] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(-1)
+  const [showSearchBar, setShowSearchBar] = useState(false)
+  const [pageInput, setPageInput] = useState('')
+  
   const containerRef = useRef<HTMLDivElement>(null)
   const renderingPages = useRef<Set<number>>(new Set())
   const canvasesRef = useRef<Map<number, HTMLCanvasElement>>(new Map())
-  const scale = 1.2 // 固定缩放比例
+  const searchInputRef = useRef<HTMLInputElement>(null)
   
   // 同步canvases状态到ref
   useEffect(() => {
     canvasesRef.current = canvases
   }, [canvases])
+
+  // 当缩放或旋转变化时，重新渲染所有已渲染的页面
+  useEffect(() => {
+    if (!pdfDoc) return
+    
+    const currentCanvases = canvasesRef.current
+    if (currentCanvases.size > 0) {
+      console.log('[StaticPdfViewer] 缩放/旋转变化，重新渲染所有页面')
+      // 清空当前canvas
+      setCanvases(new Map())
+      canvasesRef.current.clear()
+      renderingPages.current.clear()
+      
+      // 重新渲染所有之前渲染过的页面
+      const pagesToRerender = Array.from(currentCanvases.keys())
+      pagesToRerender.forEach(pageNum => {
+        setTimeout(() => renderPage(pdfDoc, pageNum), pageNum * 50) // 错开渲染时间
+      })
+    }
+  }, [scale, rotation, pdfDoc, renderPage])
 
   // 提取PDF outline信息
   const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
@@ -259,7 +293,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     try {
       console.log(`[StaticPdfViewer] 获取页面${pageNumber}对象`)
       const page = await doc.getPage(pageNumber)
-      const viewport = page.getViewport({ scale })
+      const viewport = page.getViewport({ scale, rotation })
       console.log(`[StaticPdfViewer] 页面${pageNumber}视口大小:`, viewport.width, 'x', viewport.height)
       
       const canvas = document.createElement('canvas')
@@ -299,7 +333,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       renderingPages.current.delete(pageNumber)
       console.log(`[StaticPdfViewer] 页面${pageNumber}渲染流程结束`)
     }
-  }, [scale])
+  }, [scale, rotation])
 
   // 懒加载逻辑
   useEffect(() => {
@@ -362,12 +396,109 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     }
   }, [numPages, onPageChange])
 
+  // 缩放控制函数
+  const zoomIn = useCallback(() => {
+    setScale(prev => Math.min(prev + 0.2, 3.0))
+  }, [])
+
+  const zoomOut = useCallback(() => {
+    setScale(prev => Math.max(prev - 0.2, 0.5))
+  }, [])
+
+  const resetZoom = useCallback(() => {
+    setScale(1.2)
+  }, [])
+
+  // 旋转控制
+  const rotatePage = useCallback(() => {
+    setRotation(prev => (prev + 90) % 360)
+  }, [])
+
+  // 页面导航
+  const goToPrevPage = useCallback(() => {
+    if (currentPage > 1) {
+      jumpToPage(currentPage - 1)
+    }
+  }, [currentPage, jumpToPage])
+
+  const goToNextPage = useCallback(() => {
+    if (currentPage < numPages) {
+      jumpToPage(currentPage + 1)
+    }
+  }, [currentPage, numPages, jumpToPage])
+
+  // 页面跳转输入处理
+  const handlePageInput = useCallback((value: string) => {
+    const pageNum = parseInt(value)
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= numPages) {
+      jumpToPage(pageNum)
+      setPageInput('')
+    }
+  }, [numPages, jumpToPage])
+
+  // 搜索功能
+  const handleSearch = useCallback(async (text: string) => {
+    if (!pdfDoc || !text.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    const results = []
+    for (let i = 1; i <= numPages; i++) {
+      try {
+        const page = await pdfDoc.getPage(i)
+        const textContent = await page.getTextContent()
+        const textItems = textContent.items
+        
+        for (let j = 0; j < textItems.length; j++) {
+          const item = textItems[j] as any
+          if (item.str && item.str.toLowerCase().includes(text.toLowerCase())) {
+            results.push({
+              pageNumber: i,
+              text: item.str,
+              index: j
+            })
+          }
+        }
+      } catch (error) {
+        console.error(`搜索页面${i}时出错:`, error)
+      }
+    }
+    
+    setSearchResults(results)
+    setCurrentSearchIndex(results.length > 0 ? 0 : -1)
+    
+    if (results.length > 0) {
+      jumpToPage(results[0].pageNumber)
+    }
+  }, [pdfDoc, numPages, jumpToPage])
+
+  // 搜索导航
+  const goToNextSearchResult = useCallback(() => {
+    if (searchResults.length > 0) {
+      const nextIndex = (currentSearchIndex + 1) % searchResults.length
+      setCurrentSearchIndex(nextIndex)
+      jumpToPage(searchResults[nextIndex].pageNumber)
+    }
+  }, [searchResults, currentSearchIndex, jumpToPage])
+
+  const goToPrevSearchResult = useCallback(() => {
+    if (searchResults.length > 0) {
+      const prevIndex = currentSearchIndex === 0 ? searchResults.length - 1 : currentSearchIndex - 1
+      setCurrentSearchIndex(prevIndex)
+      jumpToPage(searchResults[prevIndex].pageNumber)
+    }
+  }, [searchResults, currentSearchIndex, jumpToPage])
+
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
     jumpToPage,
     getCurrentPage: () => currentPage,
-    getOutline: () => outline
-  }), [jumpToPage, currentPage, outline])
+    getOutline: () => outline,
+    zoomIn,
+    zoomOut,
+    resetZoom
+  }), [jumpToPage, currentPage, outline, zoomIn, zoomOut, resetZoom])
 
   if (isLoading) {
     return (
@@ -403,8 +534,139 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   }
 
   return (
-    <div className={`h-full bg-gray-100 overflow-y-auto ${className}`}>
-      <div ref={containerRef} className="flex flex-col items-center p-4 space-y-4">
+    <div className={`h-full bg-gray-100 flex flex-col ${className}`}>
+      {/* PDF工具栏 */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2">
+        <div className="flex items-center justify-between">
+          {/* 左侧：页面导航 */}
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder={currentPage.toString()}
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handlePageInput(pageInput)
+                  }
+                }}
+                onBlur={() => {
+                  if (pageInput) {
+                    handlePageInput(pageInput)
+                  }
+                }}
+                className="w-12 px-2 py-1 text-sm border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <span className="text-sm text-gray-600">/ {numPages}</span>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToNextPage}
+              disabled={currentPage >= numPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* 中间：缩放控制 */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={zoomOut}>
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-gray-600 min-w-[60px] text-center">
+              {Math.round(scale * 100)}%
+            </span>
+            <Button variant="outline" size="sm" onClick={zoomIn}>
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={resetZoom}>
+              重置
+            </Button>
+            <Button variant="outline" size="sm" onClick={rotatePage}>
+              <RotateCw className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* 右侧：搜索 */}
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setShowSearchBar(!showSearchBar)
+                if (!showSearchBar) {
+                  setTimeout(() => searchInputRef.current?.focus(), 100)
+                }
+              }}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* 搜索栏 */}
+        {showSearchBar && (
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="搜索文档内容..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(searchText)
+                }
+              }}
+              className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <Button size="sm" onClick={() => handleSearch(searchText)}>
+              搜索
+            </Button>
+            {searchResults.length > 0 && (
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="sm" onClick={goToPrevSearchResult}>
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+                <span className="text-xs text-gray-600">
+                  {currentSearchIndex + 1} / {searchResults.length}
+                </span>
+                <Button variant="outline" size="sm" onClick={goToNextSearchResult}>
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setShowSearchBar(false)
+                setSearchText('')
+                setSearchResults([])
+                setCurrentSearchIndex(-1)
+              }}
+            >
+              关闭
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* PDF内容区域 */}
+      <div className="flex-1 overflow-y-auto">
+        <div ref={containerRef} className="flex flex-col items-center p-4 space-y-4">
         {Array.from({ length: numPages }, (_, index) => {
           const pageNumber = index + 1
           const canvas = canvases.get(pageNumber)
@@ -443,6 +705,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
             </div>
           )
         })}
+        </div>
       </div>
     </div>
   )
