@@ -1,15 +1,23 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
-import * as pdfjsLib from 'pdfjs-dist'
-import { PDFDocumentProxy } from 'pdfjs-dist'
+import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Search, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-// 配置 PDF.js worker
+// 动态导入PDF.js，避免服务端渲染问题
+let pdfjsLib: any = null
+let PDFDocumentProxy: any = null
+
 if (typeof window !== 'undefined') {
-  const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+  import('pdfjs-dist').then((pdfjs) => {
+    pdfjsLib = pdfjs
+    PDFDocumentProxy = pdfjs.PDFDocumentProxy
+    
+    // 配置 PDF.js worker
+    const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+  })
 }
 
 interface OutlineItem {
@@ -60,10 +68,18 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const [showSearchBar, setShowSearchBar] = useState(false)
   const [pageInput, setPageInput] = useState('')
   
+  // 客户端渲染检查
+  const [isClient, setIsClient] = useState(false)
+  
   const containerRef = useRef<HTMLDivElement>(null)
   const renderingPages = useRef<Set<number>>(new Set())
   const canvasesRef = useRef<Map<number, HTMLCanvasElement>>(new Map())
   const searchInputRef = useRef<HTMLInputElement>(null)
+  
+  // 客户端初始化
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
   
   // 同步canvases状态到ref
   useEffect(() => {
@@ -177,6 +193,20 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         setError(null)
         setLoadingTimeout(false)
         console.log('[StaticPdfViewer] 设置加载状态为true')
+        
+        // 等待pdfjs加载
+        if (!pdfjsLib) {
+          await new Promise(resolve => {
+            const checkPdfjs = () => {
+              if (pdfjsLib) {
+                resolve(pdfjsLib)
+              } else {
+                setTimeout(checkPdfjs, 100)
+              }
+            }
+            checkPdfjs()
+          })
+        }
         
         let arrayBuffer: ArrayBuffer
         
@@ -499,6 +529,18 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     zoomOut,
     resetZoom
   }), [jumpToPage, currentPage, outline, zoomIn, zoomOut, resetZoom])
+
+  // 服务端渲染时显示加载状态
+  if (!isClient) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">初始化PDF查看器...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
