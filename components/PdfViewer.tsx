@@ -108,7 +108,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
       window.removeEventListener('resize', updateHeight)
       clearTimeout(timeoutId)
     }
-  }, [containerHeight])
+  }, []) // 移除containerHeight依赖项，避免无限循环
 
   // 提取PDF outline信息
   const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
@@ -684,15 +684,16 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     // 暂时简化处理
   }, [])
 
-  // 页面懒加载渲染
+  // 页面懒加载渲染 - 只在PDF文档加载时触发
   useEffect(() => {
     if (!pdfDoc || !numPages) return
 
     // 渲染第一页
-    if (pageData.length > 0 && !pageData[0]?.rendered) {
+    const firstPageData = pageData[0]
+    if (pageData.length > 0 && !firstPageData?.rendered) {
       renderPage(pdfDoc, 1, pageData)
     }
-  }, [pdfDoc, numPages, pageData, renderPage])
+  }, [pdfDoc, numPages]) // 移除pageData和renderPage依赖项，避免循环
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({

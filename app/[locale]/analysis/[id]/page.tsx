@@ -1104,6 +1104,7 @@ export default function AnalysisPage() {
       </div>
       )}
 
+
       {/* 右侧聊天区/闪卡区 - 在闪卡模式下占据更多空间 */}
       <div className={`${flashcardView === 'none' ? 'flex-1' : 'flex-[2]'} flex-shrink-0 h-full flex flex-col bg-white`} onClick={(e) => e.stopPropagation()}>
         {flashcardView === 'manage' ? (
