@@ -86,20 +86,32 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   const containerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
-  // 监听容器尺寸变化
+  // 监听容器尺寸变化 - 防抖优化
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    
     const updateHeight = () => {
-      if (containerRef.current) {
-        setContainerHeight(containerRef.current.clientHeight)
-      } else {
-        setContainerHeight(window.innerHeight - 150)
-      }
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        if (containerRef.current) {
+          const newHeight = containerRef.current.clientHeight
+          // 只有高度变化超过10px才更新，避免频繁重渲染
+          if (Math.abs(newHeight - containerHeight) > 10) {
+            setContainerHeight(newHeight)
+          }
+        } else {
+          setContainerHeight(600) // 使用固定默认高度而不是动态计算
+        }
+      }, 100) // 防抖延迟100ms
     }
 
     updateHeight()
     window.addEventListener('resize', updateHeight)
-    return () => window.removeEventListener('resize', updateHeight)
-  }, [])
+    return () => {
+      window.removeEventListener('resize', updateHeight)
+      clearTimeout(timeoutId)
+    }
+  }, [containerHeight])
 
   // 提取PDF outline信息
   const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
@@ -615,34 +627,16 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     }
   }, [renderHighlightLayer])
 
-  // 页面组件
-  const PageItem = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  // 页面组件 - 移到 useCallback 中优化性能
+  const PageItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
     const pageNumber = index + 1
     const pageInfo = pageData[index]
-    const pageRef = useRef<HTMLDivElement>(null)
-
-    // 注册页面引用
-    useEffect(() => {
-      if (pageRef.current) {
-        pageRefs.current.set(pageNumber, pageRef.current)
-      }
-      return () => {
-        pageRefs.current.delete(pageNumber)
-      }
-    }, [pageNumber])
-
-    // 懒加载页面
-    useEffect(() => {
-      if (pdfDoc && !pageInfo?.rendered) {
-        renderPage(pdfDoc, pageNumber, pageData)
-      }
-    }, [pageNumber, pageInfo?.rendered, pdfDoc, renderPage])
-
+    
     return (
       <div style={style} className="flex justify-center p-4">
         <div 
-          ref={pageRef}
-          className="bg-white shadow-lg border border-gray-200 relative"
+          data-page-num={pageNumber}
+          className="bg-white shadow-lg border border-gray-200 relative pdf-page"
           style={{ 
             width: 'fit-content',
             minHeight: pageInfo?.height || 800
@@ -676,13 +670,14 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         </div>
       </div>
     )
-  }
+  }, [pageData, highlightCanvas])
 
-  // 获取页面高度（用于虚拟滚动）
+  // 获取页面高度（用于虚拟滚动）- 优化重渲染
   const getItemSize = useCallback((index: number) => {
     const pageInfo = pageData[index]
-    return (pageInfo?.height || 800) + 32 // 加上padding
-  }, [pageData])
+    // 使用稳定的高度计算，避免频繁变化
+    return pageInfo?.height ? pageInfo.height + 32 : 832 // 800 + 32 padding
+  }, [pageData.length]) // 只在页面数量变化时重新创建
 
   // 滚动到指定页面
   const jumpToPage = useCallback((pageNumber: number) => {
@@ -698,6 +693,16 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     // 这里可以实现滚动时更新当前页面的逻辑
     // 暂时简化处理
   }, [])
+
+  // 页面懒加载渲染
+  useEffect(() => {
+    if (!pdfDoc || !numPages) return
+
+    // 渲染第一页
+    if (pageData.length > 0 && !pageData[0]?.rendered) {
+      renderPage(pdfDoc, 1, pageData)
+    }
+  }, [pdfDoc, numPages, pageData, renderPage])
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
@@ -740,7 +745,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     <div className={`h-full bg-gray-100 ${className}`}>
       <List
         ref={listRef}
-        height={window.innerHeight - 100} // 动态计算高度
+        height={containerHeight} // 使用状态中的固定高度
         itemCount={numPages}
         itemSize={getItemSize}
         onScroll={handleScroll}
