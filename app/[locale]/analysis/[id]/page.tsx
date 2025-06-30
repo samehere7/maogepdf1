@@ -1034,18 +1034,6 @@ export default function AnalysisPage() {
 
         {/* PDF查看区域 */}
         <div className="flex-1 flex overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
-          {/* PDF目录侧栏（如果有目录的话） */}
-          {pdfOutline.length > 0 && (
-            <div className="w-64 flex-shrink-0 flex flex-col">
-              <PdfOutlineSidebar
-                outline={pdfOutline}
-                currentPage={currentPage}
-                onJumpToPage={handleJumpToPage}
-                className="h-full"
-              />
-            </div>
-          )}
-          
           {/* PDF展示区 */}
           <div className="flex-1 overflow-hidden flex flex-col">
             {loading ? (

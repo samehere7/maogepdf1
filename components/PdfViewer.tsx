@@ -39,7 +39,6 @@ interface PageData {
   rendered: boolean
   canvas?: HTMLCanvasElement
   textContent?: any
-  paragraphs?: Paragraph[]
 }
 
 interface TextItem {
@@ -79,8 +78,6 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   const [outline, setOutline] = useState<OutlineItem[]>([])
   const [pageData, setPageData] = useState<PageData[]>([])
   const [containerHeight, setContainerHeight] = useState(600)
-  const [hoveredParagraph, setHoveredParagraph] = useState<string | null>(null)
-  const [highlightCanvas, setHighlightCanvas] = useState<Map<number, HTMLCanvasElement>>(new Map())
   
   const listRef = useRef<List>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -530,26 +527,26 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
       // 获取文本内容
       const textContent = await page.getTextContent()
       
-      // 转换文本项为我们的格式
-      const textItems: TextItem[] = textContent.items.map((item: any) => {
-        const transform = item.transform
-        const fontHeight = Math.hypot(transform[2], transform[3])
-        
-        return {
-          str: item.str,
-          x: transform[4],
-          y: transform[5],
-          width: item.width,
-          height: fontHeight,
-          fontSize: fontHeight,
-          fontName: item.fontName || 'sans-serif',
-          transform: transform,
-          dir: item.dir || 'ltr'
-        }
-      })
+      // 简化文本处理，移除段落分组
+      // const textItems: TextItem[] = textContent.items.map((item: any) => {
+      //   const transform = item.transform
+      //   const fontHeight = Math.hypot(transform[2], transform[3])
+      //   
+      //   return {
+      //     str: item.str,
+      //     x: transform[4],
+      //     y: transform[5],
+      //     width: item.width,
+      //     height: fontHeight,
+      //     fontSize: fontHeight,
+      //     fontName: item.fontName || 'sans-serif',
+      //     transform: transform,
+      //     dir: item.dir || 'ltr'
+      //   }
+      // })
       
-      // 分组段落
-      const paragraphs = groupIntoParagraphs(textItems, viewport)
+      // 移除段落分组功能
+      // const paragraphs = groupIntoParagraphs(textItems, viewport)
       
       // 创建canvas
       const canvas = document.createElement('canvas')
@@ -570,8 +567,8 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         viewport: viewport
       }).promise
       
-      // 渲染文本层（用于悬停检测）
-      await renderTextLayer(page, viewport, pageNumber)
+      // 渲染文本层（简化版，禁用段落高亮）
+      // await renderTextLayer(page, viewport, pageNumber)
 
       // 更新页面数据
       setPageData(prev => {
@@ -581,13 +578,12 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
           height: viewport.height,
           rendered: true,
           canvas,
-          textContent,
-          paragraphs
+          textContent
         }
         return newData
       })
 
-      console.log(`[PdfViewer] 页面${pageNumber}渲染完成，包含${paragraphs.length}个段落`)
+      console.log(`[PdfViewer] 页面${pageNumber}渲染完成`)
       
     } catch (error) {
       console.error(`[PdfViewer] 页面${pageNumber}渲染失败:`, error)
@@ -649,12 +645,6 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
                   // 清空并添加新内容
                   node.innerHTML = ''
                   node.appendChild(pageInfo.canvas)
-                  
-                  // 添加高亮层（如果存在）
-                  const pageHighlightCanvas = highlightCanvas.get(pageNumber)
-                  if (pageHighlightCanvas && !node.contains(pageHighlightCanvas)) {
-                    node.appendChild(pageHighlightCanvas)
-                  }
                 }
               }}
               style={{ position: 'relative' }}
@@ -670,7 +660,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         </div>
       </div>
     )
-  }, [pageData, highlightCanvas])
+  }, [pageData])
 
   // 获取页面高度（用于虚拟滚动）- 优化重渲染
   const getItemSize = useCallback((index: number) => {
