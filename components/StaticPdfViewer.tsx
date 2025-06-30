@@ -194,23 +194,36 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         console.log('[StaticPdfViewer] 开始提取目录')
         await extractOutline(doc)
         
-        // 预渲染前几页以提供更好的用户体验
-        console.log('[StaticPdfViewer] 开始预渲染第一页')
+        // 立即渲染第一页，确保用户看到内容
+        console.log('[StaticPdfViewer] 开始渲染第一页')
         await renderPage(doc, 1)
         
-        // 异步预渲染第2、3页
-        if (doc.numPages > 1) {
-          setTimeout(() => {
-            console.log('[StaticPdfViewer] 预渲染第2页')
-            renderPage(doc, 2)
-          }, 100)
+        // 批量预渲染所有页面，实现ChatPDF式的即时显示
+        console.log('[StaticPdfViewer] 开始批量渲染所有页面')
+        const renderPromises = []
+        for (let i = 2; i <= Math.min(doc.numPages, 20); i++) {
+          // 限制前20页进行立即渲染，防止内存过载
+          renderPromises.push(renderPage(doc, i))
         }
-        if (doc.numPages > 2) {
-          setTimeout(() => {
-            console.log('[StaticPdfViewer] 预渲染第3页')
-            renderPage(doc, 3)
-          }, 300)
-        }
+        
+        // 并发渲染多个页面
+        Promise.allSettled(renderPromises).then(() => {
+          console.log('[StaticPdfViewer] 前20页渲染完成')
+          
+          // 如果还有更多页面，继续渲染
+          if (doc.numPages > 20) {
+            setTimeout(() => {
+              console.log('[StaticPdfViewer] 开始渲染剩余页面')
+              const remainingPromises = []
+              for (let i = 21; i <= doc.numPages; i++) {
+                remainingPromises.push(renderPage(doc, i))
+              }
+              Promise.allSettled(remainingPromises).then(() => {
+                console.log('[StaticPdfViewer] 所有页面渲染完成')
+              })
+            }, 1000) // 1秒后渲染剩余页面
+          }
+        })
         
         console.log('[StaticPdfViewer] PDF加载完成')
         
@@ -236,8 +249,8 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     console.log(`[StaticPdfViewer] 开始渲染页面${pageNumber}`)
     
     // 防止重复渲染同一页面
-    if (renderingPages.current.has(pageNumber)) {
-      console.log(`[StaticPdfViewer] 页面${pageNumber}正在渲染中，跳过`)
+    if (renderingPages.current.has(pageNumber) || canvasesRef.current.has(pageNumber)) {
+      console.log(`[StaticPdfViewer] 页面${pageNumber}已渲染或正在渲染中，跳过`)
       return
     }
     
@@ -265,13 +278,20 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       context.scale(devicePixelRatio, devicePixelRatio)
       
       console.log(`[StaticPdfViewer] 开始渲染页面${pageNumber}到Canvas`)
-      await page.render({
+      
+      // 异步渲染，立即更新状态以显示canvas容器
+      const renderTask = page.render({
         canvasContext: context,
         viewport: viewport
-      }).promise
+      })
       
-      console.log(`[StaticPdfViewer] 页面${pageNumber}渲染完成，更新Canvas状态`)
+      // 立即设置canvas到状态，让UI显示canvas容器
+      console.log(`[StaticPdfViewer] 页面${pageNumber}开始渲染，立即更新状态`)
       setCanvases(prev => new Map(prev).set(pageNumber, canvas))
+      
+      // 等待渲染完成
+      await renderTask.promise
+      console.log(`[StaticPdfViewer] 页面${pageNumber}渲染完成`)
       
     } catch (error) {
       console.error(`[StaticPdfViewer] 页面${pageNumber}渲染失败:`, error)
@@ -303,18 +323,26 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         })
       },
       {
-        rootMargin: '400px', // 增大预加载范围
-        threshold: 0.01 // 降低触发阈值，更容易触发
+        rootMargin: '800px', // 大幅增加预加载范围
+        threshold: 0 // 完全降低阈值，任何部分可见即触发
       }
     )
 
-    // 延迟观察器设置，确保DOM已渲染
+    // 立即设置观察器，不再延迟
+    const pageElements = containerRef.current?.querySelectorAll('[data-page-num]')
+    pageElements?.forEach((element) => {
+      observer.observe(element)
+    })
+    
+    // 备用：手动触发前几页的渲染
     const timeoutId = setTimeout(() => {
-      const pageElements = containerRef.current?.querySelectorAll('[data-page-num]')
-      pageElements?.forEach((element) => {
-        observer.observe(element)
-      })
-    }, 100)
+      for (let i = 1; i <= Math.min(5, numPages); i++) {
+        if (!canvasesRef.current.has(i) && !renderingPages.current.has(i)) {
+          console.log(`[StaticPdfViewer] 手动触发页面${i}渲染`)
+          renderPage(pdfDoc, i)
+        }
+      }
+    }, 50)
 
     return () => {
       clearTimeout(timeoutId)
@@ -399,10 +427,16 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
                   }
                 }} />
               ) : (
-                <div className="flex items-center justify-center h-full min-h-[800px]">
+                <div className="flex items-center justify-center h-full min-h-[800px] bg-gray-50">
                   <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
-                    <p className="text-sm text-gray-600">加载页面 {pageNumber}...</p>
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mb-3">
+                      <div className="text-2xl text-gray-400">📄</div>
+                    </div>
+                    <div className="animate-pulse">
+                      <div className="h-2 bg-gray-200 rounded w-24 mx-auto mb-2"></div>
+                      <div className="h-2 bg-gray-200 rounded w-16 mx-auto"></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">页面 {pageNumber}</p>
                   </div>
                 </div>
               )}
