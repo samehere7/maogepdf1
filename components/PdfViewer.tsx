@@ -660,14 +660,13 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         </div>
       </div>
     )
-  }, [pageData])
+  }, [pageData]) // 需要保持pageData依赖以获取最新数据
 
-  // 获取页面高度（用于虚拟滚动）- 优化重渲染
+  // 获取页面高度（用于虚拟滚动）- 使用固定高度避免重渲染
   const getItemSize = useCallback((index: number) => {
-    const pageInfo = pageData[index]
-    // 使用稳定的高度计算，避免频繁变化
-    return pageInfo?.height ? pageInfo.height + 32 : 832 // 800 + 32 padding
-  }, [pageData.length]) // 只在页面数量变化时重新创建
+    // 使用固定高度，避免动态计算导致的重渲染
+    return 832 // 800 + 32 padding，固定高度
+  }, []) // 不依赖任何变量，保持稳定
 
   // 滚动到指定页面
   const jumpToPage = useCallback((pageNumber: number) => {
@@ -684,16 +683,17 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     // 暂时简化处理
   }, [])
 
-  // 页面懒加载渲染 - 只在PDF文档加载时触发
+  // 渲染初始页面 - 简化版本
   useEffect(() => {
-    if (!pdfDoc || !numPages) return
+    if (!pdfDoc || !numPages || pageData.length === 0) return
 
-    // 渲染第一页
-    const firstPageData = pageData[0]
-    if (pageData.length > 0 && !firstPageData?.rendered) {
+    // 简单地渲染第一页，不检查是否已渲染
+    const timer = setTimeout(() => {
       renderPage(pdfDoc, 1, pageData)
-    }
-  }, [pdfDoc, numPages]) // 移除pageData和renderPage依赖项，避免循环
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [pdfDoc, numPages]) // 只依赖基本参数
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({

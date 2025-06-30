@@ -29,6 +29,7 @@ import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
 import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
+import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 
 interface AnalysisResult {
@@ -129,7 +130,7 @@ export default function AnalysisPage() {
   const [editingTitle, setEditingTitle] = useState('');
   
   // PDF查看器ref
-  const pdfViewerRef = useRef<SimplePdfViewerRef>(null);
+  const pdfViewerRef = useRef<StaticPdfViewerRef>(null);
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -1049,7 +1050,7 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <SimplePdfViewer 
+                  <StaticPdfViewer 
                     ref={pdfViewerRef}
                     file={localPdfFile || (fileInfo.url.startsWith('http') ? fileInfo.url : 
                           (typeof window !== 'undefined' ? window.location.origin + fileInfo.url : fileInfo.url))}

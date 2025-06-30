@@ -1,0 +1,311 @@
+"use client"
+
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+import * as pdfjsLib from 'pdfjs-dist'
+import { PDFDocumentProxy } from 'pdfjs-dist'
+
+// 配置 PDF.js worker
+if (typeof window !== 'undefined') {
+  const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+}
+
+interface OutlineItem {
+  title: string
+  dest: any
+  items?: OutlineItem[]
+  pageNumber?: number
+  level: number
+}
+
+interface StaticPdfViewerProps {
+  file: File | string | null
+  onOutlineLoaded?: (outline: OutlineItem[]) => void
+  onPageChange?: (currentPage: number) => void
+  className?: string
+}
+
+export interface StaticPdfViewerRef {
+  jumpToPage: (pageNumber: number) => void
+  getCurrentPage: () => number
+  getOutline: () => OutlineItem[]
+}
+
+const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({ 
+  file, 
+  onOutlineLoaded, 
+  onPageChange,
+  className = ""
+}, ref) => {
+  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null)
+  const [numPages, setNumPages] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [outline, setOutline] = useState<OutlineItem[]>([])
+  const [canvases, setCanvases] = useState<Map<number, HTMLCanvasElement>>(new Map())
+  
+  const containerRef = useRef<HTMLDivElement>(null)
+  const scale = 1.2 // 固定缩放比例
+
+  // 提取PDF outline信息
+  const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
+    try {
+      const outlineData = await doc.getOutline()
+      if (!outlineData || outlineData.length === 0) {
+        setOutline([])
+        onOutlineLoaded?.([])
+        return
+      }
+
+      const processOutlineItems = async (items: any[], level = 0): Promise<OutlineItem[]> => {
+        const result: OutlineItem[] = []
+        
+        for (const item of items) {
+          let pageNumber: number | undefined
+          
+          if (item.dest) {
+            try {
+              let dest = item.dest
+              if (typeof dest === 'string') {
+                dest = await doc.getDestination(dest)
+              }
+              
+              if (dest && Array.isArray(dest) && dest.length > 0) {
+                const pageRef = dest[0]
+                if (pageRef && typeof pageRef === 'object' && 'num' in pageRef) {
+                  const pageIndex = await doc.getPageIndex(pageRef)
+                  pageNumber = pageIndex + 1
+                } else if (typeof pageRef === 'number') {
+                  pageNumber = pageRef + 1
+                }
+              }
+            } catch (error) {
+              console.warn('解析目录项页码失败:', item.title, error)
+            }
+          }
+          
+          const outlineItem: OutlineItem = {
+            title: item.title || '未命名',
+            dest: item.dest,
+            pageNumber,
+            level,
+            items: item.items ? await processOutlineItems(item.items, level + 1) : undefined
+          }
+          
+          result.push(outlineItem)
+        }
+        
+        return result
+      }
+      
+      const processedOutline = await processOutlineItems(outlineData)
+      setOutline(processedOutline)
+      onOutlineLoaded?.(processedOutline)
+      
+    } catch (error) {
+      console.error('提取目录失败:', error)
+      setOutline([])
+      onOutlineLoaded?.([])
+    }
+  }, [onOutlineLoaded])
+
+  // 加载PDF文档
+  useEffect(() => {
+    if (!file) return
+
+    const loadPDF = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        let arrayBuffer: ArrayBuffer
+        
+        if (file instanceof File) {
+          arrayBuffer = await file.arrayBuffer()
+        } else {
+          const response = await fetch(file)
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+          }
+          arrayBuffer = await response.arrayBuffer()
+        }
+        
+        const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        setPdfDoc(doc)
+        setNumPages(doc.numPages)
+        
+        // 提取目录
+        await extractOutline(doc)
+        
+        // 预渲染第一页
+        await renderPage(doc, 1)
+        
+      } catch (err) {
+        console.error('PDF加载失败:', err)
+        setError(err instanceof Error ? err.message : '加载PDF失败')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadPDF()
+  }, [file, extractOutline])
+
+  // 渲染单个页面
+  const renderPage = useCallback(async (doc: PDFDocumentProxy, pageNumber: number) => {
+    if (canvases.has(pageNumber)) return
+
+    try {
+      const page = await doc.getPage(pageNumber)
+      const viewport = page.getViewport({ scale })
+      
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      if (!context) return
+
+      const devicePixelRatio = window.devicePixelRatio || 1
+      canvas.width = viewport.width * devicePixelRatio
+      canvas.height = viewport.height * devicePixelRatio
+      canvas.style.width = `${viewport.width}px`
+      canvas.style.height = `${viewport.height}px`
+      
+      context.scale(devicePixelRatio, devicePixelRatio)
+      
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise
+      
+      setCanvases(prev => new Map(prev).set(pageNumber, canvas))
+      
+    } catch (error) {
+      console.error(`页面${pageNumber}渲染失败:`, error)
+    }
+  }, [scale, canvases])
+
+  // 懒加载逻辑
+  useEffect(() => {
+    if (!pdfDoc || !containerRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageElement = entry.target as HTMLElement
+            const pageNumber = parseInt(pageElement.getAttribute('data-page-num') || '0')
+            
+            if (pageNumber > 0 && !canvases.has(pageNumber)) {
+              renderPage(pdfDoc, pageNumber)
+            }
+          }
+        })
+      },
+      {
+        rootMargin: '200px',
+        threshold: 0.1
+      }
+    )
+
+    const pageElements = containerRef.current.querySelectorAll('[data-page-num]')
+    pageElements.forEach((element) => {
+      observer.observe(element)
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [pdfDoc])
+
+  // 滚动到指定页面
+  const jumpToPage = useCallback((pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= numPages && containerRef.current) {
+      const pageElement = containerRef.current.querySelector(`[data-page-num="${pageNumber}"]`)
+      if (pageElement) {
+        pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        setCurrentPage(pageNumber)
+        onPageChange?.(pageNumber)
+      }
+    }
+  }, [numPages, onPageChange])
+
+  // 暴露方法给父组件
+  useImperativeHandle(ref, () => ({
+    jumpToPage,
+    getCurrentPage: () => currentPage,
+    getOutline: () => outline
+  }), [jumpToPage, currentPage, outline])
+
+  if (isLoading) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">正在加载PDF...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
+        <div className="text-center text-red-600">
+          <p className="mb-2">加载失败</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!pdfDoc || numPages === 0) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
+        <p className="text-gray-500">暂无PDF内容</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`h-full bg-gray-100 overflow-y-auto ${className}`}>
+      <div ref={containerRef} className="flex flex-col items-center p-4 space-y-4">
+        {Array.from({ length: numPages }, (_, index) => {
+          const pageNumber = index + 1
+          const canvas = canvases.get(pageNumber)
+          
+          return (
+            <div
+              key={pageNumber}
+              data-page-num={pageNumber}
+              className="bg-white shadow-lg border border-gray-200 relative"
+              style={{ 
+                width: 'fit-content',
+                minHeight: canvas ? 'auto' : '800px'
+              }}
+            >
+              {canvas ? (
+                <div ref={(node) => {
+                  if (node && canvas && !node.contains(canvas)) {
+                    node.innerHTML = ''
+                    node.appendChild(canvas)
+                  }
+                }} />
+              ) : (
+                <div className="flex items-center justify-center h-full min-h-[800px]">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-600">加载页面 {pageNumber}...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+})
+
+StaticPdfViewer.displayName = 'StaticPdfViewer'
+
+export default StaticPdfViewer
