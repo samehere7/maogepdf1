@@ -384,12 +384,48 @@ export default function PDFDebugPage() {
     try {
       const pdfjs = await import('pdfjs-dist')
       
-      // 首先测试当前用户的PDF文件
+      // 首先测试当前用户的PDF文件 - 使用正确的路径
       const currentUrl = window.location.href
       const baseUrl = currentUrl.split('/zh/')[0]
-      const userPdfUrl = `${baseUrl}/api/pdf/javascript-english.pdf` // 使用用户实际的PDF
       
-      addLog(`正在测试用户PDF文件: ${userPdfUrl}`)
+      // 尝试多个可能的PDF路径
+      const possiblePaths = [
+        '/uploads/javascript-english.pdf',
+        '/api/uploads/javascript-english.pdf', 
+        '/static/javascript-english.pdf',
+        '/files/javascript-english.pdf',
+        '/pdf/javascript-english.pdf'
+      ]
+      
+      let userPdfUrl = ''
+      let foundValidPath = false
+      
+      // 测试哪个路径可用
+      for (const path of possiblePaths) {
+        const testUrl = `${baseUrl}${path}`
+        addLog(`测试PDF路径: ${testUrl}`)
+        
+        try {
+          const headResponse = await fetch(testUrl, { method: 'HEAD' })
+          if (headResponse.ok) {
+            userPdfUrl = testUrl
+            foundValidPath = true
+            addLog(`✅ 找到有效PDF路径: ${testUrl}`)
+            break
+          } else {
+            addLog(`❌ 路径无效 (${headResponse.status}): ${testUrl}`)
+          }
+        } catch (error) {
+          addLog(`❌ 路径访问失败: ${testUrl} - ${error}`)
+        }
+      }
+      
+      if (!foundValidPath) {
+        addLog('❌ 未找到有效的用户PDF文件，使用备用测试')
+        return await testFallbackPDF(pdfjs)
+      }
+      
+      addLog(`正在下载用户PDF文件: ${userPdfUrl}`)
       
       try {
         const response = await fetch(userPdfUrl, {
@@ -400,8 +436,7 @@ export default function PDFDebugPage() {
         })
         
         if (!response.ok) {
-          addLog(`❌ 用户PDF文件访问失败: HTTP ${response.status}`)
-          // 尝试备用测试PDF
+          addLog(`❌ 用户PDF文件下载失败: HTTP ${response.status}`)
           return await testFallbackPDF(pdfjs)
         }
         
@@ -427,8 +462,8 @@ export default function PDFDebugPage() {
     addLog('正在尝试内嵌测试PDF...')
     
     try {
-      // 创建一个最小的PDF内容用于测试
-      const testPdfBase64 = "JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL091dGxpbmVzIDIgMCBSCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKL1R5cGUgL091dGxpbmVzCi9Db3VudCAwCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWzEgMCBSXQo+PgplbmRvYmoKCjEgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSAyMCAwIFIKPj4KPj4KL01lZGlhQm94IFswIDAgNjEyIDc5Ml0KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iagoKNCAwIG9iago8PAovTGVuZ3RoIDQ0Cj4+CnN0cmVhbQpCVAovRjEgMTIgVGYKNzIgNzIwIFRkCihIZWxsbyBXb3JsZCEpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKCjIwIDAgb2JqCjw8Ci9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovQmFzZUZvbnQgL0hlbHZldGljYQo+PgplbmRvYmoKCnhyZWYKMCAyMQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNjggMDAwMDBuIAowMDAwMDAwMDEwIDAwMDAwbiAKMDAwMDAwMDA1MyAwMDAwMG4gCjAwMDAwMDAzMjAgMDAwMDBuIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwNDEyIDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMjEKL1Jvb3QgNCAwIFIKPj4Kc3RhcnR4cmVmCjQ3NAolJUVPRgo="
+      // 使用一个有效的最小PDF文件（"Hello World"）
+      const testPdfBase64 = "JVBERi0xLjQKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCgoyIDAgb2JqCjw8Ci9UeXBlIC9QYWdlcwovS2lkcyBbMyAwIFJdCi9Db3VudCAxCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDIgMCBSCi9SZXNvdXJjZXMgPDwKL0ZvbnQgPDwKL0YxIDQgMCBSCj4+Cj4+Ci9NZWRpYUJveCBbMCAwIDYxMiA3OTJdCi9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iagoKNSAwIG9iago8PAovTGVuZ3RoIDQ0Cj4+CnN0cmVhbQpCVAovRjEgMTIgVGYKNzIgNzIwIFRkCihIZWxsbyBXb3JsZCEpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMDc0IDAwMDAwIG4gCjAwMDAwMDAxMjAgMDAwMDBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDBuIAp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjQ3MwolJUVPRgo="
       
       const binaryString = atob(testPdfBase64)
       const arrayBuffer = new ArrayBuffer(binaryString.length)
