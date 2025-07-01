@@ -30,12 +30,53 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
     const details: string[] = []
     
     try {
-      // 测试Canvas 2D
-      const canvas = document.createElement('canvas')
-      const ctx2d = canvas.getContext('2d')
+      // 测试Canvas 2D - 使用独立的canvas
+      const canvas2d = document.createElement('canvas')
+      canvas2d.width = 100
+      canvas2d.height = 100
+      const ctx2d = canvas2d.getContext('2d')
       
-      // 测试WebGL
-      const webgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      // 测试WebGL - 使用独立的canvas
+      const canvasWebgl = document.createElement('canvas')
+      const webgl = canvasWebgl.getContext('webgl') || canvasWebgl.getContext('experimental-webgl')
+      
+      // 基本Canvas 2D功能测试
+      let canvas2dWorks = false
+      let hardwareAccel = false
+      
+      if (ctx2d) {
+        try {
+          // 测试基本绘制功能
+          ctx2d.fillStyle = '#FF0000'
+          ctx2d.fillRect(10, 10, 50, 50)
+          
+          // 测试文本渲染（PDF.js需要）
+          ctx2d.font = '16px Arial'
+          ctx2d.fillText('Test', 20, 40)
+          
+          // 测试图像数据获取（PDF.js需要）
+          const imageData = ctx2d.getImageData(15, 15, 1, 1)
+          
+          // 验证渲染结果
+          if (imageData && imageData.data && imageData.data.length >= 4) {
+            const red = imageData.data[0]
+            canvas2dWorks = red > 200 // 检查红色值是否正确
+            hardwareAccel = canvas2dWorks
+            details.push(`Canvas 2D基本测试通过，红色值: ${red}`)
+          } else {
+            details.push('Canvas 2D图像数据获取失败')
+          }
+          
+        } catch (drawError) {
+          details.push(`Canvas 2D绘制测试失败: ${drawError}`)
+        }
+      } else {
+        details.push('Canvas 2D上下文获取失败')
+        details.push('可能的解决方案：')
+        details.push('1. 检查浏览器是否支持Canvas')
+        details.push('2. 启用硬件加速')
+        details.push('3. 检查浏览器安全设置')
+      }
       
       // 测试OffscreenCanvas
       let offscreen = false
@@ -43,42 +84,27 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
         if (typeof OffscreenCanvas !== 'undefined') {
           const offscreenCanvas = new OffscreenCanvas(100, 100)
           const offscreenCtx = offscreenCanvas.getContext('2d')
-          offscreen = !!offscreenCtx
+          if (offscreenCtx) {
+            offscreenCtx.fillRect(0, 0, 10, 10)
+            offscreen = true
+            details.push('OffscreenCanvas支持正常')
+          }
+        } else {
+          details.push('OffscreenCanvas不支持（非必需）')
         }
       } catch (error) {
-        details.push(`OffscreenCanvas失败: ${error}`)
-      }
-
-      // 检测硬件加速
-      let hardwareAccel = false
-      if (ctx2d) {
-        const testCanvas = document.createElement('canvas')
-        testCanvas.width = 100
-        testCanvas.height = 100
-        const testCtx = testCanvas.getContext('2d')
-        if (testCtx) {
-          testCtx.fillStyle = 'red'
-          testCtx.fillRect(0, 0, 50, 50)
-          const imageData = testCtx.getImageData(0, 0, 1, 1)
-          hardwareAccel = imageData.data[0] === 255
-        }
-      }
-
-      if (!ctx2d) {
-        details.push('Canvas 2D上下文获取失败')
-        details.push('可能原因：硬件加速被禁用')
-        details.push('可能原因：浏览器Canvas被阻止')
-        details.push('可能原因：系统图形驱动问题')
+        details.push(`OffscreenCanvas测试失败: ${error}`)
       }
 
       const support: CanvasTest = {
-        canvas2d: !!ctx2d,
+        canvas2d: canvas2dWorks,
         webgl: !!webgl,
         offscreenCanvas: offscreen,
         hardwareAcceleration: hardwareAccel,
         details
       }
 
+      console.log('[CanvasFallback] Canvas支持检测结果:', support)
       setCanvasSupport(support)
 
       if (support.canvas2d && onCanvasReady) {
@@ -86,12 +112,13 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
       }
 
     } catch (error) {
+      console.error('[CanvasFallback] Canvas检测过程异常:', error)
       const support: CanvasTest = {
         canvas2d: false,
         webgl: false,
         offscreenCanvas: false,
         hardwareAcceleration: false,
-        details: [`Canvas检测失败: ${error}`]
+        details: [`Canvas检测异常: ${error}`]
       }
       setCanvasSupport(support)
     }
@@ -101,46 +128,69 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
     setIsFixing(true)
     
     try {
-      // 尝试修复方案1：强制重新获取上下文
-      const canvas = document.createElement('canvas')
-      canvas.width = 1
-      canvas.height = 1
+      console.log('[CanvasFallback] 开始尝试Canvas修复...')
       
-      // 尝试不同的上下文选项
-      const contextOptions = [
-        { alpha: false },
-        { alpha: true },
+      // 修复方案1：清理可能的冲突状态
+      if (typeof window !== 'undefined') {
+        // 强制垃圾回收（如果可用）
+        if (window.gc) {
+          window.gc()
+        }
+      }
+      
+      // 修复方案2：尝试不同的Canvas上下文配置
+      const testConfigs = [
+        { alpha: false, desynchronized: false },
+        { alpha: true, desynchronized: false },
         { willReadFrequently: true },
         { willReadFrequently: false },
+        { powerPreference: 'high-performance' },
+        { powerPreference: 'low-power' },
         {}
       ]
 
-      let success = false
-      for (const options of contextOptions) {
+      let fixSuccess = false
+      for (let i = 0; i < testConfigs.length; i++) {
+        const config = testConfigs[i]
+        console.log(`[CanvasFallback] 尝试配置 ${i + 1}:`, config)
+        
         try {
-          const ctx = canvas.getContext('2d', options)
+          const testCanvas = document.createElement('canvas')
+          testCanvas.width = 100
+          testCanvas.height = 100
+          
+          const ctx = testCanvas.getContext('2d', config)
           if (ctx) {
-            // 测试基本绘制
-            ctx.fillStyle = 'red'
-            ctx.fillRect(0, 0, 1, 1)
-            const imageData = ctx.getImageData(0, 0, 1, 1)
-            if (imageData && imageData.data[0] === 255) {
-              success = true
+            // 完整的PDF.js兼容性测试
+            ctx.fillStyle = '#FF0000'
+            ctx.fillRect(25, 25, 50, 50)
+            ctx.font = '16px Arial'
+            ctx.fillText('Fix Test', 30, 45)
+            
+            const imageData = ctx.getImageData(30, 30, 1, 1)
+            if (imageData && imageData.data && imageData.data[0] > 200) {
+              console.log(`[CanvasFallback] 配置 ${i + 1} 成功！红色值:`, imageData.data[0])
+              fixSuccess = true
               break
             }
           }
         } catch (error) {
+          console.log(`[CanvasFallback] 配置 ${i + 1} 失败:`, error)
           continue
         }
       }
 
-      if (success) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+      if (fixSuccess) {
+        console.log('[CanvasFallback] Canvas修复成功，重新检测...')
+        // 等待一段时间确保状态稳定
+        await new Promise(resolve => setTimeout(resolve, 500))
         checkCanvasSupport()
+      } else {
+        console.log('[CanvasFallback] 所有修复尝试均失败')
       }
 
     } catch (error) {
-      console.error('Canvas修复失败:', error)
+      console.error('[CanvasFallback] Canvas修复过程异常:', error)
     } finally {
       setIsFixing(false)
     }
