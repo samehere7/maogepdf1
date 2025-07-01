@@ -79,6 +79,10 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   const [pageData, setPageData] = useState<PageData[]>([])
   const [containerHeight, setContainerHeight] = useState(600)
   
+  // 添加缺失的状态变量
+  const [highlightCanvas, setHighlightCanvas] = useState<Map<number, HTMLCanvasElement>>(new Map())
+  const [hoveredParagraph, setHoveredParagraph] = useState<string | null>(null)
+  
   const listRef = useRef<List>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
@@ -588,7 +592,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     } catch (error) {
       console.error(`[PdfViewer] 页面${pageNumber}渲染失败:`, error)
     }
-  }, [scale, groupIntoParagraphs])
+  }, [scale])
   
   // 渲染文本层（简化版，主要用于悬停检测）
   const renderTextLayer = useCallback(async (page: any, viewport: any, pageNumber: number) => {
@@ -616,12 +620,9 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     
     pageContainer.appendChild(textLayerDiv)
     
-    // 获取段落数据并渲染高亮层
-    const currentPageDataItem = pageData.find(p => p.pageNumber === pageNumber)
-    if (currentPageDataItem?.paragraphs) {
-      renderHighlightLayer(pageContainer, pageNumber, viewport, currentPageDataItem.paragraphs)
-    }
-  }, [renderHighlightLayer])
+    // 渲染高亮层（简化版，移除段落依赖）
+    // 注释掉段落相关功能，因为已经在前面简化了段落分组功能
+  }, [])
 
   // 页面组件 - 移到 useCallback 中优化性能
   const PageItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
