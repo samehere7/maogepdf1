@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { MaogeInterface } from "@/components/chat-interface"
-import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain, Share2 } from "lucide-react"
+import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain, Share2, Bug } from "lucide-react"
 import { useLocale, useTranslations } from 'next-intl'
 import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
@@ -29,6 +29,9 @@ import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
 import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
 import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
+import ErrorBoundary from "@/components/ErrorBoundary"
+import InlineDebugPanel from "@/components/InlineDebugPanel"
+import GlobalErrorLogger from "@/components/GlobalErrorLogger"
 
 interface AnalysisResult {
   theme: string
@@ -140,6 +143,9 @@ export default function AnalysisPage() {
   
   // 分享弹窗状态
   const [showShareModal, setShowShareModal] = useState(false);
+  
+  // 调试面板状态
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   
   // PDF目录相关状态
   const [pdfOutline, setPdfOutline] = useState<OutlineItem[]>([]);
@@ -969,6 +975,8 @@ export default function AnalysisPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* 全局错误监听器 */}
+      <GlobalErrorLogger />
       {/* 左侧边栏 - 固定宽度与主页一致 */}
       <div className="w-80 min-w-[240px] max-w-[320px] flex-shrink-0 border-r border-gray-200 bg-white">
         <Sidebar 
@@ -1050,8 +1058,32 @@ export default function AnalysisPage() {
                 variant="ghost"
                 className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                 title="分享聊天"
+                onClick={() => setShowShareModal(true)}
               >
                 <Share2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                title="PDF调试工具"
+                onClick={() => {
+                  // 先尝试打开专门的调试页面，如果失败则显示内嵌调试面板
+                  try {
+                    const debugUrl = `/${locale}/pdf-debug`
+                    const newWindow = window.open(debugUrl, '_blank')
+                    // 如果无法打开新窗口，显示内嵌面板
+                    setTimeout(() => {
+                      if (!newWindow || newWindow.closed) {
+                        setShowDebugPanel(true)
+                      }
+                    }, 1000)
+                  } catch (error) {
+                    setShowDebugPanel(true)
+                  }
+                }}
+              >
+                <Bug className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -1082,14 +1114,16 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <StaticPdfViewer 
-                    ref={pdfViewerRef}
-                    file={finalPdfFile}
-                    onOutlineLoaded={handleOutlineLoaded}
-                    onPageChange={setCurrentPage}
-                    onTextSelect={handleTextSelect}
-                    className="pdf-viewer-with-paragraphs"
-                  />
+                  <ErrorBoundary>
+                    <StaticPdfViewer 
+                      ref={pdfViewerRef}
+                      file={finalPdfFile}
+                      onOutlineLoaded={handleOutlineLoaded}
+                      onPageChange={setCurrentPage}
+                      onTextSelect={handleTextSelect}
+                      className="pdf-viewer-with-paragraphs"
+                    />
+                  </ErrorBoundary>
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
@@ -1393,6 +1427,11 @@ export default function AnalysisPage() {
         />
       )}
 
+      {/* 内嵌调试面板 */}
+      <InlineDebugPanel 
+        isOpen={showDebugPanel}
+        onClose={() => setShowDebugPanel(false)}
+      />
 
     </div>
   );
