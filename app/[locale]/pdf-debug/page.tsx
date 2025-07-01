@@ -384,55 +384,104 @@ export default function PDFDebugPage() {
     try {
       const pdfjs = await import('pdfjs-dist')
       
-      // 使用一个小的测试PDF URL
-      const testPdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-      addLog(`正在测试PDF文件: ${testPdfUrl}`)
+      // 首先测试当前用户的PDF文件
+      const currentUrl = window.location.href
+      const baseUrl = currentUrl.split('/zh/')[0]
+      const userPdfUrl = `${baseUrl}/api/pdf/javascript-english.pdf` // 使用用户实际的PDF
+      
+      addLog(`正在测试用户PDF文件: ${userPdfUrl}`)
       
       try {
-        const response = await fetch(testPdfUrl)
+        const response = await fetch(userPdfUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/pdf,*/*'
+          }
+        })
+        
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
+          addLog(`❌ 用户PDF文件访问失败: HTTP ${response.status}`)
+          // 尝试备用测试PDF
+          return await testFallbackPDF(pdfjs)
         }
         
         const arrayBuffer = await response.arrayBuffer()
         addLog(`✅ PDF文件下载成功，大小: ${arrayBuffer.byteLength} bytes`)
         
-        const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise
-        addLog(`✅ PDF文档解析成功，页数: ${doc.numPages}`)
-        
-        // 测试渲染第一页
-        const page = await doc.getPage(1)
-        addLog('✅ PDF页面获取成功')
-        
-        const viewport = page.getViewport({ scale: 1.0 })
-        addLog(`✅ PDF视口创建成功: ${viewport.width}x${viewport.height}`)
-        
-        // 测试Canvas渲染
-        const canvas = document.createElement('canvas')
-        const context = canvas.getContext('2d')
-        if (context) {
-          canvas.width = viewport.width
-          canvas.height = viewport.height
-          
-          await page.render({
-            canvasContext: context,
-            viewport: viewport
-          }).promise
-          
-          addLog('✅ PDF页面渲染到Canvas成功')
-        } else {
-          addLog('❌ Canvas上下文获取失败，无法渲染PDF')
-        }
-        
-        return true
+        return await renderPDFTest(pdfjs, arrayBuffer)
         
       } catch (pdfError) {
-        addLog(`❌ PDF测试失败: ${pdfError}`)
-        return false
+        addLog(`❌ 用户PDF测试失败: ${pdfError}`)
+        addLog('尝试使用备用PDF进行测试...')
+        return await testFallbackPDF(pdfjs)
       }
       
     } catch (error) {
       addLog(`❌ PDF测试异常: ${error}`)
+      return false
+    }
+  }
+  
+  // 备用PDF测试
+  const testFallbackPDF = async (pdfjs: any) => {
+    addLog('正在尝试内嵌测试PDF...')
+    
+    try {
+      // 创建一个最小的PDF内容用于测试
+      const testPdfBase64 = "JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL1R5cGUgL0NhdGFsb2cKL091dGxpbmVzIDIgMCBSCi9QYWdlcyAzIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKL1R5cGUgL091dGxpbmVzCi9Db3VudCAwCj4+CmVuZG9iagoKMyAwIG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWzEgMCBSXQo+PgplbmRvYmoKCjEgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAzIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSAyMCAwIFIKPj4KPj4KL01lZGlhQm94IFswIDAgNjEyIDc5Ml0KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iagoKNCAwIG9iago8PAovTGVuZ3RoIDQ0Cj4+CnN0cmVhbQpCVAovRjEgMTIgVGYKNzIgNzIwIFRkCihIZWxsbyBXb3JsZCEpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKCjIwIDAgb2JqCjw8Ci9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovQmFzZUZvbnQgL0hlbHZldGljYQo+PgplbmRvYmoKCnhyZWYKMCAyMQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAyNjggMDAwMDBuIAowMDAwMDAwMDEwIDAwMDAwbiAKMDAwMDAwMDA1MyAwMDAwMG4gCjAwMDAwMDAzMjAgMDAwMDBuIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwNDEyIDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgMjEKL1Jvb3QgNCAwIFIKPj4Kc3RhcnR4cmVmCjQ3NAolJUVPRgo="
+      
+      const binaryString = atob(testPdfBase64)
+      const arrayBuffer = new ArrayBuffer(binaryString.length)
+      const uint8Array = new Uint8Array(arrayBuffer)
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i)
+      }
+      
+      addLog(`✅ 内嵌PDF创建成功，大小: ${arrayBuffer.byteLength} bytes`)
+      
+      return await renderPDFTest(pdfjs, arrayBuffer)
+      
+    } catch (error) {
+      addLog(`❌ 备用PDF测试失败: ${error}`)
+      return false
+    }
+  }
+  
+  // PDF渲染测试
+  const renderPDFTest = async (pdfjs: any, arrayBuffer: ArrayBuffer) => {
+    try {
+      const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise
+      addLog(`✅ PDF文档解析成功，页数: ${doc.numPages}`)
+      
+      // 测试渲染第一页
+      const page = await doc.getPage(1)
+      addLog('✅ PDF页面获取成功')
+      
+      const viewport = page.getViewport({ scale: 1.0 })
+      addLog(`✅ PDF视口创建成功: ${viewport.width}x${viewport.height}`)
+      
+      // 测试Canvas渲染
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      if (context) {
+        canvas.width = viewport.width
+        canvas.height = viewport.height
+        
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise
+        
+        addLog('✅ PDF页面渲染到Canvas成功')
+        addLog('🎉 所有PDF功能测试通过！问题可能在于特定PDF文件的网络访问')
+      } else {
+        addLog('❌ Canvas上下文获取失败，无法渲染PDF')
+      }
+      
+      return true
+      
+    } catch (error) {
+      addLog(`❌ PDF渲染测试失败: ${error}`)
       return false
     }
   }
