@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-01 15:25:18 - Canvas Fallback Integration
+Force deploy trigger - 2025-07-01 15:31:45 - Canvas Detection Rewrite
