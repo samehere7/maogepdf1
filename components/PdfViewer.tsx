@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import { VariableSizeList as List } from 'react-window'
 import * as pdfjsLib from 'pdfjs-dist'
 import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
+import CanvasFallback from './CanvasFallback'
 import './paragraph-highlight.css'
 
 // 配置 PDF.js worker
@@ -733,7 +734,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     )
   }
 
-  return (
+  const renderPdfContent = () => (
     <div className={`h-full bg-gray-100 ${className}`}>
       <List
         ref={listRef}
@@ -746,6 +747,12 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         {PageItem}
       </List>
     </div>
+  )
+
+  return (
+    <CanvasFallback onCanvasReady={() => console.log('[PdfViewer] Canvas就绪，PDF可以正常渲染')}>
+      {renderPdfContent()}
+    </CanvasFallback>
   )
 })
 

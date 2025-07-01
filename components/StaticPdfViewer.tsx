@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw, Search, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import CanvasFallback from './CanvasFallback'
 import './text-layer.css'
 
 // 动态导入PDF.js，避免服务端渲染问题
@@ -860,7 +861,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     )
   }
 
-  return (
+  const renderStaticPdfContent = () => (
     <div className={`h-full bg-gray-100 flex flex-col ${className}`}>
       {/* PDF工具栏 */}
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2">
@@ -1098,6 +1099,12 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         </div>
       )}
     </div>
+  )
+
+  return (
+    <CanvasFallback onCanvasReady={() => console.log('[StaticPdfViewer] Canvas就绪，PDF可以正常渲染')}>
+      {renderStaticPdfContent()}
+    </CanvasFallback>
   )
 })
 
