@@ -2,15 +2,28 @@
 
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { VariableSizeList as List } from 'react-window'
-import * as pdfjsLib from 'pdfjs-dist'
-import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 import CanvasFallback from './CanvasFallback'
 import './paragraph-highlight.css'
 
-// 配置 PDF.js worker
+// 动态导入PDF.js，避免服务端渲染问题和模块冲突
+let pdfjsLib: any = null
+let PDFDocumentProxy: any = null
+let pdfjsLoaded = false
+
 if (typeof window !== 'undefined') {
-  const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+  import('pdfjs-dist').then((pdfjs) => {
+    pdfjsLib = pdfjs
+    PDFDocumentProxy = pdfjs.PDFDocumentProxy
+    pdfjsLoaded = true
+    
+    // 配置 PDF.js worker
+    const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+    
+    console.log('[PdfViewer] PDF.js加载完成')
+  }).catch((error) => {
+    console.error('[PdfViewer] PDF.js加载失败:', error)
+  })
 }
 
 interface OutlineItem {
@@ -70,7 +83,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   onPageChange,
   className = ""
 }, ref) => {
-  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null)
+  const [pdfDoc, setPdfDoc] = useState<any | null>(null)
   const [numPages, setNumPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [scale, setScale] = useState(1.2)
@@ -84,9 +97,17 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   const [highlightCanvas, setHighlightCanvas] = useState<Map<number, HTMLCanvasElement>>(new Map())
   const [hoveredParagraph, setHoveredParagraph] = useState<string | null>(null)
   
+  // 客户端渲染检查
+  const [isClient, setIsClient] = useState(false)
+  
   const listRef = useRef<List>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  // 客户端初始化
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // 监听容器尺寸变化 - 防抖优化
   useEffect(() => {
@@ -116,7 +137,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   }, []) // 移除containerHeight依赖项，避免无限循环
 
   // 提取PDF outline信息
-  const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
+  const extractOutline = useCallback(async (doc: any) => {
     try {
       console.log('[PdfViewer] 提取PDF目录信息...')
       
@@ -193,6 +214,29 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
       try {
         setIsLoading(true)
         setError(null)
+        
+        // 等待pdfjs加载
+        if (!pdfjsLib || !pdfjsLoaded) {
+          console.log('[PdfViewer] 等待PDF.js加载...')
+          await new Promise((resolve, reject) => {
+            let attempts = 0
+            const maxAttempts = 50 // 最多等待5秒
+            
+            const checkPdfjs = () => {
+              attempts++
+              if (pdfjsLib && pdfjsLoaded) {
+                console.log('[PdfViewer] PDF.js加载验证成功')
+                resolve(pdfjsLib)
+              } else if (attempts >= maxAttempts) {
+                console.error('[PdfViewer] PDF.js加载超时')
+                reject(new Error('PDF.js加载超时'))
+              } else {
+                setTimeout(checkPdfjs, 100)
+              }
+            }
+            checkPdfjs()
+          })
+        }
         
         let arrayBuffer: ArrayBuffer
         
@@ -521,7 +565,7 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
   
   // 渲染单个页面
   const renderPage = useCallback(async (
-    doc: PDFDocumentProxy, 
+    doc: any, 
     pageNumber: number, 
     currentPageData: PageData[]
   ) => {
@@ -703,6 +747,18 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
     getCurrentPage: () => currentPage,
     getOutline: () => outline
   }), [jumpToPage, currentPage, outline])
+
+  // 服务端渲染时显示加载状态
+  if (!isClient) {
+    return (
+      <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">初始化PDF查看器...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
