@@ -27,6 +27,7 @@ import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
 import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
 import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
+import MinimalPdfViewer from "@/components/MinimalPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import InlineDebugPanel from "@/components/InlineDebugPanel"
@@ -1113,13 +1114,8 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                    <StaticPdfViewer 
-                      ref={pdfViewerRef}
+                    <MinimalPdfViewer 
                       file={finalPdfFile}
-                      onOutlineLoaded={handleOutlineLoaded}
-                      onPageChange={setCurrentPage}
-                      onTextSelect={handleTextSelect}
-                      className="pdf-viewer-with-paragraphs"
                     />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
