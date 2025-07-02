@@ -215,20 +215,25 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
         setIsLoading(true)
         setError(null)
         
-        // 等待pdfjs加载
+        // 等待pdfjs加载并确保完全可用
         if (!pdfjsLib || !pdfjsLoaded) {
           console.log('[PdfViewer] 等待PDF.js加载...')
           await new Promise((resolve, reject) => {
             let attempts = 0
-            const maxAttempts = 50 // 最多等待5秒
+            const maxAttempts = 100 // 增加到10秒等待时间
             
             const checkPdfjs = () => {
               attempts++
-              if (pdfjsLib && pdfjsLoaded) {
+              if (pdfjsLib && pdfjsLoaded && pdfjsLib.getDocument && pdfjsLib.GlobalWorkerOptions) {
                 console.log('[PdfViewer] PDF.js加载验证成功')
                 resolve(pdfjsLib)
               } else if (attempts >= maxAttempts) {
-                console.error('[PdfViewer] PDF.js加载超时')
+                console.error('[PdfViewer] PDF.js加载超时，当前状态:', {
+                  pdfjsLib: !!pdfjsLib,
+                  pdfjsLoaded,
+                  getDocument: !!(pdfjsLib && pdfjsLib.getDocument),
+                  GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions)
+                })
                 reject(new Error('PDF.js加载超时'))
               } else {
                 setTimeout(checkPdfjs, 100)

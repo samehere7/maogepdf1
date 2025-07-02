@@ -186,9 +186,9 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   // 渲染文本层
   const renderTextLayer = useCallback(async (page: any, viewport: any, pageContainer: HTMLElement, pageNum: number) => {
     try {
-      // 确保pdfjsLib已加载
-      if (!pdfjsLib) {
-        console.warn('[StaticPdfViewer] PDF.js未加载，跳过文本层渲染')
+      // 确保pdfjsLib已加载且完全可用
+      if (!pdfjsLib || !pdfjsLoaded) {
+        console.warn('[StaticPdfViewer] PDF.js未完全加载，跳过文本层渲染')
         return
       }
       
@@ -209,12 +209,12 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       textContent.items.forEach((item: any, index: number) => {
         const span = document.createElement('span')
         
-        // PDF.js官方坐标变换 - 添加安全检查
-        if (!pdfjsLib.Util || !pdfjsLib.Util.transform) {
-          console.warn('[StaticPdfViewer] PDF.js Util未可用，使用fallback')
+        // 安全检查PDF.js工具函数的可用性
+        if (!pdfjsLib.Util || !pdfjsLib.Util.transform || typeof pdfjsLib.Util.transform !== 'function') {
+          console.warn('[StaticPdfViewer] PDF.js Util.transform未可用，使用fallback')
           // 使用简化的坐标计算作为fallback
-          const fallbackLeft = item.transform[4]
-          const fallbackTop = item.transform[5] - (item.height || 12)
+          const fallbackLeft = item.transform ? item.transform[4] : 0
+          const fallbackTop = item.transform ? (item.transform[5] - (item.height || 12)) : 0
           
           span.style.position = 'absolute'
           span.style.left = `${((100 * fallbackLeft) / viewport.width).toFixed(4)}%`
@@ -237,7 +237,36 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           return
         }
         
-        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+        // 安全调用PDF.js工具函数
+        let tx
+        try {
+          tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+        } catch (error) {
+          console.warn('[StaticPdfViewer] PDF.js transform调用失败，使用fallback:', error)
+          // 使用fallback
+          const fallbackLeft = item.transform ? item.transform[4] : 0
+          const fallbackTop = item.transform ? (item.transform[5] - (item.height || 12)) : 0
+          
+          span.style.position = 'absolute'
+          span.style.left = `${((100 * fallbackLeft) / viewport.width).toFixed(4)}%`
+          span.style.top = `${((100 * fallbackTop) / viewport.height).toFixed(4)}%`
+          span.style.fontSize = `${item.height || 12}px`
+          span.style.fontFamily = 'sans-serif'
+          span.style.whiteSpace = 'pre'
+          span.style.color = 'transparent'
+          span.style.cursor = 'text'
+          span.style.userSelect = 'text'
+          span.style.webkitUserSelect = 'text'
+          span.style.pointerEvents = 'auto'
+          span.style.transformOrigin = '0% 0%'
+          
+          span.textContent = item.str
+          span.setAttribute('data-text-index', index.toString())
+          span.setAttribute('data-page-num', pageNum.toString())
+          
+          textLayerDiv.appendChild(span)
+          return
+        }
         
         let angle = Math.atan2(tx[1], tx[0])
         const style = textContent.styles[item.fontName]
@@ -330,20 +359,25 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         setLoadingTimeout(false)
         console.log('[StaticPdfViewer] 设置加载状态为true')
         
-        // 等待pdfjs加载
+        // 等待pdfjs加载并确保完全可用
         if (!pdfjsLib || !pdfjsLoaded) {
           console.log('[StaticPdfViewer] 等待PDF.js加载...')
           await new Promise((resolve, reject) => {
             let attempts = 0
-            const maxAttempts = 50 // 最多等待5秒
+            const maxAttempts = 100 // 增加到10秒等待时间
             
             const checkPdfjs = () => {
               attempts++
-              if (pdfjsLib && pdfjsLoaded) {
+              if (pdfjsLib && pdfjsLoaded && pdfjsLib.getDocument && pdfjsLib.GlobalWorkerOptions) {
                 console.log('[StaticPdfViewer] PDF.js加载验证成功')
                 resolve(pdfjsLib)
               } else if (attempts >= maxAttempts) {
-                console.error('[StaticPdfViewer] PDF.js加载超时')
+                console.error('[StaticPdfViewer] PDF.js加载超时，当前状态:', {
+                  pdfjsLib: !!pdfjsLib,
+                  pdfjsLoaded,
+                  getDocument: !!(pdfjsLib && pdfjsLib.getDocument),
+                  GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions)
+                })
                 reject(new Error('PDF.js加载超时'))
               } else {
                 setTimeout(checkPdfjs, 100)
