@@ -182,7 +182,7 @@ export default function PDFDebugPage() {
       const pdfjs = await import('pdfjs-dist')
       
       // 设置worker
-      const workerSrc = '/pdf-js/pdf.worker.min.js'
+      const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
       pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
       
       setTestResults(prev => ({ ...prev, pdfjs: 'success', pdfVersion: pdfjs.version }))
@@ -355,7 +355,7 @@ export default function PDFDebugPage() {
       addLog(`✅ PDF.js模块加载成功，版本: ${pdfjs.version}`)
       
       // 设置Worker
-      const workerSrc = '/pdf-js/pdf.worker.min.js'
+      const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
       pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
       addLog(`✅ PDF.js Worker设置完成: ${workerSrc}`)
       
