@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from "@/components/language-selector"
 import { MaogeInterface } from "@/components/chat-interface"
-import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain, Share2, Bug } from "lucide-react"
+import { Download, InfoIcon as Insights, List, Flag, ZoomIn, ZoomOut, RotateCw, Send, FolderOpen, FileText, Plus, Zap, Sparkles, BookOpen, Brain, Share2 } from "lucide-react"
 import { useLocale, useTranslations } from 'next-intl'
 import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
@@ -24,14 +24,8 @@ import { generatePDFQuestions } from "@/lib/pdf-question-generator"
 import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
-import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
-import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
-import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
 import MinimalPdfViewer from "@/components/MinimalPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
-import ErrorBoundary from "@/components/ErrorBoundary"
-import InlineDebugPanel from "@/components/InlineDebugPanel"
-import GlobalErrorLogger from "@/components/GlobalErrorLogger"
 
 interface AnalysisResult {
   theme: string
@@ -130,8 +124,7 @@ export default function AnalysisPage() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
   
-  // PDF查看器ref
-  const pdfViewerRef = useRef<StaticPdfViewerRef>(null);
+  // PDF查看器ref（已简化为MinimalPdfViewer，无需ref）
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -144,8 +137,6 @@ export default function AnalysisPage() {
   // 分享弹窗状态
   const [showShareModal, setShowShareModal] = useState(false);
   
-  // 调试面板状态
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
   
   // PDF目录相关状态
   const [pdfOutline, setPdfOutline] = useState<OutlineItem[]>([]);
@@ -400,34 +391,16 @@ export default function AnalysisPage() {
     setPdfOutline(outline);
   }, []);
 
-  // 处理跳转到指定页面
+  // 处理跳转到指定页面（MinimalPdfViewer暂不支持页面跳转）
   const handleJumpToPage = (pageNumber: number) => {
-    console.log('[PDF目录] 跳转到页面:', pageNumber);
-    if (pdfViewerRef.current) {
-      pdfViewerRef.current.jumpToPage(pageNumber);
-    }
+    console.log('[PDF目录] 页面跳转功能已简化，当前请求跳转到页面:', pageNumber);
+    // TODO: 如需要页面跳转功能，可在后续版本中实现
   };
 
-  // 更新当前页面（监听PDF查看器的页面变化）
+  // 更新当前页面（MinimalPdfViewer已简化，移除页面监听）
   useEffect(() => {
-    const updateCurrentPage = () => {
-      if (pdfViewerRef.current) {
-        const page = pdfViewerRef.current.getCurrentPage();
-        // 只在页面真的变化时才更新状态
-        setCurrentPage(prevPage => {
-          if (prevPage !== page) {
-            console.log('[分析页] 页面变化:', prevPage, '->', page);
-            return page;
-          }
-          return prevPage;
-        });
-      }
-    };
-
-    // 定期更新当前页面
-    const interval = setInterval(updateCurrentPage, 500);
-    
-    return () => clearInterval(interval);
+    // MinimalPdfViewer不需要复杂的页面监听
+    console.log('[分析页] PDF查看器已简化，不再监听页面变化');
   }, []);
 
   // PDF 预览功能
@@ -722,43 +695,10 @@ export default function AnalysisPage() {
     setShowWelcome(false);
   };
 
-  // 跳转到指定页面的函数 - 使用新的ref系统
+  // 跳转到指定页面的函数（MinimalPdfViewer已简化）
   const handlePageJump = (pageNumber: number) => {
-    console.log(`[页码跳转] 跳转到第${pageNumber}页`);
-    console.log(`[页码跳转] isClient:`, isClient);
-    console.log(`[页码跳转] PDF查看器ref状态:`, pdfViewerRef.current);
-    console.log(`[页码跳转] PDF查看器ref方法:`, pdfViewerRef.current ? Object.keys(pdfViewerRef.current) : 'null');
-    console.log(`[页码跳转] 文件信息:`, fileInfo?.name);
-    
-    if (!isClient) {
-      console.warn('[页码跳转] 客户端未准备好');
-      return;
-    }
-    
-    if (pdfViewerRef.current && pdfViewerRef.current.jumpToPage) {
-      console.log(`[页码跳转] 调用jumpToPage方法`);
-      try {
-        pdfViewerRef.current.jumpToPage(pageNumber);
-        console.log(`[页码跳转] jumpToPage调用成功`);
-      } catch (error) {
-        console.error(`[页码跳转] jumpToPage调用失败:`, error);
-      }
-    } else {
-      console.warn('[页码跳转] PDF查看器ref或jumpToPage方法未准备好');
-      // 尝试延迟执行
-      setTimeout(() => {
-        if (pdfViewerRef.current && pdfViewerRef.current.jumpToPage) {
-          console.log(`[页码跳转] 延迟执行成功`);
-          try {
-            pdfViewerRef.current.jumpToPage(pageNumber);
-          } catch (error) {
-            console.error(`[页码跳转] 延迟执行失败:`, error);
-          }
-        } else {
-          console.error('[页码跳转] 延迟执行仍然失败');
-        }
-      }, 2000);
-    }
+    console.log(`[页码跳转] 简化版PDF查看器，暂不支持页面跳转到第${pageNumber}页`);
+    // TODO: 如需要页面跳转功能，可在后续版本的PDF查看器中实现
   };
 
   // 渲染包含页码链接的文本
@@ -975,8 +915,6 @@ export default function AnalysisPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* 全局错误监听器 */}
-      <GlobalErrorLogger />
       {/* 左侧边栏 - 固定宽度与主页一致 */}
       <div className="w-80 min-w-[240px] max-w-[320px] flex-shrink-0 border-r border-gray-200 bg-white">
         <Sidebar 
@@ -1061,29 +999,6 @@ export default function AnalysisPage() {
                 onClick={() => setShowShareModal(true)}
               >
                 <Share2 className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-                title="PDF调试工具"
-                onClick={() => {
-                  // 先尝试打开专门的调试页面，如果失败则显示内嵌调试面板
-                  try {
-                    const debugUrl = `/${locale}/pdf-debug`
-                    const newWindow = window.open(debugUrl, '_blank')
-                    // 如果无法打开新窗口，显示内嵌面板
-                    setTimeout(() => {
-                      if (!newWindow || newWindow.closed) {
-                        setShowDebugPanel(true)
-                      }
-                    }, 1000)
-                  } catch (error) {
-                    setShowDebugPanel(true)
-                  }
-                }}
-              >
-                <Bug className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -1420,11 +1335,6 @@ export default function AnalysisPage() {
         />
       )}
 
-      {/* 内嵌调试面板 */}
-      <InlineDebugPanel 
-        isOpen={showDebugPanel}
-        onClose={() => setShowDebugPanel(false)}
-      />
 
     </div>
   );

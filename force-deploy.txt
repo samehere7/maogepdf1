@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 15:15:00 - Deploy unified PDF.js manager, fix module conflicts
+Force deploy trigger - 2025-07-02 15:30:00 - MAJOR CLEANUP: Remove all redundant PDF components and debug files
