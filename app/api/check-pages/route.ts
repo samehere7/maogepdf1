@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
-import * as pdfjsLib from 'pdfjs-dist';
 
-// 配置 PDF.js worker
-if (typeof global !== 'undefined') {
-  const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+// 服务端使用动态导入PDF.js
+let pdfjsLib: any = null;
+
+async function loadPdfjs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
+    // 服务端不需要Worker配置
+  }
+  return pdfjsLib;
 }
 
 // 用户限制配置
@@ -28,7 +32,8 @@ export async function POST(req: Request) {
     
     // 使用PDF.js解析PDF获取页数
     try {
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdfjs = await loadPdfjs();
+      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const numPages = pdf.numPages;
       
       console.log(`[页数检查] PDF页数: ${numPages}`);

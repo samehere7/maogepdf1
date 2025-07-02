@@ -11,7 +11,6 @@ import { analyzeDocument } from "@/lib/openrouter"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { LoginModal } from "@/components/login-modal"
 import { Sidebar } from "@/components/sidebar"
-import * as pdfjsLib from 'pdfjs-dist'
 import { supabase } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"

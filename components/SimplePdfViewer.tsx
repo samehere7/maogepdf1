@@ -1,13 +1,24 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
-import * as pdfjsLib from 'pdfjs-dist'
-import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
 
-// 配置 PDF.js worker
+// 动态导入PDF.js，避免模块冲突
+let pdfjsLib: any = null
+let pdfjsLoaded = false
+
 if (typeof window !== 'undefined') {
-  const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+  import('pdfjs-dist').then((pdfjs) => {
+    pdfjsLib = pdfjs
+    pdfjsLoaded = true
+    
+    // 配置 PDF.js worker
+    const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+    
+    console.log('[SimplePdfViewer] PDF.js加载完成')
+  }).catch((error) => {
+    console.error('[SimplePdfViewer] PDF.js加载失败:', error)
+  })
 }
 
 interface OutlineItem {
