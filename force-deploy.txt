@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 14:40:00 - Fix Canvas detection too strict blocking PDF display
+Force deploy trigger - 2025-07-02 14:45:00 - BYPASS Canvas detection completely, direct PDF render
