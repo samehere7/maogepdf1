@@ -388,8 +388,11 @@ export default function PDFDebugPage() {
       const currentUrl = window.location.href
       const baseUrl = currentUrl.split('/zh/')[0]
       
-      // 尝试多个可能的PDF路径
+      // 尝试多个可能的PDF路径（基于实际文件系统）
       const possiblePaths = [
+        '/sample.pdf',  // public目录下的样本PDF
+        '/uploads/Git快速入门(1).pdf',  // 实际存在的PDF文件
+        '/javascript-english.pdf',
         '/uploads/javascript-english.pdf',
         '/api/uploads/javascript-english.pdf', 
         '/static/javascript-english.pdf',

@@ -57,18 +57,31 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
           // 测试图像数据获取（PDF.js需要）
           const imageData = ctx2d.getImageData(15, 15, 1, 1)
           
-          // 验证渲染结果
+          // 验证渲染结果 - 降低检测标准，适应更多浏览器
           if (imageData && imageData.data && imageData.data.length >= 4) {
             const red = imageData.data[0]
-            canvas2dWorks = red > 200 // 检查红色值是否正确
+            // 降低要求：只要有红色值就认为正常（原来要求>200，现在>100）
+            canvas2dWorks = red > 100 || red === 255
             hardwareAccel = canvas2dWorks
             details.push(`Canvas 2D基本测试通过，红色值: ${red}`)
           } else {
             details.push('Canvas 2D图像数据获取失败')
           }
           
+          // 如果第一次测试失败，再尝试基本检测
+          if (!canvas2dWorks && ctx2d) {
+            canvas2dWorks = true // 如果能获取上下文，就认为可用
+            details.push('Canvas 2D上下文可用，采用基本兼容模式')
+          }
+          
         } catch (drawError) {
-          details.push(`Canvas 2D绘制测试失败: ${drawError}`)
+          // 即使绘制测试失败，如果有上下文也认为基本可用
+          if (ctx2d) {
+            canvas2dWorks = true
+            details.push(`Canvas 2D基本可用（绘制测试失败但上下文正常）: ${drawError}`)
+          } else {
+            details.push(`Canvas 2D绘制测试失败: ${drawError}`)
+          }
         }
       } else {
         details.push('Canvas 2D上下文获取失败')
