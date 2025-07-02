@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 14:50:00 - Create minimal PDF test page to isolate root cause
+Force deploy trigger - 2025-07-02 15:00:00 - Deploy MINIMAL PDF viewer, bypass ALL complex logic
