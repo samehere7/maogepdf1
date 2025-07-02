@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 14:45:00 - BYPASS Canvas detection completely, direct PDF render
+Force deploy trigger - 2025-07-02 14:50:00 - Create minimal PDF test page to isolate root cause
