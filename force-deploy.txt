@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 14:25:00 - Use unpkg CDN for PDF.js Worker
+Force deploy trigger - 2025-07-02 14:40:00 - Fix Canvas detection too strict blocking PDF display
