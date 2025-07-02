@@ -1113,7 +1113,6 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                  <ErrorBoundary>
                     <StaticPdfViewer 
                       ref={pdfViewerRef}
                       file={finalPdfFile}
@@ -1122,7 +1121,6 @@ export default function AnalysisPage() {
                       onTextSelect={handleTextSelect}
                       className="pdf-viewer-with-paragraphs"
                     />
-                  </ErrorBoundary>
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
