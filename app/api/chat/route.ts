@@ -3,23 +3,29 @@ import { getPDF } from '@/lib/pdf-service-supabase';
 import { createClient } from '@/lib/supabase/server';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 
-// 定义模型配置 - 全部使用DeepSeek免费模型
+// 定义模型配置 - 针对大PDF优化token限制
 const MODEL_CONFIGS = {
   fast: {
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_FAST || process.env.OPENROUTER_API_KEY,
-    maxTokens: 200 // 增加token确保回答完整
+    maxTokens: 600 // 大幅增加token支持大PDF
   },
   highQuality: {
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
-    maxTokens: 300 // 高质量模式更多token
+    maxTokens: 1000 // 高质量模式支持复杂回答
   },
   // 普通用户默认使用的免费模型
   default: {
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_FREE || process.env.OPENROUTER_API_KEY,
-    maxTokens: 250 // 免费模式适中token
+    maxTokens: 800 // 大幅提升默认token限制
+  },
+  // 新增：大文档专用配置
+  largePdf: {
+    model: "deepseek/deepseek-chat-v3-0324:free",
+    apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
+    maxTokens: 1200 // 专门处理大PDF的高token配置
   }
 };
 
@@ -55,6 +61,28 @@ function getLanguageInstruction(locale: string): string {
   };
   
   return instructions[locale as keyof typeof instructions] || instructions['en'];
+}
+
+// PDF大小和复杂度检测
+async function detectLargePdf(pdf: any): Promise<boolean> {
+  try {
+    // 检测条件：
+    // 1. 文件大小 > 5MB
+    // 2. 可能的页数估算（基于文件大小）
+    const fileSizeMB = pdf.size ? (pdf.size / 1024 / 1024) : 0;
+    const estimatedPages = fileSizeMB * 20; // 粗略估算：1MB ≈ 20页
+    
+    // 满足以下任一条件认为是大PDF：
+    const isLarge = fileSizeMB > 5 || estimatedPages > 100 || 
+                   (pdf.name && pdf.name.toLowerCase().includes('manual|guide|book|教程|手册'));
+    
+    console.log(`[PDF检测] 文件: ${pdf.name}, 大小: ${fileSizeMB.toFixed(2)}MB, 估算页数: ${estimatedPages.toFixed(0)}, 是否大文档: ${isLarge}`);
+    
+    return isLarge;
+  } catch (error) {
+    console.warn('[PDF检测] 检测失败，默认为普通文档:', error);
+    return false;
+  }
 }
 
 // 简化的降级回答生成器
@@ -248,10 +276,19 @@ export async function POST(req: Request) {
 
     // 使用AI模型进行智能对话
     console.log(`[聊天API] 用户Plus状态: ${isPlus}, 请求质量: ${quality}`);
+    
+    // 检测PDF大小和复杂度，智能选择模型配置
+    const isLargePdf = await detectLargePdf(pdf);
+    console.log(`[聊天API] PDF大小检测: 大文档=${isLargePdf}, 文件=${pdf.name}`);
+    
     try {
-      // 选择模型配置
+      // 智能选择模型配置
       let modelConfig;
-      if (isPlus) {
+      if (isLargePdf) {
+        // 大PDF使用专用高token配置
+        modelConfig = MODEL_CONFIGS.largePdf;
+        console.log('[聊天API] 检测到大PDF，使用大文档专用配置');
+      } else if (isPlus) {
         // Plus用户可以选择高质量或快速模式
         modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS] || MODEL_CONFIGS.highQuality;
       } else {
@@ -291,8 +328,9 @@ ${languageInstruction}
             console.log('[聊天API] 已切换到目标PDF的RAG内容');
           }
           
-          // 使用智能RAG系统生成回答，传递语言信息
-          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name, 'high', locale);
+          // 使用智能RAG系统生成回答，根据PDF大小调整模式
+          const ragMode = isLargePdf ? 'enhanced' : 'high';
+          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name, ragMode as any, locale);
           console.log('[聊天API] RAG系统生成回答成功');
           
           // 直接返回RAG系统的回答，不再调用OpenRouter
@@ -303,7 +341,33 @@ ${languageInstruction}
           
         } catch (ragError) {
           console.error('[聊天API] RAG系统失败，使用传统方式:', ragError);
-          // 降级到传统方式
+          
+          // 智能降级处理
+          if (isLargePdf) {
+            // 大PDF特殊错误提示
+            const errorMessage = `检测到这是一个大型PDF文档（${pdf.name}），当前可能存在以下问题：
+
+**可能原因：**
+- 文档页数过多，超出处理能力
+- 文档内容过于复杂
+- 服务器处理超时
+
+**建议：**
+1. 尝试询问更具体的问题
+2. 分段提问，避免过于宽泛的查询
+3. 如果问题持续，请联系技术支持
+
+您的问题："${lastUserMessage}"
+
+我们正在持续优化大文档的处理能力，感谢您的理解。`;
+
+            return NextResponse.json({
+              content: errorMessage,
+              role: 'assistant'
+            });
+          }
+          
+          // 普通PDF降级到传统方式
           enhancedSystemPrompt = buildSystemPrompt(pdf, locale);
           
           // 记录RAG失败的详细信息，用于后续优化
@@ -311,6 +375,7 @@ ${languageInstruction}
             error: ragError instanceof Error ? ragError.message : String(ragError),
             pdfId: pdfId,
             pdfName: pdf.name,
+            isLargePdf: isLargePdf,
             question: lastUserMessage.substring(0, 100) // 只记录前100字符
           });
         }

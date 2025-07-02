@@ -694,16 +694,24 @@ export class PDFRAGSystem {
   /**
    * 生成智能回答
    */
-  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
+  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' | 'enhanced' = 'high', locale: string = 'zh'): Promise<string> {
     try {
       console.log(`[RAG] 开始生成答案: "${query}", 模式: ${mode}`);
       
-      // 1. 检索相关内容
-      const relevantChunks = await this.searchRelevantChunks(query, 3);
+      // 1. 检索相关内容 - 根据模式调整检索数量
+      const chunkCount = mode === 'enhanced' ? 8 : (mode === 'high' ? 5 : 3);
+      const relevantChunks = await this.searchRelevantChunks(query, chunkCount);
+      console.log(`[RAG] 检索到${relevantChunks.length}个相关内容块，模式: ${mode}`);
       
       // 2. 评估检索质量
       const contentQuality = this.evaluateContentQuality(query, relevantChunks);
       console.log(`[RAG] 内容质量评估: ${contentQuality.quality}, 置信度: ${contentQuality.confidence}`);
+      
+      // 2.5. 大文档增强处理
+      if (mode === 'enhanced' && this.chunks.length > 200) {
+        console.log(`[RAG] 检测到大文档(${this.chunks.length}块)，启用增强模式`);
+        return await this.generateEnhancedAnswer(query, relevantChunks, pdfTitle, locale);
+      }
       
       let answer: string;
       
@@ -775,6 +783,103 @@ export class PDFRAGSystem {
     return 'mixed';
   }
   
+  /**
+   * 大文档增强回答生成
+   */
+  private async generateEnhancedAnswer(query: string, relevantChunks: SearchResult[], pdfTitle: string, locale: string): Promise<string> {
+    try {
+      console.log('[RAG Enhanced] 开始大文档增强处理');
+      
+      // 1. 内容压缩和合并
+      const compressedContent = this.compressContent(relevantChunks);
+      
+      // 2. 构建增强提示词
+      const enhancedPrompt = this.buildEnhancedPrompt(query, compressedContent, pdfTitle, locale);
+      
+      // 3. 调用AI服务生成回答
+      const answer = await this.callAIService(enhancedPrompt, locale, 'enhanced');
+      
+      console.log('[RAG Enhanced] 大文档增强回答生成完成');
+      return answer;
+      
+    } catch (error) {
+      console.error('[RAG Enhanced] 增强处理失败，回退到标准模式:', error);
+      // 回退到标准处理
+      const context = this.buildContext(query, relevantChunks, pdfTitle);
+      const prompt = this.buildPromptFromContext(context);
+      return await this.callAIService(prompt, locale, 'high');
+    }
+  }
+
+  /**
+   * 内容压缩和智能合并
+   */
+  private compressContent(relevantChunks: SearchResult[]): string {
+    // 按页码排序
+    const sortedChunks = relevantChunks.sort((a, b) => a.chunk.pageNumber - b.chunk.pageNumber);
+    
+    let compressedContent = '';
+    let lastPageNumber = -1;
+    
+    sortedChunks.forEach((result, index) => {
+      const chunk = result.chunk;
+      const pageNumber = chunk.pageNumber;
+      
+      // 添加页码分隔
+      if (pageNumber !== lastPageNumber) {
+        if (index > 0) compressedContent += '\n\n';
+        compressedContent += `【第${pageNumber}页】`;
+        lastPageNumber = pageNumber;
+      }
+      
+      // 智能去重和压缩
+      let text = chunk.text.trim();
+      
+      // 移除重复的标点符号和空白
+      text = text.replace(/\s+/g, ' ').replace(/[。，；：！？]{2,}/g, '。');
+      
+      // 保留核心内容，移除格式字符
+      text = text.replace(/^[^\u4e00-\u9fa5a-zA-Z0-9]+/, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]+$/, '');
+      
+      if (text.length > 10) {
+        compressedContent += ` ${text}`;
+      }
+    });
+    
+    console.log(`[RAG Enhanced] 内容压缩: ${relevantChunks.length}块 -> ${compressedContent.length}字符`);
+    return compressedContent;
+  }
+
+  /**
+   * 构建增强提示词
+   */
+  private buildEnhancedPrompt(query: string, content: string, pdfTitle: string, locale: string): string {
+    const languageInstruction = getLanguageInstruction(locale);
+    
+    return `你是专业的PDF文档分析助手，擅长处理大型文档的复杂问题。
+
+文档：${pdfTitle}
+用户问题：${query}
+
+相关内容：
+${content}
+
+回答要求：
+1. **综合分析**：基于提供的多个页面内容，进行全面分析
+2. **结构化回答**：用清晰的逻辑结构组织答案
+3. **准确引用**：使用【页码】格式标注信息来源
+4. **深度解答**：不仅回答"是什么"，还要解释"为什么"和"怎么做"
+5. **内容整合**：将分散的信息整合成连贯的回答
+
+回答风格：
+- 先给出核心答案
+- 再提供详细解释
+- 最后补充相关要点
+- 保持专业但易懂的语调
+
+${languageInstruction}`;
+  }
+
   /**
    * 基于上下文生成回答
    */
@@ -1095,21 +1200,24 @@ ${chunks[0].chunk.text}`;
   /**
    * 调用AI服务
    */
-  private async callAIService(prompt: string, mode: 'high' | 'fast' = 'high', locale: string = 'zh'): Promise<string> {
+  private async callAIService(prompt: string, locale: string = 'zh', mode: 'high' | 'fast' | 'enhanced' = 'high'): Promise<string> {
     try {
-      // 通用系统提示词模板 - 多语言版本
-      const SYSTEM_PROMPT_TEMPLATES: Record<string, {normal: string, fast: string}> = {
+      // 通用系统提示词模板 - 增加enhanced模式
+      const SYSTEM_PROMPT_TEMPLATES: Record<string, {normal: string, fast: string, enhanced: string}> = {
         zh: {
           normal: '你是一位博学、严谨且乐于助人的 AI 助手，能够用 {lang} 简洁、准确地回答用户关于当前 PDF 内容的任何问题。',
-          fast: '你是一位高效的 AI 助手，请用 {lang} 极度简洁地回答，直接给出要点，避免多余解释。'
+          fast: '你是一位高效的 AI 助手，请用 {lang} 极度简洁地回答，直接给出要点，避免多余解释。',
+          enhanced: '你是专业的大型文档分析专家，擅长从复杂内容中提取核心信息并形成全面、深入的回答。请用 {lang} 详细分析并提供结构化的专业回答。'
         },
         en: {
           normal: 'You are a knowledgeable, rigorous and helpful AI assistant who can answer any questions about the current PDF content concisely and accurately in {lang}.',
-          fast: 'You are an efficient AI assistant. Please answer extremely concisely in {lang}, give key points directly, and avoid redundant explanations.'
+          fast: 'You are an efficient AI assistant. Please answer extremely concisely in {lang}, give key points directly, and avoid redundant explanations.',
+          enhanced: 'You are a professional large document analysis expert, skilled at extracting core information from complex content and forming comprehensive, in-depth answers. Please provide detailed analysis and structured professional answers in {lang}.'
         },
         ko: {
           normal: '당신은 박식하고 엄격하며 도움이 되는 AI 어시스턴트로, 현재 PDF 내용에 대한 모든 질문에 {lang}로 간결하고 정확하게 답변할 수 있습니다.',
-          fast: '당신은 효율적인 AI 어시스턴트입니다. {lang}로 극도로 간결하게 답변하고, 핵심만 직접 제시하며, 불필요한 설명을 피하세요.'
+          fast: '당신은 효율적인 AI 어시스턴트입니다. {lang}로 극도로 간결하게 답변하고, 핵심만 직접 제시하며, 불필요한 설명을 피하세요.',
+          enhanced: '당신은 대용량 문서 분석 전문가로, 복잡한 내용에서 핵심 정보를 추출하여 포괄적이고 심층적인 답변을 제공하는 데 능숙합니다. {lang}로 상세한 분석과 구조화된 전문 답변을 제공해주세요.'
         },
         ja: {
           normal: 'あなたは博識で厳格かつ親切なAIアシスタントで、現在のPDF内容に関するあらゆる質問に{lang}で簡潔かつ正確に回答できます。',
@@ -1237,10 +1345,18 @@ ${chunks[0].chunk.text}`;
       
 
       // 动态生成系统提示词
-      const generateSystemPrompt = (locale: string, mode: 'high' | 'fast') => {
+      const generateSystemPrompt = (locale: string, mode: 'high' | 'fast' | 'enhanced') => {
         const langName = LANGUAGE_NAMES[locale] || LANGUAGE_NAMES['en'];
-        const template = mode === 'fast' ? SYSTEM_PROMPT_TEMPLATES[locale]?.fast || SYSTEM_PROMPT_TEMPLATES['en'].fast : 
-                                         SYSTEM_PROMPT_TEMPLATES[locale]?.normal || SYSTEM_PROMPT_TEMPLATES['en'].normal;
+        let template;
+        
+        if (mode === 'enhanced') {
+          template = SYSTEM_PROMPT_TEMPLATES[locale]?.enhanced || SYSTEM_PROMPT_TEMPLATES['en'].enhanced;
+        } else if (mode === 'fast') {
+          template = SYSTEM_PROMPT_TEMPLATES[locale]?.fast || SYSTEM_PROMPT_TEMPLATES['en'].fast;
+        } else {
+          template = SYSTEM_PROMPT_TEMPLATES[locale]?.normal || SYSTEM_PROMPT_TEMPLATES['en'].normal;
+        }
+        
         return template.replace('{lang}', langName);
       };
       
@@ -1270,7 +1386,7 @@ ${chunks[0].chunk.text}`;
             { role: 'user', content: finalPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 1500
+          max_tokens: mode === 'enhanced' ? 2000 : (mode === 'fast' ? 800 : 1500)
         })
       });
 
