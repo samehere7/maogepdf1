@@ -241,6 +241,13 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
     alert(instructions)
   }
 
+  // 临时修复：直接渲染子组件，跳过所有Canvas检测
+  // TODO: 调试完成后可以恢复检测逻辑
+  console.log('[CanvasFallback] 跳过Canvas检测，直接显示PDF内容')
+  return <>{children}</>
+
+  // 原检测逻辑暂时禁用
+  /*
   // 如果Canvas正常工作，直接渲染子组件
   if (canvasSupport?.canvas2d) {
     return <>{children}</>
@@ -350,4 +357,5 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
       </div>
     </div>
   )
+  */
 }
