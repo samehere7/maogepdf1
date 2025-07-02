@@ -1,1 +1,1 @@
-Force deploy trigger - 2025-07-02 12:45:30 - Enhanced PDF.js Module Safety
+Force deploy trigger - 2025-07-02 14:15:00 - Fix PDF.js Worker 404 Error

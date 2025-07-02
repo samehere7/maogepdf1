@@ -17,8 +17,8 @@ if (typeof window !== 'undefined') {
     pdfjsLib = pdfjs
     pdfjsLoaded = true
     
-    // 配置 PDF.js worker
-    const workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+    // 配置 PDF.js worker - 使用本地文件避免CDN问题
+    const workerSrc = '/pdf-js/pdf.worker.min.js'
     console.log('Setting PDF worker path:', workerSrc)
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
     
