@@ -122,10 +122,13 @@ async function extractWithPDFJS(pdfUrl: string): Promise<PDFPageContent[]> {
     }
     
     // 动态导入PDF.js以避免worker问题
+    // 使用legacy版本避免与前端PDF.js冲突
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
     
-    // 禁用worker（避免服务端worker问题）
+    // 禁用worker（避免服务端worker问题和前端冲突）
     pdfjsLib.GlobalWorkerOptions.workerSrc = false;
+    
+    console.log('[PDF文本提取] 使用服务端PDF.js legacy版本，避免前端冲突');
     
     // 获取PDF文件
     let pdfData;

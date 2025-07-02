@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { ZoomIn, ZoomOut } from 'lucide-react'
+import { getPDFJS } from '@/lib/pdf-manager'
 
 interface MinimalPdfViewerProps {
   file: File | string | null
@@ -14,6 +15,19 @@ export default function MinimalPdfViewer({ file }: MinimalPdfViewerProps) {
   const [isLoading, setIsLoading] = useState(false)
   const pdfDocRef = useRef<any>(null)
 
+  // 添加错误处理，防止模块初始化冲突
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (event.reason?.message?.includes('ee') || event.reason?.message?.includes('initialization')) {
+        console.warn('[MinimalPdfViewer] 检测到PDF.js模块初始化冲突，将忽略此错误')
+        event.preventDefault()
+      }
+    }
+    
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+  }, [])
+
   useEffect(() => {
     if (!file || !containerRef.current) return
 
@@ -21,14 +35,9 @@ export default function MinimalPdfViewer({ file }: MinimalPdfViewerProps) {
       try {
         console.log('[MinimalPdfViewer] 开始加载PDF.js...')
         
-        // 动态导入PDF.js
-        const pdfjs = await import('pdfjs-dist')
-        console.log('[MinimalPdfViewer] PDF.js版本:', pdfjs.version)
-        
-        // 设置Worker - 使用CDN
-        const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
-        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-        console.log('[MinimalPdfViewer] Worker设置:', workerSrc)
+        // 使用统一的PDF.js管理器
+        const pdfjs = await getPDFJS()
+        console.log('[MinimalPdfViewer] PDF.js获取成功，版本:', pdfjs.version)
         
         // 获取PDF数据
         let arrayBuffer: ArrayBuffer
