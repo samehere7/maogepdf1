@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { ZoomIn, ZoomOut } from 'lucide-react'
 
 interface MinimalPdfViewerProps {
   file: File | string | null
@@ -8,6 +9,10 @@ interface MinimalPdfViewerProps {
 
 export default function MinimalPdfViewer({ file }: MinimalPdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1.2)
+  const [numPages, setNumPages] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const pdfDocRef = useRef<any>(null)
 
   useEffect(() => {
     if (!file || !containerRef.current) return
@@ -67,7 +72,9 @@ export default function MinimalPdfViewer({ file }: MinimalPdfViewerProps) {
           canvas.height = viewport.height
           canvas.style.display = 'block'
           canvas.style.margin = '10px auto'
-          canvas.style.border = '1px solid #ccc'
+          canvas.style.border = '1px solid #ddd'
+          canvas.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'
+          canvas.style.borderRadius = '4px'
           
           // 渲染页面到canvas
           await page.render({
