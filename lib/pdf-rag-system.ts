@@ -516,9 +516,9 @@ export class PDFRAGSystem {
   }
   
   /**
-   * 基于查询检索相关文档块
+   * 基于查询检索相关文档块 - 增强版
    */
-  async searchRelevantChunks(query: string, topK: number = 5): Promise<SearchResult[]> {
+  async searchRelevantChunks(query: string, topK: number = 5, minSimilarity: number = 0.2): Promise<SearchResult[]> {
     console.log(`[RAG] 搜索相关内容: "${query}"`);
     
     if (this.chunks.length === 0) {
@@ -556,8 +556,9 @@ export class PDFRAGSystem {
       }
     }
     
-    // 排序并返回top-k结果
+    // 过滤并排序返回top-k结果
     const topResults = similarities
+      .filter(result => result.similarity >= minSimilarity) // 应用相似度阈值
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, topK)
       .map(result => ({
@@ -692,47 +693,135 @@ export class PDFRAGSystem {
   }
   
   /**
-   * 生成智能回答
+   * 获取检索配置 - 差异化策略
    */
-  async generateAnswer(query: string, pdfTitle: string = '', mode: 'high' | 'fast' | 'enhanced' = 'high', locale: string = 'zh'): Promise<string> {
-    try {
-      console.log(`[RAG] 开始生成答案: "${query}", 模式: ${mode}`);
-      
-      // 1. 检索相关内容 - 根据模式调整检索数量
-      const chunkCount = mode === 'enhanced' ? 8 : (mode === 'high' ? 5 : 3);
-      const relevantChunks = await this.searchRelevantChunks(query, chunkCount);
-      console.log(`[RAG] 检索到${relevantChunks.length}个相关内容块，模式: ${mode}`);
-      
-      // 2. 评估检索质量
-      const contentQuality = this.evaluateContentQuality(query, relevantChunks);
-      console.log(`[RAG] 内容质量评估: ${contentQuality.quality}, 置信度: ${contentQuality.confidence}`);
-      
-      // 2.5. 大文档增强处理
-      if (mode === 'enhanced' && this.chunks.length > 200) {
-        console.log(`[RAG] 检测到大文档(${this.chunks.length}块)，启用增强模式`);
-        return await this.generateEnhancedAnswer(query, relevantChunks, pdfTitle, locale);
+  private getRetrievalConfig(mode: string, options?: any) {
+    const configs = {
+      // 免费用户快速模式
+      fast: {
+        chunkCount: 3,
+        overlapRatio: 0.1,
+        qualityThreshold: 0.5,
+        multiPassRetrieval: false
+      },
+      // Plus用户/免费用户高质量模式
+      high: {
+        chunkCount: 5,
+        overlapRatio: 0.2,
+        qualityThreshold: 0.6,
+        multiPassRetrieval: false
+      },
+      // 免费用户大PDF增强模式
+      enhanced: {
+        chunkCount: 8,
+        overlapRatio: 0.25,
+        qualityThreshold: 0.7,
+        multiPassRetrieval: true
+      },
+      // Plus用户大PDF专用模式
+      premium: {
+        chunkCount: 12,
+        overlapRatio: 0.3,
+        qualityThreshold: 0.8,
+        multiPassRetrieval: true,
+        deepRetrieval: true
       }
+    };
+
+    const baseConfig = configs[mode as keyof typeof configs] || configs.high;
+    
+    // 根据用户类型和PDF大小微调
+    if (options?.isLargePdf && options?.isPlus) {
+      return { ...baseConfig, chunkCount: Math.min(baseConfig.chunkCount + 3, 15) };
+    } else if (options?.isLargePdf) {
+      return { ...baseConfig, chunkCount: Math.min(baseConfig.chunkCount + 2, 10) };
+    }
+    
+    return baseConfig;
+  }
+
+  /**
+   * 生成智能回答 - 增强版
+   */
+  async generateAnswer(
+    query: string, 
+    pdfTitle: string = '', 
+    mode: 'high' | 'fast' | 'enhanced' | 'premium' = 'high', 
+    locale: string = 'zh',
+    options?: {
+      modelConfig?: any;
+      provider?: string;
+      isPlus?: boolean;
+      isLargePdf?: boolean;
+    }
+  ): Promise<string> {
+    const startTime = Date.now();
+    let success = false;
+    
+    try {
+      console.log(`[RAG] 开始生成答案: "${query}", 模式: ${mode}, 选项:`, options);
+      
+      // 1. 获取自适应检索策略
+      const retrievalStrategy = this.getAdaptiveRetrievalStrategy(query, options);
+      console.log('[RAG] 自适应检索策略:', retrievalStrategy);
+      
+      // 2. 执行智能检索
+      let relevantChunks = await this.searchRelevantChunks(query, retrievalStrategy.chunkCount);
+      console.log(`[RAG] 初始检索到${relevantChunks.length}个相关内容块`);
+      
+      // 3. 内容预处理和优化
+      if (relevantChunks.length > 0) {
+        relevantChunks = this.preprocessLargeContent(relevantChunks, options);
+        console.log(`[RAG] 预处理后剩余${relevantChunks.length}个高质量内容块`);
+      }
+      
+      // 4. 多轮检索（仅限Plus用户或大PDF）
+      if (retrievalStrategy.multiPass && relevantChunks.length < 3) {
+        console.log('[RAG] 执行二轮检索补充内容');
+        const additionalChunks = await this.searchRelevantChunks(
+          query, 
+          Math.ceil(retrievalStrategy.chunkCount * 0.5),
+          Math.max(retrievalStrategy.similarity_threshold - 0.1, 0.2)
+        );
+        
+        // 合并并去重
+        const combined = [...relevantChunks, ...additionalChunks];
+        relevantChunks = this.deduplicateChunks(combined).slice(0, retrievalStrategy.chunkCount);
+        console.log(`[RAG] 二轮检索后总计${relevantChunks.length}个内容块`);
+      }
+      
+      // 5. 评估检索质量
+      const contentQuality = this.evaluateContentQuality(query, relevantChunks);
+      console.log(`[RAG] 内容质量评估: ${contentQuality.quality}, 置信度: ${contentQuality.confidence}, 原因: ${contentQuality.reason}`);
       
       let answer: string;
       
-      // 3. 根据质量选择回答模式 - 始终使用AI生成以支持多语言
-      if (contentQuality.quality === 'high') {
-        // 高质量匹配：基于PDF内容用AI生成回答
-        const context = this.buildContext(query, relevantChunks, pdfTitle);
-        const prompt = this.buildPromptFromContext(context);
-        answer = await this.callAIService(prompt, locale, mode);
-        console.log('[RAG] 使用PDF内容生成回答');
-      } else if (contentQuality.quality === 'medium') {
-        // 中等质量：混合模式（PDF内容 + AI补充）
+      // 6. 分层回答生成策略
+      if (options?.isLargePdf && (mode === 'enhanced' || mode === 'premium')) {
+        // 大PDF专用增强处理
+        console.log(`[RAG] 启用大PDF专用处理模式: ${mode}`);
+        answer = await this.generateEnhancedAnswer(query, relevantChunks, pdfTitle, locale, options);
+      } else if (contentQuality.quality === 'high' && relevantChunks.length > 0) {
+        // 高质量内容：智能上下文压缩 + AI生成
+        const contextTokens = options?.modelConfig?.contextWindow || 4000;
+        const maxContextTokens = Math.floor(contextTokens * 0.6); // 60%用于上下文
+        
+        const compressedContext = this.compressContextForModel(relevantChunks, maxContextTokens, options);
+        const enhancedPrompt = this.buildEnhancedPrompt(query, compressedContext, pdfTitle, locale);
+        
+        answer = await this.callAIService(enhancedPrompt, locale, mode, options);
+        console.log('[RAG] 使用压缩上下文生成高质量回答');
+      } else if (contentQuality.quality === 'medium' && relevantChunks.length > 0) {
+        // 中等质量：混合模式
         answer = await this.generateHybridAnswer(query, relevantChunks, pdfTitle, mode, locale);
         console.log('[RAG] 使用混合模式生成回答');
       } else {
-        // 低质量：使用AI通用知识回答
+        // 低质量或无相关内容：AI通用知识
         answer = await this.generateAIAnswer(query, pdfTitle, mode, locale);
         console.log('[RAG] 使用AI通用知识生成回答');
       }
       
-      // 4. 添加到对话历史
+      // 7. 添加到对话历史
       this.conversationHistory.push(
         { role: 'user', content: query },
         { role: 'assistant', content: answer }
@@ -743,11 +832,27 @@ export class PDFRAGSystem {
         this.conversationHistory = this.conversationHistory.slice(-10);
       }
       
+      success = true;
+      this.trackOperation('生成答案', startTime, true, {
+        模式: mode,
+        质量: contentQuality.quality,
+        内容块数: relevantChunks.length,
+        答案长度: answer.length
+      });
+      
       return answer;
       
     } catch (error) {
       console.error('[RAG] 生成答案失败:', error);
-      return this.generateFallbackAnswer(query, locale);
+      this.trackOperation('生成答案', startTime, false, { 错误: error.message });
+      
+      // 尝试错误恢复
+      try {
+        return await this.attemptErrorRecovery(error);
+      } catch (recoveryError) {
+        console.error('[RAG] 错误恢复也失败:', recoveryError);
+        return this.generateFallbackAnswer(query, locale);
+      }
     }
   }
   
@@ -784,9 +889,43 @@ export class PDFRAGSystem {
   }
   
   /**
+   * 获取系统状态和统计信息
+   */
+  getSystemStats(): {
+    totalChunks: number;
+    cacheSize: number;
+    averageChunkLength: number;
+    processedPdfs: number;
+    lastProcessingTime?: Date;
+  } {
+    return {
+      totalChunks: this.chunks.length,
+      cacheSize: this.searchCache.size,
+      averageChunkLength: this.chunks.length > 0 ? 
+        this.chunks.reduce((sum, chunk) => sum + chunk.text.length, 0) / this.chunks.length : 0,
+      processedPdfs: this.pdfContentMap.size,
+      lastProcessingTime: this.chunks.length > 0 ? new Date() : undefined
+    };
+  }
+
+  /**
+   * 清理和重置系统状态
+   */
+  clearAll(): void {
+    this.chunks = [];
+    this.embeddings.clear();
+    this.conversationHistory = [];
+    this.searchCache.clear();
+    this.pdfContentMap.clear();
+    this.currentPdfId = '';
+    this.lastProcessedPdfUrl = '';
+    console.log('[RAG] 系统状态已完全清理重置');
+  }
+
+  /**
    * 大文档增强回答生成
    */
-  private async generateEnhancedAnswer(query: string, relevantChunks: SearchResult[], pdfTitle: string, locale: string): Promise<string> {
+  private async generateEnhancedAnswer(query: string, relevantChunks: SearchResult[], pdfTitle: string, locale: string, options?: any): Promise<string> {
     try {
       console.log('[RAG Enhanced] 开始大文档增强处理');
       
@@ -797,7 +936,7 @@ export class PDFRAGSystem {
       const enhancedPrompt = this.buildEnhancedPrompt(query, compressedContent, pdfTitle, locale);
       
       // 3. 调用AI服务生成回答
-      const answer = await this.callAIService(enhancedPrompt, locale, 'enhanced');
+      const answer = await this.callAIService(enhancedPrompt, locale, 'enhanced', options);
       
       console.log('[RAG Enhanced] 大文档增强回答生成完成');
       return answer;
@@ -807,7 +946,7 @@ export class PDFRAGSystem {
       // 回退到标准处理
       const context = this.buildContext(query, relevantChunks, pdfTitle);
       const prompt = this.buildPromptFromContext(context);
-      return await this.callAIService(prompt, locale, 'high');
+      return await this.callAIService(prompt, locale, 'high', options);
     }
   }
 
@@ -1198,26 +1337,40 @@ ${chunks[0].chunk.text}`;
   }
 
   /**
-   * 调用AI服务
+   * 调用AI服务 - 支持外部模型配置
    */
-  private async callAIService(prompt: string, locale: string = 'zh', mode: 'high' | 'fast' | 'enhanced' = 'high'): Promise<string> {
+  private async callAIService(
+    prompt: string, 
+    locale: string = 'zh', 
+    mode: 'high' | 'fast' | 'enhanced' | 'premium' = 'high',
+    options?: any
+  ): Promise<string> {
     try {
-      // 通用系统提示词模板 - 增加enhanced模式
-      const SYSTEM_PROMPT_TEMPLATES: Record<string, {normal: string, fast: string, enhanced: string}> = {
+      // 检查是否有外部模型配置
+      if (options?.modelConfig) {
+        console.log('[RAG] 使用外部模型配置:', options.modelConfig.provider, options.modelConfig.model);
+        return await this.callExternalProvider(prompt, options.modelConfig, locale);
+      }
+
+      // 通用系统提示词模板 - 增加premium模式
+      const SYSTEM_PROMPT_TEMPLATES: Record<string, {normal: string, fast: string, enhanced?: string, premium?: string}> = {
         zh: {
           normal: '你是一位博学、严谨且乐于助人的 AI 助手，能够用 {lang} 简洁、准确地回答用户关于当前 PDF 内容的任何问题。',
           fast: '你是一位高效的 AI 助手，请用 {lang} 极度简洁地回答，直接给出要点，避免多余解释。',
-          enhanced: '你是专业的大型文档分析专家，擅长从复杂内容中提取核心信息并形成全面、深入的回答。请用 {lang} 详细分析并提供结构化的专业回答。'
+          enhanced: '你是专业的大型文档分析专家，擅长从复杂内容中提取核心信息并形成全面、深入的回答。请用 {lang} 详细分析并提供结构化的专业回答。',
+          premium: '你是顶级的文档分析和知识整合专家，具备深度理解复杂文档的能力。请用 {lang} 提供最高质量的分析回答，包括深层次的见解、跨章节的关联分析和专业的结论。'
         },
         en: {
           normal: 'You are a knowledgeable, rigorous and helpful AI assistant who can answer any questions about the current PDF content concisely and accurately in {lang}.',
           fast: 'You are an efficient AI assistant. Please answer extremely concisely in {lang}, give key points directly, and avoid redundant explanations.',
-          enhanced: 'You are a professional large document analysis expert, skilled at extracting core information from complex content and forming comprehensive, in-depth answers. Please provide detailed analysis and structured professional answers in {lang}.'
+          enhanced: 'You are a professional large document analysis expert, skilled at extracting core information from complex content and forming comprehensive, in-depth answers. Please provide detailed analysis and structured professional answers in {lang}.',
+          premium: 'You are a top-tier document analysis and knowledge integration expert with deep understanding of complex documents. Please provide the highest quality analytical answers in {lang}, including profound insights, cross-chapter correlation analysis, and professional conclusions.'
         },
         ko: {
           normal: '당신은 박식하고 엄격하며 도움이 되는 AI 어시스턴트로, 현재 PDF 내용에 대한 모든 질문에 {lang}로 간결하고 정확하게 답변할 수 있습니다.',
           fast: '당신은 효율적인 AI 어시스턴트입니다. {lang}로 극도로 간결하게 답변하고, 핵심만 직접 제시하며, 불필요한 설명을 피하세요.',
-          enhanced: '당신은 대용량 문서 분석 전문가로, 복잡한 내용에서 핵심 정보를 추출하여 포괄적이고 심층적인 답변을 제공하는 데 능숙합니다. {lang}로 상세한 분석과 구조화된 전문 답변을 제공해주세요.'
+          enhanced: '당신은 대용량 문서 분석 전문가로, 복잡한 내용에서 핵심 정보를 추출하여 포괄적이고 심층적인 답변을 제공하는 데 능숙합니다. {lang}로 상세한 분석과 구조화된 전문 답변을 제공해주세요.',
+          premium: '당신은 최고급 문서 분석 전문가로서 Plus 사용자에게 최상의 서비스를 제공합니다. {lang}로 깊이 있는 통찰과 전문적 분석을 포함한 최고 품질의 답변을 제공하세요.'
         },
         ja: {
           normal: 'あなたは博識で厳格かつ親切なAIアシスタントで、現在のPDF内容に関するあらゆる質問に{lang}で簡潔かつ正確に回答できます。',
@@ -1345,16 +1498,18 @@ ${chunks[0].chunk.text}`;
       
 
       // 动态生成系统提示词
-      const generateSystemPrompt = (locale: string, mode: 'high' | 'fast' | 'enhanced') => {
+      const generateSystemPrompt = (locale: string, mode: 'high' | 'fast' | 'enhanced' | 'premium') => {
         const langName = LANGUAGE_NAMES[locale] || LANGUAGE_NAMES['en'];
         let template;
         
-        if (mode === 'enhanced') {
-          template = SYSTEM_PROMPT_TEMPLATES[locale]?.enhanced || SYSTEM_PROMPT_TEMPLATES['en'].enhanced;
+        const localeTemplates = SYSTEM_PROMPT_TEMPLATES[locale] || SYSTEM_PROMPT_TEMPLATES['en'];
+        
+        if (mode === 'enhanced' || mode === 'premium') {
+          template = localeTemplates.enhanced || localeTemplates.normal;
         } else if (mode === 'fast') {
-          template = SYSTEM_PROMPT_TEMPLATES[locale]?.fast || SYSTEM_PROMPT_TEMPLATES['en'].fast;
+          template = localeTemplates.fast || localeTemplates.normal;
         } else {
-          template = SYSTEM_PROMPT_TEMPLATES[locale]?.normal || SYSTEM_PROMPT_TEMPLATES['en'].normal;
+          template = localeTemplates.normal;
         }
         
         return template.replace('{lang}', langName);
@@ -1599,6 +1754,363 @@ ${chunks[0].chunk.text}`;
     this.searchCache.clear();
     this.lastProcessedPdfUrl = '';
     console.log('[RAG] 系统已清理');
+  }
+
+  /**
+   * 性能监控函数
+   */
+  private trackOperation(operation: string, startTime: number, success: boolean, metadata?: any) {
+    const duration = Date.now() - startTime;
+    console.log(`[RAG性能] ${operation}: ${duration}ms, 成功: ${success}`, metadata || {});
+    
+    // 性能阈值警告
+    if (duration > 5000) {
+      console.warn(`[RAG性能警告] ${operation} 耗时过长: ${duration}ms`);
+    }
+  }
+
+  /**
+   * 智能内容预处理 - 针对大PDF优化
+   */
+  private preprocessLargeContent(chunks: SearchResult[], options?: any): SearchResult[] {
+    console.log('[RAG预处理] 开始大文档内容预处理，原始块数:', chunks.length);
+    
+    // 1. 去重处理
+    const uniqueChunks = this.deduplicateChunks(chunks);
+    
+    // 2. 质量过滤
+    const highQualityChunks = this.filterHighQualityChunks(uniqueChunks, options);
+    
+    // 3. 相关性重排序
+    const rerankedChunks = this.reRankByRelevance(highQualityChunks, options);
+    
+    console.log('[RAG预处理] 预处理完成，最终块数:', rerankedChunks.length);
+    return rerankedChunks;
+  }
+
+  /**
+   * 去重处理
+   */
+  private deduplicateChunks(chunks: SearchResult[]): SearchResult[] {
+    const seen = new Set<string>();
+    return chunks.filter(chunk => {
+      const normalized = chunk.chunk.text.toLowerCase().replace(/\s+/g, ' ').trim();
+      if (seen.has(normalized)) {
+        return false;
+      }
+      seen.add(normalized);
+      return true;
+    });
+  }
+
+  /**
+   * 高质量内容过滤
+   */
+  private filterHighQualityChunks(chunks: SearchResult[], options?: any): SearchResult[] {
+    const minLength = options?.isLargePdf ? 50 : 30;
+    const minSimilarity = options?.isPlus ? 0.3 : 0.4;
+    
+    return chunks.filter(chunk => {
+      const text = chunk.chunk.text;
+      const similarity = chunk.similarity;
+      
+      // 长度过滤
+      if (text.length < minLength) return false;
+      
+      // 相似度过滤
+      if (similarity < minSimilarity) return false;
+      
+      // 内容质量过滤
+      const qualityScore = this.calculateContentQuality(text);
+      return qualityScore > 0.5;
+    });
+  }
+
+  /**
+   * 相关性重排序
+   */
+  private reRankByRelevance(chunks: SearchResult[], options?: any): SearchResult[] {
+    return chunks.sort((a, b) => {
+      // 综合评分：相似度 + 内容质量 + 页面位置权重
+      const scoreA = this.calculateComprehensiveScore(a, options);
+      const scoreB = this.calculateComprehensiveScore(b, options);
+      return scoreB - scoreA;
+    });
+  }
+
+  /**
+   * 综合评分计算
+   */
+  private calculateComprehensiveScore(result: SearchResult, options?: any): number {
+    const similarity = result.similarity;
+    const contentQuality = this.calculateContentQuality(result.chunk.text);
+    const positionWeight = this.calculatePositionWeight(result.chunk.pageNumber, options);
+    
+    // 加权综合评分
+    return similarity * 0.5 + contentQuality * 0.3 + positionWeight * 0.2;
+  }
+
+  /**
+   * 内容质量评估
+   */
+  private calculateContentQuality(text: string): number {
+    let score = 1.0;
+    
+    // 长度评分
+    if (text.length < 20) score *= 0.3;
+    else if (text.length > 200) score *= 1.2;
+    
+    // 结构化内容加分
+    if (/[：:。；;！!？?]/.test(text)) score *= 1.1;
+    if (/\d+[、.)]/.test(text)) score *= 1.15; // 列表结构
+    if (/第\d+[章节]/.test(text)) score *= 1.2; // 章节标题
+    
+    // 特殊字符过多扣分
+    const specialCharRatio = (text.match(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g) || []).length / text.length;
+    if (specialCharRatio > 0.3) score *= 0.7;
+    
+    return Math.max(0.1, Math.min(1.0, score));
+  }
+
+  /**
+   * 页面位置权重
+   */
+  private calculatePositionWeight(pageNumber: number, options?: any): number {
+    // 前几页和目录通常更重要
+    if (pageNumber <= 3) return 1.0;
+    if (pageNumber <= 10) return 0.9;
+    return 0.8;
+  }
+
+  /**
+   * 调用外部Provider (OpenAI等)
+   */
+  private async callExternalProvider(prompt: string, modelConfig: any, locale: string): Promise<string> {
+    try {
+      if (modelConfig.provider === 'openai') {
+        // OpenAI API调用
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${modelConfig.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: modelConfig.model,
+            messages: [
+              { 
+                role: 'system', 
+                content: `你是专业的PDF文档分析助手。请用${locale === 'zh' ? '中文' : locale}提供准确、详细的回答。`
+              },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: modelConfig.maxTokens,
+            stream: false
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[RAG外部Provider] OpenAI API错误: ${response.status} - ${errorText}`);
+          throw new Error(`OpenAI API错误: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0]?.message?.content || '抱歉，AI回答生成失败。';
+        
+      } else {
+        // OpenRouter API调用
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${modelConfig.apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+            'X-Title': 'Maoge PDF RAG'
+          },
+          body: JSON.stringify({
+            model: modelConfig.model,
+            messages: [
+              { 
+                role: 'system', 
+                content: `你是专业的PDF文档分析助手。请用${locale === 'zh' ? '中文' : locale}提供准确、详细的回答。`
+              },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: modelConfig.maxTokens,
+            stream: false
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[RAG外部Provider] OpenRouter API错误: ${response.status} - ${errorText}`);
+          throw new Error(`OpenRouter API错误: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0]?.message?.content || '抱歉，AI回答生成失败。';
+      }
+      
+    } catch (error) {
+      console.error('[RAG外部Provider] 调用失败:', error);
+      return this.generateFallbackAnswer('', locale);
+    }
+  }
+
+  /**
+   * 智能上下文压缩 - 为Plus用户优化
+   */
+  private compressContextForModel(chunks: SearchResult[], maxTokens: number, options?: any): string {
+    const startTime = Date.now();
+    
+    let context = '';
+    let currentTokens = 0;
+    const avgCharsPerToken = 4; // 估算
+    
+    // 优先级排序：相似度 > 页面位置 > 内容质量
+    const sortedChunks = chunks.sort((a, b) => {
+      const scoreA = a.similarity * 0.6 + this.calculatePositionWeight(a.chunk.pageNumber, options) * 0.4;
+      const scoreB = b.similarity * 0.6 + this.calculatePositionWeight(b.chunk.pageNumber, options) * 0.4;
+      return scoreB - scoreA;
+    });
+    
+    for (const chunk of sortedChunks) {
+      const chunkText = `【第${chunk.chunk.pageNumber}页】${chunk.chunk.text}`;
+      const estimatedTokens = chunkText.length / avgCharsPerToken;
+      
+      if (currentTokens + estimatedTokens <= maxTokens) {
+        context += chunkText + '\n\n';
+        currentTokens += estimatedTokens;
+      } else {
+        // 如果是Plus用户且还有空间，尝试部分包含
+        if (options?.isPlus && maxTokens - currentTokens > 100) {
+          const remainingChars = (maxTokens - currentTokens) * avgCharsPerToken - 50;
+          if (remainingChars > 100) {
+            context += `【第${chunk.chunk.pageNumber}页】${chunk.chunk.text.substring(0, remainingChars)}...\n\n`;
+          }
+        }
+        break;
+      }
+    }
+    
+    this.trackOperation('上下文压缩', startTime, true, {
+      原始块数: chunks.length,
+      最终字符数: context.length,
+      估算token数: currentTokens
+    });
+    
+    return context.trim();
+  }
+
+  /**
+   * 自适应检索策略 - 根据用户类型和PDF大小动态调整
+   */
+  private getAdaptiveRetrievalStrategy(query: string, options?: any): {
+    chunkCount: number;
+    similarity_threshold: number;
+    multiPass: boolean;
+    rerank: boolean;
+  } {
+    const isLargePdf = options?.isLargePdf || false;
+    const isPlus = options?.isPlus || false;
+    const queryComplexity = this.analyzeQueryComplexity(query);
+    
+    let strategy = {
+      chunkCount: 5,
+      similarity_threshold: 0.5,
+      multiPass: false,
+      rerank: false
+    };
+    
+    // 根据用户类型调整
+    if (isPlus) {
+      strategy.chunkCount = isLargePdf ? 12 : 8;
+      strategy.similarity_threshold = 0.3;
+      strategy.multiPass = true;
+      strategy.rerank = true;
+    } else {
+      strategy.chunkCount = isLargePdf ? 8 : 5;
+      strategy.similarity_threshold = 0.4;
+      strategy.multiPass = isLargePdf;
+      strategy.rerank = isLargePdf;
+    }
+    
+    // 根据查询复杂度调整
+    if (queryComplexity === 'complex') {
+      strategy.chunkCount = Math.min(strategy.chunkCount + 3, 15);
+      strategy.multiPass = true;
+    } else if (queryComplexity === 'simple') {
+      strategy.chunkCount = Math.max(strategy.chunkCount - 2, 3);
+    }
+    
+    console.log('[RAG策略] 自适应检索策略:', strategy, { isLargePdf, isPlus, queryComplexity });
+    return strategy;
+  }
+
+  /**
+   * 查询复杂度分析
+   */
+  private analyzeQueryComplexity(query: string): 'simple' | 'medium' | 'complex' {
+    const complexIndicators = [
+      '比较', '对比', '区别', '联系', '影响', '原因', '结果',
+      'compare', 'contrast', 'difference', 'relationship', 'impact', 'cause', 'effect'
+    ];
+    
+    const simpleIndicators = [
+      '是什么', '定义', '在第几页', '哪里',
+      'what is', 'definition', 'where', 'which page'
+    ];
+    
+    const lowerQuery = query.toLowerCase();
+    
+    if (simpleIndicators.some(indicator => lowerQuery.includes(indicator))) {
+      return 'simple';
+    }
+    
+    if (complexIndicators.some(indicator => lowerQuery.includes(indicator))) {
+      return 'complex';
+    }
+    
+    // 基于查询长度判断
+    if (query.length < 10) return 'simple';
+    if (query.length > 50) return 'complex';
+    
+    return 'medium';
+  }
+
+  /**
+   * 增强错误恢复机制
+   */
+  private async attemptErrorRecovery(error: any, retryCount: number = 0): Promise<string> {
+    const maxRetries = 2;
+    
+    if (retryCount >= maxRetries) {
+      console.error('[RAG错误恢复] 已达最大重试次数，返回降级回答');
+      return this.generateFallbackAnswer('', 'zh');
+    }
+    
+    console.log(`[RAG错误恢复] 第${retryCount + 1}次重试，错误类型:`, error.name || 'Unknown');
+    
+    // 根据错误类型选择恢复策略
+    if (error.name === 'TimeoutError' || error.message?.includes('timeout')) {
+      // 超时错误：减少上下文长度
+      console.log('[RAG错误恢复] 检测到超时，采用简化策略重试');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+      return this.generateFallbackAnswer('由于文档较大，处理时间较长，请尝试更具体的问题。', 'zh');
+    }
+    
+    if (error.status === 429) {
+      // 频率限制：等待后重试
+      const waitTime = Math.pow(2, retryCount) * 1000; // 指数退避
+      console.log(`[RAG错误恢复] 频率限制，等待${waitTime}ms后重试`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return this.generateFallbackAnswer('请求过于频繁，请稍后再试。', 'zh');
+    }
+    
+    return this.generateFallbackAnswer('', 'zh');
   }
 }
 

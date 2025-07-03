@@ -635,23 +635,124 @@ export default function AnalysisPage() {
   };
 
   // 处理PDF文本选择
-  const handleTextSelect = (text: string, action: 'explain' | 'summarize' | 'rewrite') => {
-    let prompt = '';
-    
-    switch (action) {
-      case 'explain':
-        prompt = `解释："${text}"。`;
-        break;
-      case 'summarize':
-        prompt = `总结："${text}"。`;
-        break;
-      case 'rewrite':
-        prompt = `改写："${text}"。`;
-        break;
+  const handleTextSelect = async (text: string, action: 'explain' | 'summarize' | 'rewrite') => {
+    if (!text.trim()) {
+      console.warn('[文本选择] 空文本，操作取消');
+      return;
     }
     
-    // 直接发送自定义问题
-    handleSendQuestion(prompt);
+    // 文本长度检查
+    if (text.length > 2000) {
+      const errorMessage = '选中的文本过长，请选择较短的文本片段（不超过2000字符）。';
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: errorMessage }
+      ]);
+      return;
+    }
+    
+    const actionNames = {
+      'explain': '解释',
+      'summarize': '总结', 
+      'rewrite': '改写'
+    };
+    
+    console.log(`[文本选择] 开始${actionNames[action]}操作，文本长度: ${text.length}`);
+    
+    try {
+      // 先添加用户消息，显示正在处理
+      const userMessage = `【${actionNames[action]}】"${text.length > 100 ? text.substring(0, 100) + '...' : text}"`;
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: userMessage },
+        { role: "assistant", content: `正在${actionNames[action]}中，请稍候...` }
+      ]);
+
+      // 调用AI处理API
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+      
+      const response = await fetch('/api/ai/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text.trim(),
+          operation: action
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('请求过于频繁，请稍后再试。');
+        } else if (response.status >= 500) {
+          throw new Error('服务器内部错误，请稍后重试。');
+        } else {
+          throw new Error(`处理请求失败: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      const result = data.result || '处理失败，请重试。';
+      
+      // 更新最后的处理中消息
+      setMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length >= 2 && 
+            newMessages[newMessages.length - 1].role === 'assistant' && 
+            newMessages[newMessages.length - 1].content.includes('请稍候')) {
+          newMessages[newMessages.length - 1] = { role: "assistant", content: result };
+        } else {
+          newMessages.push({ role: "assistant", content: result });
+        }
+        return newMessages;
+      });
+
+      // 保存到数据库
+      if (fileInfo?.id) {
+        try {
+          await saveChatMessage(fileInfo.id, userMessage, true);
+          await saveChatMessage(fileInfo.id, result, false);
+        } catch (saveError) {
+          console.warn('[文本选择] 保存聊天记录失败:', saveError);
+          // 不影响用户体验，只记录警告
+        }
+      }
+      
+      console.log(`[文本选择] ${actionNames[action]}操作完成`);
+      
+    } catch (error) {
+      console.error(`[文本选择] ${actionNames[action]}操作失败:`, error);
+      
+      let errorMessage = '抱歉，处理您的文本时出错了。请稍后再试。';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = '处理超时，请尝试选择较短的文本。';
+        } else if (error.message.includes('频繁')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('服务器')) {
+          errorMessage = error.message;
+        }
+      }
+      
+      // 更新错误消息
+      setMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length >= 1 && 
+            newMessages[newMessages.length - 1].role === 'assistant' && 
+            newMessages[newMessages.length - 1].content.includes('请稍候')) {
+          newMessages[newMessages.length - 1] = { role: "assistant", content: errorMessage };
+        } else {
+          newMessages.push({ role: "assistant", content: errorMessage });
+        }
+        return newMessages;
+      });
+    }
   };
 
   // 生成欢迎问题
@@ -1031,6 +1132,7 @@ export default function AnalysisPage() {
                 {isClient ? (
                     <MinimalPdfViewer 
                       file={finalPdfFile}
+                      onTextSelect={handleTextSelect}
                     />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">

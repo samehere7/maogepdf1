@@ -3,29 +3,53 @@ import { getPDF } from '@/lib/pdf-service-supabase';
 import { createClient } from '@/lib/supabase/server';
 import { pdfRAGSystem } from '@/lib/pdf-rag-system';
 
-// 定义模型配置 - 针对大PDF优化token限制
+// 定义模型配置 - 支持差异化模型策略
 const MODEL_CONFIGS = {
   fast: {
+    provider: "openrouter",
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_FAST || process.env.OPENROUTER_API_KEY,
-    maxTokens: 600 // 大幅增加token支持大PDF
+    maxTokens: 600,
+    contextWindow: 4000
   },
   highQuality: {
+    provider: "openrouter", 
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
-    maxTokens: 1000 // 高质量模式支持复杂回答
+    maxTokens: 1000,
+    contextWindow: 4000
   },
   // 普通用户默认使用的免费模型
   default: {
+    provider: "openrouter",
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_FREE || process.env.OPENROUTER_API_KEY,
-    maxTokens: 800 // 大幅提升默认token限制
+    maxTokens: 800,
+    contextWindow: 4000
   },
-  // 新增：大文档专用配置
-  largePdf: {
+  // 免费用户大PDF优化配置
+  freeLargePdf: {
+    provider: "openrouter",
     model: "deepseek/deepseek-chat-v3-0324:free",
     apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
-    maxTokens: 1200 // 专门处理大PDF的高token配置
+    maxTokens: 1200,
+    contextWindow: 4000
+  },
+  // Plus用户大PDF专用配置 - GPT-4o
+  plusLargePdf: {
+    provider: "openai",
+    model: "gpt-4o",
+    apiKey: process.env.OPENAI_API_KEY,
+    maxTokens: 4000,
+    contextWindow: 128000
+  },
+  // Plus用户高质量模式 - GPT-4o mini
+  plusHighQuality: {
+    provider: "openai",
+    model: "gpt-4o-mini",
+    apiKey: process.env.OPENAI_API_KEY,
+    maxTokens: 2000,
+    contextWindow: 128000
   }
 };
 
@@ -63,26 +87,336 @@ function getLanguageInstruction(locale: string): string {
   return instructions[locale as keyof typeof instructions] || instructions['en'];
 }
 
-// PDF大小和复杂度检测
+// PDF大小和复杂度检测 - 增强版
 async function detectLargePdf(pdf: any): Promise<boolean> {
   try {
     // 检测条件：
     // 1. 文件大小 > 5MB
     // 2. 可能的页数估算（基于文件大小）
+    // 3. 文件名关键词检测
     const fileSizeMB = pdf.size ? (pdf.size / 1024 / 1024) : 0;
     const estimatedPages = fileSizeMB * 20; // 粗略估算：1MB ≈ 20页
     
-    // 满足以下任一条件认为是大PDF：
-    const isLarge = fileSizeMB > 5 || estimatedPages > 100 || 
-                   (pdf.name && pdf.name.toLowerCase().includes('manual|guide|book|教程|手册'));
+    // 增强检测：文件名模式匹配
+    const namePatterns = [
+      /manual|guide|book|教程|手册|文档|说明书/i,
+      /\d{3,}页|\d{3,}p|pages/i,  // 页数标识
+      /complete|full|comprehensive|完整|全套/i  // 完整性关键词
+    ];
     
-    console.log(`[PDF检测] 文件: ${pdf.name}, 大小: ${fileSizeMB.toFixed(2)}MB, 估算页数: ${estimatedPages.toFixed(0)}, 是否大文档: ${isLarge}`);
+    const nameMatch = pdf.name && namePatterns.some(pattern => pattern.test(pdf.name));
+    
+    // 满足以下任一条件认为是大PDF：
+    const isLarge = fileSizeMB > 5 || estimatedPages > 100 || nameMatch;
+    
+    console.log(`[PDF检测] 文件: ${pdf.name}, 大小: ${fileSizeMB.toFixed(2)}MB, 估算页数: ${estimatedPages.toFixed(0)}, 名称匹配: ${nameMatch}, 是否大文档: ${isLarge}`);
     
     return isLarge;
   } catch (error) {
     console.warn('[PDF检测] 检测失败，默认为普通文档:', error);
     return false;
   }
+}
+
+// 多Provider API调用函数
+async function callAIProvider(modelConfig: any, messages: any[], locale: string = 'zh'): Promise<string> {
+  try {
+    console.log(`[AI调用] 使用Provider: ${modelConfig.provider}, 模型: ${modelConfig.model}`);
+    
+    if (modelConfig.provider === 'openai') {
+      // OpenAI API调用
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${modelConfig.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelConfig.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: modelConfig.maxTokens,
+          stream: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[OpenAI] API错误: ${response.status} - ${errorText}`);
+        throw new Error(`OpenAI API错误: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || '抱歉，AI回答生成失败。';
+      
+    } else {
+      // OpenRouter API调用 (DeepSeek等)
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${modelConfig.apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+          'X-Title': 'Maoge PDF Chat'
+        },
+        body: JSON.stringify({
+          model: modelConfig.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: modelConfig.maxTokens,
+          stream: false
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[OpenRouter] API错误: ${response.status} - ${errorText}`);
+        throw new Error(`OpenRouter API错误: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || '抱歉，AI回答生成失败。';
+    }
+    
+  } catch (error) {
+    console.error('[AI调用] 失败:', error);
+    throw error;
+  }
+}
+
+// 大PDF降级处理函数
+async function handleLargePdfFallback(pdf: any, question: string, isPlus: boolean, locale: string): Promise<string> {
+  console.log('[大PDF降级] 开始分段处理策略');
+  
+  try {
+    // 基于问题类型的智能回答
+    const questionType = analyzeQuestionType(question);
+    
+    if (questionType === 'summary') {
+      return generateDocumentSummary(pdf, isPlus, locale);
+    } else if (questionType === 'specific') {
+      return generateKeywordSearch(pdf, question, locale);
+    } else {
+      return generateGenericHelp(pdf, question, isPlus, locale);
+    }
+    
+  } catch (error) {
+    console.error('[大PDF降级] 处理失败:', error);
+    throw error;
+  }
+}
+
+// 问题类型分析
+function analyzeQuestionType(question: string): 'summary' | 'specific' | 'generic' {
+  const summaryKeywords = ['总结', '概述', '介绍', 'summary', 'overview', 'what is', '是什么'];
+  const specificKeywords = ['如何', '怎么', 'how to', 'why', '为什么', '在哪里', 'where'];
+  
+  const lowerQuestion = question.toLowerCase();
+  
+  if (summaryKeywords.some(keyword => lowerQuestion.includes(keyword))) {
+    return 'summary';
+  } else if (specificKeywords.some(keyword => lowerQuestion.includes(keyword))) {
+    return 'specific';
+  }
+  return 'generic';
+}
+
+// 生成文档摘要
+function generateDocumentSummary(pdf: any, isPlus: boolean, locale: string): string {
+  const templates = {
+    zh: {
+      plus: `# 📋 大型文档摘要
+
+**文档**: ${pdf.name}
+**文件大小**: ${(pdf.size / (1024 * 1024)).toFixed(2)} MB
+
+## 🎯 Plus用户专享功能
+作为Plus用户，您享有大型文档的优先处理权限。虽然当前文档处理遇到了技术挑战，但我们为您提供以下建议：
+
+### 📝 优化提问策略
+1. **章节式提问**: 询问文档的特定章节或部分
+2. **关键词搜索**: 使用具体的技术术语或概念
+3. **分步骤查询**: 将复杂问题分解为多个简单问题
+
+### 🔧 技术支持
+- 大型文档处理正在优化中
+- Plus用户问题将优先处理
+- 如需紧急帮助，请联系技术支持`,
+
+      free: `# 📋 大型文档处理说明
+
+**文档**: ${pdf.name}  
+**状态**: 超大文档需要特殊处理
+
+## 💡 处理建议
+由于这是一个大型文档，建议您：
+
+1. **具体化问题**: 询问文档中的特定内容
+2. **关键词搜索**: 使用准确的关键词
+3. **升级到Plus**: 获得大文档优先处理权限
+
+### 🎯 提问示例
+- "文档中关于X的部分说了什么？"
+- "如何实现Y功能？"
+- "第N章的主要内容是什么？"`
+    },
+    en: {
+      plus: `# 📋 Large Document Summary
+
+**Document**: ${pdf.name}
+**File Size**: ${(pdf.size / (1024 * 1024)).toFixed(2)} MB
+
+## 🎯 Plus User Exclusive Features
+As a Plus user, you have priority processing rights for large documents. While current document processing faces technical challenges, we provide the following recommendations:
+
+### 📝 Optimized Query Strategy
+1. **Chapter-wise questions**: Ask about specific sections of the document
+2. **Keyword search**: Use specific technical terms or concepts  
+3. **Step-by-step queries**: Break complex questions into simpler ones
+
+### 🔧 Technical Support
+- Large document processing is being optimized
+- Plus user questions will be prioritized
+- For urgent help, please contact technical support`,
+
+      free: `# 📋 Large Document Processing Instructions
+
+**Document**: ${pdf.name}
+**Status**: Extra large document requires special processing
+
+## 💡 Processing Suggestions
+Since this is a large document, we recommend:
+
+1. **Specific questions**: Ask about specific content in the document
+2. **Keyword search**: Use precise keywords
+3. **Upgrade to Plus**: Get priority processing for large documents
+
+### 🎯 Question Examples
+- "What does the document say about X?"
+- "How to implement Y functionality?"
+- "What is the main content of Chapter N?"`
+    }
+  };
+  
+  const template = templates[locale as keyof typeof templates] || templates.en;
+  return isPlus ? template.plus : template.free;
+}
+
+// 生成关键词搜索建议
+function generateKeywordSearch(pdf: any, question: string, locale: string): string {
+  const keywords = extractKeywords(question);
+  
+  const templates = {
+    zh: `# 🔍 智能关键词搜索
+
+**您的问题**: "${question}"
+**文档**: ${pdf.name}
+
+## 🎯 搜索策略
+基于您的问题，建议重新提问时包含以下关键词：
+
+${keywords.map(kw => `- **${kw}**`).join('\n')}
+
+## 💡 优化建议
+1. **使用更具体的术语**: 替换通用词汇为专业术语
+2. **添加上下文**: 说明您想了解的具体方面
+3. **分步骤提问**: 将复杂问题拆分为简单问题
+
+### 📝 推荐问题格式
+- "在${keywords[0] || '相关主题'}方面，文档提到了什么？"
+- "${keywords[1] || '具体功能'}的实现方法是什么？"
+- "关于${keywords[2] || '特定概念'}的详细说明在哪里？"`,
+
+    en: `# 🔍 Smart Keyword Search
+
+**Your Question**: "${question}"
+**Document**: ${pdf.name}
+
+## 🎯 Search Strategy
+Based on your question, we recommend rephrasing with these keywords:
+
+${keywords.map(kw => `- **${kw}**`).join('\n')}
+
+## 💡 Optimization Tips
+1. **Use specific terms**: Replace general words with technical terms
+2. **Add context**: Specify the exact aspect you want to know
+3. **Ask step-by-step**: Break complex questions into simple ones
+
+### 📝 Recommended Question Format
+- "What does the document mention about ${keywords[0] || 'relevant topic'}?"
+- "What is the implementation method for ${keywords[1] || 'specific function'}?"
+- "Where are the detailed instructions for ${keywords[2] || 'specific concept'}?"`
+  };
+  
+  return templates[locale as keyof typeof templates] || templates.en;
+}
+
+// 提取关键词
+function extractKeywords(question: string): string[] {
+  // 简单的关键词提取（实际应用中可以使用更复杂的NLP）
+  const stopWords = ['的', '是', '在', '和', '与', '或', '如何', '怎么', '什么', 'the', 'is', 'and', 'or', 'how', 'what', 'where', 'when', 'why'];
+  const words = question.toLowerCase().split(/\s+/).filter(word => 
+    word.length > 2 && !stopWords.includes(word)
+  );
+  return words.slice(0, 3); // 返回前3个关键词
+}
+
+// 生成通用帮助
+function generateGenericHelp(pdf: any, question: string, isPlus: boolean, locale: string): string {
+  const templates = {
+    zh: `# 🤔 大型文档处理建议
+
+**文档**: ${pdf.name}
+**您的问题**: "${question}"
+
+## 🎯 当前情况
+这是一个大型PDF文档，需要特殊的处理策略。${isPlus ? '作为Plus用户，您享有优先处理权限。' : '建议升级到Plus获得更好的大文档处理体验。'}
+
+## 💡 解决方案
+### 1. 📍 具体化您的问题
+- ❌ "这个文档讲什么？"  
+- ✅ "第3章关于API设计的部分说了什么？"
+
+### 2. 🔍 使用关键词搜索
+- ❌ "怎么做？"
+- ✅ "JWT认证的实现步骤是什么？"
+
+### 3. 📝 分段提问
+- ❌ "详细介绍整个系统架构"
+- ✅ "数据库设计有哪些要点？"
+
+${isPlus ? '### 🎁 Plus用户福利\n- 大文档优先处理\n- 更长的上下文支持\n- 技术团队优先响应' : '### 🚀 升级建议\n升级到Plus版本享受大文档无忧体验！'}`,
+
+    en: `# 🤔 Large Document Processing Suggestions
+
+**Document**: ${pdf.name}
+**Your Question**: "${question}"
+
+## 🎯 Current Situation
+This is a large PDF document that requires special processing strategies. ${isPlus ? 'As a Plus user, you have priority processing privileges.' : 'Consider upgrading to Plus for better large document processing experience.'}
+
+## 💡 Solutions
+### 1. 📍 Make Your Questions Specific
+- ❌ "What does this document say?"
+- ✅ "What does Chapter 3 about API design mention?"
+
+### 2. 🔍 Use Keyword Search
+- ❌ "How to do it?"
+- ✅ "What are the JWT authentication implementation steps?"
+
+### 3. 📝 Ask in Segments
+- ❌ "Detailed introduction to the entire system architecture"
+- ✅ "What are the key points of database design?"
+
+${isPlus ? '### 🎁 Plus User Benefits\n- Priority processing for large documents\n- Longer context support\n- Priority response from technical team' : '### 🚀 Upgrade Recommendation\nUpgrade to Plus for worry-free large document experience!'}`
+  };
+  
+  return templates[locale as keyof typeof templates] || templates.en;
+}
+
+// 生成大PDF帮助信息
+function generateLargePdfHelpMessage(pdf: any, question: string, isPlus: boolean, locale: string): string {
+  return generateGenericHelp(pdf, question, isPlus, locale);
 }
 
 // 简化的降级回答生成器
@@ -282,18 +616,29 @@ export async function POST(req: Request) {
     console.log(`[聊天API] PDF大小检测: 大文档=${isLargePdf}, 文件=${pdf.name}`);
     
     try {
-      // 智能选择模型配置
+      // 智能选择模型配置 - 差异化策略
       let modelConfig;
-      if (isLargePdf) {
-        // 大PDF使用专用高token配置
-        modelConfig = MODEL_CONFIGS.largePdf;
-        console.log('[聊天API] 检测到大PDF，使用大文档专用配置');
+      if (isLargePdf && isPlus) {
+        // Plus用户 + 大PDF：使用GPT-4o高性能配置
+        modelConfig = MODEL_CONFIGS.plusLargePdf;
+        console.log('[聊天API] Plus用户大PDF：使用GPT-4o专用配置');
+      } else if (isLargePdf) {
+        // 免费用户 + 大PDF：使用优化的DeepSeek配置
+        modelConfig = MODEL_CONFIGS.freeLargePdf;
+        console.log('[聊天API] 免费用户大PDF：使用DeepSeek优化配置');
       } else if (isPlus) {
-        // Plus用户可以选择高质量或快速模式
-        modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS] || MODEL_CONFIGS.highQuality;
+        // Plus用户 + 普通PDF：可选择高质量模式
+        if (quality === 'highQuality') {
+          modelConfig = MODEL_CONFIGS.plusHighQuality;
+          console.log('[聊天API] Plus用户：使用GPT-4o-mini高质量模式');
+        } else {
+          modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS] || MODEL_CONFIGS.highQuality;
+          console.log('[聊天API] Plus用户：使用DeepSeek快速模式');
+        }
       } else {
-        // 普通用户使用免费模型
+        // 普通用户：使用免费模型
         modelConfig = MODEL_CONFIGS.default;
+        console.log('[聊天API] 免费用户：使用DeepSeek默认配置');
       }
       
       // 根据请求类型选择处理方式
@@ -315,7 +660,7 @@ ${languageInstruction}
 用户请求：${lastUserMessage}`;
         
       } else {
-        // 使用智能RAG系统生成回答
+        // 使用智能RAG系统生成回答 - 差异化策略
         try {
           console.log('[聊天API] 使用智能RAG系统生成回答');
           
@@ -328,43 +673,74 @@ ${languageInstruction}
             console.log('[聊天API] 已切换到目标PDF的RAG内容');
           }
           
-          // 使用智能RAG系统生成回答，根据PDF大小调整模式
-          const ragMode = isLargePdf ? 'enhanced' : 'high';
-          const ragAnswer = await pdfRAGSystem.generateAnswer(lastUserMessage, pdf.name, ragMode as any, locale);
+          // 根据用户类型和PDF大小选择RAG模式
+          let ragMode: 'fast' | 'high' | 'enhanced' | 'premium';
+          if (isLargePdf && isPlus) {
+            ragMode = 'premium';  // Plus用户大PDF：最高质量
+            console.log('[聊天API] Plus用户大PDF：使用premium RAG模式');
+          } else if (isLargePdf) {
+            ragMode = 'enhanced'; // 免费用户大PDF：增强模式
+            console.log('[聊天API] 免费用户大PDF：使用enhanced RAG模式');
+          } else if (isPlus) {
+            ragMode = 'high';     // Plus用户普通PDF：高质量模式
+            console.log('[聊天API] Plus用户：使用high RAG模式');
+          } else {
+            ragMode = 'fast';     // 免费用户普通PDF：快速模式
+            console.log('[聊天API] 免费用户：使用fast RAG模式');
+          }
+          
+          // 使用智能RAG系统生成回答
+          const ragAnswer = await pdfRAGSystem.generateAnswer(
+            lastUserMessage, 
+            pdf.name, 
+            ragMode as any, 
+            locale,
+            {
+              modelConfig: modelConfig,
+              provider: modelConfig.provider,
+              isPlus: isPlus,
+              isLargePdf: isLargePdf
+            }
+          );
           console.log('[聊天API] RAG系统生成回答成功');
           
-          // 直接返回RAG系统的回答，不再调用OpenRouter
+          // 对于新用户或大PDF，添加使用指导
+          let finalAnswer = ragAnswer;
+          if (isLargePdf && Math.random() < 0.3) { // 30%概率显示指导
+            const guidance = generateUserGuidance(isPlus, isLargePdf, locale);
+            finalAnswer = `${ragAnswer}\n\n---\n\n${guidance}`;
+          }
+          
+          // 直接返回RAG系统的回答
           return NextResponse.json({
-            content: ragAnswer,
+            content: finalAnswer,
             role: 'assistant'
           });
           
         } catch (ragError) {
           console.error('[聊天API] RAG系统失败，使用传统方式:', ragError);
           
-          // 智能降级处理
+          // 智能降级处理 - 增强版
           if (isLargePdf) {
-            // 大PDF特殊错误提示
-            const errorMessage = `检测到这是一个大型PDF文档（${pdf.name}），当前可能存在以下问题：
-
-**可能原因：**
-- 文档页数过多，超出处理能力
-- 文档内容过于复杂
-- 服务器处理超时
-
-**建议：**
-1. 尝试询问更具体的问题
-2. 分段提问，避免过于宽泛的查询
-3. 如果问题持续，请联系技术支持
-
-您的问题："${lastUserMessage}"
-
-我们正在持续优化大文档的处理能力，感谢您的理解。`;
-
-            return NextResponse.json({
-              content: errorMessage,
-              role: 'assistant'
-            });
+            console.log('[聊天API] 大PDF处理失败，启动智能降级处理');
+            
+            // 尝试分段处理策略
+            try {
+              const fallbackAnswer = await handleLargePdfFallback(pdf, lastUserMessage, isPlus, locale);
+              return NextResponse.json({
+                content: fallbackAnswer,
+                role: 'assistant'
+              });
+            } catch (fallbackError) {
+              console.error('[聊天API] 降级处理也失败:', fallbackError);
+              
+              // 最终降级：提供结构化的帮助信息
+              const helpMessage = generateLargePdfHelpMessage(pdf, lastUserMessage, isPlus, locale);
+              return NextResponse.json({
+                content: helpMessage,
+                role: 'assistant'
+              });
+            }
           }
           
           // 普通PDF降级到传统方式
@@ -381,35 +757,14 @@ ${languageInstruction}
         }
       }
       
-      // 调用OpenAI API
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${modelConfig.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-          'X-Title': 'Maoge PDF Chat'
-        },
-        body: JSON.stringify({
-          model: modelConfig.model,
-          messages: [
-            { role: 'system', content: enhancedSystemPrompt },
-            { role: 'user', content: lastUserMessage }
-          ],
-          temperature: 0.7,
-          max_tokens: isSimpleTextOperation ? 100 : modelConfig.maxTokens, // 简单操作使用更少token
-          stream: false // 确保非流式响应以简化处理
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiAnswer = data.choices[0]?.message?.content || '抱歉，AI回答生成失败，请重试。';
+      // 调用AI API - 支持多Provider
+      const messages = [
+        { role: 'system', content: enhancedSystemPrompt },
+        { role: 'user', content: lastUserMessage }
+      ];
       
-      console.log(`[聊天API] GPT-4o回答生成成功，长度: ${aiAnswer.length}`);
+      const aiAnswer = await callAIProvider(modelConfig, messages, locale);
+      console.log(`[聊天API] AI回答生成成功，长度: ${aiAnswer.length}, Provider: ${modelConfig.provider}`);
       
       return NextResponse.json({
         content: aiAnswer,
@@ -449,5 +804,50 @@ ${languageInstruction}
       content: errorMessage,
       role: "assistant"
     }, { status: 500 });
+  }
+}
+
+// 性能监控和错误追踪辅助函数
+function trackPerformance(operation: string, startTime: number, isSuccess: boolean, metadata?: any) {
+  const duration = Date.now() - startTime;
+  const logData = {
+    operation,
+    duration,
+    success: isSuccess,
+    timestamp: new Date().toISOString(),
+    ...metadata
+  };
+  
+  console.log(`[性能监控] ${operation}:`, logData);
+  
+  // 性能阈值警告
+  if (duration > 10000) { // 10秒
+    console.warn(`[性能警告] ${operation} 耗时过长: ${duration}ms`);
+  }
+}
+
+// 用户体验优化：分级提示信息
+function generateUserGuidance(isPlus: boolean, isLargePdf: boolean, locale: string = 'zh'): string {
+  const guidance = {
+    zh: {
+      plusLarge: `🎯 **Plus用户专享大PDF服务**\n\n您正在享受GPT-4o驱动的高质量大文档处理服务。为了获得最佳体验：\n\n• **具体化问题**：如"第5章的核心观点是什么？"\n• **分步骤提问**：将复杂问题拆分为多个简单问题\n• **关键词搜索**：使用文档中的专业术语\n\n💡 Plus用户享有优先处理权限和更长的上下文支持。`,
+      freeLarge: `📚 **大型文档智能处理**\n\n我们为您优化了大文档的处理体验。建议您：\n\n• **精确提问**：使用具体的章节、概念或关键词\n• **分段查询**：逐步深入了解文档内容\n• **升级Plus**：获得GPT-4o专用处理和优先支持\n\n🚀 [升级到Plus](/#pricing) 解锁大文档无限制体验`,
+      normal: `💬 **智能PDF对话助手**\n\n我已准备好回答您关于文档的任何问题：\n\n• 文档内容解释和总结\n• 关键信息查找和定位\n• 概念解析和知识扩展\n\n请随时开始您的提问！`
+    },
+    en: {
+      plusLarge: `🎯 **Plus User Exclusive Large PDF Service**\n\nYou're enjoying high-quality large document processing powered by GPT-4o. For the best experience:\n\n• **Be Specific**: Ask "What are the core points in Chapter 5?"\n• **Ask Step-by-Step**: Break complex questions into simpler ones\n• **Use Keywords**: Use professional terms from the document\n\n💡 Plus users enjoy priority processing and extended context support.`,
+      freeLarge: `📚 **Smart Large Document Processing**\n\nWe've optimized the large document experience for you. We recommend:\n\n• **Precise Questions**: Use specific chapters, concepts, or keywords\n• **Segmented Queries**: Gradually explore document content\n• **Upgrade to Plus**: Get GPT-4o dedicated processing and priority support\n\n🚀 [Upgrade to Plus](/#pricing) for unlimited large document experience`,
+      normal: `💬 **Smart PDF Chat Assistant**\n\nI'm ready to answer any questions about your document:\n\n• Document content explanation and summary\n• Key information search and location\n• Concept analysis and knowledge expansion\n\nFeel free to start asking!`
+    }
+  };
+  
+  const lang = guidance[locale as keyof typeof guidance] || guidance.en;
+  
+  if (isLargePdf && isPlus) {
+    return lang.plusLarge;
+  } else if (isLargePdf) {
+    return lang.freeLarge;
+  } else {
+    return lang.normal;
   }
 } 

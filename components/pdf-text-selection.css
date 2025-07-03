@@ -1,0 +1,80 @@
+/* PDF文本选择相关样式 */
+
+/* 文本选择层样式 */
+.textLayer {
+  user-select: text !important;
+  cursor: text;
+}
+
+.textLayer span {
+  user-select: text !important;
+  cursor: text;
+}
+
+/* 选中文本的高亮样式 */
+.textLayer span::selection {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: inherit !important;
+}
+
+.textLayer span::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: inherit !important;
+}
+
+/* 工具栏动画样式 */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-selection-toolbar {
+  animation: slideInFromBottom 0.2s ease-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .text-selection-toolbar {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .text-selection-toolbar button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 改善触摸设备上的选择体验 */
+@media (pointer: coarse) {
+  .textLayer span {
+    padding: 2px 0;
+    margin: -2px 0;
+  }
+}
+
+/* 防止选择时出现的蓝色闪烁 */
+.textLayer span {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* PDF页面容器样式优化 */
+.pdf-page-container {
+  transition: box-shadow 0.2s ease;
+}
+
+.pdf-page-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
