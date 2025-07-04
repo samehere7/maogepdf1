@@ -35,19 +35,19 @@ const MODEL_CONFIGS = {
     maxTokens: 1200,
     contextWindow: 4000
   },
-  // Plus用户大PDF专用配置 - GPT-4o
+  // Plus用户大PDF专用配置 - GPT-4o via OpenRouter
   plusLargePdf: {
-    provider: "openai",
-    model: "gpt-4o",
-    apiKey: process.env.OPENAI_API_KEY,
+    provider: "openrouter",
+    model: "openai/gpt-4o",
+    apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
     maxTokens: 4000,
     contextWindow: 128000
   },
-  // Plus用户高质量模式 - GPT-4o mini
+  // Plus用户高质量模式 - GPT-4o mini via OpenRouter  
   plusHighQuality: {
-    provider: "openai",
-    model: "gpt-4o-mini",
-    apiKey: process.env.OPENAI_API_KEY,
+    provider: "openrouter",
+    model: "openai/gpt-4o-mini",
+    apiKey: process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY,
     maxTokens: 2000,
     contextWindow: 128000
   }
@@ -621,7 +621,12 @@ export async function POST(req: Request) {
       if (isLargePdf && isPlus) {
         // Plus用户 + 大PDF：使用GPT-4o高性能配置
         modelConfig = MODEL_CONFIGS.plusLargePdf;
-        console.log('[聊天API] Plus用户大PDF：使用GPT-4o专用配置');
+        console.log('[聊天API] Plus用户大PDF：使用GPT-4o专用配置', {
+          model: modelConfig.model,
+          provider: modelConfig.provider,
+          maxTokens: modelConfig.maxTokens,
+          hasApiKey: !!modelConfig.apiKey
+        });
       } else if (isLargePdf) {
         // 免费用户 + 大PDF：使用优化的DeepSeek配置
         modelConfig = MODEL_CONFIGS.freeLargePdf;
@@ -630,7 +635,12 @@ export async function POST(req: Request) {
         // Plus用户 + 普通PDF：可选择高质量模式
         if (quality === 'highQuality') {
           modelConfig = MODEL_CONFIGS.plusHighQuality;
-          console.log('[聊天API] Plus用户：使用GPT-4o-mini高质量模式');
+          console.log('[聊天API] Plus用户：使用GPT-4o-mini高质量模式', {
+            model: modelConfig.model,
+            provider: modelConfig.provider,
+            maxTokens: modelConfig.maxTokens,
+            hasApiKey: !!modelConfig.apiKey
+          });
         } else {
           modelConfig = MODEL_CONFIGS[quality as keyof typeof MODEL_CONFIGS] || MODEL_CONFIGS.highQuality;
           console.log('[聊天API] Plus用户：使用DeepSeek快速模式');
