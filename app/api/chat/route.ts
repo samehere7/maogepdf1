@@ -122,6 +122,13 @@ async function detectLargePdf(pdf: any): Promise<boolean> {
 async function callAIProvider(modelConfig: any, messages: any[], locale: string = 'zh'): Promise<string> {
   try {
     console.log(`[AI调用] 使用Provider: ${modelConfig.provider}, 模型: ${modelConfig.model}`);
+    console.log(`[AI调用] API密钥状态: ${modelConfig.apiKey ? `${modelConfig.apiKey.substring(0, 20)}...` : '❌ 未设置'}`);
+    
+    // 检查API密钥是否存在
+    if (!modelConfig.apiKey || modelConfig.apiKey.trim() === '') {
+      console.error(`[AI调用] API密钥缺失 - Provider: ${modelConfig.provider}, 模型: ${modelConfig.model}`);
+      throw new Error(`API配置错误：${modelConfig.provider} API密钥未设置`);
+    }
     
     if (modelConfig.provider === 'openai') {
       // OpenAI API调用
@@ -523,8 +530,30 @@ ${languageInstruction}`;
   return basePrompt;
 }
 
+// 环境变量检查函数
+function checkEnvironmentVariables() {
+  const envVars = {
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    OPENROUTER_API_KEY_HIGH: process.env.OPENROUTER_API_KEY_HIGH,
+    OPENROUTER_API_KEY_FREE: process.env.OPENROUTER_API_KEY_FREE,
+    OPENROUTER_API_KEY_FAST: process.env.OPENROUTER_API_KEY_FAST
+  };
+  
+  console.log('[环境变量检查]', {
+    OPENROUTER_API_KEY: envVars.OPENROUTER_API_KEY ? `${envVars.OPENROUTER_API_KEY.substring(0, 20)}...` : '❌ 未设置',
+    OPENROUTER_API_KEY_HIGH: envVars.OPENROUTER_API_KEY_HIGH ? `${envVars.OPENROUTER_API_KEY_HIGH.substring(0, 20)}...` : '❌ 未设置',
+    OPENROUTER_API_KEY_FREE: envVars.OPENROUTER_API_KEY_FREE ? `${envVars.OPENROUTER_API_KEY_FREE.substring(0, 20)}...` : '❌ 未设置',
+    OPENROUTER_API_KEY_FAST: envVars.OPENROUTER_API_KEY_FAST ? `${envVars.OPENROUTER_API_KEY_FAST.substring(0, 20)}...` : '❌ 未设置'
+  });
+  
+  return envVars;
+}
+
 export async function POST(req: Request) {
   console.log('[聊天API] 开始处理请求');
+  
+  // 检查环境变量
+  checkEnvironmentVariables();
   
   try {
     // 检查用户是否已登录
@@ -621,6 +650,13 @@ export async function POST(req: Request) {
       if (isLargePdf && isPlus) {
         // Plus用户 + 大PDF：使用GPT-4o高性能配置
         modelConfig = MODEL_CONFIGS.plusLargePdf;
+        
+        // 检查Plus专用配置是否可用
+        if (!modelConfig.apiKey || modelConfig.apiKey.trim() === '') {
+          console.warn('[聊天API] Plus用户GPT-4o配置缺失，回退到优化配置');
+          modelConfig = MODEL_CONFIGS.freeLargePdf; // 回退到优化配置
+        }
+        
         console.log('[聊天API] Plus用户大PDF：使用GPT-4o专用配置', {
           model: modelConfig.model,
           provider: modelConfig.provider,
@@ -635,6 +671,13 @@ export async function POST(req: Request) {
         // Plus用户 + 普通PDF：可选择高质量模式
         if (quality === 'highQuality') {
           modelConfig = MODEL_CONFIGS.plusHighQuality;
+          
+          // 检查Plus专用配置是否可用
+          if (!modelConfig.apiKey || modelConfig.apiKey.trim() === '') {
+            console.warn('[聊天API] Plus用户GPT-4o-mini配置缺失，回退到标准配置');
+            modelConfig = MODEL_CONFIGS.highQuality; // 回退到标准配置
+          }
+          
           console.log('[聊天API] Plus用户：使用GPT-4o-mini高质量模式', {
             model: modelConfig.model,
             provider: modelConfig.provider,
@@ -802,12 +845,16 @@ ${languageInstruction}
     let errorMessage = "抱歉，处理您的问题时出错了。请稍后再试。";
     
     // 处理具体的API错误
-    if (error.response?.status === 401) {
+    if (error.message?.includes('API配置错误')) {
+      errorMessage = "系统配置问题，请联系管理员或稍后重试。";
+    } else if (error.response?.status === 401) {
       errorMessage = "API密钥验证失败，请检查配置。";
     } else if (error.response?.status === 429) {
       errorMessage = "请求过于频繁，请稍后再试。";
     } else if (error.response?.status >= 500) {
       errorMessage = "服务器暂时不可用，请稍后再试。";
+    } else if (error.message?.includes('fetch')) {
+      errorMessage = "网络连接问题，请检查网络或稍后重试。";
     }
     
     return NextResponse.json({
