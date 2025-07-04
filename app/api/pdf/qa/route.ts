@@ -21,6 +21,35 @@ function getSystemPromptByLocale(locale: string, pdfName: string): string {
   return prompts[locale as keyof typeof prompts] || prompts['en'];
 }
 
+// 生成回退响应函数
+function generateFallbackResponse(question: string, locale: string): string {
+  const responses = {
+    'zh': {
+      greeting: '你好！我是智能PDF文档助手。目前AI服务暂时不可用，但我很乐意为您提供帮助。',
+      general: '抱歉，目前AI服务暂时不可用。请稍后再试，或者您可以尝试重新表述您的问题。',
+      help: '我是您的PDF文档助手，可以帮助您：\n• 解释文档内容\n• 回答相关问题\n• 提供文档摘要\n• 查找特定信息\n\n请稍后再试或联系技术支持。'
+    },
+    'en': {
+      greeting: 'Hello! I am an intelligent PDF document assistant. The AI service is temporarily unavailable, but I am happy to help you.',
+      general: 'Sorry, the AI service is temporarily unavailable. Please try again later or try rephrasing your question.',
+      help: 'I am your PDF document assistant and can help you with:\n• Explaining document content\n• Answering related questions\n• Providing document summaries\n• Finding specific information\n\nPlease try again later or contact technical support.'
+    }
+  };
+  
+  const localizedResponses = responses[locale as keyof typeof responses] || responses['en'];
+  
+  // 根据问题类型选择合适的回退响应
+  const questionLower = question.toLowerCase();
+  
+  if (questionLower.includes('你好') || questionLower.includes('hello') || questionLower.includes('hi')) {
+    return localizedResponses.greeting;
+  } else if (questionLower.includes('帮助') || questionLower.includes('help') || questionLower.includes('功能')) {
+    return localizedResponses.help;
+  } else {
+    return localizedResponses.general;
+  }
+}
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,12 +136,20 @@ export async function POST(request: NextRequest) {
     } catch (ragError) {
       console.warn('[PDF QA API] RAG系统失败，使用备用方案:', ragError);
       
-      // 备用方案：直接使用OpenRouter
+      // 备用方案：直接使用OpenRouter，根据模式选择合适的API密钥
+      const apiKey = mode === 'fast' 
+        ? (process.env.OPENROUTER_API_KEY_FAST || process.env.OPENROUTER_API_KEY)
+        : (process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY);
+      
+      console.log(`[PDF QA API] 使用备用方案，模式: ${mode}, API密钥类型: ${mode === 'fast' ? 'FAST' : 'HIGH'}`);
+      
       const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'https://maoge.pdf',
+          'X-Title': 'Maoge PDF Analysis',
         },
         body: JSON.stringify({
           model: mode === 'fast' ? 'deepseek/deepseek-chat' : 'anthropic/claude-3.5-sonnet',
@@ -134,11 +171,29 @@ export async function POST(request: NextRequest) {
       if (!openRouterResponse.ok) {
         const errorText = await openRouterResponse.text();
         console.error(`[PDF QA API] OpenRouter API error: ${openRouterResponse.status} - ${errorText}`);
-        throw new Error(`AI服务暂时不可用: ${openRouterResponse.status}`);
+        console.error(`[PDF QA API] 请求头信息: ${JSON.stringify(openRouterResponse.headers)}`);
+        console.error(`[PDF QA API] 使用的模型: ${mode === 'fast' ? 'deepseek/deepseek-chat' : 'anthropic/claude-3.5-sonnet'}`);
+        
+        // 提供更详细的错误信息
+        let errorMessage = 'AI服务暂时不可用';
+        if (openRouterResponse.status === 401) {
+          errorMessage = 'API密钥无效或已过期，请检查配置';
+        } else if (openRouterResponse.status === 429) {
+          errorMessage = 'API请求次数超限，请稍后再试';
+        } else if (openRouterResponse.status === 500) {
+          errorMessage = 'AI服务内部错误，请稍后再试';
+        }
+        
+        throw new Error(`${errorMessage} (${openRouterResponse.status})`);
       }
 
       const data = await openRouterResponse.json();
       answer = data.choices[0]?.message?.content || '抱歉，我目前无法回答这个问题。请稍后再试。';
+    }
+    
+    // 如果answer仍然为空，提供智能回退响应
+    if (!answer) {
+      answer = generateFallbackResponse(question, locale);
     }
     
     console.log(`[PDF QA API] 答案生成成功，长度: ${answer.length}`);
@@ -151,9 +206,33 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[PDF QA API] 处理问题失败:', error);
+    console.error('[PDF QA API] 错误堆栈:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[PDF QA API] 请求参数:', { pdfId, question, mode, locale });
+    
+    // 根据错误类型返回更友好的错误信息
+    let userMessage = '处理问题失败，请稍后再试';
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      if (error.message.includes('API密钥')) {
+        userMessage = 'API配置错误，请联系管理员';
+        statusCode = 503;
+      } else if (error.message.includes('超限')) {
+        userMessage = 'API请求次数超限，请稍后再试';
+        statusCode = 429;
+      } else if (error.message.includes('401')) {
+        userMessage = 'API认证失败，请检查配置';
+        statusCode = 503;
+      }
+    }
+    
     return NextResponse.json({ 
-      error: '处理问题失败',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+      error: userMessage,
+      details: error instanceof Error ? error.message : 'Unknown error',
+      debug: process.env.NODE_ENV === 'development' ? {
+        stack: error instanceof Error ? error.stack : null,
+        params: { pdfId, question, mode, locale }
+      } : undefined
+    }, { status: statusCode });
   }
 } 

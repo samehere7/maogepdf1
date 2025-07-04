@@ -1526,16 +1526,27 @@ ${chunks[0].chunk.text}`;
       console.log(`[RAG] 强化语言指令:`, languageInstruction.substring(0, 30) + '...');
       console.log(`[RAG] 最终提示词长度:`, finalPrompt.length);
 
+      // 根据模式选择合适的API密钥和模型
+      const apiKey = mode === 'fast' 
+        ? (process.env.OPENROUTER_API_KEY_FAST || process.env.OPENROUTER_API_KEY)
+        : (process.env.OPENROUTER_API_KEY_HIGH || process.env.OPENROUTER_API_KEY);
+        
+      const model = mode === 'fast' 
+        ? "deepseek/deepseek-chat"
+        : (mode === 'premium' ? "openai/gpt-4o" : "anthropic/claude-3.5-sonnet");
+      
+      console.log(`[RAG] 使用模式: ${mode}, 模型: ${model}, API密钥类型: ${mode === 'fast' ? 'FAST' : 'HIGH'}`);
+      
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
           'X-Title': 'Maoge PDF Chat'
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-chat-v3-0324:free",
+          model: model,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: finalPrompt }
@@ -1548,7 +1559,22 @@ ${chunks[0].chunk.text}`;
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[RAG] AI服务HTTP错误: ${response.status} - ${errorText}`);
-        throw new Error(`AI服务错误: ${response.status} - ${errorText}`);
+        console.error(`[RAG] 请求模式: ${mode}, 模型: ${model}, API密钥类型: ${mode === 'fast' ? 'FAST' : 'HIGH'}`);
+        console.error(`[RAG] 请求头信息: ${JSON.stringify(response.headers)}`);
+        
+        // 提供更详细的错误信息
+        let errorMessage = 'AI服务错误';
+        if (response.status === 401) {
+          errorMessage = 'API密钥无效或已过期';
+        } else if (response.status === 429) {
+          errorMessage = 'API请求次数超限';
+        } else if (response.status === 500) {
+          errorMessage = 'AI服务内部错误';
+        } else if (response.status === 400) {
+          errorMessage = '请求参数错误';
+        }
+        
+        throw new Error(`${errorMessage}: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();

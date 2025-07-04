@@ -72,9 +72,68 @@
 
 /* PDF页面容器样式优化 */
 .pdf-page-container {
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  scroll-margin: 20px;
 }
 
 .pdf-page-container:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 缩放动画 */
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pdf-page-container.zoom-in {
+  animation: zoomIn 0.3s ease-out;
+}
+
+.pdf-page-container.zoom-out {
+  animation: zoomOut 0.3s ease-out;
+}
+
+/* 缩放控制工具栏样式 */
+.zoom-toolbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+/* 高DPI屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .pdf-page-container canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* 平滑滚动 */
+.pdf-viewer-container {
+  scroll-behavior: smooth;
+}
+
+/* 键盘快捷键提示样式 */
+.keyboard-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-left: 4px;
 }
