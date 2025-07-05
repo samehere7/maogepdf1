@@ -118,6 +118,14 @@ export function getPDFJSStatus() {
     loaded: pdfjsLoaded,
     workerConfigured,
     instance: pdfjsLib !== null,
-    loading: loadingPromise !== null
+    loading: loadingPromise !== null,
+    version: pdfjsLib?.version || 'unknown',
+    workerSrc: pdfjsLib?.GlobalWorkerOptions?.workerSrc || 'unknown'
   }
+}
+
+// 将状态函数暴露到全局对象，方便调试
+if (typeof window !== 'undefined') {
+  (window as any).getPDFJSStatus = getPDFJSStatus
+  console.log('🔧 [PDF Manager] 调试函数已暴露到 window.getPDFJSStatus()')
 }

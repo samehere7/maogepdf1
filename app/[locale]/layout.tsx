@@ -5,6 +5,9 @@ import { Providers } from "@/components/providers"
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {locales} from '@/i18n';
+import GlobalErrorHandler from '@/components/GlobalErrorHandler';
+import { DebugErrorBoundary } from '@/components/DebugErrorBoundary';
+import DebugHelper from '@/components/DebugHelper';
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -44,11 +47,15 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <NextIntlClientProvider messages={messages}>
-          <Providers>
-            {children}
-          </Providers>
-        </NextIntlClientProvider>
+        <DebugErrorBoundary>
+          <NextIntlClientProvider messages={messages}>
+            <Providers>
+              <GlobalErrorHandler />
+              {children}
+              <DebugHelper />
+            </Providers>
+          </NextIntlClientProvider>
+        </DebugErrorBoundary>
       </body>
     </html>
   )

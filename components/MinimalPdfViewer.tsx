@@ -159,14 +159,43 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
     if (typeof window === 'undefined') return
     
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason?.message?.includes('ee') || event.reason?.message?.includes('initialization')) {
-        console.warn('[MinimalPdfViewer] 检测到PDF.js模块初始化冲突，将忽略此错误')
+      console.group('🔍 [MinimalPdfViewer] 未处理的Promise拒绝')
+      console.log('错误原因:', event.reason)
+      console.log('错误类型:', typeof event.reason)
+      console.log('错误消息:', event.reason?.message || '无消息')
+      console.log('错误堆栈:', event.reason?.stack || '无堆栈')
+      console.log('时间戳:', new Date().toISOString())
+      console.groupEnd()
+      
+      if (event.reason?.message?.includes('ee') || 
+          event.reason?.message?.includes('initialization') ||
+          event.reason?.message?.includes('TT: undefined function')) {
+        console.warn('[MinimalPdfViewer] 检测到PDF.js相关错误，将忽略以防止应用崩溃')
         event.preventDefault()
       }
     }
     
+    const handleError = (event: ErrorEvent) => {
+      console.group('🔍 [MinimalPdfViewer] JavaScript错误')
+      console.log('错误消息:', event.message)
+      console.log('文件名:', event.filename)
+      console.log('行号:', event.lineno)
+      console.log('列号:', event.colno)
+      console.log('错误对象:', event.error)
+      console.log('时间戳:', new Date().toISOString())
+      console.groupEnd()
+    }
+    
     window.addEventListener('unhandledrejection', handleUnhandledRejection)
-    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    window.addEventListener('error', handleError)
+    
+    console.log('🔍 [MinimalPdfViewer] 错误监听器已注册')
+    
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+      window.removeEventListener('error', handleError)
+      console.log('🔍 [MinimalPdfViewer] 错误监听器已清理')
+    }
   }, [])
 
   // 添加文本选择事件监听
@@ -283,11 +312,24 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
 
     const loadPDF = async () => {
       try {
-        console.log('[MinimalPdfViewer] 开始加载PDF.js...')
+        console.group('🔍 [MinimalPdfViewer] PDF加载过程调试')
+        console.log('开始时间:', new Date().toISOString())
+        console.log('文件参数:', file)
+        console.log('文件类型:', typeof file)
+        console.log('是否为File对象:', file instanceof File)
+        console.log('容器状态:', !!containerRef.current)
+        console.log('当前scale:', scale)
+        
+        console.log('开始加载PDF.js...')
         
         // 使用统一的PDF.js管理器
         const pdfjs = await getPDFJS()
-        console.log('[MinimalPdfViewer] PDF.js获取成功，版本:', pdfjs.version)
+        console.log('PDF.js获取成功，版本:', pdfjs.version)
+        console.log('PDF.js状态:', {
+          GlobalWorkerOptions: !!pdfjs.GlobalWorkerOptions,
+          workerSrc: pdfjs.GlobalWorkerOptions?.workerSrc,
+          getDocument: !!pdfjs.getDocument
+        })
         
         // 获取PDF数据
         let arrayBuffer: ArrayBuffer
@@ -307,8 +349,18 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
         console.log('[MinimalPdfViewer] 文件大小:', arrayBuffer.byteLength)
         
         // 解析PDF
-        const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise
-        console.log('[MinimalPdfViewer] PDF解析成功，页数:', doc.numPages)
+        console.log('开始解析PDF文档...')
+        console.log('ArrayBuffer大小:', arrayBuffer.byteLength)
+        console.log('ArrayBuffer类型:', arrayBuffer.constructor.name)
+        
+        const loadingTask = pdfjs.getDocument({ data: arrayBuffer })
+        console.log('PDF加载任务创建:', !!loadingTask)
+        
+        const doc = await loadingTask.promise
+        console.log('PDF解析成功！')
+        console.log('文档对象:', doc)
+        console.log('页数:', doc.numPages)
+        console.log('指纹:', doc.fingerprints)
         
         // 清空容器
         containerRef.current!.innerHTML = ''
@@ -418,15 +470,36 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
         setIsLoading(false)
         
       } catch (error) {
-        console.error('[MinimalPdfViewer] 加载失败:', error)
+        console.group('🚨 [MinimalPdfViewer] PDF加载失败')
+        console.error('错误对象:', error)
+        console.error('错误类型:', typeof error)
+        console.error('错误构造函数:', error?.constructor?.name)
+        console.error('错误消息:', error instanceof Error ? error.message : String(error))
+        console.error('错误堆栈:', error instanceof Error ? error.stack : '无堆栈')
+        console.error('加载参数:', { file, scale })
+        console.error('容器状态:', !!containerRef.current)
+        console.error('时间戳:', new Date().toISOString())
+        console.groupEnd()
+        
         if (containerRef.current) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
           containerRef.current.innerHTML = `
-            <div style="text-align: center; padding: 20px; color: red;">
-              <h3>PDF加载失败</h3>
-              <p>${error instanceof Error ? error.message : String(error)}</p>
+            <div style="text-align: center; padding: 20px; color: red; font-family: monospace;">
+              <h3>🚨 PDF加载失败</h3>
+              <p><strong>错误:</strong> ${errorMessage}</p>
+              <details style="margin-top: 10px; text-align: left; background: #f5f5f5; padding: 10px; border-radius: 4px;">
+                <summary>调试信息</summary>
+                <pre>错误类型: ${error?.constructor?.name || 'Unknown'}
+时间: ${new Date().toISOString()}
+文件: ${typeof file === 'string' ? file : 'File对象'}
+Scale: ${scale}
+容器: ${!!containerRef.current ? '有效' : '无效'}</pre>
+              </details>
             </div>
           `
         }
+      } finally {
+        console.groupEnd()
       }
     }
 
