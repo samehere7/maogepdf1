@@ -9,6 +9,11 @@ let loadingPromise: Promise<any> | null = null
 let workerConfigured = false
 
 export async function getPDFJS() {
+  // 确保在客户端环境中运行
+  if (typeof window === 'undefined') {
+    throw new Error('[PDF Manager] PDF.js 只能在客户端环境中使用')
+  }
+  
   console.log('[PDF Manager] 请求PDF.js实例，当前状态:', { pdfjsLoaded, workerConfigured })
   
   // 如果已经加载完成，直接返回
@@ -32,10 +37,41 @@ export async function getPDFJS() {
       
       // 只配置一次Worker，避免重复配置导致冲突
       if (!workerConfigured) {
-        const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
-        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-        workerConfigured = true
-        console.log('[PDF Manager] Worker配置完成:', workerSrc)
+        try {
+          // 尝试多种worker源，提高兼容性
+          const workerSources = [
+            `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`,
+            `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`,
+            // 备用固定版本
+            'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
+          ]
+          
+          const workerSrc = workerSources[0] // 优先使用jsdelivr CDN
+          
+          // 添加worker加载验证
+          console.log('[PDF Manager] 开始配置Worker:', workerSrc)
+          
+          // 设置GlobalWorkerOptions，包含错误处理
+          pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+          
+          // 测试worker是否可以正常工作
+          const testDoc = await pdfjs.getDocument({ data: new Uint8Array([]) }).promise
+            .catch((error) => {
+              console.warn('[PDF Manager] Worker测试失败，尝试备用源:', error.message)
+              // 如果第一个源失败，尝试第二个
+              pdfjs.GlobalWorkerOptions.workerSrc = workerSources[1]
+              console.log('[PDF Manager] 切换到备用Worker源:', workerSources[1])
+              return null
+            })
+          
+          workerConfigured = true
+          console.log('[PDF Manager] Worker配置完成:', workerSrc)
+          console.log('[PDF Manager] 备用worker源:', workerSources.slice(1))
+        } catch (workerError) {
+          console.error('[PDF Manager] Worker配置失败:', workerError)
+          // 仍然标记为已配置，避免重复尝试
+          workerConfigured = true
+        }
       } else {
         console.log('[PDF Manager] Worker已配置，跳过重复配置')
       }
