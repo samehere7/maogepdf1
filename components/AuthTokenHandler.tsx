@@ -5,6 +5,9 @@ import { supabase } from '@/lib/supabase/client'
 
 export default function AuthTokenHandler() {
   useEffect(() => {
+    // 确保在客户端环境中运行
+    if (typeof window === 'undefined') return
+    
     // 检查URL中是否有access_token
     const handleAuthToken = async () => {
       const hash = window.location.hash

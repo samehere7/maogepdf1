@@ -11,6 +11,9 @@ export default function ShareDetector({ onShareDetected }: ShareDetectorProps) {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    // 确保在客户端环境中运行
+    if (typeof window === 'undefined') return
+    
     const shareParam = searchParams.get('share')
     if (shareParam) {
       onShareDetected(shareParam)

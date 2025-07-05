@@ -73,7 +73,7 @@ export function LanguageSelector() {
     }
     
     // 优先级3：浏览器语言检测
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
       const browserLang = navigator.language.toLowerCase()
       const matchedBrowserLang = languages.find(lang => 
         browserLang.startsWith(lang.code.toLowerCase()) || 
@@ -158,12 +158,14 @@ export function LanguageSelector() {
     newPath = normalizePath(newPath)
     
     console.log('🚀 Navigating to new path:', newPath)
-    console.log('🔍 Navigation details:', {
-      currentURL: window.location.href,
-      targetPath: newPath,
-      willChange: window.location.pathname !== newPath,
-      method: 'window.location.href'
-    })
+    if (typeof window !== 'undefined') {
+      console.log('🔍 Navigation details:', {
+        currentURL: window.location.href,
+        targetPath: newPath,
+        willChange: window.location.pathname !== newPath,
+        method: 'window.location.href'
+      })
+    }
     
     // 执行语言切换导航
     setTimeout(() => {
@@ -178,7 +180,9 @@ export function LanguageSelector() {
       }
       
       // 使用 window.location.href 确保完整的页面刷新和语言切换
-      window.location.href = newPath
+      if (typeof window !== 'undefined') {
+        window.location.href = newPath
+      }
     }, 50) // 减少延迟以提升用户体验
   }
 

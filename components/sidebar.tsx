@@ -72,15 +72,34 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
   const { profile } = useUser()
   const isLoggedIn = !!profile
 
+  // 安全的localStorage操作辅助函数
+  const safeLocalStorage = {
+    getItem: (key: string, defaultValue: string = '') => {
+      if (typeof window === 'undefined') return defaultValue
+      return localStorage.getItem(key) || defaultValue
+    },
+    setItem: (key: string, value: string) => {
+      if (typeof window === 'undefined') return
+      localStorage.setItem(key, value)
+    },
+    removeItem: (key: string) => {
+      if (typeof window === 'undefined') return
+      localStorage.removeItem(key)
+    }
+  }
+
   useEffect(() => {
+    // 确保在客户端环境中运行
+    if (typeof window === 'undefined') return
+    
     // 如果用户已登录，从API获取PDF列表
     if (isLoggedIn) {
       loadPDFsFromAPI()
     }
     
     // 加载本地文件夹数据（这些可以继续使用localStorage，因为它们是组织结构）
-    setFolders(JSON.parse(localStorage.getItem("uploadedFolders") || "[]"))
-    setFolderStructure(JSON.parse(localStorage.getItem("folderStructure") || "{}"))
+    setFolders(JSON.parse(safeLocalStorage.getItem("uploadedFolders", "[]")))
+    setFolderStructure(JSON.parse(safeLocalStorage.getItem("folderStructure", "{}")))
     
     // 监听PDF重命名事件
     const handlePdfRename = (event: CustomEvent) => {
@@ -174,12 +193,12 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     const newFolder = { id: Date.now().toString(), name: folderName.trim() }
     const newFolders = [...folders, newFolder]
     setFolders(newFolders)
-    localStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
+    safeLocalStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
     
     // Initialize empty folder in structure
     const newStructure = { ...folderStructure, [newFolder.id]: [] }
     setFolderStructure(newStructure)
-    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+    safeLocalStorage.setItem("folderStructure", JSON.stringify(newStructure))
     
     setShowFolderModal(false)
     setFolderName(t('myFolder'))
@@ -189,7 +208,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
     if (!editFolderName.trim()) return
     const newFolders = folders.map(f => f.id === id ? { ...f, name: editFolderName.trim() } : f)
     setFolders(newFolders)
-    localStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
+    safeLocalStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
     setEditingFolderId(null)
     setEditFolderName("")
   }
@@ -197,12 +216,12 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
   const handleDeleteFolder = (id: string) => {
     const newFolders = folders.filter(f => f.id !== id)
     setFolders(newFolders)
-    localStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
+    safeLocalStorage.setItem("uploadedFolders", JSON.stringify(newFolders))
     
     // Remove folder from structure and move PDFs back to root
     const { [id]: removedPdfs, ...newStructure } = folderStructure
     setFolderStructure(newStructure)
-    localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+    safeLocalStorage.setItem("folderStructure", JSON.stringify(newStructure))
   }
 
   const handleDeletePdf = (id: string) => {
@@ -224,7 +243,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
       try {
         // 从本地存储删除闪卡数据
         const storageKey = `flashcards_${pdfId}`;
-        localStorage.removeItem(storageKey);
+        safeLocalStorage.removeItem(storageKey);
         console.log('[Sidebar] 闪卡已从本地存储删除:', storageKey);
         
         // 更新状态，移除该PDF的闪卡计数
@@ -280,7 +299,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
           newStructure[folderId] = newStructure[folderId].filter(pdfId => pdfId !== deletingPdf.id)
         })
         setFolderStructure(newStructure)
-        localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+        safeLocalStorage.setItem("folderStructure", JSON.stringify(newStructure))
       } else {
         const error = await response.json()
         alert(`${t('deleteFailed')}: ${error.error || tc('error')}`)
@@ -575,7 +594,7 @@ export function Sidebar({ className, pdfFlashcardCounts = {}, onFlashcardClick }
                 })
                 
                 setFolderStructure(newStructure)
-                localStorage.setItem("folderStructure", JSON.stringify(newStructure))
+                safeLocalStorage.setItem("folderStructure", JSON.stringify(newStructure))
                 setDraggedPdfId(null)
                 setDragOverFolderId(null)
               }
