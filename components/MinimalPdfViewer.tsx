@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { ZoomIn, ZoomOut } from 'lucide-react'
 import { getPDFJS } from '@/lib/pdf-manager'
+import { getSimplePDFJS } from '@/lib/pdf-manager-simple'
 import TextSelectionToolbar from './text-selection-toolbar'
 import './pdf-text-selection.css'
 
@@ -322,14 +323,28 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
         
         console.log('开始加载PDF.js...')
         
-        // 使用统一的PDF.js管理器
-        const pdfjs = await getPDFJS()
-        console.log('PDF.js获取成功，版本:', pdfjs.version)
-        console.log('PDF.js状态:', {
-          GlobalWorkerOptions: !!pdfjs.GlobalWorkerOptions,
-          workerSrc: pdfjs.GlobalWorkerOptions?.workerSrc,
-          getDocument: !!pdfjs.getDocument
-        })
+        let pdfjs: any
+        try {
+          // 首先尝试使用标准PDF.js管理器
+          pdfjs = await getPDFJS()
+          console.log('PDF.js获取成功，版本:', pdfjs.version)
+          console.log('PDF.js状态:', {
+            GlobalWorkerOptions: !!pdfjs.GlobalWorkerOptions,
+            workerSrc: pdfjs.GlobalWorkerOptions?.workerSrc,
+            getDocument: !!pdfjs.getDocument
+          })
+        } catch (standardError) {
+          console.warn('🔧 [MinimalPdfViewer] 标准PDF.js失败，尝试简化版本:', standardError)
+          
+          try {
+            // 回退到简化版PDF.js
+            pdfjs = await getSimplePDFJS()
+            console.log('🔧 [MinimalPdfViewer] 简化版PDF.js获取成功，版本:', pdfjs.version)
+          } catch (simpleError) {
+            console.error('🚨 [MinimalPdfViewer] 所有PDF.js方案均失败:', simpleError)
+            throw new Error(`PDF.js加载失败: ${simpleError.message}`)
+          }
+        }
         
         // 获取PDF数据
         let arrayBuffer: ArrayBuffer

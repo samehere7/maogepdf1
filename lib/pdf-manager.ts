@@ -38,38 +38,50 @@ export async function getPDFJS() {
       // 只配置一次Worker，避免重复配置导致冲突
       if (!workerConfigured) {
         try {
-          // 尝试多种worker源，提高兼容性
-          const workerSources = [
-            `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`,
-            `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`,
-            // 备用固定版本
-            'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
-          ]
+          // 使用更稳定的worker配置策略
+          console.log('[PDF Manager] 开始配置Worker...')
           
-          const workerSrc = workerSources[0] // 优先使用jsdelivr CDN
-          
-          // 添加worker加载验证
-          console.log('[PDF Manager] 开始配置Worker:', workerSrc)
-          
-          // 设置GlobalWorkerOptions，包含错误处理
-          pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-          
-          // 测试worker是否可以正常工作
-          const testDoc = await pdfjs.getDocument({ data: new Uint8Array([]) }).promise
-            .catch((error) => {
-              console.warn('[PDF Manager] Worker测试失败，尝试备用源:', error.message)
-              // 如果第一个源失败，尝试第二个
-              pdfjs.GlobalWorkerOptions.workerSrc = workerSources[1]
-              console.log('[PDF Manager] 切换到备用Worker源:', workerSources[1])
-              return null
-            })
+          // 方案1：尝试使用本地worker（通过import）
+          try {
+            // 动态导入worker
+            const workerBlob = new Blob([`
+              importScripts('https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js');
+            `], { type: 'application/javascript' })
+            
+            const workerUrl = URL.createObjectURL(workerBlob)
+            pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
+            console.log('[PDF Manager] 使用Blob Worker URL配置完成')
+          } catch (blobError) {
+            console.warn('[PDF Manager] Blob Worker配置失败，使用直接CDN:', blobError)
+            
+            // 方案2：使用固定版本的稳定CDN
+            const stableWorkerSources = [
+              // 使用固定的稳定版本，避免版本不匹配
+              'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+              'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+              // Mozilla官方CDN
+              'https://mozilla.github.io/pdf.js/build/pdf.worker.js'
+            ]
+            
+            const workerSrc = stableWorkerSources[0]
+            pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+            console.log('[PDF Manager] 使用稳定版本Worker:', workerSrc)
+            console.log('[PDF Manager] 备用源:', stableWorkerSources.slice(1))
+          }
           
           workerConfigured = true
-          console.log('[PDF Manager] Worker配置完成:', workerSrc)
-          console.log('[PDF Manager] 备用worker源:', workerSources.slice(1))
+          console.log('[PDF Manager] Worker配置完成，当前源:', pdfjs.GlobalWorkerOptions.workerSrc)
         } catch (workerError) {
           console.error('[PDF Manager] Worker配置失败:', workerError)
-          // 仍然标记为已配置，避免重复尝试
+          
+          // 最后的备用方案：禁用worker，使用主线程
+          try {
+            pdfjs.GlobalWorkerOptions.workerSrc = ''
+            console.warn('[PDF Manager] 禁用Worker，使用主线程模式')
+          } catch (fallbackError) {
+            console.error('[PDF Manager] 备用方案也失败:', fallbackError)
+          }
+          
           workerConfigured = true
         }
       } else {
