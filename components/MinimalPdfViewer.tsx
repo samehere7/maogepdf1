@@ -27,6 +27,9 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
   // 处理文本选择
   const handleTextSelection = useCallback(() => {
     try {
+      // 确保在客户端环境中运行
+      if (typeof window === 'undefined') return
+      
       const selection = window.getSelection()
       if (!selection || selection.rangeCount === 0) {
         setToolbarPosition(null)
@@ -116,7 +119,9 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
       setSelectedText('')
       // 清除选择
       try {
-        window.getSelection()?.removeAllRanges()
+        if (typeof window !== 'undefined') {
+          window.getSelection()?.removeAllRanges()
+        }
       } catch (error) {
         console.warn('[工具栏] 清除选择时出错:', error)
       }
@@ -150,6 +155,9 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
 
   // 添加错误处理，防止模块初始化冲突
   useEffect(() => {
+    // 确保在客户端环境中运行
+    if (typeof window === 'undefined') return
+    
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       if (event.reason?.message?.includes('ee') || event.reason?.message?.includes('initialization')) {
         console.warn('[MinimalPdfViewer] 检测到PDF.js模块初始化冲突，将忽略此错误')
@@ -163,7 +171,7 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
 
   // 添加文本选择事件监听
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || typeof window === 'undefined') return
 
     const container = containerRef.current
     
@@ -204,7 +212,9 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
         if (event.key === 'Escape') {
           setToolbarPosition(null)
           setSelectedText('')
-          window.getSelection()?.removeAllRanges()
+          if (typeof window !== 'undefined') {
+            window.getSelection()?.removeAllRanges()
+          }
         }
       } catch (error) {
         console.error('[事件监听] 键盘事件处理出错:', error)
@@ -234,6 +244,9 @@ export default function MinimalPdfViewer({ file, onTextSelect }: MinimalPdfViewe
 
   // 添加键盘快捷键支持
   useEffect(() => {
+    // 确保在客户端环境中运行
+    if (typeof window === 'undefined') return
+    
     const handleKeyDown = (event: KeyboardEvent) => {
       // 检查是否在输入框中
       const activeElement = document.activeElement
