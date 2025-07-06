@@ -91,16 +91,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  experimental: {
-    serverComponentsExternalPackages: [
-      'pdf-parse', 
-      '@supabase/supabase-js', 
-      '@supabase/ssr',
-      '@formatjs/intl-localematcher',
-      '@formatjs/ecma402-abstract'
-    ],
-    optimizePackageImports: ['lucide-react'],
   }
 }
 
