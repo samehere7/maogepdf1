@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 
+// 禁用静态生成，因为这个路由需要在运行时执行
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.maogepdf.com'
   
