@@ -27,7 +27,6 @@ import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
 import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
 import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
-import MinimalPdfViewer from "@/components/MinimalPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import InlineDebugPanel from "@/components/InlineDebugPanel"
@@ -131,7 +130,7 @@ export default function AnalysisPage() {
   const [editingTitle, setEditingTitle] = useState('');
   
   // PDF查看器ref
-  const pdfViewerRef = useRef<StaticPdfViewerRef>(null);
+  const pdfViewerRef = useRef<SimplePdfViewerRef>(null);
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -1114,8 +1113,11 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                    <MinimalPdfViewer 
+                    <SimplePdfViewer 
                       file={finalPdfFile}
+                      onOutlineLoaded={handleOutlineLoaded}
+                      onPageChange={setCurrentPage}
+                      ref={pdfViewerRef}
                     />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
