@@ -133,6 +133,8 @@ export default function AnalysisPage() {
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
+  const [isSafeMode, setIsSafeMode] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
   
   // 欢迎问题相关状态
   const [showWelcome, setShowWelcome] = useState(false);
@@ -200,19 +202,71 @@ export default function AnalysisPage() {
   }, [fileInfo?.id, flashcards.length]);
 
   useEffect(() => {
-    setIsClient(true);
-    
-    // 早期检查URL参数
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('flashcard') === 'true') {
-        console.log('[分析页] 早期检测到flashcard参数，标记需要打开闪卡');
-        setShouldOpenFlashcard(true);
-        // 清除URL参数
-        window.history.replaceState({}, '', `/${locale}/analysis/${params.id}`);
+    // 安全的客户端初始化
+    const initializeClient = async () => {
+      try {
+        console.log('[分析页] 开始安全的客户端初始化...');
+        
+        // 基本环境检查
+        if (typeof window === 'undefined') {
+          throw new Error('非客户端环境');
+        }
+        
+        // 检查必要的浏览器功能
+        const hasRequiredFeatures = Boolean(
+          window.localStorage &&
+          window.sessionStorage &&
+          document.createElement &&
+          window.fetch
+        );
+        
+        if (!hasRequiredFeatures) {
+          throw new Error('浏览器缺少必要功能');
+        }
+        
+        console.log('[分析页] 基本环境检查通过');
+        
+        // 早期检查URL参数
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('flashcard') === 'true') {
+            console.log('[分析页] 早期检测到flashcard参数，标记需要打开闪卡');
+            setShouldOpenFlashcard(true);
+            // 清除URL参数
+            window.history.replaceState({}, '', `/${locale}/analysis/${params.id}`);
+          }
+        } catch (urlError) {
+          console.warn('[分析页] URL参数处理失败:', urlError);
+          // 非关键错误，继续执行
+        }
+        
+        // 检查是否有之前的错误记录
+        try {
+          const errorLog = localStorage.getItem('pdf-error-log');
+          if (errorLog) {
+            const errors = JSON.parse(errorLog);
+            if (errors.length > 3) {
+              console.warn('[分析页] 检测到多次错误，启用安全模式');
+              setIsSafeMode(true);
+            }
+          }
+        } catch (storageError) {
+          console.warn('[分析页] 检查错误日志失败:', storageError);
+        }
+        
+        setIsClient(true);
+        console.log('[分析页] 客户端初始化完成');
+        
+      } catch (error) {
+        console.error('[分析页] 客户端初始化失败:', error);
+        setClientError(error instanceof Error ? error.message : String(error));
+        setIsSafeMode(true);
+        setIsClient(true); // 即使出错也要设置为true，以便显示错误界面
       }
-    }
-  }, [params.id]);
+    };
+    
+    initializeClient();
+  }, [params.id, locale]);
 
   useEffect(() => {
     console.log('[分析页] PDF加载useEffect触发，参数:', { id: params.id, locale })
@@ -1216,11 +1270,39 @@ export default function AnalysisPage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-white" onClick={(e) => e.stopPropagation()}>
           {/* PDF展示区 */}
           <div className="flex-1 overflow-hidden">
-            {loading ? (
+            {clientError ? (
+              <div className="flex items-center justify-center h-full bg-red-50">
+                <div className="text-center max-w-md mx-auto p-6">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⚠️</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">客户端初始化失败</h3>
+                  <p className="text-red-600 mb-4">客户端环境检查失败: {clientError}</p>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => window.location.reload()}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      重新加载页面
+                    </Button>
+                    <Button 
+                      onClick={() => window.open('/zh/pdf-debug', '_blank')}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      打开调试工具
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : loading ? (
               <div className="flex items-center justify-center h-full bg-gray-50">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8b5cf6] mx-auto mb-4"></div>
                   <p className="text-slate-600">{t('loadingPdf')}...</p>
+                  {isSafeMode && (
+                    <p className="text-xs text-orange-600 mt-2">安全模式已启用</p>
+                  )}
                 </div>
               </div>
             ) : pdfError ? (
@@ -1228,12 +1310,73 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                    <StaticPdfViewer 
-                      file={finalPdfFile}
-                      onOutlineLoaded={handleOutlineLoaded}
-                      onPageChange={setCurrentPage}
-                      ref={pdfViewerRef}
-                    />
+                  <ErrorBoundary
+                    fallback={({ error, retry }) => (
+                      <div className="flex items-center justify-center h-full bg-yellow-50">
+                        <div className="text-center max-w-md mx-auto p-6">
+                          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-2xl">⚠️</span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-yellow-800 mb-2">PDF查看器错误</h3>
+                          <p className="text-yellow-700 mb-4">{error.message}</p>
+                          <div className="space-y-2">
+                            <Button 
+                              onClick={retry}
+                              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                            >
+                              重试加载PDF
+                            </Button>
+                            <Button 
+                              onClick={() => setIsSafeMode(true)}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              启用安全模式
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  >
+                    {isSafeMode ? (
+                      <div className="flex items-center justify-center h-full bg-blue-50">
+                        <div className="text-center max-w-md mx-auto p-6">
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-2xl">🛡️</span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-blue-800 mb-2">安全模式</h3>
+                          <p className="text-blue-700 mb-4">
+                            检测到可能的兼容性问题，已启用安全模式。PDF功能可能受限，但基本功能仍可使用。
+                          </p>
+                          <div className="space-y-2">
+                            <Button 
+                              onClick={() => {
+                                setIsSafeMode(false);
+                                localStorage.removeItem('pdf-error-log');
+                              }}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              尝试正常模式
+                            </Button>
+                            <Button 
+                              onClick={() => window.open(fileInfo.url, '_blank')}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              在新窗口打开PDF
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <StaticPdfViewer 
+                        file={finalPdfFile}
+                        onOutlineLoaded={handleOutlineLoaded}
+                        onPageChange={setCurrentPage}
+                        ref={pdfViewerRef}
+                      />
+                    )}
+                  </ErrorBoundary>
                 ) : (
                   <div className="flex items-center justify-center h-full bg-gray-50">
                     <div className="text-center">
