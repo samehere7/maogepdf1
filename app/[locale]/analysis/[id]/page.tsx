@@ -25,7 +25,7 @@ import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
-import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
+import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import InlineDebugPanel from "@/components/InlineDebugPanel"
@@ -129,7 +129,7 @@ export default function AnalysisPage() {
   const [editingTitle, setEditingTitle] = useState('');
   
   // PDF查看器ref
-  const pdfViewerRef = useRef<StaticPdfViewerRef>(null);
+  const pdfViewerRef = useRef<SimplePdfViewerRef>(null);
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -1371,7 +1371,7 @@ export default function AnalysisPage() {
                         </div>
                       </div>
                     ) : (
-                      <StaticPdfViewer 
+                      <SimplePdfViewer 
                         file={finalPdfFile}
                         onOutlineLoaded={handleOutlineLoaded}
                         onPageChange={setCurrentPage}
