@@ -129,7 +129,7 @@ export default function AnalysisPage() {
   const [editingTitle, setEditingTitle] = useState('');
   
   // PDF查看器ref
-  const pdfViewerRef = useRef<SimplePdfViewerRef>(null);
+  const pdfViewerRef = useRef<StaticPdfViewerRef>(null);
   
   // 客户端渲染检查
   const [isClient, setIsClient] = useState(false);
@@ -304,6 +304,7 @@ export default function AnalysisPage() {
 
         // 分离PDF加载和文档分析，避免分析阻塞PDF显示
         setLoading(false); // 先让PDF显示，分析可以异步进行
+        console.log('[分析页] PDF基本信息加载完成，开始显示PDF查看器');
         
         // 异步执行文档分析，不阻塞PDF显示
         setTimeout(async () => {
@@ -326,8 +327,18 @@ export default function AnalysisPage() {
         }, 100);
 
       } catch (error) {
-        console.error("Error loading PDF:", error);
-        setPdfError('加载PDF失败，请重试');
+        console.error("[分析页] PDF加载过程中出错:", error);
+        // 设置更具体的错误信息
+        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+          setPdfError('登录已过期，请重新登录');
+          setTimeout(() => router.push(`/${locale}/auth/login`), 2000);
+        } else if (error.message?.includes('404') || error.message?.includes('Not Found')) {
+          setPdfError('PDF文件未找到，可能已被删除');
+        } else if (error.message?.includes('网络') || error.message?.includes('network')) {
+          setPdfError('网络连接异常，请检查网络后重试');
+        } else {
+          setPdfError('加载PDF失败，请稍后重试');
+        }
         setLoading(false);
       }
     };
@@ -953,10 +964,27 @@ export default function AnalysisPage() {
 
   if (pdfError) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-2xl font-bold mb-4">{t('chat.fileNotFound')}</h1>
-        <p className="text-gray-600 mb-6">{pdfError}</p>
-        <Button onClick={() => window.location.href = `/${locale}`}>{t('chat.backToHome')}</Button>
+      <div className="flex flex-col items-center justify-center h-screen max-w-md mx-auto p-6">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <span className="text-2xl">⚠️</span>
+        </div>
+        <h1 className="text-2xl font-bold mb-4 text-center">{t('chat.fileNotFound')}</h1>
+        <p className="text-gray-600 mb-6 text-center">{pdfError}</p>
+        <div className="space-y-3 w-full">
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            重新加载
+          </Button>
+          <Button 
+            onClick={() => window.location.href = `/${locale}`} 
+            variant="outline"
+            className="w-full"
+          >
+            {t('chat.backToHome')}
+          </Button>
+        </div>
       </div>
     );
   }

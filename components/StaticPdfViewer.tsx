@@ -339,18 +339,21 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       console.log('[StaticPdfViewer] 没有文件，跳过加载')
       setError(null) // 清除之前的错误
       setIsLoading(false)
+      setLoadingTimeout(false)
       return
     }
 
     console.log('[StaticPdfViewer] 开始加载PDF文件:', file)
-  console.log('[StaticPdfViewer] 文件类型:', typeof file)
-  console.log('[StaticPdfViewer] 是否为File对象:', file instanceof File)
+    console.log('[StaticPdfViewer] 文件类型:', typeof file)
+    console.log('[StaticPdfViewer] 是否为File对象:', file instanceof File)
 
-    // 设置30秒加载超时
+    // 设置15秒加载超时（缩短超时时间）
     const timeoutId = setTimeout(() => {
-      console.log('[StaticPdfViewer] 加载超时，设置超时状态')
+      console.warn('[StaticPdfViewer] PDF加载超时，可能网络较慢或文件较大')
       setLoadingTimeout(true)
-    }, 30000)
+      setError('PDF加载时间较长，请检查网络连接或文件大小')
+      setIsLoading(false)
+    }, 15000)
 
     const loadPDF = async () => {
       try {
@@ -364,7 +367,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           console.log('[StaticPdfViewer] 等待PDF.js加载...')
           await new Promise((resolve, reject) => {
             let attempts = 0
-            const maxAttempts = 100 // 增加到10秒等待时间
+            const maxAttempts = 50 // 减少到5秒等待时间
             
             const checkPdfjs = () => {
               attempts++
@@ -378,7 +381,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
                   getDocument: !!(pdfjsLib && pdfjsLib.getDocument),
                   GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions)
                 })
-                reject(new Error('PDF.js加载超时'))
+                reject(new Error('PDF.js库初始化失败，请刷新页面重试'))
               } else {
                 setTimeout(checkPdfjs, 100)
               }
@@ -397,7 +400,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           
           // 添加超时机制
           const controller = new AbortController()
-          const timeoutId = setTimeout(() => controller.abort(), 10000) // 10秒超时
+          const fetchTimeoutId = setTimeout(() => controller.abort(), 8000) // 8秒超时
           
           try {
             const response = await fetch(file, { 
@@ -406,20 +409,20 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
                 'Accept': 'application/pdf,*/*'
               }
             })
-            clearTimeout(timeoutId)
+            clearTimeout(fetchTimeoutId)
             
             console.log('[StaticPdfViewer] 远程响应状态:', response.status)
             console.log('[StaticPdfViewer] 响应Content-Type:', response.headers.get('content-type'))
             
             if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+              throw new Error(`PDF文件下载失败: ${response.status} ${response.statusText}`)
             }
             
             arrayBuffer = await response.arrayBuffer()
           } catch (fetchError) {
-            clearTimeout(timeoutId)
+            clearTimeout(fetchTimeoutId)
             if (fetchError.name === 'AbortError') {
-              throw new Error('PDF下载超时')
+              throw new Error('PDF文件下载超时，请检查网络连接')
             }
             throw fetchError
           }
@@ -865,11 +868,21 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   if (isLoading) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">正在加载PDF...</p>
+          <p className="text-gray-600 mb-2">正在加载PDF...</p>
+          <p className="text-sm text-gray-500">
+            {loadingTimeout ? '网络较慢，请耐心等待或刷新重试' : '正在初始化PDF查看器'}
+          </p>
           {loadingTimeout && (
-            <p className="text-orange-600 text-sm mt-2">加载时间较长，请检查网络连接</p>
+            <div className="mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+              >
+                重新加载
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -879,9 +892,34 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   if (error) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
-        <div className="text-center text-red-600">
-          <p className="mb-2">加载失败</p>
-          <p className="text-sm">{error}</p>
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF加载失败</h3>
+          <p className="text-sm text-red-600 mb-4">{error}</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                setError(null)
+                setIsLoading(false)
+                setLoadingTimeout(false)
+                // 触发重新加载
+                if (file) {
+                  window.location.reload()
+                }
+              }}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              重试加载
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+            >
+              刷新页面
+            </button>
+          </div>
         </div>
       </div>
     )
