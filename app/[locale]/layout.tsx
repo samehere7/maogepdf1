@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers"
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {locales} from '@/i18n';
+import GlobalErrorCatcher from '@/components/GlobalErrorCatcher';
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -46,6 +47,7 @@ export default async function LocaleLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
+            <GlobalErrorCatcher />
             {children}
           </Providers>
         </NextIntlClientProvider>
