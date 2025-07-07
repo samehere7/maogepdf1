@@ -11,21 +11,44 @@ import './text-layer.css'
 let pdfjsLib: any = null
 let PDFDocumentProxy: any = null
 let pdfjsLoaded = false
+let pdfjsLoadPromise: Promise<any> | null = null
 
-if (typeof window !== 'undefined') {
-  import('pdfjs-dist').then((pdfjs) => {
+// 安全的PDF.js加载函数
+const loadPDFJS = async (): Promise<any> => {
+  if (typeof window === 'undefined') {
+    throw new Error('PDF.js只能在客户端环境中加载')
+  }
+
+  // 如果已经加载完成，直接返回
+  if (pdfjsLoaded && pdfjsLib) {
+    return pdfjsLib
+  }
+
+  // 如果正在加载中，等待加载完成
+  if (pdfjsLoadPromise) {
+    return pdfjsLoadPromise
+  }
+
+  // 开始新的加载过程
+  pdfjsLoadPromise = import('pdfjs-dist').then((pdfjs) => {
     pdfjsLib = pdfjs
     PDFDocumentProxy = pdfjs.PDFDocumentProxy
-    pdfjsLoaded = true
     
     // 配置 PDF.js worker - 使用官方CDN避免Next.js打包问题
     const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
     
-    console.log('[StaticPdfViewer] PDF.js加载完成')
+    pdfjsLoaded = true
+    console.log('[StaticPdfViewer] PDF.js加载完成，版本:', pdfjs.version)
+    
+    return pdfjs
   }).catch((error) => {
     console.error('[StaticPdfViewer] PDF.js加载失败:', error)
+    pdfjsLoadPromise = null // 重置加载状态，允许重试
+    throw new Error(`PDF.js加载失败: ${error.message}`)
   })
+
+  return pdfjsLoadPromise
 }
 
 interface OutlineItem {
@@ -187,8 +210,8 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const renderTextLayer = useCallback(async (page: any, viewport: any, pageContainer: HTMLElement, pageNum: number) => {
     try {
       // 确保pdfjsLib已加载且完全可用
-      if (!pdfjsLib || !pdfjsLoaded) {
-        console.warn('[StaticPdfViewer] PDF.js未完全加载，跳过文本层渲染')
+      if (!pdfjsLib) {
+        console.warn('[StaticPdfViewer] PDF.js未加载，跳过文本层渲染')
         return
       }
       
@@ -362,33 +385,10 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         setLoadingTimeout(false)
         console.log('[StaticPdfViewer] 设置加载状态为true')
         
-        // 等待pdfjs加载并确保完全可用
-        if (!pdfjsLib || !pdfjsLoaded) {
-          console.log('[StaticPdfViewer] 等待PDF.js加载...')
-          await new Promise((resolve, reject) => {
-            let attempts = 0
-            const maxAttempts = 50 // 减少到5秒等待时间
-            
-            const checkPdfjs = () => {
-              attempts++
-              if (pdfjsLib && pdfjsLoaded && pdfjsLib.getDocument && pdfjsLib.GlobalWorkerOptions) {
-                console.log('[StaticPdfViewer] PDF.js加载验证成功')
-                resolve(pdfjsLib)
-              } else if (attempts >= maxAttempts) {
-                console.error('[StaticPdfViewer] PDF.js加载超时，当前状态:', {
-                  pdfjsLib: !!pdfjsLib,
-                  pdfjsLoaded,
-                  getDocument: !!(pdfjsLib && pdfjsLib.getDocument),
-                  GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions)
-                })
-                reject(new Error('PDF.js库初始化失败，请刷新页面重试'))
-              } else {
-                setTimeout(checkPdfjs, 100)
-              }
-            }
-            checkPdfjs()
-          })
-        }
+        // 使用安全的PDF.js加载函数
+        console.log('[StaticPdfViewer] 开始加载PDF.js...')
+        pdfjsLib = await loadPDFJS()
+        console.log('[StaticPdfViewer] PDF.js加载验证成功')
         
         let arrayBuffer: ArrayBuffer
         

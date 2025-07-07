@@ -241,19 +241,29 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
     alert(instructions)
   }
 
-  // 临时修复：直接渲染子组件，跳过所有Canvas检测
-  // TODO: 调试完成后可以恢复检测逻辑
-  console.log('[CanvasFallback] 跳过Canvas检测，直接显示PDF内容')
-  return <>{children}</>
+  // 恢复Canvas检测，但采用宽松策略，优先保证PDF可用性
+  if (canvasSupport === null) {
+    // 检测尚未完成，显示加载状态
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">初始化Canvas...</p>
+        </div>
+      </div>
+    )
+  }
 
-  // 原检测逻辑暂时禁用
-  /*
-  // 如果Canvas正常工作，直接渲染子组件
-  if (canvasSupport?.canvas2d) {
+  // 如果Canvas基本可用或强制通过，直接渲染子组件
+  if (canvasSupport.canvas2d) {
+    console.log('[CanvasFallback] Canvas检测通过，渲染PDF内容')
+    if (onCanvasReady) {
+      onCanvasReady()
+    }
     return <>{children}</>
   }
 
-  // 如果Canvas不可用，显示修复界面
+  // Canvas不可用时显示修复界面，但提供绕过选项
   return (
     <div className="min-h-[400px] flex items-center justify-center bg-gray-50">
       <div className="max-w-md mx-auto text-center p-6">
@@ -262,18 +272,37 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
         </div>
         
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Canvas渲染不可用
+          Canvas渲染检测异常
         </h2>
         
         <p className="text-gray-600 mb-6">
-          PDF查看器需要Canvas 2D支持才能正常工作。检测到您的浏览器Canvas功能异常。
+          PDF查看器需要Canvas 2D支持。检测到可能的兼容性问题，但PDF仍可能正常工作。
         </p>
 
         <div className="space-y-3 mb-6">
+          {/* 添加强制显示选项 */}
+          <Button 
+            onClick={() => {
+              console.log('[CanvasFallback] 用户选择强制显示PDF')
+              // 强制设置为可用状态
+              setCanvasSupport(prev => prev ? {...prev, canvas2d: true} : {
+                canvas2d: true,
+                webgl: false,
+                offscreenCanvas: false,
+                hardwareAcceleration: false,
+                details: ['用户强制启用']
+              })
+            }}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            ⚡ 强制显示PDF（推荐）
+          </Button>
+          
           <Button 
             onClick={attemptCanvasFix}
             disabled={isFixing}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            variant="outline"
+            className="w-full"
           >
             {isFixing ? (
               <>
@@ -295,15 +324,6 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
           >
             <Settings className="h-4 w-4 mr-2" />
             浏览器设置帮助
-          </Button>
-
-          <Button 
-            onClick={() => window.location.reload()}
-            variant="outline"
-            className="w-full"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            重新加载页面
           </Button>
         </div>
 
@@ -335,7 +355,7 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
                   <div className="mt-2 pt-2 border-t">
                     <div className="font-medium mb-1">详细信息:</div>
                     {canvasSupport.details.map((detail, index) => (
-                      <div key={index} className="text-red-600">{detail}</div>
+                      <div key={index} className="text-gray-600">{detail}</div>
                     ))}
                   </div>
                 )}
@@ -345,17 +365,12 @@ export default function CanvasFallback({ onCanvasReady, children }: CanvasFallba
         )}
 
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
-          <div className="font-medium text-blue-800 mb-1">常见解决方案：</div>
-          <div className="text-blue-700 space-y-1">
-            <div>• 启用浏览器硬件加速</div>
-            <div>• 更新显卡驱动程序</div>
-            <div>• 尝试无痕/隐身模式</div>
-            <div>• 清除浏览器缓存</div>
-            <div>• 重启浏览器</div>
+          <div className="font-medium text-blue-800 mb-1">💡 提示：</div>
+          <div className="text-blue-700">
+            大多数现代浏览器都支持PDF显示。如果检测异常，建议直接点击"强制显示PDF"按钮。
           </div>
         </div>
       </div>
     </div>
   )
-  */
 }

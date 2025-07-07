@@ -326,20 +326,52 @@ export default function AnalysisPage() {
           }
         }, 100);
 
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("[分析页] PDF加载过程中出错:", error);
-        // 设置更具体的错误信息
-        if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-          setPdfError('登录已过期，请重新登录');
-          setTimeout(() => router.push(`/${locale}/auth/login`), 2000);
-        } else if (error.message?.includes('404') || error.message?.includes('Not Found')) {
-          setPdfError('PDF文件未找到，可能已被删除');
-        } else if (error.message?.includes('网络') || error.message?.includes('network')) {
-          setPdfError('网络连接异常，请检查网络后重试');
-        } else {
-          setPdfError('加载PDF失败，请稍后重试');
+        
+        // 记录错误到本地存储，供调试使用
+        try {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          const errorStack = error instanceof Error ? error.stack : '无堆栈信息'
+          
+          const errorInfo = {
+            message: errorMessage || '未知错误',
+            stack: errorStack || '无堆栈信息',
+            timestamp: new Date().toISOString(),
+            context: 'PDF加载过程',
+            pdfId: params.id,
+            userAgent: navigator.userAgent,
+            url: window.location.href
+          }
+          
+          const existingErrors = JSON.parse(localStorage.getItem('pdf-error-log') || '[]')
+          existingErrors.push(errorInfo)
+          localStorage.setItem('pdf-error-log', JSON.stringify(existingErrors.slice(-10)))
+        } catch (logError) {
+          console.error('错误记录失败:', logError)
         }
-        setLoading(false);
+        
+        // 设置更具体和友好的错误信息
+        let userFriendlyError = ''
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        
+        if (errorMessage?.includes('401') || errorMessage?.includes('Unauthorized')) {
+          userFriendlyError = '登录已过期，请重新登录'
+          setTimeout(() => router.push(`/${locale}/auth/login`), 2000)
+        } else if (errorMessage?.includes('404') || errorMessage?.includes('Not Found')) {
+          userFriendlyError = 'PDF文件未找到或已被删除'
+        } else if (errorMessage?.includes('网络') || errorMessage?.includes('network') || errorMessage?.includes('fetch')) {
+          userFriendlyError = '网络连接异常，请检查网络连接后重试'
+        } else if (errorMessage?.includes('PDF.js') || errorMessage?.includes('pdfjs')) {
+          userFriendlyError = 'PDF解析器初始化失败，建议刷新页面或使用最新版浏览器'
+        } else if (errorMessage?.includes('Canvas') || errorMessage?.includes('canvas')) {
+          userFriendlyError = '浏览器Canvas功能异常，建议启用硬件加速或更换浏览器'
+        } else {
+          userFriendlyError = `PDF加载失败: ${errorMessage || '未知错误'}`
+        }
+        
+        setPdfError(userFriendlyError)
+        setLoading(false)
       }
     };
 
@@ -969,14 +1001,59 @@ export default function AnalysisPage() {
           <span className="text-2xl">⚠️</span>
         </div>
         <h1 className="text-2xl font-bold mb-4 text-center">{t('chat.fileNotFound')}</h1>
-        <p className="text-gray-600 mb-6 text-center">{pdfError}</p>
+        <p className="text-gray-600 mb-4 text-center">{pdfError}</p>
+        
+        {/* 增强的错误恢复选项 */}
         <div className="space-y-3 w-full">
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={() => {
+              // 先清除错误状态，然后重新加载PDF
+              setPdfError(null)
+              setLoading(true)
+              // 强制重新执行loadPDF逻辑
+              window.location.reload()
+            }} 
             className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            重新加载
+            🔄 重新加载PDF
           </Button>
+          
+          <Button 
+            onClick={() => {
+              // 尝试不同的PDF加载策略
+              console.log('[错误恢复] 尝试强制刷新PDF缓存')
+              // 清除可能的缓存问题
+              if (typeof window !== 'undefined') {
+                // 清除sessionStorage中的PDF缓存
+                const keys = Object.keys(sessionStorage)
+                keys.forEach(key => {
+                  if (key.startsWith('pdf_local_')) {
+                    sessionStorage.removeItem(key)
+                  }
+                })
+              }
+              
+              // 重新加载页面
+              window.location.reload()
+            }}
+            variant="outline"
+            className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            🔧 清除缓存并重试
+          </Button>
+          
+          <Button 
+            onClick={() => {
+              // 打开调试工具
+              const debugUrl = `/${locale}/pdf-debug`
+              window.open(debugUrl, '_blank')
+            }}
+            variant="outline"
+            className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+          >
+            🔍 打开诊断工具
+          </Button>
+          
           <Button 
             onClick={() => window.location.href = `/${locale}`} 
             variant="outline"
@@ -984,6 +1061,17 @@ export default function AnalysisPage() {
           >
             {t('chat.backToHome')}
           </Button>
+        </div>
+        
+        {/* 错误提示信息 */}
+        <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded text-xs w-full">
+          <div className="font-medium text-blue-800 mb-1">💡 常见解决方案：</div>
+          <div className="text-blue-700 space-y-1">
+            <div>• 网络连接问题：检查网络连接</div>
+            <div>• 浏览器兼容性：尝试更新浏览器</div>
+            <div>• 缓存问题：清除浏览器缓存</div>
+            <div>• PDF文件损坏：重新上传PDF文件</div>
+          </div>
         </div>
       </div>
     );
