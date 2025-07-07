@@ -137,6 +137,26 @@ const SimplePdfViewer = forwardRef<SimplePdfViewerRef, SimplePdfViewerProps>(({
         setIsLoading(true)
         setError(null)
         
+        // 等待PDF.js加载完成
+        if (!pdfjsLoaded || !pdfjsLib) {
+          console.log('[SimplePdfViewer] 等待PDF.js加载...')
+          
+          // 最多等待10秒
+          let attempts = 0
+          const maxAttempts = 100
+          
+          while ((!pdfjsLoaded || !pdfjsLib) && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            attempts++
+          }
+          
+          if (!pdfjsLoaded || !pdfjsLib) {
+            throw new Error('PDF.js加载超时，请刷新页面重试')
+          }
+        }
+        
+        console.log('[SimplePdfViewer] PDF.js已就绪，开始加载文档')
+        
         let arrayBuffer: ArrayBuffer
         
         if (file instanceof File) {
