@@ -226,13 +226,15 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
               attempts++
               if (pdfjsLib && pdfjsLoaded && pdfjsLib.getDocument && pdfjsLib.GlobalWorkerOptions) {
                 console.log('[PdfViewer] PDF.js加载验证成功')
+                console.log('[PdfViewer] Worker源:', pdfjsLib.GlobalWorkerOptions.workerSrc)
                 resolve(pdfjsLib)
               } else if (attempts >= maxAttempts) {
                 console.error('[PdfViewer] PDF.js加载超时，当前状态:', {
                   pdfjsLib: !!pdfjsLib,
                   pdfjsLoaded,
                   getDocument: !!(pdfjsLib && pdfjsLib.getDocument),
-                  GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions)
+                  GlobalWorkerOptions: !!(pdfjsLib && pdfjsLib.GlobalWorkerOptions),
+                  workerSrc: pdfjsLib ? pdfjsLib.GlobalWorkerOptions?.workerSrc : null
                 })
                 reject(new Error('PDF.js加载超时'))
               } else {
@@ -241,6 +243,13 @@ const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(({
             }
             checkPdfjs()
           })
+        }
+        
+        // 额外确保Worker配置正确
+        if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+          const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`
+          pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+          console.log('[PdfViewer] 强制设置Worker源:', workerSrc)
         }
         
         let arrayBuffer: ArrayBuffer

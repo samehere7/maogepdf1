@@ -19,6 +19,8 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
     
     console.log('[InteractivePdfViewer] PDF.js加载完成')
+    console.log('[InteractivePdfViewer] Worker源配置为:', workerSrc)
+    console.log('[InteractivePdfViewer] 当前GlobalWorkerOptions:', pdfjs.GlobalWorkerOptions)
   }).catch((error) => {
     console.error('[InteractivePdfViewer] PDF.js加载失败:', error)
   })
@@ -276,10 +278,39 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         setIsLoading(true);
         setError(null);
         
+        // 确保PDF.js和Worker已经正确加载
+        if (!pdfjsLib || !pdfjsLoaded) {
+          console.log('[PDF加载] 等待PDF.js完全加载...');
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const maxAttempts = 50;
+            
+            const checkPdfjsReady = () => {
+              attempts++;
+              if (pdfjsLib && pdfjsLoaded && pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                console.log('[PDF加载] PDF.js准备就绪，Worker源:', pdfjsLib.GlobalWorkerOptions.workerSrc);
+                resolve(pdfjsLib);
+              } else if (attempts >= maxAttempts) {
+                reject(new Error('PDF.js加载超时'));
+              } else {
+                setTimeout(checkPdfjsReady, 100);
+              }
+            };
+            checkPdfjsReady();
+          });
+        }
+        
+        // 额外确保Worker配置正确
+        if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+          const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
+          pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+          console.log('[PDF加载] 强制设置Worker源:', workerSrc);
+        }
+        
         const fullUrl = file.startsWith('http') ? file : 
                       (typeof window !== 'undefined' ? `${window.location.origin}${file}` : file);
         
-        console.log('Starting to load PDF file:', fullUrl);
+        console.log('[PDF加载] 开始加载PDF文件:', fullUrl);
         
         const response = await fetch(fullUrl);
         if (!response.ok) {
@@ -287,7 +318,7 @@ const InteractivePDFViewer = forwardRef<PDFViewerRef, InteractivePDFViewerProps>
         }
 
         const arrayBuffer = await response.arrayBuffer();
-        console.log('PDF file loaded successfully, size:', arrayBuffer.byteLength, 'bytes');
+        console.log('[PDF加载] PDF文件加载成功，大小:', arrayBuffer.byteLength, 'bytes');
         
         const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         console.log('PDF document loaded successfully, pages:', doc.numPages);

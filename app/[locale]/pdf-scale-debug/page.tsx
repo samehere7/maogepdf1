@@ -201,16 +201,31 @@ export default function PDFScaleDebugPage() {
   const detectPDFJS = async (info: DiagnosticInfo) => {
     try {
       const pdfjs = await import('pdfjs-dist')
+      
+      // 确保Worker配置正确设置
+      const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+      pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+      
       info.pdfjs.isLoaded = true
       info.pdfjs.version = pdfjs.version
       info.pdfjs.workerSrc = pdfjs.GlobalWorkerOptions.workerSrc
 
-      // 测试PDF.js基本功能
+      console.log('[PDF.js诊断] Worker源设置为:', workerSrc)
+
+      // 测试PDF.js基本功能 - 使用简单的PDF数据
       try {
-        await pdfjs.getDocument({ data: new Uint8Array([]) }).promise
+        // 创建一个最小的有效PDF数据用于测试
+        const testPdfData = new Uint8Array([
+          0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, // %PDF-1.4
+        ])
+        await pdfjs.getDocument({ data: testPdfData }).promise
       } catch (error) {
-        // 预期的错误，说明PDF.js可以正常加载
-        console.log('PDF.js基本测试通过')
+        // 这个错误是预期的，说明PDF.js可以正常工作
+        if (error.message.includes('Invalid PDF') || error.message.includes('stream')) {
+          console.log('[PDF.js诊断] 基本功能测试通过 - PDF.js可以正常解析')
+        } else {
+          info.pdfjs.errors.push(`PDF.js功能测试失败: ${error}`)
+        }
       }
     } catch (error) {
       info.pdfjs.errors.push(`PDF.js加载失败: ${error}`)
@@ -230,20 +245,26 @@ export default function PDFScaleDebugPage() {
     try {
       const pdfjs = await import('pdfjs-dist')
       
-      // 配置worker
+      // 强制重新配置worker，确保设置正确
       const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
       pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+      
+      console.log('[缩放测试] 使用Worker源:', workerSrc)
+      console.log('[缩放测试] 当前GlobalWorkerOptions:', pdfjs.GlobalWorkerOptions)
 
       let arrayBuffer: ArrayBuffer
 
       if (selectedFile) {
+        console.log('[缩放测试] 使用本地文件:', selectedFile.name)
         arrayBuffer = await selectedFile.arrayBuffer()
       } else {
+        console.log('[缩放测试] 获取远程文件:', pdfUrl)
         const response = await fetch(pdfUrl)
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
         arrayBuffer = await response.arrayBuffer()
+        console.log('[缩放测试] 文件下载完成，大小:', arrayBuffer.byteLength, 'bytes')
       }
 
       const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise
