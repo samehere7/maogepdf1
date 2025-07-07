@@ -240,14 +240,15 @@ export default function AnalysisPage() {
           // 非关键错误，继续执行
         }
         
-        // 检查是否有之前的错误记录
+        // 检查错误日志但不自动启用安全模式，让用户自主选择
         try {
           const errorLog = localStorage.getItem('pdf-error-log');
           if (errorLog) {
             const errors = JSON.parse(errorLog);
             if (errors.length > 3) {
-              console.warn('[分析页] 检测到多次错误，启用安全模式');
-              setIsSafeMode(true);
+              console.warn('[分析页] 检测到多次错误，但不自动启用安全模式');
+              // 不再自动设置安全模式，让PDF.js和CanvasFallback自己处理
+              // setIsSafeMode(true); // 注释掉自动启用
             }
           }
         } catch (storageError) {
@@ -260,7 +261,8 @@ export default function AnalysisPage() {
       } catch (error) {
         console.error('[分析页] 客户端初始化失败:', error);
         setClientError(error instanceof Error ? error.message : String(error));
-        setIsSafeMode(true);
+        // 不自动启用安全模式，让PDF.js自己处理兼容性
+        // setIsSafeMode(true); // 注释掉自动启用
         setIsClient(true); // 即使出错也要设置为true，以便显示错误界面
       }
     };

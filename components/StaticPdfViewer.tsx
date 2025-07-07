@@ -54,21 +54,13 @@ class PDFJSLoader {
         throw new Error('PDF.js模块加载不完整')
       }
       
-      // 配置worker路径
-      const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
-      
-      // 安全设置GlobalWorkerOptions
-      if (pdfjs.GlobalWorkerOptions) {
-        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-      } else {
-        console.warn('[PDFJSLoader] GlobalWorkerOptions不可用，尝试备用方案')
-      }
+      // 改进的Worker配置策略
+      await this.configureWorker(pdfjs)
       
       this.pdfjsLib = pdfjs
       this.isLoaded = true
       
       console.log('[PDFJSLoader] PDF.js加载完成，版本:', pdfjs.version)
-      console.log('[PDFJSLoader] Worker路径:', workerSrc)
       
       return pdfjs
       
@@ -81,6 +73,59 @@ class PDFJSLoader {
       this.pdfjsLib = null
       
       throw new Error(`PDF.js加载失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  private async configureWorker(pdfjs: any): Promise<void> {
+    if (!pdfjs.GlobalWorkerOptions) {
+      console.warn('[PDFJSLoader] GlobalWorkerOptions不可用，跳过Worker配置')
+      return
+    }
+
+    // 优先级策略：本地 > CDN fallback > 内联Worker
+    const workerStrategies = [
+      // 策略1：使用本地Worker文件（如果存在）
+      `/pdf.worker.min.js`,
+      
+      // 策略2：使用稳定的CDN
+      `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`,
+      
+      // 策略3：使用unpkg作为备选
+      `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`,
+      
+      // 策略4：使用jsdelivr作为第二备选
+      `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+    ]
+
+    for (const workerSrc of workerStrategies) {
+      try {
+        console.log(`[PDFJSLoader] 尝试Worker配置: ${workerSrc}`)
+        
+        // 测试Worker是否可访问（仅对远程URL）
+        if (workerSrc.startsWith('http')) {
+          const testResponse = await fetch(workerSrc, { 
+            method: 'HEAD',
+            mode: 'no-cors' // 避免CORS问题
+          })
+          console.log(`[PDFJSLoader] Worker测试响应: ${testResponse.status}`)
+        }
+        
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+        console.log(`[PDFJSLoader] Worker配置成功: ${workerSrc}`)
+        return
+        
+      } catch (error) {
+        console.warn(`[PDFJSLoader] Worker配置失败: ${workerSrc}`, error)
+        continue
+      }
+    }
+
+    // 如果所有策略都失败，尝试内联Worker作为最后手段
+    try {
+      console.log('[PDFJSLoader] 尝试内联Worker配置')
+      pdfjs.GlobalWorkerOptions.workerSrc = 'data:application/javascript;base64,aW1wb3J0U2NyaXB0cygiaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvcGRmLmpzLzMuMTEuMTc0L3BkZi53b3JrZXIubWluLmpzIik7'
+    } catch (error) {
+      console.error('[PDFJSLoader] 内联Worker配置也失败，继续无Worker模式')
     }
   }
 
@@ -162,9 +207,22 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   const canvasesRef = useRef<Map<number, HTMLCanvasElement>>(new Map())
   const searchInputRef = useRef<HTMLInputElement>(null)
   
-  // 客户端初始化
+  // 客户端初始化和安全模式检测
   useEffect(() => {
     setIsClient(true)
+    
+    // 监听安全模式激活事件
+    const handleSafeModeEvent = () => {
+      console.log('[StaticPdfViewer] 安全模式已激活')
+      setIsSafeMode(true)
+      setError(null) // 清除错误，让安全模式接管
+    }
+    
+    window.addEventListener('enableSafeMode', handleSafeModeEvent)
+    
+    return () => {
+      window.removeEventListener('enableSafeMode', handleSafeModeEvent)
+    }
   }, [])
   
   // 同步canvases状态到ref
@@ -427,12 +485,14 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
       setIsLoading(false)
     }, 15000)
 
-    const loadPDF = async () => {
+    const loadPDF = async (retryCount = 0) => {
+      const maxRetries = 3
+      
       try {
         setIsLoading(true)
         setError(null)
         setLoadingTimeout(false)
-        console.log('[StaticPdfViewer] 设置加载状态为true')
+        console.log(`[StaticPdfViewer] 开始PDF加载尝试 ${retryCount + 1}/${maxRetries + 1}`)
         
         // 使用改进的PDF.js加载器
         console.log('[StaticPdfViewer] 开始加载PDF.js...')
@@ -446,40 +506,32 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           arrayBuffer = await file.arrayBuffer()
         } else {
           console.log('[StaticPdfViewer] 获取远程文件:', file)
-          
-          // 添加超时机制
-          const controller = new AbortController()
-          const fetchTimeoutId = setTimeout(() => controller.abort(), 8000) // 8秒超时
-          
-          try {
-            const response = await fetch(file, { 
-              signal: controller.signal,
-              headers: {
-                'Accept': 'application/pdf,*/*'
-              }
-            })
-            clearTimeout(fetchTimeoutId)
-            
-            console.log('[StaticPdfViewer] 远程响应状态:', response.status)
-            console.log('[StaticPdfViewer] 响应Content-Type:', response.headers.get('content-type'))
-            
-            if (!response.ok) {
-              throw new Error(`PDF文件下载失败: ${response.status} ${response.statusText}`)
-            }
-            
-            arrayBuffer = await response.arrayBuffer()
-          } catch (fetchError) {
-            clearTimeout(fetchTimeoutId)
-            if (fetchError.name === 'AbortError') {
-              throw new Error('PDF文件下载超时，请检查网络连接')
-            }
-            throw fetchError
-          }
+          arrayBuffer = await fetchPDFWithRetry(file, retryCount)
         }
         
         console.log('[StaticPdfViewer] ArrayBuffer大小:', arrayBuffer.byteLength)
         
-        const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        // 验证PDF文件完整性
+        if (arrayBuffer.byteLength === 0) {
+          throw new Error('PDF文件为空')
+        }
+        
+        // 检查PDF文件头
+        const header = new Uint8Array(arrayBuffer.slice(0, 4))
+        const headerStr = String.fromCharCode(...header)
+        if (!headerStr.startsWith('%PDF')) {
+          throw new Error('文件不是有效的PDF格式')
+        }
+        
+        const doc = await pdfjsLib.getDocument({ 
+          data: arrayBuffer,
+          // 添加PDF.js配置选项
+          verbosity: 0, // 减少控制台输出
+          disableAutoFetch: false,
+          disableStream: false,
+          disableRange: false
+        }).promise
+        
         console.log('[StaticPdfViewer] PDF文档加载成功，页数:', doc.numPages)
         
         setPdfDoc(doc)
@@ -489,51 +541,190 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         console.log('[StaticPdfViewer] 开始提取目录')
         await extractOutline(doc)
         
-        // 立即渲染第一页，确保用户看到内容
-        console.log('[StaticPdfViewer] 开始渲染第一页')
-        await renderPage(doc, 1)
-        
-        // 批量预渲染所有页面，实现ChatPDF式的即时显示
-        console.log('[StaticPdfViewer] 开始批量渲染所有页面')
-        const renderPromises = []
-        for (let i = 2; i <= Math.min(doc.numPages, 20); i++) {
-          // 限制前20页进行立即渲染，防止内存过载
-          renderPromises.push(renderPage(doc, i))
-        }
-        
-        // 并发渲染多个页面
-        Promise.allSettled(renderPromises).then(() => {
-          console.log('[StaticPdfViewer] 前20页渲染完成')
-          
-          // 如果还有更多页面，继续渲染
-          if (doc.numPages > 20) {
-            setTimeout(() => {
-              console.log('[StaticPdfViewer] 开始渲染剩余页面')
-              const remainingPromises = []
-              for (let i = 21; i <= doc.numPages; i++) {
-                remainingPromises.push(renderPage(doc, i))
-              }
-              Promise.allSettled(remainingPromises).then(() => {
-                console.log('[StaticPdfViewer] 所有页面渲染完成')
-              })
-            }, 1000) // 1秒后渲染剩余页面
-          }
-        })
+        // 智能渲染策略
+        await performSmartRendering(doc)
         
         console.log('[StaticPdfViewer] PDF加载完成')
         
       } catch (err) {
-        console.error('[StaticPdfViewer] PDF加载失败:', err)
+        console.error(`[StaticPdfViewer] PDF加载失败 (尝试 ${retryCount + 1}):`, err)
         
-        // 重置PDF.js加载器状态以便重试
-        pdfLoader.reset()
+        // 智能重试逻辑
+        if (retryCount < maxRetries && shouldRetry(err)) {
+          console.log(`[StaticPdfViewer] 准备重试 (${retryCount + 2}/${maxRetries + 1})`)
+          
+          // 重置PDF.js加载器状态
+          pdfLoader.reset()
+          
+          // 指数退避延迟
+          const delay = Math.min(1000 * Math.pow(2, retryCount), 5000)
+          setTimeout(() => {
+            loadPDF(retryCount + 1)
+          }, delay)
+          
+          return
+        }
         
-        const errorMessage = err instanceof Error ? err.message : '加载PDF失败'
+        // 最终失败处理
+        const errorMessage = generateUserFriendlyError(err)
         setError(errorMessage)
+        
+        // 记录详细错误信息用于调试
+        logDetailedError(err, retryCount)
+        
       } finally {
         console.log('[StaticPdfViewer] 设置加载状态为false')
         clearTimeout(timeoutId)
         setIsLoading(false)
+      }
+    }
+
+    // 智能远程文件获取
+    const fetchPDFWithRetry = async (url: string, retryCount: number): Promise<ArrayBuffer> => {
+      const timeout = Math.min(8000 + (retryCount * 2000), 15000) // 递增超时
+      const controller = new AbortController()
+      const fetchTimeoutId = setTimeout(() => controller.abort(), timeout)
+      
+      try {
+        const response = await fetch(url, { 
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/pdf,*/*',
+            'Cache-Control': retryCount > 0 ? 'no-cache' : 'default'
+          }
+        })
+        clearTimeout(fetchTimeoutId)
+        
+        console.log('[StaticPdfViewer] 远程响应状态:', response.status)
+        console.log('[StaticPdfViewer] 响应Content-Type:', response.headers.get('content-type'))
+        
+        if (!response.ok) {
+          throw new Error(`PDF文件下载失败: ${response.status} ${response.statusText}`)
+        }
+        
+        return await response.arrayBuffer()
+        
+      } catch (fetchError) {
+        clearTimeout(fetchTimeoutId)
+        if (fetchError.name === 'AbortError') {
+          throw new Error(`PDF文件下载超时 (${timeout}ms)，请检查网络连接`)
+        }
+        throw fetchError
+      }
+    }
+
+    // 智能渲染策略
+    const performSmartRendering = async (doc: any) => {
+      try {
+        // 第一阶段：立即渲染第一页
+        console.log('[StaticPdfViewer] 第一阶段：渲染第一页')
+        await renderPage(doc, 1)
+        
+        // 第二阶段：预渲染前几页
+        const initialPages = Math.min(doc.numPages, 5)
+        console.log(`[StaticPdfViewer] 第二阶段：预渲染前${initialPages}页`)
+        
+        const initialPromises = []
+        for (let i = 2; i <= initialPages; i++) {
+          initialPromises.push(renderPage(doc, i))
+        }
+        
+        await Promise.allSettled(initialPromises)
+        console.log('[StaticPdfViewer] 初始页面渲染完成')
+        
+        // 第三阶段：后台渲染剩余页面
+        if (doc.numPages > initialPages) {
+          setTimeout(async () => {
+            console.log('[StaticPdfViewer] 第三阶段：后台渲染剩余页面')
+            const remainingPromises = []
+            
+            for (let i = initialPages + 1; i <= doc.numPages; i++) {
+              remainingPromises.push(renderPage(doc, i))
+            }
+            
+            await Promise.allSettled(remainingPromises)
+            console.log('[StaticPdfViewer] 所有页面渲染完成')
+          }, 500)
+        }
+        
+      } catch (renderError) {
+        console.error('[StaticPdfViewer] 智能渲染过程中出错:', renderError)
+        // 即使渲染出错，也不影响PDF的基本加载
+      }
+    }
+
+    // 判断是否应该重试
+    const shouldRetry = (error: any): boolean => {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      
+      // 网络相关错误通常可以重试
+      if (errorMessage.includes('超时') || 
+          errorMessage.includes('网络') || 
+          errorMessage.includes('fetch') ||
+          errorMessage.includes('AbortError')) {
+        return true
+      }
+      
+      // PDF.js Worker相关错误可以重试
+      if (errorMessage.includes('Worker') || 
+          errorMessage.includes('worker')) {
+        return true
+      }
+      
+      // 暂时性错误可以重试
+      if (errorMessage.includes('暂时') || 
+          errorMessage.includes('临时')) {
+        return true
+      }
+      
+      return false
+    }
+
+    // 生成用户友好的错误消息
+    const generateUserFriendlyError = (error: any): string => {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      
+      if (errorMessage.includes('超时')) {
+        return 'PDF加载超时，请检查网络连接或稍后重试'
+      }
+      
+      if (errorMessage.includes('Worker')) {
+        return 'PDF处理器初始化失败，请刷新页面重试'
+      }
+      
+      if (errorMessage.includes('不是有效的PDF')) {
+        return '文件格式不正确，请确保上传的是有效的PDF文件'
+      }
+      
+      if (errorMessage.includes('下载失败')) {
+        return 'PDF文件下载失败，请检查文件链接或网络连接'
+      }
+      
+      return `PDF加载失败：${errorMessage}`
+    }
+
+    // 记录详细错误信息
+    const logDetailedError = (error: any, retryCount: number) => {
+      const errorInfo = {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        retryCount,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        fileType: typeof file,
+        fileName: file instanceof File ? file.name : file
+      }
+      
+      console.error('[StaticPdfViewer] 详细错误信息:', errorInfo)
+      
+      // 保存到本地存储用于调试
+      try {
+        const existingErrors = JSON.parse(localStorage.getItem('pdf-errors') || '[]')
+        existingErrors.push(errorInfo)
+        localStorage.setItem('pdf-errors', JSON.stringify(existingErrors.slice(-5)))
+      } catch (storageError) {
+        console.warn('[StaticPdfViewer] 无法保存错误信息到本地存储:', storageError)
       }
     }
 
@@ -943,6 +1134,90 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
     )
   }
 
+  // 安全模式渲染
+  if (isSafeMode) {
+    return (
+      <div className={`h-full bg-gray-100 flex flex-col ${className}`}>
+        <div className="flex-shrink-0 bg-orange-50 border-b border-orange-200 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+              <span className="text-orange-600">🛡️</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-orange-800">安全模式已启用</h3>
+              <p className="text-xs text-orange-600">PDF将以兼容性模式显示，功能可能受限</p>
+            </div>
+            <button
+              onClick={() => {
+                setIsSafeMode(false)
+                setError(null)
+                // 尝试重新正常加载
+                console.log('[StaticPdfViewer] 退出安全模式，尝试正常加载')
+              }}
+              className="ml-auto px-3 py-1 text-xs bg-orange-200 text-orange-800 rounded hover:bg-orange-300 transition-colors"
+            >
+              退出安全模式
+            </button>
+          </div>
+        </div>
+        
+        <div className="flex-1 p-4">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl text-gray-400">📄</span>
+            </div>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">PDF安全模式</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              当前处于安全模式，PDF预览功能暂时不可用。<br/>
+              您可以下载文件或尝试在其他浏览器中打开。
+            </p>
+            
+            {typeof file === 'string' && (
+              <div className="space-y-2">
+                <a
+                  href={file}
+                  download
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  📥 下载PDF文件
+                </a>
+                <br/>
+                <a
+                  href={file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                >
+                  🔗 在新窗口中打开
+                </a>
+              </div>
+            )}
+            
+            {file instanceof File && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    const url = URL.createObjectURL(file)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = file.name
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  📥 下载PDF文件
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (error) {
     return (
       <div className={`flex items-center justify-center h-full bg-gray-50 ${className}`}>
@@ -952,6 +1227,18 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF加载失败</h3>
           <p className="text-sm text-red-600 mb-4">{error}</p>
+          
+          {/* 智能建议 */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-left">
+            <div className="text-xs font-medium text-blue-800 mb-1">💡 可能的解决方案：</div>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• 检查网络连接是否正常</li>
+              <li>• 尝试刷新页面</li>
+              <li>• 启用浏览器硬件加速</li>
+              <li>• 使用安全模式查看PDF</li>
+            </ul>
+          </div>
+          
           <div className="space-y-2">
             <button
               onClick={() => {
@@ -970,7 +1257,17 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
               }}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              🔄 重试加载PDF
+              🔄 智能重试
+            </button>
+            <button
+              onClick={() => {
+                console.log('[StaticPdfViewer] 用户选择安全模式')
+                setIsSafeMode(true)
+                setError(null)
+              }}
+              className="w-full px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
+            >
+              🛡️ 安全模式（推荐）
             </button>
             <button
               onClick={() => {
@@ -979,18 +1276,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
               }}
               className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
             >
-              🔧 强制刷新页面
-            </button>
-            <button
-              onClick={() => {
-                console.log('[StaticPdfViewer] 用户选择安全模式')
-                // 通知父组件启用安全模式
-                const event = new CustomEvent('enableSafeMode')
-                window.dispatchEvent(event)
-              }}
-              className="w-full px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
-            >
-              🛡️ 启用安全模式
+              🔧 刷新页面
             </button>
           </div>
         </div>
