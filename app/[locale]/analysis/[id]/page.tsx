@@ -25,7 +25,6 @@ import { extractTextFromPDF } from "@/lib/pdf-text-extractor"
 import ShareChatModal from "@/components/share-chat-modal"
 import PDFOutlineNavigator from "@/components/pdf-outline-navigator"
 import PdfViewer, { PdfViewerRef } from "@/components/PdfViewer"
-import SimplePdfViewer, { SimplePdfViewerRef } from "@/components/SimplePdfViewer"
 import StaticPdfViewer, { StaticPdfViewerRef } from "@/components/StaticPdfViewer"
 import PdfOutlineSidebar from "@/components/PdfOutlineSidebar"
 import ErrorBoundary from "@/components/ErrorBoundary"
@@ -1113,7 +1112,7 @@ export default function AnalysisPage() {
             ) : fileInfo?.url ? (
               <div className="h-full">
                 {isClient ? (
-                    <SimplePdfViewer 
+                    <StaticPdfViewer 
                       file={finalPdfFile}
                       onOutlineLoaded={handleOutlineLoaded}
                       onPageChange={setCurrentPage}
