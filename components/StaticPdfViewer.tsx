@@ -7,49 +7,97 @@ import { Button } from '@/components/ui/button'
 import CanvasFallback from './CanvasFallback'
 import './text-layer.css'
 
-// 动态导入PDF.js，避免服务端渲染问题
-let pdfjsLib: any = null
-let PDFDocumentProxy: any = null
-let pdfjsLoaded = false
-let pdfjsLoadPromise: Promise<any> | null = null
+// 改进的PDF.js动态加载系统
+class PDFJSLoader {
+  private static instance: PDFJSLoader | null = null
+  private pdfjsLib: any = null
+  private loadPromise: Promise<any> | null = null
+  private isLoaded = false
 
-// 安全的PDF.js加载函数
-const loadPDFJS = async (): Promise<any> => {
-  if (typeof window === 'undefined') {
-    throw new Error('PDF.js只能在客户端环境中加载')
+  static getInstance(): PDFJSLoader {
+    if (!PDFJSLoader.instance) {
+      PDFJSLoader.instance = new PDFJSLoader()
+    }
+    return PDFJSLoader.instance
   }
 
-  // 如果已经加载完成，直接返回
-  if (pdfjsLoaded && pdfjsLib) {
-    return pdfjsLib
+  async loadPDFJS(): Promise<any> {
+    // 环境检查
+    if (typeof window === 'undefined') {
+      throw new Error('PDF.js只能在客户端环境中加载')
+    }
+
+    // 如果已经加载完成，直接返回
+    if (this.isLoaded && this.pdfjsLib) {
+      return this.pdfjsLib
+    }
+
+    // 如果正在加载中，等待加载完成
+    if (this.loadPromise) {
+      return this.loadPromise
+    }
+
+    // 开始新的加载过程
+    this.loadPromise = this.performLoad()
+    return this.loadPromise
   }
 
-  // 如果正在加载中，等待加载完成
-  if (pdfjsLoadPromise) {
-    return pdfjsLoadPromise
+  private async performLoad(): Promise<any> {
+    try {
+      console.log('[PDFJSLoader] 开始加载PDF.js...')
+      
+      // 动态导入PDF.js
+      const pdfjs = await import('pdfjs-dist')
+      
+      // 验证PDF.js是否正确加载
+      if (!pdfjs || !pdfjs.getDocument) {
+        throw new Error('PDF.js模块加载不完整')
+      }
+      
+      // 配置worker路径
+      const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+      
+      // 安全设置GlobalWorkerOptions
+      if (pdfjs.GlobalWorkerOptions) {
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+      } else {
+        console.warn('[PDFJSLoader] GlobalWorkerOptions不可用，尝试备用方案')
+      }
+      
+      this.pdfjsLib = pdfjs
+      this.isLoaded = true
+      
+      console.log('[PDFJSLoader] PDF.js加载完成，版本:', pdfjs.version)
+      console.log('[PDFJSLoader] Worker路径:', workerSrc)
+      
+      return pdfjs
+      
+    } catch (error) {
+      console.error('[PDFJSLoader] PDF.js加载失败:', error)
+      
+      // 重置状态，允许重试
+      this.loadPromise = null
+      this.isLoaded = false
+      this.pdfjsLib = null
+      
+      throw new Error(`PDF.js加载失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
 
-  // 开始新的加载过程
-  pdfjsLoadPromise = import('pdfjs-dist').then((pdfjs) => {
-    pdfjsLib = pdfjs
-    PDFDocumentProxy = pdfjs.PDFDocumentProxy
-    
-    // 配置 PDF.js worker - 使用官方CDN避免Next.js打包问题
-    const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
-    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-    
-    pdfjsLoaded = true
-    console.log('[StaticPdfViewer] PDF.js加载完成，版本:', pdfjs.version)
-    
-    return pdfjs
-  }).catch((error) => {
-    console.error('[StaticPdfViewer] PDF.js加载失败:', error)
-    pdfjsLoadPromise = null // 重置加载状态，允许重试
-    throw new Error(`PDF.js加载失败: ${error.message}`)
-  })
-
-  return pdfjsLoadPromise
+  // 重置加载器状态（用于错误恢复）
+  reset(): void {
+    this.loadPromise = null
+    this.isLoaded = false
+    this.pdfjsLib = null
+    console.log('[PDFJSLoader] 加载器状态已重置')
+  }
 }
+
+// 全局PDF.js加载器实例
+const pdfLoader = PDFJSLoader.getInstance()
+
+// 兼容性包装函数
+const loadPDFJS = () => pdfLoader.loadPDFJS()
 
 interface OutlineItem {
   title: string
@@ -83,7 +131,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   onTextSelect,
   className = ""
 }, ref) => {
-  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null)
+  const [pdfDoc, setPdfDoc] = useState<any | null>(null)
   const [numPages, setNumPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -145,7 +193,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   }, [scale, rotation, pdfDoc, renderPage])
 
   // 提取PDF outline信息
-  const extractOutline = useCallback(async (doc: PDFDocumentProxy) => {
+  const extractOutline = useCallback(async (doc: any) => {
     try {
       const outlineData = await doc.getOutline()
       if (!outlineData || outlineData.length === 0) {
@@ -209,7 +257,8 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   // 渲染文本层
   const renderTextLayer = useCallback(async (page: any, viewport: any, pageContainer: HTMLElement, pageNum: number) => {
     try {
-      // 确保pdfjsLib已加载且完全可用
+      // 确保PDF.js已加载且完全可用
+      const pdfjsLib = await loadPDFJS()
       if (!pdfjsLib) {
         console.warn('[StaticPdfViewer] PDF.js未加载，跳过文本层渲染')
         return
@@ -385,9 +434,9 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         setLoadingTimeout(false)
         console.log('[StaticPdfViewer] 设置加载状态为true')
         
-        // 使用安全的PDF.js加载函数
+        // 使用改进的PDF.js加载器
         console.log('[StaticPdfViewer] 开始加载PDF.js...')
-        pdfjsLib = await loadPDFJS()
+        const pdfjsLib = await loadPDFJS()
         console.log('[StaticPdfViewer] PDF.js加载验证成功')
         
         let arrayBuffer: ArrayBuffer
@@ -475,7 +524,12 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
         
       } catch (err) {
         console.error('[StaticPdfViewer] PDF加载失败:', err)
-        setError(err instanceof Error ? err.message : '加载PDF失败')
+        
+        // 重置PDF.js加载器状态以便重试
+        pdfLoader.reset()
+        
+        const errorMessage = err instanceof Error ? err.message : '加载PDF失败'
+        setError(errorMessage)
       } finally {
         console.log('[StaticPdfViewer] 设置加载状态为false')
         clearTimeout(timeoutId)
@@ -491,7 +545,7 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
   }, [file])
 
   // 渲染单个页面
-  const renderPage = useCallback(async (doc: PDFDocumentProxy, pageNumber: number) => {
+  const renderPage = useCallback(async (doc: any, pageNumber: number) => {
     console.log(`[StaticPdfViewer] 开始渲染页面${pageNumber}`)
     
     // 防止重复渲染同一页面
@@ -901,23 +955,42 @@ const StaticPdfViewer = forwardRef<StaticPdfViewerRef, StaticPdfViewerProps>(({
           <div className="space-y-2">
             <button
               onClick={() => {
+                console.log('[StaticPdfViewer] 用户点击重试加载')
+                // 重置所有相关状态
+                pdfLoader.reset()
                 setError(null)
-                setIsLoading(false)
+                setIsLoading(true)
                 setLoadingTimeout(false)
-                // 触发重新加载
-                if (file) {
-                  window.location.reload()
-                }
+                setPdfDoc(null)
+                setNumPages(0)
+                setCanvases(new Map())
+                
+                // 不刷新页面，而是重新触发PDF加载
+                console.log('[StaticPdfViewer] 状态重置完成，将重新触发PDF加载')
               }}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
-              重试加载
+              🔄 重试加载PDF
             </button>
             <button
-              onClick={() => window.location.reload()}
-              className="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+              onClick={() => {
+                console.log('[StaticPdfViewer] 用户选择强制刷新页面')
+                window.location.reload()
+              }}
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
             >
-              刷新页面
+              🔧 强制刷新页面
+            </button>
+            <button
+              onClick={() => {
+                console.log('[StaticPdfViewer] 用户选择安全模式')
+                // 通知父组件启用安全模式
+                const event = new CustomEvent('enableSafeMode')
+                window.dispatchEvent(event)
+              }}
+              className="w-full px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
+            >
+              🛡️ 启用安全模式
             </button>
           </div>
         </div>
