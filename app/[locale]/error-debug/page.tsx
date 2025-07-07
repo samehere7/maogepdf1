@@ -37,7 +37,7 @@ export default function ErrorDebugPage() {
   const originalConsoleError = useRef<any>(null)
   const originalConsoleWarn = useRef<any>(null)
   const originalConsoleLog = useRef<any>(null)
-  const [testComponent, setTestComponent] = useState<string>('none')
+  const [activeTestComponent, setActiveTestComponent] = useState<string>('none')
 
   // 错误收集器
   useEffect(() => {
@@ -291,17 +291,17 @@ export default function ErrorDebugPage() {
     try {
       switch (componentName) {
         case 'pdf-viewer':
-          setTestComponent('pdf-viewer')
+          setActiveTestComponent('pdf-viewer')
           // 这里可以动态加载PDF查看器组件进行测试
           break
         case 'interactive-pdf':
-          setTestComponent('interactive-pdf')
+          setActiveTestComponent('interactive-pdf')
           break
         case 'simple-pdf':
-          setTestComponent('simple-pdf')
+          setActiveTestComponent('simple-pdf')
           break
         default:
-          setTestComponent('none')
+          setActiveTestComponent('none')
       }
     } catch (error) {
       console.error(`组件 ${componentName} 测试失败:`, error)
@@ -375,21 +375,21 @@ export default function ErrorDebugPage() {
             
             {/* 测试组件渲染区域 */}
             <div className="border rounded p-4 bg-gray-50">
-              {testComponent === 'none' && (
+              {activeTestComponent === 'none' && (
                 <div className="text-gray-500">选择组件进行测试</div>
               )}
-              {testComponent === 'pdf-viewer' && (
+              {activeTestComponent === 'pdf-viewer' && (
                 <div className="text-blue-600">
                   正在测试 PdfViewer 组件...
                   {/* 这里可以实际渲染PDF组件 */}
                 </div>
               )}
-              {testComponent === 'interactive-pdf' && (
+              {activeTestComponent === 'interactive-pdf' && (
                 <div className="text-green-600">
                   正在测试 InteractivePDF 组件...
                 </div>
               )}
-              {testComponent === 'simple-pdf' && (
+              {activeTestComponent === 'simple-pdf' && (
                 <div className="text-purple-600">
                   正在测试 SimplePDF 组件...
                 </div>
