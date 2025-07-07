@@ -13,7 +13,7 @@ export default function DebugPdfErrorPage() {
   }
 
   useEffect(() => {
-    addLog('🚀 PDF错误调试页面启动')
+    addLog('🚀 PDF错误调试页面启动 - 版本 v2.1 [2025-07-07-04:00]')
     
     // 立即检查当前错误状态
     addLog('🌐 当前URL: ' + window.location.href)
