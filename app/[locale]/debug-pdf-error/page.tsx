@@ -50,20 +50,30 @@ export default function DebugPdfErrorPage() {
 
     // 测试具体PDF或基础功能
     const testPDFFunction = async () => {
+      addLog('🚀 testPDFFunction开始执行')
+      
       const urlParams = new URLSearchParams(window.location.search)
+      addLog('🔍 解析URL参数: ' + window.location.search)
+      
       const pdfId = urlParams.get('id')
+      addLog('🎯 提取的PDF ID: ' + (pdfId || 'null'))
       
       if (pdfId) {
+        addLog('✅ 条件判断: 有PDF ID，执行特定PDF测试')
         await testSpecificPDF(pdfId)
       } else {
+        addLog('✅ 条件判断: 无PDF ID，执行基础测试')
         await testBasicPDFJS()
       }
+      
+      addLog('🏁 testPDFFunction执行完成')
     }
     
     // 测试特定PDF ID
     const testSpecificPDF = async (pdfId: string) => {
       try {
-        addLog('🎯 测试特定PDF ID: ' + pdfId)
+        addLog('🎯 ===== 开始测试特定PDF ID: ' + pdfId + ' =====')
+        addLog('🔍 函数参数验证: ' + typeof pdfId + ' - ' + pdfId)
         
         // 测试API访问
         addLog('🔄 测试PDF API访问...')
