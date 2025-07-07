@@ -147,10 +147,26 @@ export default function MinimalPdfViewer({ file }: MinimalPdfViewerProps) {
         const pdfjs = await import('pdfjs-dist')
         console.log('[MinimalPdfViewer] PDF.js版本:', pdfjs.version)
         
-        // 设置Worker - 使用CDN
+        // 强制确保Worker配置正确 - 多重验证
         const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+        
+        // 第一次设置
         pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
-        console.log('[MinimalPdfViewer] Worker设置:', workerSrc)
+        console.log('[MinimalPdfViewer] 第一次Worker设置:', workerSrc)
+        
+        // 验证设置是否生效，如果没有则强制重设
+        if (!pdfjs.GlobalWorkerOptions.workerSrc || pdfjs.GlobalWorkerOptions.workerSrc !== workerSrc) {
+          console.warn('[MinimalPdfViewer] Worker配置验证失败，强制重新设置')
+          pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+          
+          // 再次验证
+          if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+            throw new Error('Worker源配置失败，无法继续加载PDF')
+          }
+        }
+        
+        console.log('[MinimalPdfViewer] 最终Worker设置:', pdfjs.GlobalWorkerOptions.workerSrc)
+        console.log('[MinimalPdfViewer] GlobalWorkerOptions:', pdfjs.GlobalWorkerOptions)
         
         // 获取PDF数据
         let arrayBuffer: ArrayBuffer
