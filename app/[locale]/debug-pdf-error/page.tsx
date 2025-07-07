@@ -19,6 +19,16 @@ export default function DebugPdfErrorPage() {
     addLog('🌐 当前URL: ' + window.location.href)
     addLog('🖥️ 用户代理: ' + navigator.userAgent)
     
+    // 检查URL参数
+    const urlParams = new URLSearchParams(window.location.search)
+    const pdfId = urlParams.get('id')
+    if (pdfId) {
+      addLog('🎯 检测到PDF ID: ' + pdfId)
+      addLog('将执行特定PDF测试')
+    } else {
+      addLog('ℹ️ 未提供PDF ID，将测试基础功能')
+    }
+    
     // 设置错误监听
     const handleError = (event: ErrorEvent) => {
       addLog(`🚨 捕获错误: ${event.message}`)
@@ -37,6 +47,92 @@ export default function DebugPdfErrorPage() {
 
     window.addEventListener('error', handleError)
     window.addEventListener('unhandledrejection', handlePromiseRejection)
+
+    // 测试具体PDF或基础功能
+    const testPDFFunction = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const pdfId = urlParams.get('id')
+      
+      if (pdfId) {
+        await testSpecificPDF(pdfId)
+      } else {
+        await testBasicPDFJS()
+      }
+    }
+    
+    // 测试特定PDF ID
+    const testSpecificPDF = async (pdfId: string) => {
+      try {
+        addLog('🎯 测试特定PDF ID: ' + pdfId)
+        
+        // 测试API访问
+        addLog('🔄 测试PDF API访问...')
+        const apiResponse = await fetch(`/api/pdfs/${pdfId}`)
+        addLog(`📡 API响应状态: ${apiResponse.status} ${apiResponse.statusText}`)
+        
+        if (!apiResponse.ok) {
+          const errorText = await apiResponse.text()
+          addLog(`❌ API访问失败: ${errorText}`)
+          return
+        }
+        
+        const pdfInfo = await apiResponse.json()
+        addLog('✅ PDF信息获取成功')
+        addLog(`📄 PDF名称: ${pdfInfo.name || '未知'}`)
+        addLog(`🔗 PDF URL: ${pdfInfo.url || '未知'}`)
+        
+        if (!pdfInfo.url) {
+          addLog('❌ PDF URL为空，无法继续测试')
+          return
+        }
+        
+        // 测试PDF文件访问
+        addLog('🔄 测试PDF文件访问...')
+        const pdfResponse = await fetch(pdfInfo.url)
+        addLog(`📡 PDF文件响应: ${pdfResponse.status} ${pdfResponse.statusText}`)
+        
+        if (!pdfResponse.ok) {
+          addLog('❌ PDF文件访问失败')
+          return
+        }
+        
+        const arrayBuffer = await pdfResponse.arrayBuffer()
+        addLog(`📁 PDF文件大小: ${arrayBuffer.byteLength} bytes`)
+        
+        // 使用PDF.js解析
+        const pdfjs = await import('pdfjs-dist')
+        const workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+        addLog(`🔧 PDF.js Worker设置: ${workerSrc}`)
+        
+        addLog('🔄 解析特定PDF文档...')
+        const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise
+        addLog(`✅ 特定PDF解析成功，页数: ${doc.numPages}`)
+        
+        // 测试渲染第一页
+        addLog('🔄 渲染特定PDF第一页...')
+        const page = await doc.getPage(1)
+        const viewport = page.getViewport({ scale: 1.0 })
+        addLog(`📐 特定PDF页面尺寸: ${viewport.width}x${viewport.height}`)
+        
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        if (context) {
+          canvas.width = viewport.width
+          canvas.height = viewport.height
+          await page.render({ canvasContext: context, viewport }).promise
+          addLog('✅ 特定PDF渲染成功')
+        } else {
+          addLog('❌ 无法获取Canvas上下文')
+        }
+        
+      } catch (error) {
+        addLog(`💥 特定PDF测试失败: ${error}`)
+        if (error instanceof Error && error.stack) {
+          addLog(`📚 错误堆栈: ${error.stack}`)
+        }
+      }
+    }
 
     // 测试PDF.js基础功能
     const testBasicPDFJS = async () => {
@@ -94,7 +190,7 @@ export default function DebugPdfErrorPage() {
     }
 
     // 延迟执行测试
-    setTimeout(testBasicPDFJS, 1000)
+    setTimeout(testPDFFunction, 1000)
 
     return () => {
       window.removeEventListener('error', handleError)
